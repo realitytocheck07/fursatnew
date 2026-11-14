@@ -343,3 +343,76 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
    Two mask layers: the wave band (top 18px) + a solid block below it. Corners stay rounded by border-radius. */
 .fk-card { -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0 10V3.2C9 0.6 20 0.4 31 2.4C42 4.4 52 6.2 64 4.6C76 3 88 0.8 100 1.6V10Z'/%3E%3C/svg%3E") 0 0 / 100% 18px no-repeat, linear-gradient(#000,#000) 0 17px / 100% calc(100% - 17px) no-repeat;
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0 10V3.2C9 0.6 20 0.4 31 2.4C42 4.4 52 6.2 64 4.6C76 3 88 0.8 100 1.6V10Z'/%3E%3C/svg%3E") 0 0 / 100% 18px no-repeat, linear-gradient(#000,#000) 0 17px / 100% calc(100% - 17px) no-repeat; }
+/* ═════ v5.18 DESIGN SYSTEM (Phase 4A) — ADD-ONLY, not applied to any page yet ═════
+   New names only: --fk-fs-*, .fk-ty-*, .fk-btn--primary|secondary|ghost|on-dark|lg|md, .fk-card--text.
+   Existing .fk-btn / .fk-btn--solid|line|gold and .fk-card are untouched. Phase 4B swaps pages over (see DESIGN-SYSTEM.md). */
+
+/* 1. TYPE SCALE — 7 steps, nothing below 12px. Playfair = headings, Poppins = text. */
+:root{
+  --fk-font-head:var(--fk-serif);
+  --fk-font-text:var(--fk-sans);
+  --fk-fs-1:.75rem;   /* 12  labels, chips, fine print (the floor) */
+  --fk-fs-2:.875rem;  /* 14  small text, md button */
+  --fk-fs-3:1rem;     /* 16  body, lg button */
+  --fk-fs-4:1.25rem;  /* 20  h4, card title */
+  --fk-fs-5:1.75rem;  /* 28  h3 */
+  --fk-fs-6:2.5rem;   /* 40  h2 */
+  --fk-fs-7:4rem;     /* 64  hero max */
+  --fk-fs-hero:clamp(2.5rem,1.4rem + 4.6vw,4rem); /* 40 on phone → 64 from ~900px */
+}
+.fk-ty-hero{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-hero);line-height:1.05;letter-spacing:-.02em;text-wrap:balance}
+.fk-ty-h2{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-5);line-height:1.15;letter-spacing:-.015em;text-wrap:balance}
+.fk-ty-h3{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-4);line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+@media (min-width:768px){.fk-ty-h2{font-size:var(--fk-fs-6)}.fk-ty-h3{font-size:var(--fk-fs-5)}}
+.fk-ty-h4{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-4);line-height:1.25;text-wrap:balance}
+.fk-ty-body{margin:0;font-family:var(--fk-font-text);font-weight:400;font-size:var(--fk-fs-3);line-height:1.6;text-wrap:pretty}
+.fk-ty-small{margin:0;font-family:var(--fk-font-text);font-weight:400;font-size:var(--fk-fs-2);line-height:1.5;text-wrap:pretty}
+.fk-ty-label{margin:0;font-family:var(--fk-font-text);font-weight:600;font-size:var(--fk-fs-1);line-height:1.2;letter-spacing:var(--fk-ls-label);text-transform:uppercase}
+
+/* 2. BUTTONS — one green, Poppins 600, pill. Use WITH .fk-btn: class="fk-btn fk-btn--primary" (48px) or "... fk-btn--md" (44px). */
+:root{
+  --fk-btn-green:var(--fk-forest-800);        /* #14301c, the one green */
+  --fk-btn-green-hover:var(--fk-forest-900);  /* #0e2214 */
+  --fk-btn-on-green:#fbf3e6;
+  --fk-btn-paper:var(--fk-cream-50);          /* #fcf7f0 */
+  --fk-btn-gold:var(--fk-gold-300);           /* #e6c27a, dark surfaces only */
+}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost){
+  box-sizing:border-box;min-height:48px;padding:0 24px;gap:8px;border-radius:var(--radius-fk-pill,9999px);
+  font-family:var(--fk-font-text);font-weight:600;font-size:var(--fk-fs-3);line-height:1;letter-spacing:0;text-align:center;
+  border:2px solid transparent;box-shadow:none;background:none;
+  transition:transform var(--fk-dur-press,150ms) var(--fk-ease-out,ease-out),background-color var(--fk-dur-2,200ms) ease,color var(--fk-dur-2,200ms) ease,border-color var(--fk-dur-2,200ms) ease,box-shadow var(--fk-dur-2,200ms) ease}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost).fk-btn--md{min-height:44px;padding:0 20px;font-size:var(--fk-fs-2)}
+.fk-btn.fk-btn--primary{background:var(--fk-btn-green);border-color:var(--fk-btn-green);color:var(--fk-btn-on-green);box-shadow:0 8px 18px -10px rgba(14,34,20,.6)}
+.fk-btn.fk-btn--secondary{background:var(--fk-btn-paper);border-color:var(--fk-btn-green);color:var(--fk-btn-green)}
+.fk-btn.fk-btn--ghost{padding:0 12px;color:var(--fk-btn-green)}
+.fk-btn.fk-btn--ghost.fk-btn--md{padding:0 12px}
+.fk-btn--ghost::after{content:"\2192" / "";display:inline-block;transition:transform var(--fk-dur-2,200ms) var(--fk-ease-out,ease-out)}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost):focus-visible{outline:3px solid var(--fk-focus);outline-offset:3px}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost):not(:disabled):active{transform:scale(.97)}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost):is(:disabled,[aria-disabled="true"]){opacity:.55;cursor:not-allowed;box-shadow:none}
+@media (hover:hover) and (pointer:fine){
+  .fk-btn.fk-btn--primary:not(:disabled):hover{background:var(--fk-btn-green-hover);border-color:var(--fk-btn-green-hover)}
+  .fk-btn.fk-btn--secondary:not(:disabled):hover{background:var(--fk-btn-green);color:var(--fk-btn-on-green)}
+  .fk-btn.fk-btn--ghost:not(:disabled):hover{background:rgba(20,48,28,.08)}
+  .fk-btn--ghost:not(:disabled):hover::after{transform:translateX(3px)}
+}
+/* on a dark surface (solid forest or dark scrim): primary = gold, secondary/ghost = cream/gold text */
+.fk-btn.fk-btn--primary.fk-btn--on-dark{background:var(--fk-btn-gold);border-color:var(--fk-btn-gold);color:var(--fk-btn-green);box-shadow:none}
+.fk-btn.fk-btn--secondary.fk-btn--on-dark{background:transparent;border-color:var(--fk-btn-gold);color:var(--fk-btn-gold)}
+.fk-btn.fk-btn--ghost.fk-btn--on-dark{color:var(--fk-btn-on-green)}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost).fk-btn--on-dark:focus-visible{outline-color:var(--fk-btn-gold)}
+@media (hover:hover) and (pointer:fine){
+  .fk-btn.fk-btn--primary.fk-btn--on-dark:not(:disabled):hover{background:#f0d192;border-color:#f0d192}
+  .fk-btn.fk-btn--secondary.fk-btn--on-dark:not(:disabled):hover{background:var(--fk-btn-gold);color:var(--fk-btn-green)}
+  .fk-btn.fk-btn--ghost.fk-btn--on-dark:not(:disabled):hover{background:rgba(251,243,230,.12)}
+}
+@media (prefers-reduced-motion:reduce){
+  .fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost),
+  .fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost)::after{transition:none}
+  .fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost):not(:disabled):active,
+  .fk-btn--ghost:not(:disabled):hover::after{transform:none}
+}
+
+/* 3. CARD — .fk-card is the one card (wave top, above). Only addition: a photo-less version for items with no real photo. */
+.fk-card--text .fk-card__b{padding-top:30px}
