@@ -42,7 +42,7 @@ function beat(t){if(!on){B=0;hero.style.setProperty("--b",0);return}t=t||perform
  if(an){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t;lock()}}else if(t-last>504){B=1;last=t;lock()}
  B*=.9;if(B<.01)B=0;hero.style.setProperty("--b",B.toFixed(3));requestAnimationFrame(beat)}
 var st={bend:0,bob:0,ear:0,sq:0,tilt:0,nod:0},lt=0;
-(function dl(ms){requestAnimationFrame(dl);var t=ms/1000,dt=Math.min(t-lt,.1);lt=t;if(calm)return;
+(function dl(ms){requestAnimationFrame(dl);var t=ms/1000,dt=Math.min(t-lt,.1);lt=t;if(calm||document.hidden||scrollY>innerHeight*1.2)return;
  dance+=((on?1:0)-dance)*(1-Math.exp(-dt*3.2));if(on)ph+=dt/bp;
  var idle=1-dance,sw=Math.sin(Math.PI*ph),th=Math.pow(1-Math.abs(Math.sin(Math.PI*ph)),2),hit=Math.min(1,th*.75+B*.45);
  st.bend=sw*dance+Math.sin(t*.8)*.32*idle;st.tilt=st.bend;

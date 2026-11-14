@@ -23,17 +23,24 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
   </a>
 )}
 <style>
-.afab { position: fixed; left: 20px; bottom: 20px; z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Poppins, system-ui, sans-serif; transition-property: transform, box-shadow; transition-duration: 200ms; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
+.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Poppins, system-ui, sans-serif; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
 .afab-img { width: 44px; height: 44px; border-radius: 50%; background: #f6e4c9; object-fit: cover; }
 .afab-t b { color: #f3c56b; font-weight: 600; }
 .afab-q { display: block; max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; color: #d9c9a6; font-size: .78rem; transition-property: max-width, opacity, margin; transition-duration: 320ms; transition-timing-function: cubic-bezier(.23,1,.32,1); }
 .afab:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
 .afab:active { transform: scale(.96); }
 @media (min-width: 768px) { .afab { display: inline-flex; } }
+/* tablet: just the mascot, so it covers less of the page (the label stays for screen readers) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .afab { padding: 4px; gap: 0; }
+  .afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons */
+:global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
 @media (hover: hover) and (pointer: fine) {
   .afab:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
   .afab:hover .afab-q, .afab:focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } }
 @media print { .afab { display: none !important; } }
 </style>

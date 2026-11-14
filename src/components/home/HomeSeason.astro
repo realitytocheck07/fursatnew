@@ -12,32 +12,31 @@ const rows: Row[] = [...(food as any[]), ...(drinks as any[])].flatMap((sec) =>
 );
 const photos = (dishPhotos as any).photos as Record<string, { src: string; sm: string; w: number; h: number; todo?: string }>;
 
-type Dish = { name: string; alt: string; photo?: string; hashed?: string };
+type Dish = { name: string; alt: string; photo: string };
 type Card = { kind: string; dishes: Dish[] };
 
-// `photo` = key in dish-photos.json. `hashed` = photo already in /assets (checked by eye, no entry in dish-photos.json).
+// `photo` = key in dish-photos.json (only photos from public/assets/dishes/new, confirmed, no hands or people in shot).
 const CARDS: Card[] = [
   { kind: 'drink', dishes: [
     { name: 'Fursat Rahasyam', alt: 'Fursat Rahasyam mocktail', photo: 'FURSAT RAHASYAM' },
-    { name: 'Life Fursat Bhai', alt: 'Life Fursat Bhai cocktail', photo: 'LIFE FURSAT BHAI' },
     { name: 'Gongura Muchatlu', alt: 'Gongura Muchatlu cocktail', photo: 'GONGURA MUCHATLU' },
     { name: 'Iced Latte', alt: 'Iced latte', photo: 'ICED LATTE' },
+    { name: 'Cappuccino', alt: 'Cappuccino with latte art', photo: 'CAPPUCCINO' },
   ] },
   { kind: 'plate', dishes: [
     { name: 'Ustad Special Nalli Gosht Biryani', alt: 'Ustad Special Nalli Gosht Biryani', photo: 'Ustad Special Nalli Gosht Biryani' },
-    { name: 'Fursat Spl Coriander Chicken', alt: 'Coriander chicken with garlic bread', hashed: '3904d620bd' },
-    { name: 'Jamaican Jerk Chicken with Fries', alt: 'Jamaican jerk chicken with fries', photo: 'Jamaican Jerk Chicken with Fries' },
-    { name: 'Loose Prawns', alt: 'Loose prawns on a plate', hashed: 'eb8b3a9e42' },
+    { name: 'Guntur Karam Wings', alt: 'Guntur Karam Wings', photo: 'Guntur Karam Wings' },
+    { name: 'Chicken Tikka (Angara/ Malai/ Hariyali)', alt: 'Angara chicken tikka', photo: 'Chicken Tikka (Angara/ Malai/ Hariyali)' },
+    { name: 'Nalla Karam Kodi Vepudu', alt: 'Nalla Karam Kodi Vepudu', photo: 'Nalla Karam Kodi Vepudu' },
   ] },
   { kind: 'sweet', dishes: [
     { name: 'Biscoff Cheesecake', alt: 'Biscoff cheesecake', photo: 'Biscoff Cheesecake' },
     { name: 'Apricot Delight', alt: 'Apricot delight', photo: 'Apricot Delight' },
   ] },
   { kind: 'bite', dishes: [
-    { name: 'Crispy Chicken with Mayo', alt: 'Crispy fried chicken with dips', hashed: '22a02d4ff8' },
-    { name: 'Thai Chilli, Basil, Chicken Momos', alt: 'Chicken momos on a plate', hashed: '2ff8792a04' },
-    { name: 'Boti Fry', alt: 'Boti fry with bread and lemon', hashed: 'a0027c64d3' },
-    { name: 'Mutton Paya Soup', alt: 'Mutton paya soup in a blue bowl', hashed: 'e1ceeaf4fe' },
+    { name: 'Jeedi Pappu Kodi Pakodi', alt: 'Jeedi Pappu Kodi Pakodi', photo: 'Jeedi Pappu Kodi Pakodi' },
+    { name: 'Korean Bun', alt: 'Korean bun', photo: 'Korean Bun' },
+    { name: 'OG French Toast', alt: 'OG French toast', photo: 'OG French Toast' },
   ] },
 ];
 
@@ -53,14 +52,9 @@ const cards = CARDS.map((c) => ({
     const tray = hf ? `${hf[1]} half / ${hf[2]} full` : String(row.price);
     // Short line under the name: the menu's own description, else the menu section.
     const note = hf ? row.section : (row.description || row.section);
-    let img: { src: string; srcset?: string; w: number; h: number };
-    if (d.photo) {
-      const ph = photos[d.photo];
-      if (!ph || ph.todo) throw new Error(`HomeSeason: no confirmed photo for "${d.photo}"`);
-      img = { src: ph.sm, srcset: `${ph.sm} 427w, ${ph.src} ${ph.w}w`, w: ph.w, h: ph.h };
-    } else {
-      img = { src: `/assets/${d.hashed}.webp`, w: 900, h: 514 };
-    }
+    const ph = photos[d.photo];
+    if (!ph || ph.todo) throw new Error(`HomeSeason: no confirmed photo for "${d.photo}"`);
+    const img = { src: ph.sm, srcset: `${ph.sm} 427w, ${ph.src} ${ph.w}w`, w: ph.w, h: ph.h };
     const name = row.name === row.name.toUpperCase() ? d.name : row.name;
     // Deep link target: the exact menu name (as in food.json / drinks.json), URL-encoded.
     return { name, menuName: row.name, alt: d.alt, note, priceText, tray, img };
@@ -112,7 +106,7 @@ const BADGE: Record<string, string> = {"drink": "<path d=\"M6 3h12l-1.5 7a4.5 4.
 </script>
 
 <style is:global>
-.hs{background:#F4ECDA;color:#1A1608;padding:clamp(40px,6vw,72px) 0 clamp(36px,5vw,64px)}
+.hs{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(40px,6vw,72px) 0 clamp(36px,5vw,64px)}
 .hs-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:0 clamp(12px,2vw,28px);margin-bottom:clamp(20px,3vw,34px)}
 .hs-head h2{margin:0;font:500 clamp(30px,4.2vw,48px)/1.12 "Playfair Display",Georgia,serif;letter-spacing:-.02em;text-wrap:balance}
 .hs-head p{margin:0;font:400 14px/1.5 Poppins,system-ui,sans-serif;color:#4a4330}

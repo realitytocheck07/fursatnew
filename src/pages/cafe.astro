@@ -2,12 +2,13 @@
 import site from '../data/site.json';
 // cafe.astro — Fursat Café (P6 restyle: shared ExperienceLayout on the baked plaster stage, mock "Café + Restaurant + Bar").
 // Content is the page's existing copy, items, prices and photos; only the design changed.
+// TODO(client): confirm Café featured items, and the Wi-Fi / power-plug claims (moments text + FAQ). Pillars use menu counts only.
 import Base from '../layouts/Base.astro';
 import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
 ---
 <Base
   title="Café Lounge — Fursat Kitchen | Bar | Madhapur"
-  description="Fursat Café Lounge — artisan coffees, teas and light bites in a warm, creative setting. Work, unwind or catch up with friends in Madhapur's cosiest café."
+  description="Fursat Café Lounge in Madhapur, Hyderabad — coffees, teas, milk shakes, desserts and all-day breakfast. Work, unwind or catch up with friends."
   canonical="https://fursatind.in/cafe/"
   ogImage="https://fursatind.in/assets/fursat_space_09.webp"
   ogImageAlt="Fursat Café Lounge interior — cosy seating and warm lighting"
@@ -15,20 +16,20 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
   <ExperienceLayout
     insta="fursatind.in"
     active="cafe"
-    kicker="Slow mornings · Artisan roasts"
-    h1a="Seasonal Sips &"
-    h1b="Slow Bakes"
-    lead="Inspired by the rhythm of unhurried mornings. Specialty coffee roasted with single-origin beans, ceremonial matcha, house-whipped thick shakes, and oven-fresh pastries."
+    kicker="Slow mornings · Coffee & shakes"
+    h1a="Coffee, Shakes &"
+    h1b="Slow Mornings"
+    lead="Coffees, teas, milk shakes, desserts and all-day breakfast, ordered from the same menu as the rest of Fursat."
     ctas={[
       { label: 'Explore Café Menu', href: '#cafe-menu', primary: true },
       { label: 'Book a Café Booth', href: '/reserve', book: true },
     ]}
-    hero={{ src: '/assets/dishes/dsc08774.webp', alt: 'Latte art coffee at Fursat Café', w: 1200, h: 1200, pos: '50% 60%' }}
+    hero={{ src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino at Fursat Café', w: 1067, h: 1600, pos: '50% 50%' }}
     pillars={[
-      { icon: 'coffee', title: 'Single-Origin Espresso', line: 'Arabica, roasted light-medium.' },
-      { icon: 'leaf', title: 'Ceremonial Grade Matcha', line: 'Stone-ground, whisked by hand.' },
-      { icon: 'bake', title: 'House-Baked Daily', line: 'Small morning batches.' },
-      { icon: 'shake', title: 'Signature Thick Shakes', line: 'Churned with artisanal gelato.' },
+      { icon: 'coffee', title: 'Coffee', line: '27 coffees on the menu.' },
+      { icon: 'leaf', title: 'Tea', line: '10 teas, from chai to green tea.' },
+      { icon: 'bake', title: 'Desserts & Cookies', line: 'Cheesecakes, tiramisu, cookies.' },
+      { icon: 'shake', title: 'Shakes & Smoothies', line: '8 milk shakes, 4 smoothies.' },
     ]}
     momentsA="Spaces Designed"
     momentsB="to Unwind"
@@ -41,10 +42,10 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
     cardsKicker="The café selection"
     cardsTitle="Favorites from the Counter"
     cards={[
-      { tag: 'Bestseller', name: 'Lotus Biscoff Shake', price: '₹345', text: 'Caramelized Biscoff spread blended with vanilla bean cream, crowned with crushed biscuits.', img: { src: '/assets/dishes/lotus_biscoff_.webp', alt: 'Lotus Biscoff Shake' } },
-      { tag: 'Cold Brew', name: 'Amber Cold Brew', price: '₹265', text: 'Slow-steeped for 18 hours for deep chocolate notes, served over clear crystal ice.', img: { src: '/assets/dishes/dsc08774.webp', alt: 'Artisan Cold Brew' } },
-      { tag: 'Bakes', name: 'Belgian Chocolate Waffle', price: '₹315', text: 'Crisp golden waffle drizzled with warm dark ganache, toasted almonds, and vanilla gelato.', img: { src: '/assets/dishes/dsc08852.webp', alt: 'Classic Belgian Waffle' } },
-      { tag: 'Breakfast', name: 'Smashed Avocado Sourdough', price: '₹365', text: 'Toasted country sourdough with Hass avocado, cherry tomatoes, feta crumble, and chili flakes.', img: { src: '/assets/dishes/dsc08919.webp', alt: 'Avocado Toast & Sourdough' } },
+      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
+      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
+      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
+      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian. From our all day breakfast menu.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
     ]}
     cardsLink={{ label: 'See the full menu', href: '/menu' }}
     faqTitle="Café FAQs"

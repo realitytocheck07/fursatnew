@@ -46,28 +46,6 @@
     var per={},top=[];res.forEach(function(r){per[r.it.c]=(per[r.it.c]||0)+1;if(per[r.it.c]<=2&&top.length<6)top.push(r)});
     return top}
   var LEAF='<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg>',LEAFS='<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-spice"/></svg>',BADGE='<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-badge"/></svg>',SPRIG='<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sprig"/></svg>';
-  var gq=null;
-  function loadGsap(cb){if(window.gsap)return cb(window.gsap);if(gq){gq.push(cb);return}gq=[cb];
-    var sc=document.createElement("script");sc.src="/js/gsap.min.js";
-    sc.onload=function(){var f=gq;gq=null;f.forEach(function(x){x(window.gsap)})};
-    sc.onerror=function(){var f=gq;gq=null;f.forEach(function(x){x(null)})};document.head.appendChild(sc)}
-  /* focal moment: the leaf "blooms" open from its stem corner, price seal pops last */
-  function bloom(){
-    if(calm)return;var cards=[].slice.call(out.querySelectorAll(".mc"));if(!cards.length)return;
-    out.classList.add("pre");var stop=setTimeout(function(){out.classList.remove("pre")},2200);
-    loadGsap(function(g){clearTimeout(stop);
-      if(!g||!cards[0].isConnected){out.classList.remove("pre");return}
-      var imgs=cards.map(function(c){return c.querySelector(".mc-img")}),seals=cards.map(function(c){return c.querySelector(".mc-seal")}),
-          odd=function(i){return i%2===0},
-          from=function(i){return"circle(0% at "+(odd(i)?"0% 100%":"100% 0%")+")"},
-          to=function(i){return"circle(150% at "+(odd(i)?"0% 100%":"100% 0%")+")"};
-      var tl=g.timeline({defaults:{ease:"expo.out"},onComplete:function(){g.set(cards.concat(imgs,seals,out.querySelectorAll(".mc-img img,.mc-ph svg")),{clearProps:"all"})}});
-      tl.add(function(){out.classList.remove("pre")},0)
-        .from(out.querySelector(".rs-h"),{y:12,opacity:0,duration:.5},0)
-        .from(cards,{y:28,opacity:0,duration:.7,stagger:{each:.07,amount:.4}},.05)
-        .fromTo(imgs,{clipPath:from},{clipPath:to,duration:.9,stagger:{each:.07,amount:.4}},.08)
-        .from(out.querySelectorAll(".mc-img img,.mc-ph svg"),{scale:1.18,duration:1.1,stagger:{each:.07,amount:.4}},.08)
-        .from(seals,{scale:.9,opacity:0,duration:.45,stagger:{each:.07,amount:.4}},.45)})}
   function render(text,top,quiet){
     var sree=mode==="sree",anyAlc=top.some(function(r){return r.it.a});
     var wa="https://wa.me/919059670033?text="+encodeURIComponent("Hi Fursat! I would like to reserve a table.");
@@ -77,14 +55,15 @@
       var why=r.why.filter(function(x){return!(x==="Spicy"&&it.s)});
       var tn=0;for(var ci=0;ci<it.c.length;ci++)tn+=it.c.charCodeAt(ci);
       var tags=[it.c,it.a?"Contains alcohol, 21+":""].filter(Boolean).join(" \u00b7 "),
-          vg=it.v==="veg"?'<span class="mc-vg is-veg" role="img" aria-label="Veg"></span>':it.v==="nonveg"?'<span class="mc-vg is-nv" role="img" aria-label="Non-veg"></span>':"",
+          vg=it.v==="veg"?'<span class="ar-vg is-veg" role="img" aria-label="Veg"></span>':it.v==="nonveg"?'<span class="ar-vg is-nv" role="img" aria-label="Non-veg"></span>':"",
           chips=why.slice(0,2).concat(it.s&&why.indexOf("Spicy")<0?["Spicy"]:[]).slice(0,2).map(function(w){return"<li>"+esc(w)+"</li>"}).join("");
-      return '<li class="mc" data-t="'+(tn%4)+'" style="--k:'+k+'"><div class="mc-fig"><div class="mc-img">'+(it.img?'<img src="'+esc(it.img)+'" alt="'+esc(it.n)+'" width="640" height="576" loading="lazy" decoding="async">':'<span class="mc-ph">'+LEAF+'</span>')+'</div><span class="mc-seal">'+(it.f?"<small>from</small>":"")+"<b>\u20b9"+it.p+'</b></span></div><div class="mc-b"><h3 class="mc-n" translate="no">'+vg+'<a href=\"/menu/#dish='+encodeURIComponent(it.n)+'\"><span>'+esc(it.n)+'</span></a></h3><p class="mc-m">'+esc(tags)+"</p>"+(chips?'<ul class="mc-w" aria-label="Why this pick">'+chips+"</ul>":"")+"</div></li>"}).join("")+"</ol>"}
+      var ic=it.v==="veg"?"i-leaf":it.s?"i-spice":"i-sprig";
+      return '<li class="fk-card ar" style="--k:'+k+'"><div class="fk-card__ph">'+(it.img?'<img src="'+esc(it.img)+'" alt="'+esc(it.n)+'" width="640" height="512" loading="lazy" decoding="async">':'<span class="ar-ph">'+LEAF+'</span>')+'</div><span class="fk-card__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+ic+'"/></svg></span><div class="fk-card__b"><h3 class="fk-card__t" translate="no">'+vg+'<a href="/menu/#dish='+encodeURIComponent(it.n)+'"><span>'+esc(it.n)+'</span></a></h3><p class="fk-card__p">'+esc(tags)+'</p>'+(chips?'<ul class="ar-w" aria-label="Why this pick">'+chips+'</ul>':'')+'<div class="fk-card__foot"><span class="fk-card__price">'+(it.f?'<small>from</small>':'')+'\u20b9'+it.p+'</span><span class="fk-card__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></div></li>'}).join("")+"</ol>"}
     else h+='<p class="rs-none">Try \u201csomething spicy under 400\u201d, \u201cdessert\u201d or \u201cchicken biryani\u201d.</p>';
     h+='<div class="rs-sep" aria-hidden="true">'+SPRIG+'</div><a class="rs-wa" href="'+wa+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.47 15.04L2 22l5.1-1.34A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.2 15.02l-.3-.18-3 .79.8-2.92-.2-.31A8.1 8.1 0 0 1 12.04 3.8zM8.6 7.4c-.2 0-.5.07-.75.35-.26.28-1 .97-1 2.37s1.03 2.75 1.17 2.94c.14.19 2 3.17 4.9 4.32 2.4.95 2.9.76 3.42.71.52-.05 1.68-.69 1.92-1.35.24-.66.24-1.23.17-1.35-.07-.12-.26-.19-.54-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.1-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.28-1.4-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.12-.57.13-.13.28-.33.43-.5.14-.16.19-.28.28-.47.1-.19.05-.35-.02-.5-.07-.14-.62-1.55-.86-2.1-.22-.5-.45-.5-.64-.51z"/></svg><span>Reserve a table on WhatsApp</span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></a>'
       +'<p class="rs-fine">Prices from the Fursat printed menu. Taxes extra.'+(anyAlc?" Alcohol is served to guests aged 21 and above only.":"")+"</p>";
     out.innerHTML=h;out.hidden=false;if(quiet)return;
-    if(st)st.textContent=sree?top.length+(top.length===1?" item":" items")+" in Sreemukhi\u2019s special menu":top.length?top.length+(top.length===1?" result":" results")+" for "+text+". Press Tab to move through them.":"No results for "+text+".";bloom();var hd=document.getElementById("as-rh");hd.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});hd.focus({preventScroll:true})}
+    if(st)st.textContent=sree?top.length+(top.length===1?" item":" items")+" in Sreemukhi\u2019s special menu":top.length?top.length+(top.length===1?" result":" results")+" for "+text+". Press Tab to move through them.":"No results for "+text+".";var hd=document.getElementById("as-rh");hd.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});hd.focus({preventScroll:true})}
   function go(){var text=q.value.trim();if(!text&&mode!=="sree"){if(st)st.textContent="Type what you feel like eating, then press Enter.";q.focus();return}
     if(st)st.textContent="";out.hidden=false;out.innerHTML=calm?"":'<div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div><div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div>';
     ready.then(function(){render(text,run(text))})}
@@ -96,7 +75,7 @@
   q.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();go()}});
   document.querySelectorAll("[data-mood]").forEach(function(b){b.addEventListener("click",function(){q.value=b.dataset.mood;go()})});
   /* page-aware start: /ask?q=coffee%20and%20desserts (from the Ask Fursat button on other pages) */
-  (function(){var pq=new URLSearchParams(location.search).get("q");if(pq){q.value=pq.slice(0,80);go()}})();
+  var pq=new URLSearchParams(location.search).get("q");if(pq){q.value=pq.slice(0,80);go()}
   var mic=document.getElementById("af-mic"),SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(mic&&SR){mic.hidden=false;var rec=null;mic.addEventListener("click",function(){
     if(rec){rec.stop();return}
@@ -105,5 +84,5 @@
     rec.onend=rec.onerror=function(){rec=null;mic.setAttribute("aria-pressed","false")};
     try{rec.start()}catch(x){rec=null;mic.setAttribute("aria-pressed","false")}})}
   function preview(){ready.then(function(){if(mode==="sree")return;var t=HI[mode];render(t,run(t).slice(0,3),true)})}
-  preview();
+  if(!pq)preview();
 })();

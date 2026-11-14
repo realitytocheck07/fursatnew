@@ -7,7 +7,7 @@ function duck(on){var m=window.__fzMu;if(m)m.volume=on?.2:.85}
 function ui(){var playing=!A.paused&&!A.ended;b.classList.toggle("ask",want&&blocked&&A.paused&&!ended);b.classList.toggle("off",!want);
  b.setAttribute("aria-pressed",want&&!ended?"true":"false");
  var t=!want?"Unmute voice":ended?"Voice ended":"Mute voice";tx.textContent=t;
- b.setAttribute("aria-label",!want?"Unmute intro voice":ended?"Intro voice ended":"Mute intro voice")}
+ b.setAttribute("aria-label",t)}
 function play(){var p;try{p=A.play()}catch(e){}
  if(p&&p.then)p.then(function(){blocked=false;ui();if(window.__fzV===undefined){window.__fzV=1;window.__fzOnV&&window.__fzOnV(1)}},function(){blocked=true;ui();arm();if(window.__fzV===undefined){window.__fzV=0;window.__fzOnV&&window.__fzOnV(0)}});else ui()}
 function fade(cb){clearInterval(tm);var v=A.volume,st=v/10;tm=setInterval(function(){v-=st;if(v<=.02){clearInterval(tm);A.pause();A.volume=1;cb&&cb()}else A.volume=Math.max(v,0)},30)}

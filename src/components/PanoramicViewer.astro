@@ -76,7 +76,7 @@ const thumbFor = (id: string) => smallImg(IMGS[id]);
         <div class="pv-shade" aria-hidden="true"></div>
         <div class="pv-pins" id="pv-pins"></div>
 
-        <div class="pv-stories" id="pv-stories" aria-label="Story progress"></div>
+        <div class="pv-stories" id="pv-stories" role="group" aria-label="Story progress"></div>
         <div class="pv-pausetag">Paused</div>
 
         <div class="pv-tools">
@@ -163,7 +163,13 @@ const thumbFor = (id: string) => smallImg(IMGS[id]);
 <script>
   const root = document.getElementById('tour');
   const boot = (opts?: { auto?: boolean }) => import('./tour/panorama.js').then((m) => m.initTour(root, opts));
-  if (root) { if (root.dataset.lazy) (window as any).__pvLoad = () => boot({ auto: false }); else boot(); }
+  if (root) {
+    if (root.dataset.lazy) (window as any).__pvLoad = () => boot({ auto: false });
+    else if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); boot(); } }, { rootMargin: '250px 0px' });
+      io.observe(root);
+    } else boot();
+  }
 </script>
 
 <style is:global>

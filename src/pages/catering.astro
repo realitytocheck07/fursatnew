@@ -1,6 +1,6 @@
 ---
 // catering.astro - Outdoor Catering by Fursat
-// Royal Deccan feasts delivered & live-cooked at your venue
+// TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500), "weddings", "bar service" and delivery area are unconfirmed.
 import InstaFollow from '../components/InstaFollow.astro';
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
@@ -25,7 +25,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
         <span class="ct-kicker">GOURMET EXPERIENCES AT YOUR VENUE</span>
         <h1 class="ct-title mot-headline">Fursat Outdoor Catering</h1>
         <p class="ct-sub">
-          Bring the signature flavors, live tandoor artistry, and royal hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
+          Bring the flavors and hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
         </p>
         <div class="ct-hero-btns">
           <a href="#quote" class="ct-btn-gold">Request Catering Menu & Quote</a>
@@ -34,42 +34,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
       </div>
     </section>
 
-    <!-- Catering Capabilities -->
-    <section class="ct-services">
-      <div class="ct-container">
-        <div class="ct-sec-head text-center">
-          <span class="ct-kicker">LIVE COUNTERS & SETUPS</span>
-          <h2 class="ct-sec-title mot-headline">What We Bring to Your Gathering</h2>
-        </div>
-
-        <div class="ct-grid">
-          <div class="ct-card">
-            <div class="ct-card-icon">🔥</div>
-            <h3>Live Charcoal Tandoor</h3>
-            <p>Hot, sizzling Angaraa Tikka, Tandoori Prawns, Paneer Kebabs, and crisp rotis & naans rolled and baked on-site.</p>
-          </div>
-
-          <div class="ct-card">
-            <div class="ct-card-icon">🍲</div>
-            <h3>Dum Biryani Handis</h3>
-            <p>Sealed clay and copper handis of Hyderabadi Mutton & Chicken Dum Biryani, unsealed live before your guests for peak aroma.</p>
-          </div>
-
-          <div class="ct-card">
-            <div class="ct-card-icon">🍹</div>
-            <h3>Mocktail & Mixology Bar</h3>
-            <p>Bespoke mobile bar setups with flair mixologists serving botanical mocktails, smoked coolers, and cold brews.</p>
-          </div>
-
-          <div class="ct-card">
-            <div class="ct-card-icon">🧁</div>
-            <h3>Live Chaat & Dessert Island</h3>
-            <p>Interactive street-food chaats, live jalebi counters, Lotus Biscoff dessert pots, and artisanal ice cream rolls.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <!-- TODO(client): 4 live-counter cards (tandoor, biryani handis, mixology bar, chaat & dessert) removed until the client confirms them; restore from git history (v5.17) if confirmed. -->
     <!-- Service Scale Section -->
     <section class="ct-scale">
       <div class="ct-container">
@@ -287,38 +252,11 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     font-weight: 700;
     text-decoration: none}
 
-  /* Services Grid */
-  .ct-services {
-    padding: clamp(60px, 8vw, 110px) 0}
   .ct-sec-title {
     font-family:var(--fk-serif);
     font-size: clamp(2rem, 4vw, 3rem);
     color: #1f2a1a;
     margin: 0 0 40px}
-  .ct-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-    gap: 24px}
-  .ct-card {
-    background: rgba(255,250,242,0.71);
-    border: 1px solid rgba(201,154,67,0.45);
-    border-radius: 24px;
-    padding: 32px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px}
-  .ct-card-icon {
-    font-size: 2.2rem}
-  .ct-card h3 {
-    font-family:var(--fk-serif);
-    font-size: 1.35rem;
-    color: #1f2a1a;
-    margin: 0}
-  .ct-card p {
-    font-size: 0.925rem;
-    color: #4a4232;
-    margin: 0;
-    line-height: 1.5}
 
   /* Quote Form */
   .ct-quote {

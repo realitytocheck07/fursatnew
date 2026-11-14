@@ -25,7 +25,8 @@
     "p": 329,
     "c": "All day breakfast",
     "v": "veg",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/og-french-toast-sm.webp"
   },
   {
     "n": "Nutella French Toast",
@@ -47,7 +48,8 @@
     "c": "Finger bites",
     "d": "Soft bun filled with rich ream and cheese,Garlic butter.",
     "v": "veg",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/korean-bun-sm.webp"
   },
   {
     "n": "Malai Bun",
@@ -124,8 +126,7 @@
     "c": "Sandwiches & burgers",
     "v": "veg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/ask/peri-peri-sandwich.webp"
+    "k": "food"
   },
   {
     "n": "Chicken & Cheese Sandwich",
@@ -327,8 +328,7 @@
     "c": "Regional specials",
     "v": "veg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/dishes/pandu_mirchi_kodi_kebab.webp"
+    "k": "food"
   },
   {
     "n": "Gongura Mushroom Vepudu",
@@ -358,7 +358,8 @@
     "c": "Regional specials",
     "s": 1,
     "k": "food",
-    "v": "nonveg"
+    "v": "nonveg",
+    "img": "/assets/dishes/sm/guntur-karam-wings-sm.webp"
   },
   {
     "n": "Nalla Karam Kodi Vepudu",
@@ -367,38 +368,36 @@
     "v": "nonveg",
     "s": 1,
     "k": "food",
-    "img": "/assets/dishes/karvepaku_kodi_vepudu.webp"
+    "img": "/assets/dishes/sm/nalla-karam-kodi-vepudu-sm.webp"
   },
   {
     "n": "Fursat Spl Coriander Chicken",
     "p": 525,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/coriander-chicken.webp"
+    "k": "food"
   },
   {
     "n": "Jeedi Pappu Kodi Pakodi",
     "p": 525,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/jeedi-pappu-kodi-pakodi-sm.webp"
   },
   {
     "n": "Karivepaku Kodi Vepudu",
     "p": 525,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/karvepaku_kodi_vepudu.webp"
+    "k": "food"
   },
   {
     "n": "Telangana Mutton Fry (with bone)",
     "p": 675,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/dsc08946.webp"
+    "k": "food"
   },
   {
     "n": "Nethi Mamsam Vepudu",
@@ -412,24 +411,21 @@
     "p": 455,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/boti-fry-with-pav.webp"
+    "k": "food"
   },
   {
     "n": "Godavari Royyala Vepudu",
     "p": 615,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/dsc05389.webp"
+    "k": "food"
   },
   {
     "n": "Korameenu Chepa Chips",
     "p": 595,
     "c": "Regional specials",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/koramenu-chapa-chips.webp"
+    "k": "food"
   },
   {
     "n": "Velluli Karam Kodi Guddulu",
@@ -451,8 +447,7 @@
     "p": 465,
     "c": "Starters",
     "v": "veg",
-    "k": "food",
-    "img": "/assets/dishes/dsc03321.webp"
+    "k": "food"
   },
   {
     "n": "Classic paneer tikka",
@@ -461,15 +456,14 @@
     "d": "4] Tandoori Non Veg",
     "v": "veg",
     "k": "food",
-    "img": "/assets/dishes/dsc03327.webp"
+    "img": "/assets/dishes/sm/classic-paneer-tikka-sm.webp"
   },
   {
     "n": "Nawabi Chicken Tangdi Kabab",
     "p": 475,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/dsc03308.webp"
+    "k": "food"
   },
   {
     "n": "Chicken Tikka (Angara/ Malai/ Hariyali)",
@@ -477,31 +471,28 @@
     "c": "Starters",
     "v": "nonveg",
     "k": "food",
-    "img": "/assets/dishes/angaraa_chicken_tikka_.webp"
+    "img": "/assets/dishes/sm/chicken-tikka-angara-sm.webp"
   },
   {
     "n": "Haleem Bomb",
     "p": 555,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/haleem-with-broch-bread.webp"
+    "k": "food"
   },
   {
     "n": "Mutton Ghee Roast with Kerala Paratha",
     "p": 675,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/dsc03317.webp"
+    "k": "food"
   },
   {
     "n": "Sarso Vali Prawns Tikka",
     "p": 675,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/tandoori_prawns_.webp"
+    "k": "food"
   },
   {
     "n": "Lasooni Fish Tikka",
@@ -509,24 +500,21 @@
     "c": "Starters",
     "d": "RS4> @ Chef's Special",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/dsc05154.webp"
+    "k": "food"
   },
   {
     "n": "Mini Burmese Parcel",
     "p": 455,
     "c": "Starters",
     "v": "veg",
-    "k": "food",
-    "img": "/assets/dishes/dsc05366.webp"
+    "k": "food"
   },
   {
     "n": "Mushroom Salt and Pepper",
     "p": 455,
     "c": "Starters",
     "v": "veg",
-    "k": "food",
-    "img": "/assets/dishes/dsc03333.webp"
+    "k": "food"
   },
   {
     "n": "Honey Chilli Lotus Stem",
@@ -534,8 +522,7 @@
     "c": "Starters",
     "v": "veg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/dishes/dsc03331.webp"
+    "k": "food"
   },
   {
     "n": "Crispy Corn Kernel",
@@ -550,8 +537,7 @@
     "p": 599,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/loose-prawns.webp"
+    "k": "food"
   },
   {
     "n": "Chilli Garlic Fish",
@@ -560,8 +546,7 @@
     "d": "e] Continental Veg",
     "v": "nonveg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/dishes/dsc05352.webp"
+    "k": "food"
   },
   {
     "n": "Mozzarella Cheese Sticks",
@@ -590,8 +575,7 @@
     "p": 475,
     "c": "Starters",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/ask/dishes/crispy-chicken-with-mayo.webp"
+    "k": "food"
   },
   {
     "n": "Peri Peri Chicken Wings",
@@ -599,8 +583,7 @@
     "c": "Starters",
     "v": "nonveg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/ask/dishes/peri-peri-chicken-wings.webp"
+    "k": "food"
   },
   {
     "n": "Jamaican Jerk Chicken with Fries",
@@ -608,8 +591,7 @@
     "c": "Starters",
     "v": "nonveg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/ask/dishes/jamaican-jerk-with-fries.webp"
+    "k": "food"
   },
   {
     "n": "Butter Garlic Prawns",
@@ -702,8 +684,7 @@
     "v": "opt",
     "d": "Veg 485, chicken 595, prawns 635.",
     "k": "food",
-    "f": 1,
-    "img": "/assets/ask/dishes/spaghetti-aglio-olio.webp"
+    "f": 1
   },
   {
     "n": "Chicken Lasagna",
@@ -727,8 +708,7 @@
     "c": "Momos",
     "v": "nonveg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/ask/dishes/chicken-momo.webp"
+    "k": "food"
   },
   {
     "n": "ExoticVeg Momos",
@@ -743,8 +723,7 @@
     "c": "Asian mains",
     "v": "veg",
     "s": 1,
-    "k": "food",
-    "img": "/assets/ask/schezwan-paneer.webp"
+    "k": "food"
   },
   {
     "n": "Veg Dumpling and Manchurian",
@@ -768,8 +747,7 @@
     "d": "Chicken 375, fish 415, prawns 445.",
     "s": 1,
     "k": "food",
-    "f": 1,
-    "img": "/assets/ask/chilli-chicken.webp"
+    "f": 1
   },
   {
     "n": "Schezwan Chicken/ Fish/ Prawns",
@@ -1063,8 +1041,7 @@
     "p": 495,
     "c": "Biryani & rice",
     "v": "nonveg",
-    "k": "food",
-    "img": "/assets/dishes/fursat_.webp"
+    "k": "food"
   },
   {
     "n": "Chicken Fry Piece Pulao",
@@ -1072,7 +1049,7 @@
     "c": "Biryani & rice",
     "v": "nonveg",
     "k": "food",
-    "img": "/assets/dishes/fursat_1_.webp"
+    "img": "/assets/dishes/sm/chicken-fry-piece-pulao-sm.webp"
   },
   {
     "n": "Pachi Mirchi Kodi Pulao",
@@ -1154,7 +1131,7 @@
     "d": "Half 599, full 999.",
     "k": "food",
     "f": 1,
-    "img": "/assets/ask/dishes/nalli-ghost-biryani.webp"
+    "img": "/assets/dishes/sm/nalli-gosht-biryani-half-sm.webp"
   },
   {
     "n": "Bheemavaram Royyala Pulao",
@@ -1233,8 +1210,7 @@
     "p": 375,
     "c": "South Indian",
     "v": "veg",
-    "k": "food",
-    "img": "/assets/ask/dishes/mudda-pappu-avakaya-annam.webp"
+    "k": "food"
   },
   {
     "n": "Sambar Rice with Aloo Chips",
@@ -1260,7 +1236,8 @@
     "p": 385,
     "c": "Desserts",
     "v": "veg",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/biscoff-cheesecake-sm.webp"
   },
   {
     "n": "Blueberry cheesecake",
@@ -1287,7 +1264,8 @@
     "n": "Tiramisu",
     "p": 375,
     "c": "Desserts",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/tiramisu-sm.webp"
   },
   {
     "n": "Tres leches",
@@ -1299,7 +1277,8 @@
     "n": "Apricot Delight",
     "p": 375,
     "c": "Desserts",
-    "k": "food"
+    "k": "food",
+    "img": "/assets/dishes/sm/apricot-delight-sm.webp"
   },
   {
     "n": "Chocolate Brownies",
@@ -1338,7 +1317,7 @@
     "k": "drink",
     "v": "veg",
     "d": "Barman special",
-    "img": "/assets/ask/dishes/fursat-rahasyam.webp"
+    "img": "/assets/dishes/sm/fursat-rahasyam-sm.webp"
   },
   {
     "n": "Jamu Ratri",
@@ -1583,8 +1562,7 @@
     "p": 299,
     "c": "Smoothies",
     "k": "drink",
-    "v": "veg",
-    "img": "/assets/ask/dishes/rasberry-smoothie.webp"
+    "v": "veg"
   },
   {
     "n": "Espresso",
@@ -1605,21 +1583,24 @@
     "p": 219,
     "c": "Hot coffee",
     "k": "drink",
-    "v": "veg"
+    "v": "veg",
+    "img": "/assets/dishes/sm/cappuccino-sm.webp"
   },
   {
     "n": "Cafe Latte",
     "p": 229,
     "c": "Hot coffee",
     "k": "drink",
-    "v": "veg"
+    "v": "veg",
+    "img": "/assets/dishes/sm/cafe-latte-sm.webp"
   },
   {
     "n": "Cafe Mocha",
     "p": 239,
     "c": "Hot coffee",
     "k": "drink",
-    "v": "veg"
+    "v": "veg",
+    "img": "/assets/dishes/sm/cafe-mocha-sm.webp"
   },
   {
     "n": "Affogato",
@@ -1753,7 +1734,7 @@
     "c": "Iced coffee",
     "k": "drink",
     "v": "veg",
-    "img": "/assets/ask/dishes/iced-latte.webp"
+    "img": "/assets/dishes/sm/iced-latte-sm.webp"
   },
   {
     "n": "Iced Mocha",

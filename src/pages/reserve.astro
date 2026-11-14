@@ -49,6 +49,10 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
       </div>
     </div>
   </main>
+  <style is:global>
+    /* first section starts below the fixed header (--sh-h, set in fk-tokens.css) */
+    .rs-page { padding-top: var(--sh-h); }
+  </style>
   <SiteFooter />
   <MobileBar active="reserve" />
   <script>import '../scripts/fk-motion';</script>

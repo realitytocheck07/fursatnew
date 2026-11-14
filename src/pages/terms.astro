@@ -1,5 +1,5 @@
 ---
-// terms.astro - Fursat Offer Terms, House Rules & Privacy Policy
+// terms.astro - Fursat House Rules, Privacy & Cancellation Policy
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -17,37 +17,19 @@ import MobileBar from '../components/MobileBar.astro';
     <div class="tr-container">
       <div class="tr-doc-card">
         <span class="tr-kicker">LEGAL & POLICIES</span>
-        <h1 class="tr-title mot-headline">Offer Terms, House Rules & Privacy Policy</h1>
+        <h1 class="tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
         <p class="tr-updated">Last Updated: November 2026</p>
 
-        <!-- Section 1: Offer Terms -->
-        <section class="tr-section">
-          <h2>1. Promotional Offer Terms & Conditions (Code: FURSAT15)</h2>
-          <ul>
-            <li>
-              <b>Discount Scope:</b> The 15% discount (using code <code>FURSAT15</code>) is subject to terms. Confirm scope on WhatsApp.
-            </li>
-            <li>
-              <b>Exclusions:</b> As per state excise guidelines, the offer does not apply to alcoholic beverages, tobacco, or statutory government taxes (GST) / service charges.
-            </li>
-            <li>
-              <b>Redemption:</b> The coupon code must be presented to the service captain prior to bill generation. Only one promotional coupon may be applied per table/bill.
-            </li>
-            <li>
-              <b>Validity:</b> Terms apply, confirm on WhatsApp. Not combinable with banquet packages or third-party aggregator promotions (Zomato Gold / Swiggy Dineout).
-            </li>
-          </ul>
-        </section>
-
+        <!-- TODO(client): offer terms section (FURSAT15 / 15%) removed until the client confirms the offer; restore from git history (v5.17) if confirmed. -->
         <!-- Section 2: House Rules -->
         <section class="tr-section">
-          <h2>2. House Rules & Admission Policy</h2>
+          <h2>1. House Rules & Admission Policy</h2>
           <ul>
             <li>
               <b>Age Policy for Bar:</b> Alcohol service is strictly restricted to guests aged 21 and above. Valid government-issued photo ID (Aadhaar, Passport, Driving License) may be requested.
             </li>
             <li>
-              <b>Table Holding:</b> Reserved tables will be held for a grace period of 20 minutes past the confirmed reservation time. In case of delay, please inform our reception at +91 90596 70033.
+              <b>Table Holding:</b> Reserved tables are held for a short grace period past the confirmed reservation time. <!-- TODO(client): confirm grace period (20 minutes was a placeholder) --> In case of delay, please inform our reception at +91 90596 70033.
             </li>
             <li>
               <b>Dress Code:</b> Smart casual dining attire is encouraged. Management reserves the right of admission.
@@ -57,7 +39,7 @@ import MobileBar from '../components/MobileBar.astro';
 
         <!-- Section 3: Privacy Policy -->
         <section class="tr-section" id="privacy">
-          <h2>3. Privacy Policy</h2>
+          <h2>2. Privacy Policy</h2>
           <p>
             At Fursat Kitchen | Bar (operated by Sriven Hospitality), we respect your privacy:
           </p>
@@ -76,13 +58,13 @@ import MobileBar from '../components/MobileBar.astro';
 
         <!-- Section 4: Cancellation & Refund -->
         <section class="tr-section" id="refund">
-          <h2>4. Reservation & Banquet Cancellation Policy</h2>
+          <h2>3. Reservation & Banquet Cancellation Policy</h2>
           <ul>
             <li>
               <b>A-la-carte Dining:</b> No cancellation fee is charged for regular table reservations. We kindly request at least 2 hours notice if you need to reschedule.
             </li>
             <li>
-              <b>Banquet & Private Events:</b> Advance deposits for banquet dates are refundable up to 7 days prior to the scheduled event date, subject to a 10% administrative fee.
+              <b>Banquet & Private Events:</b> Advance deposits for banquet dates are refundable up to 7 days prior to the scheduled event date, subject to an administrative fee. <!-- TODO(client): confirm refund window (7 days) and fee (10% was a placeholder) -->
             </li>
           </ul>
         </section>
@@ -175,7 +157,7 @@ import MobileBar from '../components/MobileBar.astro';
     color: #1f2a1a}
   .tr-section code {
     background: rgba(214,170,90,0.26);
-    color: #9c4f1c;
+    color: #7a3a10;
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: 700}

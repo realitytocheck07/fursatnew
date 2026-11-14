@@ -2,6 +2,8 @@
 import site from '../data/site.json';
 // SiteFooter.astro - Fursat Luxury Hospitality Footer
 // Legal Name, Address, FSSAI, Hours, Socials & Quick Links
+// TODO(client): address (Shop G1 per legal info vs 'Level 3') and a second phone number are unconfirmed.
+// One legal bar only: the copyright line below. Legal name, GSTIN and FSSAI come from site.json.
 ---
 <footer class="sf-footer" id="visit">
   <div class="sf-container">
@@ -24,7 +26,7 @@ import site from '../data/site.json';
       <!-- Quick Nav Links -->
       <div class="sf-links-grid">
         <div class="sf-link-group">
-          <h3 class="sf-group-title">Dining & Drinks</h3>
+          <h2 class="sf-group-title">Dining & Drinks</h2>
           <a href="/">Home</a>
           <a href="/reserve">Reserve a Table</a>
           <a href="/menu">Full Menu</a>
@@ -36,7 +38,7 @@ import site from '../data/site.json';
         </div>
 
         <div class="sf-link-group">
-          <h3 class="sf-group-title">Celebrations</h3>
+          <h2 class="sf-group-title">Celebrations</h2>
           <a href="/party">Parties &amp; Events</a>
           <a href="/banquet">The Banquet Hall</a>
           <a href="/party#birthday">Birthdays & Anniversaries</a>
@@ -46,7 +48,7 @@ import site from '../data/site.json';
         </div>
 
         <div class="sf-link-group">
-          <h3 class="sf-group-title">Visit Us</h3>
+          <h2 class="sf-group-title">Visit Us</h2>
           <p class="sf-info-p">
             <b>Location:</b><br />
             Level 3, Capital Park, Image Gardens Road, VIP Hills, Silicon Valley, Madhapur, Hyderabad, Telangana 500081
@@ -57,7 +59,7 @@ import site from '../data/site.json';
           </p>
           <p class="sf-info-p">
             <b>Reservations:</b><br />
-            <a href="tel:+919059670033">+91 90596 70033</a> / <a href="tel:+919848360033">+91 98483 60033</a>
+            <a href="tel:+919059670033">+91 90596 70033</a>
           </p>
         </div>
       </div>
@@ -77,10 +79,10 @@ import site from '../data/site.json';
     <!-- Bottom Legal Bar -->
     <div class="sf-bottom">
       <p class="sf-copy">
-        © {new Date().getFullYear()} Fursat Kitchen | Bar · Sriven Hospitality. All rights reserved.
+        © {new Date().getFullYear()} Fursat Kitchen | Bar · {site.legal.name} · GSTIN {site.legal.gstin} · FSSAI {site.legal.fssai}
       </p>
       <div class="sf-legal-links">
-        <a href="/terms">Offer Terms</a>
+        <a href="/terms">Terms</a>
         <a href="/terms#privacy">Privacy Policy</a>
         <a href="/terms#refund">Refund Policy</a>
       </div>

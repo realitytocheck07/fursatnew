@@ -173,7 +173,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
           </div>
           <div class="mv-feat-txt">
             <span class="mv-lab">Featured drink</span>
-            <h3 class="mv-nm" id="mv-feat-name">{titleCase(drink.name)}</h3>
+            <h2 class="mv-nm" id="mv-feat-name">{titleCase(drink.name)}</h2>
             <p class="mv-meta"><span class={vegMark(drink.veg)} role="img" aria-label={drink.veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{drink.section}</p>
             <div class="mv-chef-row">
               <p class="mv-price num">{money(drink.price!)}</p>
@@ -194,7 +194,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
           <div class="mv-chef-main">
             <span class="mv-ghost" aria-hidden="true">{picks[0].name[0]}</span>
             <span class="mv-lab">Chef's pick</span>
-            <h3 class="mv-nm">{titleCase(picks[0].name)}</h3>
+            <h2 class="mv-nm">{titleCase(picks[0].name)}</h2>
             <p class="mv-meta">
               <span class={vegMark(picks[0].veg)} role="img" aria-label={picks[0].veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{picks[0].veg ? 'Vegetarian' : 'Non-vegetarian'}
               {picks[0].spicy && <span class="mv-spice">Spicy</span>}
@@ -210,7 +210,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
             <div class="mv-chef-2in">
               <div>
                 <span class="mv-lab">Also a chef's pick</span>
-                <h4 class="mv-nm2">{titleCase(picks[1].name)}</h4>
+                <h3 class="mv-nm2">{titleCase(picks[1].name)}</h3>
                 <p class="mv-meta">
                   <span class={vegMark(picks[1].veg)} role="img" aria-label={picks[1].veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{picks[1].veg ? 'Vegetarian' : 'Non-vegetarian'}
                   {picks[1].spicy && <span class="mv-spice">Spicy</span>}

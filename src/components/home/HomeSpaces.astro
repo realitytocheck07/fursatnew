@@ -1,20 +1,23 @@
 ---
 // "What brings you in?": 5 slim tiles, one per space. Real venue photos only.
 const TILES = [
-  { href: '/restaurant-bar', label: 'Restaurant & Bar', src: '/assets/interior/fursat_space_04-720.webp', alt: 'Restaurant seating with red banquettes and framed art' },
-  { href: '/cafe', label: 'Café', src: '/assets/interior/fursat_space_02-720.webp', alt: 'Café lounge with sofas and a marble coffee table' },
-  { href: '/party', label: 'Parties & Events', src: '/assets/venue/banquet/banquet-stage-01-720.webp', alt: 'Banquet hall set with chairs facing the stage' },
-  { href: '/banquet', label: 'Banquet', src: '/assets/venue/banquet/banquet-tables-05-720.webp', alt: 'Banquet hall with a long U-shaped table setup' },
-  { href: '/catering', label: 'Catering', src: '/assets/b8761a51b5.webp', alt: 'Nalli gosht biryani in a brass handi' },
+  { href: '/restaurant-bar', label: 'Restaurant & Bar', base: '/assets/interior/fursat_space_04', alt: 'Restaurant seating with red banquettes and framed art' },
+  { href: '/cafe', label: 'Café', base: '/assets/interior/fursat_space_02', alt: 'Café lounge with sofas and a marble coffee table' },
+  { href: '/party', label: 'Parties & Events', base: '/assets/venue/banquet/banquet-stage-01', alt: 'Banquet hall set with chairs facing the stage' },
+  { href: '/banquet', label: 'Banquet', base: '/assets/venue/banquet/banquet-tables-05', alt: 'Banquet hall with a long U-shaped table setup' },
+  { href: '/catering', label: 'Catering', base: '/assets/dishes/new/nalli-gosht-biryani-half', alt: 'Ustad Special Nalli Gosht Biryani' },
 ];
+// 480 and 720 wide files exist for every tile; the browser picks by the tile's real width
+const SIZES = '(min-width: 1000px) 20vw, 50vw';
+const SIZES_LAST = '(min-width: 1000px) 20vw, (min-width: 600px) 50vw, 100vw';
 ---
 <section class="hw" id="spaces" aria-labelledby="hw-h">
   <h2 id="hw-h" data-fk-reveal>What brings you in?</h2>
   <ul class="hw-row" data-fk-stagger="70">
-    {TILES.map((t) => (
+    {TILES.map((t, i) => (
       <li>
         <a class="hw-tile fk-lift" href={t.href}>
-          <img src={t.src} alt={t.alt} loading="lazy" decoding="async" width="720" height="960" />
+          <img src={`${t.base}-720.webp`} srcset={`${t.base}-480.webp 480w, ${t.base}-720.webp 720w`} sizes={i === TILES.length - 1 ? SIZES_LAST : SIZES} alt={t.alt} loading="lazy" decoding="async" width="720" height="960" />
           <span class="hw-label">{t.label}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </a>
       </li>
@@ -29,7 +32,7 @@ if(document.readyState==='complete')arm();else addEventListener('load',arm,{once
 </script>
 
 <style is:global>
-.hw{background:#EFE4CB;color:#1A1608;padding:clamp(36px,5vw,64px) 0 clamp(32px,4.5vw,56px)}
+.hw{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(36px,5vw,64px) 0 clamp(32px,4.5vw,56px)}
 .hw h2{margin:0 0 clamp(18px,2.6vw,30px);padding:0 clamp(12px,2vw,28px);text-align:center;font:500 clamp(28px,3.8vw,44px)/1.12 "Playfair Display",Georgia,serif;letter-spacing:-.02em;text-wrap:balance}
 .hw-row{list-style:none;margin:0;padding:0 clamp(12px,2vw,28px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vw,20px)}
 .hw-tile{position:relative;display:block;aspect-ratio:3/4;max-height:380px;width:100%;border-radius:22px;overflow:hidden;background:#2a2514;color:#F8F3E6;text-decoration:none;-webkit-tap-highlight-color:transparent}
