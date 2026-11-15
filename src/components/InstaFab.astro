@@ -1,7 +1,8 @@
 ---
 // InstaFab: a small round Instagram button, one account per page (same accounts as the InstaFollow cards).
 // Desktop and tablet: bottom-left, stacked above Ask Fursat. Phone: bottom-right, above the phone bar.
-// It appears once the guest scrolls past the first screen, so it never covers a hero's buttons. Hidden on /404.
+// It appears once the guest scrolls past the first screen, so it never covers a hero's buttons. Hidden on /404,
+// while the footer is in view, and while an Instagram follow card is on screen.
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const MAP: Record<string, string> = {
   '/banquet': 'fursatbanquets',
@@ -36,16 +37,19 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   root.classList.add('fab-js');
   // anything fixed along the bottom-left that the buttons must sit above (Home legal bar, Home "Reserve a table" pill, Banquet phone dock)
   const below = () => ['legal', 'fxsticky', 'pb-dock'].map((id) => document.getElementById(id)).filter(Boolean);
+  // Fade both buttons out while the footer is in view (they would cover its text), and the Instagram button also
+  // while an Instagram follow card is on screen (one Instagram link at a time). Watched with IntersectionObserver.
+  let inFooter = false, inCard = false;
   let raf = 0;
   const tick = () => {
     raf = 0;
-    let on = scrollY > innerHeight * 0.6;
+    let on = scrollY > innerHeight * 0.6 && !inFooter;
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
     if (on) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
       const r = el.getBoundingClientRect();
       if (r.left < 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
-    b.classList.toggle('is-on', on);
+    b.classList.toggle('is-on', on && !inCard);
     if (ask) ask.classList.toggle('is-on', on);
     let lift = 0;
     const base = matchMedia('(max-width: 767px)').matches ? 84 : 20; // where the lowest button normally sits
@@ -64,6 +68,17 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   addEventListener('scroll', req, { passive: true });
   addEventListener('resize', req, { passive: true });
   // these bars show and hide on their own (class or hidden attribute), so re-check when they change
+  if ('IntersectionObserver' in window) {
+    // the buttons sit in the bottom ~150px: count the footer as "in view" once its top is above that strip
+    const foot = document.querySelector('.sf-footer');
+    if (foot) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; req(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+    const cards = new Set();
+    const cio = new IntersectionObserver((es) => {
+      es.forEach((e) => (e.isIntersecting ? cards.add(e.target) : cards.delete(e.target)));
+      inCard = cards.size > 0; req();
+    });
+    document.querySelectorAll('aside.ig').forEach((el) => cio.observe(el));
+  }
   const mo = new MutationObserver(req);
   below().forEach((el) => mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }));
   addEventListener('transitionend', req, { passive: true });
@@ -73,7 +88,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 <style>
 .ifab { position: fixed; z-index: 8500; left: 20px; bottom: calc(88px + var(--fab-lift, 0px)); display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 4px; border-radius: 999px; text-decoration: none; background: rgb(255 251 244 / .96); box-shadow: inset 0 0 0 1.5px #d6a64c, 0 14px 28px -14px rgb(60 36 10 / .6); color: #1f2a1a; font: 600 .85rem/1 Poppins, system-ui, sans-serif;
   transition-property: opacity, translate, visibility, box-shadow; transition-duration: 300ms, 300ms, 0s, 200ms; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
-:global(html.fab-js) .ifab:not(.is-on) { opacity: 0; visibility: hidden; translate: 0 12px; transition-delay: 0s, 0s, 300ms, 0s; }
+:global(html.fab-js) .ifab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 300ms, 0s; }
 .ifab.is-on { transition-delay: 0s; }
 .ifab--solo { bottom: calc(20px + var(--fab-lift, 0px)); }
 .ifab-ic { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
@@ -91,6 +106,6 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 @media (max-width: 767px) {
   .ifab, .ifab--solo { left: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); height: 48px; padding: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .ifab, .ifab-t { transition-duration: 0s; translate: none; } }
+@media (prefers-reduced-motion: reduce) { .ifab, .ifab-t { transition-duration: 0s; translate: none; } .ifab:active { scale: 1; } }
 @media print { .ifab { display: none !important; } }
 </style>

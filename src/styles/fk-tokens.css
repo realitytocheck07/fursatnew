@@ -220,10 +220,9 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .hy-h1,.hy-h2,.rs-pform h2,.rs-title h2,.pa-sec-h,.xp-sec-h{text-wrap:balance}
 .hy p,.fk-card__p,.xp-faq-item p,.pa-blurb{text-wrap:pretty}
 .fk-card__price,.pk-amt,#pa-total,#pa-n,.rs-sval,.rs-tm,[data-fx-count]{font-variant-numeric:tabular-nums}
-/* header: one sans, label-style pill */
+/* header: one sans */
 .sh-plaster,.sh-plaster .sh-si-t,.sh-plaster small,.sh-plaster .sh-mp-label,.sh-plaster .sh-mp-time{font-family:var(--fk-sans)}
 .sh-plaster .sh-si-t{font-weight:500}
-.sh-plaster .sh-pill{font:600 .68rem/1 var(--fk-sans);letter-spacing:.08em}
 
 /* ═════ v4.4 COLOUR ROLES — one job per colour on the cream surface ═════
    green  = the main action (strongest on cream, 11.8:1)      → --fk-action-*
@@ -268,7 +267,6 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .hy a:focus-visible,.hy button:focus-visible,.fk-card a:focus-visible,.fk-card button:focus-visible,.sh-plaster a:focus-visible,.sh-plaster button:focus-visible{outline:2px solid var(--fk-focus);outline-offset:3px}
 /* v4.5: restyled pages hand the shared sans to legacy chrome (mobile bar, header dropdown, skip link) */
 body:has(.sh-plaster){--sans:var(--fk-sans)}
-.sh-plaster .sh-pill{font-size:.75rem}
 
 /* ═════ v4.5 MOTION SUPPORT ═════ */
 /* card spotlight: soft cream light follows the pointer (set by fk-motion) */
@@ -307,7 +305,6 @@ main:is(.ct-page,.od-page,.tr-page){padding-top:clamp(92px,9.5vw,148px)} /* banq
 /* narrow desktop screens: keep every header item on one line */
 @media (min-width: 1041px) and (max-width: 1200px) {
   body:has(.hy) .sh-plaster .sh-link, body:has(.hy) .sh-plaster .sh-reserve-btn { white-space: nowrap; }
-  body:has(.hy) .sh-plaster .sh-link .sh-pill { display: none; }
   body:has(.hy) .sh-plaster .sh-nav { gap: 0; }
   body:has(.hy) .sh-plaster .sh-link { margin: 0 4px; font-size: .86rem; }
 }
@@ -353,6 +350,8 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
   --fk-fs-6:2.5rem;   /* 40  h2 */
   --fk-fs-7:4rem;     /* 64  hero max */
   --fk-fs-hero:clamp(2.5rem,1.4rem + 4.6vw,4rem); /* 40 on phone → 64 from ~900px */
+  --fk-fs-min:.75rem; /* 12px: no text on the site is smaller (same as --fk-fs-1) */
+  --fk-tap:44px;      /* smallest tap target, width and height */
 }
 .fk-ty-hero{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-hero);line-height:1.05;letter-spacing:-.02em;text-wrap:balance}
 .fk-ty-h2{margin:0;font-family:var(--fk-font-head);font-weight:500;font-size:var(--fk-fs-5);line-height:1.15;letter-spacing:-.015em;text-wrap:balance}
@@ -376,7 +375,7 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
   font-family:var(--fk-font-text);font-weight:600;font-size:var(--fk-fs-3);line-height:1;letter-spacing:0;text-align:center;
   border:2px solid transparent;box-shadow:none;background:none;
   transition:transform var(--fk-dur-press,150ms) var(--fk-ease-out,ease-out),background-color var(--fk-dur-2,200ms) ease,color var(--fk-dur-2,200ms) ease,border-color var(--fk-dur-2,200ms) ease,box-shadow var(--fk-dur-2,200ms) ease}
-.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost).fk-btn--md{min-height:44px;padding:0 20px;font-size:var(--fk-fs-2)}
+.fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost).fk-btn--md{min-height:var(--fk-tap);padding:0 20px;font-size:var(--fk-fs-2)}
 .fk-btn.fk-btn--primary{background:var(--fk-btn-green);border-color:var(--fk-btn-green);color:var(--fk-btn-on-green);box-shadow:0 8px 18px -10px rgba(14,34,20,.6)}
 .fk-btn.fk-btn--secondary{background:var(--fk-btn-paper);border-color:var(--fk-btn-green);color:var(--fk-btn-green)}
 .fk-btn.fk-btn--ghost{padding:0 12px;color:var(--fk-btn-green)}
@@ -407,6 +406,10 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
   .fk-btn:is(.fk-btn--primary,.fk-btn--secondary,.fk-btn--ghost):not(:disabled):active,
   .fk-btn--ghost:not(:disabled):hover::after{transform:none}
 }
+
+/* 2b. TAP TARGET — put .fk-tap on any small link or icon button: at least 44 x 44px, content centred.
+   The visible shape (dot, icon, text) can stay small inside it. */
+.fk-tap{display:inline-flex;align-items:center;justify-content:center;min-width:var(--fk-tap);min-height:var(--fk-tap)}
 
 /* 3. CARD — .fk-card is the one card (wave top, above). Only addition: a photo-less version for items with no real photo. */
 .fk-card--text .fk-card__b{padding-top:30px}

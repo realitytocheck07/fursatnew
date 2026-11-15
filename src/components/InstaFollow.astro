@@ -43,5 +43,5 @@ const url = `https://www.instagram.com/${handle}/`;
 .ig-card:focus-visible { outline: 3px solid #1d5a32; outline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .ig-card:hover { transform: translateY(-2px); border-color: #c99a43; box-shadow: 0 16px 30px -18px rgb(90 60 20 / .45); } }
 @media (max-width: 520px) { .ig-card { flex-wrap: wrap; } .ig-go { width: 100%; justify-content: center; } }
-@media (prefers-reduced-motion: reduce) { .ig-card { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .ig-card, .ig-card:hover { transition: none; transform: none; } }
 </style>

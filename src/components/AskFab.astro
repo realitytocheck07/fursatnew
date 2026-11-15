@@ -35,12 +35,12 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
   .afab { padding: 4px; gap: 0; }
   .afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
-/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons */
-:global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
+/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons; it fades out again while the footer is in view */
+:global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
 @media (hover: hover) and (pointer: fine) {
   .afab:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
   .afab:hover .afab-q, .afab:focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } }
+@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } }
 @media print { .afab { display: none !important; } }
 </style>

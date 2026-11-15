@@ -14,7 +14,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
 ---
 <header class:list={["sh-header", "sh-plaster", { "sh-flow": active === 'home' }]} id="site-header">
   <div class="sh-inner">
-    <!-- Brand Logo -->
+    <!-- Brand Logo. Order is hidden from the nav for now (the /order page stays). -->
     <a href="/" class="sh-logo" aria-label="Fursat Kitchen | Bar Home">
       <img src="/assets/c86f49db5a.webp" alt="Fursat Kitchen | Bar" width="118" height="88" />
     </a>
@@ -72,10 +72,6 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
 
       <a href="/restaurant-bar" class:list={["sh-link", { active: active === 'restaurant-bar' }]}>Bar & Kitchen</a>
       <a href="/cafe" class:list={["sh-link", { active: active === 'cafe' }]}>Café</a>
-      <a href="/order" class:list={["sh-link", "sh-badge-link", { active: active === 'order' }]}>
-        <span>Order</span>
-        <span class="sh-pill">Phase 2</span>
-      </a>
       <a href="/ask" class:list={["sh-link", { active: active === 'ask' }]}>Ask Fursat</a>
       <a href="/story" class:list={["sh-link", { active: active === 'story' }]}>Story</a>
     </nav>
@@ -111,7 +107,6 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
         <a href="/menu" class="sh-mp-link">Explore Menu</a>
         <a href="/restaurant-bar" class="sh-mp-link">Restaurant & Bar (21+)</a>
         <a href="/cafe" class="sh-mp-link">Fursat Café & Shakes</a>
-        <a href="/order" class="sh-mp-link">Online Ordering <span class="sh-pill">Phase 2</span></a>
       </div>
       <div class="sh-mp-group">
         <span class="sh-mp-label">Occasions & Spaces</span>
@@ -225,7 +220,6 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   .sh-si-t { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .9375rem; font-weight: 500; color: #14301c; }
   .sh-sub-item:hover .sh-si-t { color: #9c4f1c; }
   .sh-sub-item small { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .775rem; color: #5a5040; }
-  .sh-pill { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; padding: 2px 7px; border-radius: 999px; background: rgba(201,154,67,.14); color: #74501a; border: 1px solid rgba(201,154,67,.45); }
 
   /* keyboard focus ring (the nav links use all:unset, which removes the browser default) */
   .sh-header :is(a, button):focus-visible { outline: 2px solid #14301c; outline-offset: 3px; border-radius: 999px; }
@@ -295,7 +289,9 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     .sh-rl-short { display: inline; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .sh-header, .sh-inner, .sh-logo, .sh-logo img, .sh-link, .sh-link::after, .sh-sub-item, .sh-menu, .sh-reserve-btn, .sh-arr, .sh-burger span { transition: none; }
+    .sh-header, .sh-inner, .sh-logo, .sh-logo img, .sh-link, .sh-link::after, .sh-sub-item, .sh-menu, .sh-wa, .sh-reserve-btn, .sh-arr, .sh-burger span { transition: none; }
+    .sh-logo:hover, .sh-sub-item:hover, .sh-wa:hover, .sh-reserve-btn:hover, .sh-reserve-btn:active { transform: none; }
+    .sh-menu { transform: none; }
     .sh-mobile-panel { animation: none; }
     .sh-header.sh-hidden { transform: none; }
   }

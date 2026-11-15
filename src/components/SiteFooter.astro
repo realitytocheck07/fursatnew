@@ -30,7 +30,6 @@ import site from '../data/site.json';
           <a href="/restaurant-bar">Restaurant & Bar (21+)</a>
           <a href="/cafe">Fursat Café</a>
           <a href="/ask">Ask Fursat (Mood Search)</a>
-          <a href="/order">Order Online <small>(Phase 2)</small></a>
           <a href="/story">Our Story</a>
         </div>
 
@@ -118,6 +117,15 @@ import site from '../data/site.json';
     flex-direction: column;
     gap: 16px;
   }
+  /* the logo is dark green: it sits on a cream chip so it reads on the green footer */
+  .sf-logo {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    background: var(--fk-plaster, #F6E4C9);
+    padding: 8px 14px;
+    border-radius: 14px;
+  }
   .sf-logo img {
     height: 52px;
     width: auto;
@@ -154,10 +162,6 @@ import site from '../data/site.json';
   }
   .sf-link-group a:hover {
     color: #E0A63C;
-  }
-  .sf-link-group small {
-    color: #E0A63C;
-    font-size: 0.75rem;
   }
   .sf-info-p {
     font-size: 0.875rem;
@@ -247,19 +251,19 @@ import site from '../data/site.json';
   .sf-link-group a, .sf-ss-links a, .sf-legal-links a, .sf-info-p a { -webkit-tap-highlight-color: transparent; }
   .sf-link-group a:focus-visible, .sf-ss-links a:focus-visible, .sf-legal-links a:focus-visible, .sf-info-p a:focus-visible, .sf-logo:focus-visible { outline: 2px solid #e8c886; outline-offset: 2px; border-radius: 4px; }
   .sf-info-p a { color: #e8c886; text-decoration: underline; text-underline-offset: .2em; text-decoration-thickness: from-font; }
-  .sf-link-group small { font-size: .75rem; }
-  @media (max-width: 767px), (pointer: coarse) {
-    .sf-link-group { gap: 0; }
+  @media (prefers-reduced-motion: reduce) { .sf-link-group a, .sf-ss-links a { transition: none; } }
+  /* tap targets: every footer link is at least 44px tall (--fk-tap) at every width */
+  .sf-link-group { gap: 0; }
+  .sf-link-group a { display: flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-info-p { margin: 0 0 8px; }
+  .sf-info-p a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-logo { min-height: var(--fk-tap, 44px); }
+  .sf-ss-links { gap: 0 16px; }
+  .sf-ss-links a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-legal-links { flex-wrap: wrap; gap: 0 12px; }
+  .sf-legal-links a { display: inline-flex; align-items: center; justify-content: center; min-width: var(--fk-tap, 44px); min-height: var(--fk-tap, 44px); padding: 0 4px; }
+  @media (max-width: 767px) {
     .sf-group-title { margin: 0 0 4px; }
-    .sf-link-group a { display: flex; align-items: center; min-height: 44px; }
-    .sf-link-group a small { margin-left: 6px; }
-    .sf-info-p { margin: 0 0 8px; }
-    .sf-info-p a { display: inline-flex; align-items: center; min-height: 44px; }
-    .sf-logo { display: inline-flex; align-items: center; min-height: 44px; }
-    .sf-ss-links { gap: 0 16px; }
-    .sf-ss-links a { display: inline-flex; align-items: center; min-height: 44px; }
     .sf-bottom { align-items: flex-start; }
-    .sf-legal-links { flex-wrap: wrap; gap: 0 20px; }
-    .sf-legal-links a { display: inline-flex; align-items: center; min-height: 44px; }
   }
 </style>

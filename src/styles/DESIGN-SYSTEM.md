@@ -6,9 +6,13 @@ Tokens: `--fk-fs-1..7` = 12 / 14 / 16 / 20 / 28 / 40 / 64, `--fk-fs-hero` = clam
 Classes: `fk-ty-hero` (40→64), `fk-ty-h2` (28 phone, 40 desktop), `fk-ty-h3` (20 / 28),
 `fk-ty-h4` (20), `fk-ty-body` (16), `fk-ty-small` (14), `fk-ty-label` (12, caps).
 
+## Floors (tokens in `:root`)
+`--fk-fs-min` = 12px: no text smaller. `--fk-tap` = 44px: no tap target smaller.
+Class `fk-tap` = inline-flex, at least 44 x 44px (small dots, icons, links); the visible shape can stay small inside it.
+
 ## Buttons (always with `fk-btn`)
 `fk-btn fk-btn--primary` green · `fk-btn--secondary` outline · `fk-btn--ghost` text + arrow (it adds its own arrow: no svg).
-Size: default 48px, add `fk-btn--md` for 44px. Add `fk-btn--on-dark` on solid dark green or a dark scrim (primary turns gold).
+Size: default 48px, add `fk-btn--md` for 44px (`--fk-tap`). Add `fk-btn--on-dark` on solid dark green or a dark scrim (primary turns gold).
 Poppins 600, pill, one green `--fk-btn-green` #14301c. Focus ring, hover, press, disabled, reduced motion are built in.
 
 ## Card
@@ -31,6 +35,11 @@ Not buttons, keep as chips (only raise to 12px min): mv-pill, af-pill, rs-mpill.
 | hs-card (Home), ct-card, ct-stat-card, mv-card, pk-face (Party) | `fk-card` (no photo: `fk-card--text`) |
 | rs-xcard, rs-mcard, rs-card-in | already inside `fk-card`: drop the extra skin |
 | bq-gal-card, hw-tile, ig-card, pb-sum-card | decide in 4B (photo tile / form widget) |
+
+## Shared parts (header, footer, floating buttons)
+- Order is hidden from the nav and footer for now (`/order` stays). No "Phase 2" label anywhere.
+- Footer logo sits on a cream chip (`.sf-logo`, `--fk-plaster`).
+- Instagram circle + Ask pill fade out while the footer is in view; the Instagram circle also while an `aside.ig` follow card is on screen.
 
 ## Notes for 4B
 - Home does not load `fk-tokens.css`: 4B must import it there.
