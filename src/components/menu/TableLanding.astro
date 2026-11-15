@@ -1,0 +1,56 @@
+---
+// /menu Phase 3: "The Table". The dishes leave the food door and land on the real long-table photo as the page scrolls
+// (prototype 02). Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
+// Dishes come from menu-table.json (the table ring), so names, prices and photos match the menu. No script or reduced motion: they are already placed.
+import '../../styles/table-landing.css';
+interface Dish { title: string; label: string; price: string; dn: string; sm: string; clip: string }
+interface Props { dishes: Dish[]; count?: number; max?: number }
+const { dishes, count, max = 5 } = Astro.props;
+
+// Real food photos only, in the order they land (nearest place at the table first). A ring dish without a dishes/ photo is never used.
+const PICK = ['Ustad Special Nalli Gosht Biryani', 'Guntur Karam Wings', 'Angara Chicken Tikka', 'Nalla Karam Kodi Vepudu', 'Biscoff Cheesecake'];
+const real = (d: Dish) => d.sm.startsWith('/assets/dishes/') && !/jerk/i.test(d.title);
+const chosen: Dish[] = PICK.map((t) => dishes.find((d) => d.title === t)).filter((d): d is Dish => !!d && real(d));
+for (const d of dishes) if (chosen.length < 4 && real(d) && !chosen.includes(d)) chosen.push(d);
+const list = chosen.slice(0, max);
+if (list.length < 4) throw new Error('TableLanding: needs at least 4 ring dishes that have a real photo');
+---
+<section class="tl" id="tl" aria-labelledby="tl-title" data-fab-avoid>
+  <div class="tl-stage" id="tl-stage">
+    <div class="tl-bg" aria-hidden="true">
+      <img src="/assets/venue/interior/long-table-dining-720.webp"
+        srcset="/assets/venue/interior/long-table-dining-480.webp 480w, /assets/venue/interior/long-table-dining-720.webp 720w, /assets/venue/interior/long-table-dining.webp 1200w"
+        sizes="100vw" width="1200" height="1600" alt="" loading="lazy" decoding="async" />
+      <span class="tl-shade"></span>
+    </div>
+
+    <div class="tl-head">
+      <span class="tl-eyebrow">The Table</span>
+      <h2 class="tl-hl" id="tl-title">Pull up a chair. <span>Dinner’s landing.</span></h2>
+      {count ? <p class="tl-sub num">{count} dishes on the menu</p> : null}
+    </div>
+
+    <!-- the plates: decorative here, the names live in the list below -->
+    <ul class="tl-spots" id="tl-spots" aria-hidden="true">
+      {list.map((d, i) => (
+        <li class="tl-spot is-landed" style={`--i:${i}`} data-title={d.title}>
+          <i class="tl-ring"></i><i class="tl-ring tl-ring--solid"></i>
+          <span class="tl-shadow"></span>
+          <span class="tl-plate"><span class="tl-drop"><img src={d.sm} alt="" width="640" height="640" decoding="async" draggable="false" /></span></span>
+          <span class="tl-label"><b>{d.title}</b><span class="num">{d.price} · {d.label}</span></span>
+        </li>
+      ))}
+    </ul>
+    <ul class="tl-legend" aria-label="Dishes on the table">
+      {list.map((d) => (<li><b>{d.title}</b> <span class="num">{d.price}</span></li>))}
+    </ul>
+
+    <div class="tl-cta">
+      <button class="tl-btn" type="button" data-side-go="food">Full food menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<script>
+  import './table-landing';
+</script>

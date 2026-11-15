@@ -185,7 +185,7 @@
     f.addEventListener("pointerleave",function(){["--rx","--ry"].forEach(function(p){f.style.removeProperty(p)})})
   });
 
-  function measure(){W=cards[0].offsetWidth||W;render(performance.now())}
+  var mw=-1;function measure(){var w=cards[0].offsetWidth||W;if(w===mw)return;mw=w;W=w;render(performance.now())}
   paint(0);measure();addEventListener("resize",measure);addEventListener("load",measure);
 
   /* ---- entrance + only run while the stage is on screen ---- */

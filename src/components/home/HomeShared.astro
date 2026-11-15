@@ -1,5 +1,6 @@
 ---
-// Shared by the Home sections: buttons, section rhythm and the shared reveal.
+// Shared by the Home sections: design system (fk-tokens.css), section rhythm and the shared reveal.
+import '../../styles/fk-tokens.css';
 // Reveal (same contract as fk-motion's v5.12a reveal, without loading Motion/Anime.js on Home):
 //   [data-fk-reveal]  fades in + rises 12px once when it enters the screen
 //   [data-fk-stagger] group: direct children reveal one after another (value = step in ms, 60–100, group capped at 400ms)
@@ -29,23 +30,16 @@
 })();
 </script>
 <style is:global>
-.hb{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;border:1.5px solid #404517;font:600 15px/1 Poppins,system-ui,sans-serif;text-decoration:none;text-align:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;appearance:none;transition-property:background-color,color,transform;transition-duration:.2s,.2s,150ms;transition-timing-function:ease,ease,cubic-bezier(.23,1,.32,1)}
-.hb svg{flex:none;width:15px;height:15px}
-.hb--pri{background:#404517;color:#F8F3E6}
-.hb--ghost{background:transparent;color:#1A1608;border-color:#1A1608}
-.hb:active{transform:scale(.96)}
-.hb:focus-visible{outline:2px solid #C94716;outline-offset:3px}
-@media(hover:hover){.hb--pri:hover{background:#2c300e}.hb--ghost:hover{background:#1A1608;color:#F8F3E6}}
-.hh2{margin:0;font:500 clamp(28px,3.8vw,44px)/1.12 "Playfair Display",Georgia,serif;letter-spacing:-.02em;text-wrap:balance}
 .hlead{margin:0;font:400 16px/1.6 Poppins,system-ui,sans-serif;color:#4a4330;max-width:60ch}
 @media(prefers-reduced-motion:no-preference){
   [data-fk-reveal],[data-fk-stagger]>*{transition-property:opacity,transform;transition-duration:320ms;transition-timing-function:cubic-bezier(.23,1,.32,1)}
   .fk-pre{opacity:0;transform:translateY(12px)}
 }
-/* card hover lift (same values as .fk-lift in fk-tokens.css, which Home does not load) */
+/* cards keep the reveal fade: fk-tokens .fk-lift alone would drop opacity from the transition */
+@media(prefers-reduced-motion:no-preference){.fk-lift.fk-lift{transition-property:opacity,transform;transition-duration:320ms,200ms}}
+/* card hover lift: same as .fk-lift in fk-tokens.css, plus opacity so the reveal and the lift share one transition */
 @media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
   .fk-lift{transition-property:opacity,transform;transition-duration:320ms,200ms;transition-timing-function:cubic-bezier(.23,1,.32,1)}
   .fk-lift:hover{transform:translateY(-3px)}
 }
-@media(prefers-reduced-motion:reduce){.hb{transition:none}}
 </style>

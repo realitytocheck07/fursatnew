@@ -45,8 +45,8 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 <section class="pb" id="packages" aria-labelledby="pb-h" data-wa={site.phonePlain}>
   <div class="pb-in">
     <header class="pb-head">
-      <p class="pb-kick">Banquet packages</p>
-      <h2 id="pb-h" class="pb-title">Build your banquet menu</h2>
+      <p class="fk-ty-label pb-kick">Banquet packages</p>
+      <h2 id="pb-h" class="fk-ty-h2 pb-title">Build your banquet menu</h2>
       <p class="pb-lead">Pick a package, choose your dishes course by course, and send the menu to us on WhatsApp. Prices are per guest, plus taxes.</p>
     </header>
 
@@ -86,7 +86,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 
       <aside class="pb-sum-card" aria-label="Your menu">
         <div class="pb-sc-top">
-          <p class="pb-sc-k">Your package</p>
+          <p class="fk-ty-label pb-sc-k">Your package</p>
           <p class="pb-sc-p"><span id="pb-sc-price">{inr(first.price)}</span> <small id="pb-sc-kind">{first.kind}</small></p>
           <div class="pb-meter" aria-hidden="true"><i id="pb-bar"></i></div>
           <p class="pb-sc-prog" id="pb-prog">0 of {first.choose} courses chosen</p>
@@ -98,7 +98,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
           <label class="pb-f"><span>Event date <em>(optional)</em></span><input id="pb-date" type="date" /></label>
         </div>
         <p class="pb-est" aria-live="polite"><span>Estimate</span> <b id="pb-est">{inr(first.price * 50)}</b> <small>+ taxes</small></p>
-        <button type="button" class="pb-send" id="pb-send">
+        <button type="button" class="fk-btn fk-btn--primary fk-btn--on-dark pb-send" id="pb-send">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.37a9.9 9.9 0 0 0 4.74 1.2c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2z"/></svg>
           Send my menu on WhatsApp
         </button>
@@ -112,7 +112,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   <!-- phone: compact bar above the bottom navigation -->
   <div class="pb-dock" id="pb-dock" hidden>
     <span class="pb-dock-t"><b id="pb-dock-price">{inr(first.price)}</b> · <span id="pb-dock-prog">0/{first.choose}</span></span>
-    <button type="button" class="pb-dock-b" id="pb-dock-send">Send menu</button>
+    <button type="button" class="fk-btn fk-btn--primary fk-btn--md fk-btn--on-dark" id="pb-dock-send">Send menu</button>
   </div>
 </section>
 
@@ -199,8 +199,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb { --pb-ink:#1f2a1a; --pb-mute:#5b5240; --pb-card:rgb(255 251 244 / .86); --pb-edge:rgb(201 154 67 / .45); padding: clamp(56px, 7vw, 96px) 0; scroll-margin-top: 96px; }
 .pb-in { max-width: 1300px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 .pb-head { text-align: center; max-width: 720px; margin: 0 auto clamp(28px, 4vw, 44px); }
-.pb-kick { margin: 0 0 10px; font: 600 .8125rem/1 var(--fk-sans); letter-spacing: .16em; text-transform: uppercase; color: var(--fk-text-gold); }
-.pb-title { margin: 0 0 12px; font: 500 clamp(2rem, 4vw, 3rem)/1.1 var(--fk-serif); letter-spacing: -.02em; color: var(--pb-ink); text-wrap: balance; }
+
 .pb-lead { margin: 0; font: 400 1rem/1.6 var(--fk-sans); color: var(--pb-mute); }
 
 /* package selector */
@@ -237,7 +236,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-course.is-done .pb-rule { background: #2e7d4a; color: #fff; }
 .pb-rule--incl { background: rgb(46 125 74 / .12); color: #24603a; }
 .pb-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.pb-chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #dcc6a0; background: #fffaf2; color: var(--pb-ink); font: 500 .9rem/1.2 var(--fk-sans); cursor: pointer; transition-property: background-color, border-color, color, transform, opacity; transition-duration: var(--fk-dur-2, 200ms); transition-timing-function: var(--fk-ease-out, ease); -webkit-tap-highlight-color: transparent; }
+.pb-chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #dcc6a0; background: #fffaf2; color: var(--pb-ink); font: 500 .875rem/1.2 var(--fk-sans); cursor: pointer; transition-property: background-color, border-color, color, transform, opacity; transition-duration: var(--fk-dur-2, 200ms); transition-timing-function: var(--fk-ease-out, ease); -webkit-tap-highlight-color: transparent; }
 .pb-chip:active { transform: scale(.96); }
 .pb-chip[aria-pressed="true"] { background: var(--fk-action-bg); border-color: #14321e; color: var(--fk-action-fg); }
 .pb-chip[aria-pressed="true"]::before { content: "✓ "; }
@@ -250,7 +249,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 
 /* summary card */
 .pb-sum-card { position: sticky; top: 96px; display: grid; gap: 14px; padding: 20px; border-radius: 22px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; box-shadow: 0 24px 48px -28px rgb(10 30 18 / .7); }
-.pb-sc-k { margin: 0; font: 600 .72rem/1 var(--fk-sans); letter-spacing: .14em; text-transform: uppercase; color: #e7c27a; }
+
 .pb-sc-p { margin: 4px 0 0; font: 600 2rem/1.1 var(--fk-serif); font-variant-numeric: tabular-nums; }
 .pb-sc-p small { font: 500 .85rem/1 var(--fk-sans); color: #d9c9a6; margin-left: 4px; }
 .pb-meter { height: 6px; border-radius: 99px; background: rgb(255 255 255 / .14); overflow: hidden; margin-top: 12px; }
@@ -265,13 +264,11 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-step button { height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / .22); background: rgb(255 255 255 / .1); color: #fff; font: 600 20px/1 var(--fk-sans); cursor: pointer; }
 .pb-f input:focus-visible, .pb-step button:focus-visible { outline: 3px solid #f3c56b; outline-offset: 2px; }
 .pb-est { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 0; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / .14); font: 500 .85rem/1 var(--fk-sans); color: #d9c9a6; }
+.pb-est small { font-size: .875rem; }
 .pb-est b { font: 600 1.35rem/1 var(--fk-serif); color: #fff; font-variant-numeric: tabular-nums; }
-.pb-send { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #f4d38c 0%, #e3ab4a 100%); color: #2a1d0c; font: 600 1rem/1 var(--fk-sans); cursor: pointer; transition-property: transform, box-shadow; transition-duration: 150ms; transition-timing-function: var(--fk-ease-out, ease); }
-.pb-send svg { width: 20px; height: 20px; }
-.pb-send:active { transform: scale(.96); }
-.pb-send:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
 .pb-note { margin: 0; font: 400 .8rem/1.5 var(--fk-sans); color: #bfae8a; }
-.pb-alt { font: 500 .85rem/1.4 var(--fk-sans); color: #f3d9a0; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+.pb-alt { font: 500 .875rem/1.4 var(--fk-sans); color: #f3d9a0; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
 .pb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .pb-dock { display: none; }
 
@@ -284,10 +281,16 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   .pb-panel { grid-template-columns: 1fr; }
   .pb-pkgs { grid-template-columns: repeat(5, minmax(168px, 1fr)); margin-inline: calc(-1 * clamp(16px, 4vw, 40px)); padding-inline: clamp(16px, 4vw, 40px); scroll-padding-inline: clamp(16px, 4vw, 40px); }
   .pb-dock:not([hidden]) { position: fixed; left: 10px; right: 10px; bottom: calc(82px + env(safe-area-inset-bottom)); z-index: 8000; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px; background: #13301d; color: #f6ecd8; box-shadow: 0 16px 32px -16px rgb(0 0 0 / .6); font: 500 .9rem/1 var(--fk-sans); font-variant-numeric: tabular-nums; }
-  .pb-dock-b { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #f4d38c, #e3ab4a); color: #2a1d0c; font: 600 .9rem/1 var(--fk-sans); }
+  
 }
 @media (prefers-reduced-motion: reduce) {
-  .pb-pkg, .pb-chip, .pb-course, .pb-meter i, .pb-send { transition: none; }
+  .pb-pkg, .pb-chip, .pb-course, .pb-meter i{ transition: none; }
   .pb-course.is-nudge { animation: none; }
 }
+/* Phase 4B: layout + colour only. */
+.pb-kick { margin: 0 0 10px; color: var(--fk-text-gold); }
+.pb-title { margin: 0 0 12px; color: var(--pb-ink); }
+.pb-sc-k { color: #e7c27a; }
+.pb-send { width: 100%; }
+.pb-send svg { width: 20px; height: 20px; flex: none; }
 </style>

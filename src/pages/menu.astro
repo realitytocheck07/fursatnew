@@ -9,9 +9,10 @@ import featured from '../data/menu-featured.json';
 import dishPhotos from '../data/dish-photos.json';
 import tableData from '../data/menu-table.json';
 import barData from '../data/menu-bar.json';
-import { FOOD_GROUPS, DRINK_GROUPS, CHIPS, ICONS, type Group } from '../components/menu/menuGroups';
+import { FOOD_GROUPS, DRINK_GROUPS, type Group } from '../components/menu/menuGroups';
 import { money } from '../components/menu/cart';
 import MenuDoors from '../components/menu/MenuDoors.astro';
+import TableLanding from '../components/menu/TableLanding.astro';
 import '../styles/fk-tokens.css';
 import '../styles/menu-v2.css';
 
@@ -134,39 +135,11 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 
   <main class="mv" id="main" tabindex="-1" data-side="drinks">
     <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData} />
+    <TableLanding dishes={tableDishes} count={foodCount} />
 
     <section class="mv-stage" aria-label="Menu overview">
-      <!-- Toolbar -->
-      <div class="mv-tools">
-        <label class="mv-search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="mv-q" type="search" placeholder="Search the menu…" autocomplete="off" enterkeyhint="search" aria-label="Search the menu" />
-        </label>
-        <div class="mv-diet" role="group" aria-label="Dietary filters">
-          <button class="mv-pill" type="button" data-diet="veg" aria-pressed="false"><i class="mv-dot mv-dot--v"></i>Veg</button>
-          <button class="mv-pill" type="button" data-diet="nonveg" aria-pressed="false"><i class="mv-dot mv-dot--n"></i>Non-veg</button>
-          <button class="mv-pill" type="button" data-diet="spicy" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 3c-1 3-4 4-6 4C8 7 5 9 5 13c0 4 3 7 7 7 5 0 8-4 8-9 0-3-1-6-3-8z"/></svg>Spicy</button>
-        </div>
-        <button class="mv-pill mv-age-pill" type="button" id="mv-age-open" aria-haspopup="dialog">21+ <span aria-hidden="true">ⓘ</span><span class="mv-sr"> bar menu age notice</span></button>
-      </div>
-
-      <!-- Rail + featured + chef's pick -->
+      <!-- Featured drink + chef's picks (the one filter bar is the sticky bar at the top of the full list) -->
       <div class="mv-grid">
-        <nav class="mv-card mv-rail" aria-label="Menu categories">
-          {[{ side: 'drinks', groups: DRINK_GROUPS }, { side: 'food', groups: FOOD_GROUPS }].map(({ side, groups }) => (
-            <ul class="mv-rail-list" data-rail={side} hidden={side !== 'drinks'}>
-              {groups.map((g, k) => (
-                <li>
-                  <button class:list={['mv-rw', { 'is-on': k === 0 }]} type="button" data-go={g.id} data-side-of={side}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[g.icon]} />
-                    <span><b>{g.label}</b><small>{groupSub(g)}</small></span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ))}
-        </nav>
-
         <section class="mv-card mv-feat" aria-labelledby="mv-feat-name">
           <div class="mv-feat-ph">
             <img src={featured.featuredDrink.image} alt={featured.featuredDrink.imageAlt} width="1082" height="1600" loading="lazy" decoding="async" />
@@ -226,13 +199,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
         </section>
       </div>
 
-      <!-- Chips + picks bar -->
-      <div class="mv-bar">
-        <div class="mv-chips" role="group" aria-label="Jump to a category">
-          {CHIPS.map((c, k) => (
-            <button class:list={['mv-chip', { 'is-on': k === 0 }]} type="button" data-chip={c.to ?? 'all'} data-side-of={c.side}>{c.label}</button>
-          ))}
-        </div>
+      <!-- Picks pill (fixed at the bottom; opens the list, sends it on WhatsApp) -->
         <div class="mv-picks" id="mv-picks" data-count="0">
           <div class="mv-picks-bar" id="mv-picks-bar">
             <button class="mv-picks-btn" type="button" id="mv-picks-toggle" aria-expanded="false" aria-controls="mv-picks-panel">
@@ -255,23 +222,31 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
             <div class="mv-picks-foot"><span>Subtotal <b class="num" id="mv-sub">₹0</b> <small>taxes extra</small></span><button type="button" class="mv-link" id="mv-clear">Clear all</button></div>
           </div>
         </div>
-      </div>
     </section>
 
     <!-- Full menu: every item server-rendered (works without JS) -->
     <section class="mv-list" aria-label="Full menu" id="mv-list">
-      <div class="mv-sticky" id="mv-sticky">
+      <!-- The one filter bar: Food | Drinks, live count, category chips, search, Veg / Non-veg -->
+      <div class="mv-sticky" id="mv-sticky" data-fab-avoid>
         <div class="mv-sticky-in">
           <div class="mv-seg" role="group" aria-label="Food or drinks">
-            <button class="mv-seg-b is-on" type="button" data-side-go="food" data-seg="food">Food</button>
-            <button class="mv-seg-b" type="button" data-side-go="drinks" data-seg="drinks">Drinks</button>
+            <button class="mv-seg-b is-on" type="button" data-side-go="food" data-seg="food" aria-pressed="true">Food</button>
+            <button class="mv-seg-b" type="button" data-side-go="drinks" data-seg="drinks" aria-pressed="false">Drinks</button>
           </div>
-          {[{ side: 'food', groups: FOOD_GROUPS }, { side: 'drinks', groups: DRINK_GROUPS }].map(({ side, groups }) => (
-            <div class="mv-schips" data-schips={side} hidden={side !== 'food'}>
-              {groups.map((g) => (<button class="mv-schip" type="button" data-go={g.id} data-side-of={side}>{g.label}</button>))}
+          <p class="mv-count num" id="mv-count" role="status" aria-live="polite">{foodCount} dishes</p>
+          {[{ side: 'food', groups: FOOD_GROUPS, label: 'Food categories' }, { side: 'drinks', groups: DRINK_GROUPS, label: 'Drink categories' }].map(({ side, groups, label }) => (
+            <div class="mv-schips" data-schips={side} role="group" aria-label={label} hidden={side !== 'food'}>
+              {groups.map((g) => (<button class="mv-schip" type="button" data-go={g.id} data-side-of={side} aria-pressed="false">{g.label}</button>))}
             </div>
           ))}
-          <p class="mv-count num" id="mv-count" role="status" aria-live="polite"></p>
+          <label class="mv-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="mv-q" type="search" placeholder="Search the menu…" autocomplete="off" enterkeyhint="search" aria-label="Search the menu" />
+          </label>
+          <div class="mv-diet" role="group" aria-label="Dietary filters">
+            <button class="mv-pill" type="button" data-diet="veg" aria-pressed="false"><i class="mv-dot mv-dot--v"></i>Veg</button>
+            <button class="mv-pill" type="button" data-diet="nonveg" aria-pressed="false"><i class="mv-dot mv-dot--n"></i>Non-veg</button>
+          </div>
         </div>
       </div>
       <div class="mv-list-in">
@@ -286,7 +261,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
                     <ul class="mv-items">
                       {sec.items.map((i) => (
-                        <li class="mv-item" data-row data-sec={i.section} data-veg={i.veg ? '1' : '0'} data-spicy={i.spicy ? '1' : '0'} data-text={`${titleCase(i.name)} ${i.description ?? ''} ${i.section}`.toLowerCase()} {...(i.image ? { 'data-img': i.image } : {})}>
+                        <li class="mv-item" data-row data-sec={i.section} data-veg={i.veg ? '1' : '0'} data-text={`${titleCase(i.name)} ${i.description ?? ''} ${i.section}`.toLowerCase()} {...(i.image ? { 'data-img': i.image } : {})}>
                           <div class={i.thumb ? 'mv-item-main has-thumb' : 'mv-item-main'}>
                             {i.thumb && <img class="mv-thumb" src={i.thumb} alt="" width="56" height="56" loading="lazy" decoding="async" />}
                             <span class={vegMark(i.veg)} role="img" aria-label={i.veg ? 'Vegetarian' : 'Non-vegetarian'}></span>
@@ -349,9 +324,6 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
       </div>
     </dialog>
   </main>
-
-  <!-- Cursor photo reveal (desktop, rows that have a real photo) -->
-  <div class="mv-reveal" id="mv-reveal" aria-hidden="true"><img alt="" width="220" height="160" decoding="async" /></div>
 
   <script type="application/ld+json" is:inline set:html={JSON.stringify(menuLd)}></script>
 

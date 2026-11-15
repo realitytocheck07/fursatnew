@@ -22,20 +22,20 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
     <section class="od-hero">
       <div class="od-hero-bg" aria-hidden="true"></div>
       <div class="od-hero-inner">
-        <span class="od-pill">TAKEAWAY</span>
-        <h1 class="od-hero-title mot-headline">Order for takeaway</h1>
-        <p class="od-hero-sub">Direct from our kitchen. Prepared fresh for pickup at Capital Park, Madhapur.</p>
+        <span class="fk-ty-label od-pill">TAKEAWAY</span>
+        <h1 class="fk-ty-hero od-hero-title mot-headline">Order for takeaway</h1>
+        <p class="fk-ty-body od-hero-sub">Direct from our kitchen. Prepared fresh for pickup at Capital Park, Madhapur.</p>
 
         <div class="od-card">
-          <p class="od-coming-soon">Online ordering is coming soon</p>
-          <p class="od-desc">In the meantime, message our kitchen desk directly on WhatsApp to place your takeaway order.</p>
+          <p class="fk-ty-label od-coming-soon">Online ordering is coming soon</p>
+          <p class="fk-ty-body od-desc">In the meantime, message our kitchen desk directly on WhatsApp to place your takeaway order.</p>
 
           <div class="od-actions">
-            <a href={waUrl} target="_blank" rel="noopener" class="od-wa-btn mot-btn-press">
+            <a href={waUrl} target="_blank" rel="noopener" class="fk-btn fk-btn--primary od-wa-btn">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.63C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.3C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
               <span>Order via WhatsApp (+91 90596 70033)</span>
             </a>
-            <a href="/menu" class="od-menu-btn mot-btn-press">Browse Full Menu</a>
+            <a href="/menu" class="fk-btn fk-btn--secondary">Browse Full Menu</a>
           </div>
         </div>
       </div>
@@ -71,28 +71,9 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
     max-width: 680px;
     margin: 0 auto;
     text-align: center}
-  .od-pill {
-    display: inline-block;
-    padding: 6px 16px;
-    border-radius: 999px;
-    background: rgba(214,170,90,0.21);
-    border: 1px solid #d6aa5a;
-    color: #74501a;
-    font-size: 0.8125rem;
-    font-weight:600;
-    letter-spacing: 0.1em;
-    margin-bottom: 16px}
-  .od-hero-title {
-    font-family:var(--fk-serif);
-    font-size: clamp(2.4rem, 5.5vw, 4rem);
-    color: #1f2a1a;
-    margin: 0 0 12px;
-    line-height: 1.15}
-  .od-hero-sub {
-    font-size: 1.1rem;
-    color: #4a4232;
-    margin: 0 0 32px;
-    line-height: 1.5}
+  
+  
+  
   .od-card {
     background: rgba(251,243,231,.94);
     backdrop-filter: blur(12px);
@@ -101,63 +82,26 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
     border-radius: 24px;
     padding: clamp(28px, 5vw, 44px);
     box-shadow: 0 20px 60px rgba(90,60,20,0.20)}
-  .od-coming-soon {
-    font-size: 0.9375rem;
-    font-weight:600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #74501a;
-    margin: 0 0 10px}
-  .od-desc {
-    font-size: 1.05rem;
-    color: #4a4232;
-    line-height: 1.6;
-    margin: 0 0 28px}
+  
+  
   .od-actions {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 14px}
-  .od-wa-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    max-width: 440px;
-    padding: 16px 28px;
-    border-radius: 999px;
-    background: var(--fk-action-bg);
-    color: #fbf3e6;
-    font-weight:600;
-    font-size: 1.05rem;
-    text-decoration: none;
-    box-shadow: 0 6px 24px rgba(14,34,20,.3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;border-color:var(--fk-action-rim);box-shadow:var(--fk-action-shadow);color:var(--fk-action-fg)}
-  .od-wa-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(14,34,20,.3)}
-  .od-wa-btn svg {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0}
-  .od-menu-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 28px;
-    border-radius: 999px;
-    background: rgba(255,250,242,0.87);
-    border: 1.5px solid rgba(201,154,67,0.60);
-    color: #1f2a1a;
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease}
-  .od-menu-btn:hover {
-    background: rgba(214,170,90,0.21);
-    border-color: #d6aa5a;
-    color: #74501a}
+  
+  
+  
+  
+  
 
   @media (max-width: 420px) { .od-hero { min-height: 0; padding-top: 20px; padding-bottom: 40px; } }
+/* Phase 4B: layout + colour only. */
+  .od-pill { display: inline-block; padding: 6px 16px; border-radius: 999px; background: rgba(214,170,90,0.21); border: 1px solid #d6aa5a; color: #74501a; margin-bottom: 16px }
+  .od-hero-title { margin: 0 0 12px; color: #1f2a1a }
+  .od-hero-sub { margin: 0 0 32px; color: #4a4232 }
+  .od-coming-soon { margin: 0 0 10px; color: #74501a }
+  .od-desc { margin: 0 0 28px; color: #4a4232 }
+  .od-wa-btn { width: 100%; max-width: 440px }
+  .od-wa-btn svg { width: 24px; height: 24px; flex-shrink: 0 }
 </style>

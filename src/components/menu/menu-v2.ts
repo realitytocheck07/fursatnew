@@ -1,12 +1,11 @@
-// /menu client script: picks, side switching, 21+ notice, search + filters, scroll-spy,
-// sticky chips, scroll entrance, cursor photo reveal, phone dish sheet, sliding active pill.
+// /menu client script: picks, side switching, 21+ notice, the one sticky filter bar (toggle, chips, search, Veg / Non-veg, live count), scroll-spy,
+// scroll entrance, phone dish sheet, sliding active pill.
 // No framework, no animation library.
 import { reducer, keyOf, money, total, count, waLink, type Line, type MenuItem } from './cart';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 type Side = 'food' | 'drinks';
 
 const root = $('.mv');
@@ -131,9 +130,9 @@ function init(root: HTMLElement) {
 
   function setSide(side: Side) {
     root.dataset.side = side;
-    $$('[data-rail]').forEach((ul) => ul.toggleAttribute('hidden', ul.dataset.rail !== side));
     $$('[data-schips]').forEach((d) => d.toggleAttribute('hidden', d.dataset.schips !== side));
-    $$('[data-seg]').forEach((b) => b.classList.toggle('is-on', b.dataset.seg === side));
+    $$('[data-seg]').forEach((b) => { const on = b.dataset.seg === side; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
+    updateCount();
     placeSlides(true);
   }
   function centerIn(btn: HTMLElement | null) {
@@ -143,9 +142,7 @@ function init(root: HTMLElement) {
     box.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
   }
   function mark(id: string | null) {
-    $$('.mv-rw').forEach((b) => b.classList.toggle('is-on', b.dataset.go === id));
-    $$('.mv-chip').forEach((b) => b.classList.toggle('is-on', (b.dataset.chip === 'all' && !id) || b.dataset.chip === id));
-    $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); if (on && b.offsetParent) centerIn(b); });
+    $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); if (on && b.offsetParent) centerIn(b); });
     placeSlides(true);
   }
   // while we scroll the page ourselves (Full food / drinks menu, hotspots, chips) the scroll-spy must not flip the side:
@@ -172,17 +169,14 @@ function init(root: HTMLElement) {
     if (sgo) { const s = sgo.dataset.sideGo as Side; go(s === 'drinks' ? 'd-cocktails' : 'f-biryani', s); return; }
     const g = t.closest<HTMLElement>('[data-go]');
     if (g) { go(g.dataset.go!, g.dataset.sideOf as Side | undefined); return; }
-    const chip = t.closest<HTMLElement>('[data-chip]');
-    if (chip) { const id = chip.dataset.chip!; go(id === 'all' ? null : id, (chip.dataset.sideOf as Side) || undefined); }
   });
-  $('#mv-age-open')!.addEventListener('click', () => { pending = null; dlg.showModal(); });
   dlg.addEventListener('close', () => {
     if (dlg.returnValue === 'yes') { try { localStorage.setItem(AGE, '1'); } catch { /* ignore */ } const run = pending; pending = null; run?.(); }
     else if (dlg.returnValue === 'no') { pending = null; go('f-biryani', 'food'); }
     dlg.returnValue = '';
   });
 
-  /* ── sliding active pill (rail, chips, toggle): one clipped fill moves under the labels ── */
+  /* ── sliding active pill (chips, toggle): one clipped fill moves under the labels ── */
   type Slide = { box: HTMLElement; el: HTMLElement; sel: string; placed: boolean };
   const slides: Slide[] = [];
   function placeSlides(animate: boolean) {
@@ -201,7 +195,7 @@ function init(root: HTMLElement) {
     });
   }
   if (!reduce) { // reduced motion keeps the plain colour change on the chip itself
-    [['.mv-rail-list', '.mv-rw', false], ['.mv-chips', '.mv-chip', false], ['.mv-schips', '.mv-schip', true], ['.mv-seg', '.mv-seg-b', false]].forEach(([bs, sel, tint]) => {
+    [['.mv-schips', '.mv-schip', true], ['.mv-seg', '.mv-seg-b', false]].forEach(([bs, sel, tint]) => {
       $$(bs as string).forEach((box) => {
         const el = document.createElement('span');
         el.className = 'mv-slide' + (tint ? ' mv-slide--tint' : ''); el.setAttribute('aria-hidden', 'true');
@@ -214,8 +208,8 @@ function init(root: HTMLElement) {
     document.fonts?.ready.then(() => placeSlides(false));
   }
 
-  /* ── edge fades on the two chip rows (no hard cut against the toggle or the screen edge) ── */
-  $$('.mv-chips, .mv-schips').forEach((el) => {
+  /* ── edge fades on the chip rows (no hard cut against the toggle or the screen edge) ── */
+  $$('.mv-schips').forEach((el) => {
     const upd = () => {
       el.style.setProperty('--fl', el.scrollLeft > 4 ? '22px' : '0px');
       el.style.setProperty('--fr', el.scrollLeft + el.clientWidth < el.scrollWidth - 4 ? '22px' : '0px');
@@ -225,7 +219,7 @@ function init(root: HTMLElement) {
     upd();
   });
 
-  /* ── scroll-spy: keeps rail, chips and sticky chips on the group in view ── */
+  /* ── scroll-spy: keeps the chips on the group in view ── */
   const groups = $$('.mv-grp');
   const seen = new Set<Element>();
   if ('IntersectionObserver' in window) {
@@ -261,23 +255,28 @@ function init(root: HTMLElement) {
     const re = new RegExp('(' + toks.map(reEsc).join('|') + ')', 'ig');
     el.innerHTML = esc(text).replace(re, '<mark>$1</mark>');
   }
+  // live count of what is showing on the open side, e.g. "24 dishes" (read out by the status region)
+  function updateCount() {
+    const side = root.dataset.side as Side, n = $$(`[data-side-block="${side}"] [data-row]:not([hidden])`).length;
+    countEl.textContent = n ? `${n} ${side === 'food' ? (n === 1 ? 'dish' : 'dishes') : (n === 1 ? 'drink' : 'drinks')}` : 'No matches';
+  }
   function filter() {
     const toks = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const active = toks.length > 0 || diets.size > 0;
     let shown = 0;
     rows.forEach((li) => {
-      const veg = li.dataset.veg === '1', spicy = li.dataset.spicy === '1', text = li.dataset.text || '';
+      const veg = li.dataset.veg === '1', text = li.dataset.text || '';
       let ok = toks.every((tk) => text.includes(tk));
       if (ok && diets.has('veg') && !veg) ok = false;
       if (ok && diets.has('nonveg') && veg) ok = false;
-      if (ok && diets.has('spicy') && !spicy) ok = false;
       li.toggleAttribute('hidden', !ok);
       if (ok) { shown++; hl(names.get(li)!, orig.get(names.get(li)!)!, toks); const d = descs.get(li); if (d) hl(d, orig.get(d)!, toks); }
     });
     ['.mv-sec', '.mv-grp', '.mv-side'].forEach((sel) => $$(sel).forEach((s) => s.toggleAttribute('hidden', !s.querySelector('[data-row]:not([hidden])'))));
     emptyEl.toggleAttribute('hidden', shown > 0 || !active);
-    countEl.textContent = active ? (shown ? `${shown} item${shown === 1 ? '' : 's'}` : 'No matches') : '';
-    if (active && !jumped) { jumped = true; scrollTo($('#mv-list')); }
+    updateCount();
+    // the first search from the top of the page (bar not on screen yet) brings the list into view
+    if (active && !jumped) { jumped = true; if ($('#mv-list')!.getBoundingClientRect().top > 8) scrollTo($('#mv-list')); }
     if (!active) jumped = false;
   }
   q.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(filter, 120); });
@@ -307,46 +306,11 @@ function init(root: HTMLElement) {
     below.forEach((r) => io.observe(r));
   }
 
-  /* ── cursor photo reveal (fine pointers, ≥1280px, rows with a real photo) ──
-     The photo sits in a gutter right of the list and follows the cursor's height only,
-     so it never covers a name, a price or a + button. */
-  const rev = $('#mv-reveal');
-  const revImg = rev?.querySelector('img');
-  const wide = matchMedia('(min-width: 1280px) and (hover: hover) and (pointer: fine)');
-  if (rev && revImg && finePointer && !reduce) {
-    let ty = 0, y = 0, vy = 0, gx = 0, raf = 0, on = false;
-    const W = 220, H = 160;
-    const listIn = $('.mv-list-in')!, sticky = $('#mv-sticky')!;
-    const place = () => {
-      y += (ty - y) * 0.15;
-      const tilt = Math.max(-4, Math.min(4, vy * 0.2)); vy *= 0.85;
-      rev.style.transform = `translate(${gx}px,${y}px) rotate(${tilt}deg)`;
-      raf = on ? requestAnimationFrame(place) : 0;
-    };
-    const aim = (e: PointerEvent) => {
-      const r = listIn.getBoundingClientRect();
-      gx = Math.round(r.right - parseFloat(getComputedStyle(listIn).paddingRight) + 24);
-      const pill = picksEl.getBoundingClientRect();
-      const floor = Math.min(innerHeight - H - 12, (pill.width && !picksEl.classList.contains('is-hidden') ? pill.top : innerHeight) - H - 12);
-      const ceil = sticky.getBoundingClientRect().bottom + 12;
-      vy = e.movementY; ty = Math.max(ceil, Math.min(floor, e.clientY - H / 2));
-    };
-    const show = (e: PointerEvent, src: string) => {
-      if (!wide.matches) return;
-      if (revImg.getAttribute('src') !== src) revImg.setAttribute('src', src);
-      aim(e); if (!on) y = ty;
-      on = true; rev.classList.add('is-on'); if (!raf) raf = requestAnimationFrame(place);
-    };
-    const hide = () => { on = false; rev.classList.remove('is-on'); };
-    rows.filter((r) => r.dataset.img).forEach((r) => {
-      r.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(e, r.dataset.img!); });
-      r.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') show(e, r.dataset.img!); });
-      r.addEventListener('pointerleave', hide);
-    });
-    addEventListener('scroll', hide, { passive: true });
-  }
+  /* ── the filter bar's height, so jumps stop just under it ── */
+  const stickyEl = $('#mv-sticky');
+  if (stickyEl && 'ResizeObserver' in window) new ResizeObserver(() => root.style.setProperty('--mv-stk', Math.round(stickyEl.offsetHeight) + 'px')).observe(stickyEl);
 
-  /* ── sticky chips follow the site header (it slides away on scroll down) ── */
+  /* ── the filter bar follows the site header (it slides away on scroll down) ── */
   const header = $('.sh-header');
   if (header) {
     const sync = () => root.style.setProperty('--mv-top', Math.max(0, Math.round(header.getBoundingClientRect().bottom)) + 'px');

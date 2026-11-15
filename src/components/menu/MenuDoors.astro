@@ -13,9 +13,12 @@ const { foodCount, drinkCount, foodSections, drinkSections, dishes, bar } = Astr
 const spots = [...bar.spots].sort((a, b) => a.x - b.x); // Tab order = left to right
 const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
 ---
-<section class="md" id="md" aria-labelledby="md-title" style="--split:50%" data-bar-w={bar.w} data-bar-h={bar.h} data-bar-y={bar.posY}>
-  <!-- DRINKS: the bar with hexagon hotspots (clipped top layer: left on desktop, top on phone) -->
+<section class="md" id="md" aria-labelledby="md-title" style="--rest:50%" data-bar-w={bar.w} data-bar-h={bar.h} data-bar-y={bar.posY}>
+  <!-- DRINKS: the bar with hexagon hotspots (top layer: left on desktop, top on phone).
+       Counter-translate reveal: the wrapper (overflow:hidden) moves one way, .md-bar-in moves the other way by the same
+       amount, so the picture stays put and only the wrapper's edge (the seam) moves. Both are transforms: no repaint. -->
   <div class="md-door md-door--bar" data-door="drinks">
+   <div class="md-bar-in">
     <button class="md-open" type="button" data-open-side="drinks" aria-label="Open the drinks side: bar menu">Drinks</button>
     <div class="md-ph" id="md-ph-bar">
       <img src={bar.image} srcset={bar.srcset} sizes="(max-width:820px) 100vw, 75vw" width={bar.w} height={bar.h} alt={bar.alt} fetchpriority="high" decoding="async" style={`object-position:50% ${bar.posY * 100}%`} />
@@ -30,12 +33,19 @@ const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
       </div>
     </div>
     <span class="md-shade" aria-hidden="true"></span>
+    <!-- Caption in two groups (head at the top, button at the bottom) so the FURSAT sign in the photo stays free between them.
+         data-fab-avoid: the floating Ask / Instagram buttons step aside while this button is in their corner. -->
     <div class="md-cap md-cap--bar">
-      <span class="md-eyebrow">The Bar · 21+</span>
-      <h2 class="md-hl">Sip. Socialize. <span>Unwind.</span></h2>
-      <p class="md-sub num">{drinkSections} sections · {drinkCount} drinks</p>
-      <button class="md-btn md-btn--ghost" type="button" data-side-go="drinks">Full drinks menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      <div class="md-cap-head">
+        <span class="md-eyebrow">The Bar · 21+</span>
+        <h2 class="md-hl">Sip. Socialize. <span>Unwind.</span></h2>
+        <p class="md-sub num">{drinkSections} sections · {drinkCount} drinks</p>
+      </div>
+      <div class="md-cap-foot">
+        <button class="md-btn md-btn--ghost" type="button" data-side-go="drinks" data-fab-avoid>Full drinks menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      </div>
     </div>
+   </div>
   </div>
 
   <!-- FOOD: the rotating table (base layer: right on desktop, bottom on phone) -->
@@ -78,8 +88,8 @@ const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
 
 <style is:global>
   /* keyboard door openers: invisible until focused, then a gold ring inside the visible part of the door */
-  .md-open{position:absolute;z-index:6;top:0;bottom:0;left:0;width:var(--split);padding:0;border:0;background:none;color:transparent;font-size:0;pointer-events:none}
-  .md-door--food .md-open{left:var(--split);width:auto;right:0}
+  .md-open{position:absolute;z-index:6;top:0;bottom:0;left:0;width:var(--rest);padding:0;border:0;background:none;color:transparent;font-size:0;pointer-events:none}
+  .md-door--food .md-open{left:var(--rest);width:auto;right:0}
   .md[data-open="drinks"] .md-door--bar .md-open,.md[data-open="food"] .md-door--food .md-open{display:none}
   .md :focus-visible{outline:3px solid var(--mv-rim)}
   .md .mb-spot:focus-visible{box-shadow:0 0 0 6px rgb(20 13 9 / .8)}
@@ -88,8 +98,8 @@ const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
   .md .mt:focus-visible{outline-offset:-4px;border-radius:12px}
   @media (max-width:820px){
     .md-open,.md-door--food .md-open{left:0;right:0;width:auto}
-    .md-door--bar .md-open{top:0;bottom:auto;height:var(--split)}
-    .md-door--food .md-open{top:var(--split);bottom:0;height:auto}
+    .md-door--bar .md-open{top:0;bottom:auto;height:var(--rest)}
+    .md-door--food .md-open{top:var(--rest);bottom:0;height:auto}
   }
 </style>
 

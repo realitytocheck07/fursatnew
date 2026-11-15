@@ -13,10 +13,10 @@ const heading = ['I', 'said', 'one', 'drink.', 'Fursat', 'happened.'];
 <section class="rl" id="reels" aria-labelledby="rl-h">
   <p class="rl-mq" aria-hidden="true">Fursat happened. Fursat happened. Fursat happened.</p>
   <div class="rl-head">
-    <h2 class="rl-h" id="rl-h" aria-label="I said one drink. Fursat happened.">
+    <h2 class="fk-ty-hero" id="rl-h" aria-label="I said one drink. Fursat happened.">
       <span aria-hidden="true">{heading.map((w, i) => <><span class="rl-w" style={`--i:${i}`}>{w}</span>{' '}</>)}</span>
     </h2>
-    <a class="rl-ig" href="https://www.instagram.com/fursatind.in" target="_blank" rel="noopener">Watch more on Instagram<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <a class="fk-btn fk-btn--ghost fk-btn--md" href="https://www.instagram.com/fursatind.in" target="_blank" rel="noopener">Watch more on Instagram</a>
   </div>
 
   <div class="rl-ctl">
@@ -58,7 +58,7 @@ const heading = ['I', 'said', 'one', 'drink.', 'Fursat', 'happened.'];
     {reels.map((r, i) => <button class="rl-th" type="button" data-i={i} aria-label={`Go to reel ${i + 1}: ${r.name}`} aria-current={i === 0 ? 'true' : 'false'}><img src={r.poster} alt="" width="48" height="64" loading="lazy" decoding="async" /><span class="rl-th-n" aria-hidden="true">{r.name}</span></button>)}
   </div>
 
-  <div class="rl-cta"><button class="rl-reserve" type="button" data-open="book">Reserve a table</button></div>
+  <div class="rl-cta"><button class="fk-btn fk-btn--primary" type="button" data-open="book">Reserve a table</button></div>
 
   <noscript>
     <style is:inline>.rl-stage,.rl-ctl,.rl-cta{display:none}</style>

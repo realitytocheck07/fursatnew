@@ -94,8 +94,8 @@ document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;var p
 
 /* ======================= 11. sparkle trail + elephant toot ======================= */
 (function(){var cv=$("fxsparks");if(!cv)return;var cx=cv.getContext("2d"),P=[],W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1),reduce=matchMedia("(prefers-reduced-motion:reduce)").matches,fine=matchMedia("(pointer:fine)").matches,run=false;
-  function rs(){W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}rs();addEventListener("resize",rs);
-  function add(x,y,n,sp){for(var i=0;i<n;i++){var a=Math.random()*6.283,s=(Math.random()*.9+.2)*sp;P.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-.3,l:1,r:Math.random()*2.2+1})}go()}
+  var sized=false;function rs(){W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);sized=true}addEventListener("resize",function(){sized=false;if(run)rs()},{passive:true});
+  function add(x,y,n,sp){if(!sized)rs();for(var i=0;i<n;i++){var a=Math.random()*6.283,s=(Math.random()*.9+.2)*sp;P.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-.3,l:1,r:Math.random()*2.2+1})}go()}
   function go(){if(!run){run=true;requestAnimationFrame(tick)}}
   function tick(){cx.clearRect(0,0,W,H);var night=document.documentElement.classList.contains("night");cx.globalCompositeOperation="lighter";
     for(var i=P.length-1;i>=0;i--){var p=P[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.012;p.l-=.022;if(p.l<=0){P.splice(i,1);continue}
@@ -103,9 +103,6 @@ document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;var p
     if(P.length)requestAnimationFrame(tick);else{run=false;cx.clearRect(0,0,W,H)}}
   var lx=0,ly=0;
   if(!reduce&&fine)addEventListener("pointermove",function(e){var d=Math.abs(e.clientX-lx)+Math.abs(e.clientY-ly);if(d<14)return;lx=e.clientX;ly=e.clientY;add(lx,ly,2,.9)},{passive:true});
-  var ele=document.querySelector(".fx-ele"),ac=null;
-  function toot(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain(),t=ac.currentTime;o.type="sawtooth";o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(520,t+.16);o.frequency.exponentialRampToValueAtTime(300,t+.5);f.type="lowpass";f.frequency.value=1400;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+.55);o.connect(f);f.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.6)}catch(_){}}
-  if(ele)ele.addEventListener("click",function(e){ele.classList.remove("toot");void ele.offsetWidth;ele.classList.add("toot");toot();var r=ele.getBoundingClientRect();add(r.left+r.width*.5,r.top+r.height*.3,34,3.2);try{navigator.vibrate&&navigator.vibrate(18)}catch(_){}});
   window.__fxSparks=add;
 })();
 
@@ -142,99 +139,6 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
     var dt=new Date(d.value+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
     var msg=["Hi Fursat! 👋 I would like to reserve a table:","• Name: "+nm,"• Phone: +91 "+x.slice(0,5)+" "+x.slice(5),"• Date: "+dt,"• Time: "+t.value,"• Guests: "+g,"• Zone: "+z.value].join("\n");
     var a=document.createElement("a");a.href="https://wa.me/"+WA+"?text="+encodeURIComponent(msg);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();dlg.close&&dlg.close()});
-})();
-
-/* ======================= 14. glass ribbon (WebGL) ======================= */
-(function(){var box=document.getElementById("fxrib"),cv=document.getElementById("fxribgl");if(!box||!cv)return;
-  var m=/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(box).getPropertyValue("--rib")||"");if(!m)return;
-  var gl=cv.getContext("webgl",{premultipliedAlpha:true,alpha:true,antialias:false});if(!gl)return;
-  var VS="attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}";
-  var FS="precision mediump float;varying vec2 uv;uniform sampler2D T;uniform float t;uniform vec2 px;"+
-  "float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}"+
-  "float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}"+
-  "float fb(vec2 p){return .55*n(p)+.3*n(p*2.03+7.1)+.15*n(p*4.1+3.3);}"+
-  "float L(vec3 c){return dot(c,vec3(.299,.587,.114));}"+
-  "void main(){vec4 base=texture2D(T,uv);if(base.a<.004){gl_FragColor=vec4(0.);return;}"+
-  "vec2 q=uv*vec2(3.2,4.4);vec2 fl=vec2(fb(q+vec2(t*.045,t*.03)),fb(q+vec2(5.2-t*.035,1.3+t*.04)))-.5;"+
-  "vec2 o=fl*.0105;"+
-  "vec2 e=px*2.;float gx=L(texture2D(T,uv+vec2(e.x,0.)).rgb)-L(texture2D(T,uv-vec2(e.x,0.)).rgb);float gy=L(texture2D(T,uv+vec2(0.,e.y)).rgb)-L(texture2D(T,uv-vec2(0.,e.y)).rgb);vec2 g=vec2(gx,gy);float ge=clamp(length(g)*2.6,0.,1.);"+
-    "vec3 c=texture2D(T,uv+o).rgb;"+
-  "float lu=L(c);c=mix(vec3(lu),c,1.06);c*=vec3(1.03,1.,.96);"+
-  "float ph=dot(uv,vec2(.78,.62))*9.-t*.55+fl.x*5.;float band=pow(.5+.5*sin(ph),9.);"+
-  "float ph2=dot(uv,vec2(-.4,.9))*13.+t*.38+fl.y*6.;float band2=pow(.5+.5*sin(ph2),12.);"+
-  "float spec=(band*.8+band2*.55)*(ge*.8+.04*smoothstep(.6,.95,lu))*.62;"+
-  "c+=spec*vec3(1.,.91,.72);"+
-  
-  "c=mix(c,vec3(lu)*vec3(1.1,.97,.82),.22);float a=base.a*mix(.8,1.,clamp(ge*1.4+smoothstep(.55,.9,lu),0.,1.));gl_FragColor=vec4(c*a,a);}";
-  function sh(ty,s){var o=gl.createShader(ty);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw 0;return o}
-  var pr;try{pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw 0}catch(_){return}
-  gl.useProgram(pr);var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
-  var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
-  var uT=gl.getUniformLocation(pr,"t"),uP=gl.getUniformLocation(pr,"px");
-  var dpr=Math.min(1.5,window.devicePixelRatio||1);cv.width=Math.round(876*dpr);cv.height=Math.round(640*dpr);gl.viewport(0,0,cv.width,cv.height);
-  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches,vis=true,raf=0,t0=performance.now();
-  function draw(now){raf=0;gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform1f(uT,reduce?4:(now-t0)/1000);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);if(!reduce&&vis&&!document.hidden&&!document.getElementById("top").classList.contains("has-vid"))raf=requestAnimationFrame(draw)}
-  var img=new Image();img.onload=function(){var tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-    gl.uniform1i(gl.getUniformLocation(pr,"T"),0);gl.uniform2f(uP,1/img.width,1/img.height);box.classList.add("gl");raf=requestAnimationFrame(draw);
-    if("IntersectionObserver"in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis&&!raf&&!reduce)raf=requestAnimationFrame(draw)}).observe(box);
-    document.addEventListener("visibilitychange",function(){if(!document.hidden&&!raf&&!reduce)raf=requestAnimationFrame(draw)})};
-  img.src=m[1];
-})();
-
-/* ======================= 15. natural 3D: depth-parallax scene, dust motes, idle camera ======================= */
-(function(){var hero=document.getElementById("top"),bg=document.getElementById("fxbggl"),img=document.querySelector("img.fx-herobg"),mc=document.getElementById("fxmotes");if(!hero||!img)return;
-  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches,small=matchMedia("(max-width:899px)").matches;
-  var vis=true,px=0,py=0,tx=0,ty=0,last=performance.now(),idleAt=performance.now()+3000,gp=0,gq=0;
-  addEventListener("pointermove",function(){idleAt=performance.now()+2800},{passive:true});
-  function pv(){var a=parseFloat(hero.style.getPropertyValue("--px")),b=parseFloat(hero.style.getPropertyValue("--py"));return[isNaN(a)?0:a,isNaN(b)?0:b]}
-  /* ---- depth-parallax background (2.5D) ---- */
-  var gl=null,uOff,uSy;
-  if(bg&&!reduce){try{gl=bg.getContext("webgl",{premultipliedAlpha:true,alpha:true,antialias:false})}catch(_){}}
-  if(gl){(function(){
-    var VS="attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}";
-    var FS="precision mediump float;varying vec2 uv;uniform sampler2D T,D;uniform vec2 o;uniform float sy;void main(){float d=texture2D(D,uv).r;vec2 s=o*(d-.42)*.034+vec2(0.,-sy*(d-.3)*.03);vec2 u=clamp(uv+s,.001,.999);vec4 c=texture2D(T,u);gl_FragColor=vec4(c.rgb*c.a,c.a);}";
-    function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw 0;return o}
-    var pr;try{pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw 0}catch(_){gl=null;return}
-    gl.useProgram(pr);var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);var lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
-    uOff=gl.getUniformLocation(pr,"o");uSy=gl.getUniformLocation(pr,"sy");
-    /* hand-built depth map: bright = near */
-    var dc=document.createElement("canvas");dc.width=219;dc.height=160;var x=dc.getContext("2d"),g=x.createLinearGradient(0,0,0,160);g.addColorStop(0,"#1c1c1c");g.addColorStop(.45,"#4a4a4a");g.addColorStop(1,"#bdbdbd");x.fillStyle=g;x.fillRect(0,0,219,160);
-    function blob(cx,cy,rx,ry,v,a){x.save();x.globalAlpha=a;x.fillStyle="rgb("+v+","+v+","+v+")";x.beginPath();x.ellipse(cx/4,cy/4,rx/4,ry/4,0,0,6.283);x.fill();x.restore()}
-    blob(280,300,52,98,150,.95);blob(610,275,62,48,135,.9);blob(540,470,300,120,215,.95);blob(780,330,95,230,225,.92);blob(440,380,120,60,170,.7);blob(520,60,160,90,18,.8);
-    x.filter="blur(5px)";x.drawImage(dc,0,0);x.filter="none";
-    var dt=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,dt);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,dc);
-    [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(function(k){gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR)});gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-    gl.uniform1i(gl.getUniformLocation(pr,"D"),1);gl.uniform1i(gl.getUniformLocation(pr,"T"),0);
-    function go(){var tx0=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tx0);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-      [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(function(k){gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR)});gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);bg.classList.add("on");img.classList.add("gl-on")}
-    if(img.complete&&img.naturalWidth)go();else img.addEventListener("load",go)
-  })()}
-  /* ---- dust motes drifting through the light ---- */
-  var mx=mc&&mc.getContext("2d"),M=[];if(mx&&!reduce){for(var i=0;i<(small?14:30);i++)M.push({x:Math.random()*876,y:Math.random()*640,z:Math.random(),r:Math.random()*1.6+.7,s:Math.random()*6.28,v:Math.random()*.2+.06})}
-  function frame(now){var dt=Math.min(.05,(now-last)/1000);last=now;
-    if(now>idleAt){var t=now/1000;tx=Math.sin(t*.37)*.55+Math.sin(t*.91)*.12;ty=Math.cos(t*.29)*.38;hero.style.setProperty("--px",tx.toFixed(4));hero.style.setProperty("--py",ty.toFixed(4))}
-    var p=pv();px+=(p[0]-px)*Math.min(1,dt*6);py+=(p[1]-py)*Math.min(1,dt*6);
-    if(gl&&bg.classList.contains("on")&&!hero.classList.contains("has-vid")){var sy=parseFloat(hero.style.getPropertyValue("--sy"))||0;gl.viewport(0,0,bg.width,bg.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform2f(uOff,px,py);gl.uniform1f(uSy,sy);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
-    if(mx&&M.length){mx.clearRect(0,0,876,640);mx.globalCompositeOperation="lighter";
-      for(var k=0;k<M.length;k++){var m=M[k];m.s+=dt*.6;m.x+=(Math.sin(m.s)*.12+m.v*.6)*(.5+m.z)+px*.25*(m.z-.3);m.y-=m.v*(.4+m.z)*.6+py*.05;if(m.y<-6)m.y=646;if(m.x>886)m.x=-6;if(m.x<-10)m.x=886;
-        var a=(.18+.5*m.z)*(.55+.45*Math.sin(m.s*1.7)),r=m.r*(1+m.z*1.4),gr=mx.createRadialGradient(m.x,m.y,0,m.x,m.y,r*3);gr.addColorStop(0,"rgba(255,244,214,"+a+")");gr.addColorStop(1,"rgba(255,230,170,0)");mx.fillStyle=gr;mx.beginPath();mx.arc(m.x,m.y,r*3,0,6.283);mx.fill()}}
-    if(vis&&!document.hidden)requestAnimationFrame(frame)}
-  if(reduce){return}
-  if("IntersectionObserver"in window)new IntersectionObserver(function(es){var v=es[0].isIntersecting;if(v&&!vis){vis=true;last=performance.now();requestAnimationFrame(frame)}vis=v}).observe(hero);
-  document.addEventListener("visibilitychange",function(){if(!document.hidden&&vis){last=performance.now();requestAnimationFrame(frame)}});
-  requestAnimationFrame(frame);
-})();
-
-/* ======================= 16. Flow hero video ======================= */
-(function(){var v=document.getElementById("fxvid"),h=document.getElementById("top");if(!v||!h)return;
-  h.classList.add("has-vid");
-  v.addEventListener("error",function(){h.classList.remove("has-vid");v.remove()});
-  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;if(reduce){v.removeAttribute("autoplay");return}
-  function play(){var p=v.play();if(p&&p.catch)p.catch(function(){})}
-  play();document.addEventListener("pointerdown",play,{once:true});
-  if("IntersectionObserver"in window)new IntersectionObserver(function(es){es[0].isIntersecting?play():v.pause()}).observe(v);
-  document.addEventListener("visibilitychange",function(){document.hidden?v.pause():play()});
 })();
 
 /* ======================= 17. Elephant Flow clip (colour + matte packed side by side, composited on a canvas) ======================= */
@@ -381,63 +285,6 @@ document.addEventListener("click",function(e){var t=e.target.closest&&e.target.c
 window.FursatConcierge={open:openIt,route:route};
 })();
 
-/* ---------- 21. Ask Fursat: cursor glare + "thinking" dots on send ---------- */
-(function(){var af=document.getElementById("ask-fursat");if(!af)return;var card=af.querySelector(".af-card");if(!card)return;
-  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
-  if(!reduce&&matchMedia("(hover:hover)").matches){
-    card.addEventListener("pointermove",function(e){var r=card.getBoundingClientRect();card.style.setProperty("--mx",((e.clientX-r.left)/r.width*100).toFixed(1)+"%");card.style.setProperty("--my",((e.clientY-r.top)/r.height*100).toFixed(1)+"%");card.style.setProperty("--mo","1")},{passive:true});
-    card.addEventListener("pointerleave",function(){card.style.setProperty("--mo","0")});
-  }
-  var send=document.getElementById("af-send"),q=document.getElementById("af-q");
-  function busy(){if(!send||reduce)return;send.classList.add("busy");setTimeout(function(){send.classList.remove("busy")},750)}
-  if(send)send.addEventListener("pointerdown",function(){if(q&&q.value.trim())busy()},true);
-  if(q)q.addEventListener("keydown",function(e){if(e.key==="Enter"&&q.value.trim())busy()},true);
-})();
-
-/* ---------- 22. Ask Fursat widget API: events (CustomEvent + dataLayer), "/" shortcut, clear button, theming ---------- */
-(function(){
-  var af=document.getElementById("ask-fursat");if(!af)return;
-  var VERSION="1.0.0",form=document.getElementById("af-form"),q=document.getElementById("af-q"),send=document.getElementById("af-send"),mic=document.getElementById("af-mic");
-  window.dataLayer=window.dataLayer||[];
-  var subs={};
-  function emit(name,detail){detail=detail||{};detail.widget="ask-fursat";detail.v=VERSION;
-    try{window.dataLayer.push(Object.assign({event:"fursat_"+name},detail))}catch(e){}
-    try{window.dispatchEvent(new CustomEvent("fursat:"+name,{detail:detail}))}catch(e){}
-    (subs[name]||[]).slice().forEach(function(f){try{f(detail)}catch(e){}})}
-  window.FursatWidget={version:VERSION,
-    on:function(n,f){(subs[n]=subs[n]||[]).push(f);return this},
-    off:function(n,f){subs[n]=(subs[n]||[]).filter(function(x){return x!==f});return this},
-    focus:function(){q&&q.focus()},
-    ask:function(t){if(!q)return;q.value=t||"";q.dispatchEvent(new Event("input",{bubbles:true}));if(send)send.click()},
-    open:function(k){window.FursatConcierge&&window.FursatConcierge.open(k||"")},
-    theme:function(o){Object.keys(o||{}).forEach(function(k){af.style.setProperty("--fw-"+k,o[k])})}};
-  /* privacy: payloads never carry what the guest typed or said — only its length and the channel */
-  document.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||!af.contains(t))return;
-    var chip=t.closest(".af-chip");if(chip){emit("chip_clicked",{label:(chip.textContent||"").trim().slice(0,40)});return}
-    if(t.closest(".pk-open")){emit("cta_clicked",{cta:"party_packages"});return}
-    if(t.closest(".af-contact .wa")){emit("cta_clicked",{cta:"whatsapp"});return}
-    if(t.closest("#af-mic")){emit("voice_toggled",{});return}
-    if(t.closest("#af-send")&&q&&q.value.trim())emit("ask_submitted",{channel:"click",q_len:q.value.trim().length})},true);
-  if(q){
-    q.addEventListener("keydown",function(e){if(e.key==="Enter"&&q.value.trim())emit("ask_submitted",{channel:"enter",q_len:q.value.trim().length})},true);
-    var f1=false;q.addEventListener("focus",function(){if(!f1){f1=true;emit("input_focused",{})}});
-  }
-  /* "/" focuses the box (like search on GitHub/YouTube) */
-  document.addEventListener("keydown",function(e){if(e.key!=="/"||e.ctrlKey||e.metaKey||e.altKey)return;var a=document.activeElement,tg=a&&a.tagName;if(tg==="INPUT"||tg==="TEXTAREA"||tg==="SELECT"||(a&&a.isContentEditable))return;if(innerWidth<900||!q)return;e.preventDefault();q.focus();emit("shortcut_used",{})});
-  /* clear button + hint */
-  if(form&&q){
-    var kbd=document.createElement("span");kbd.className="af-kbd";kbd.setAttribute("aria-hidden","true");kbd.textContent="/";
-    var clr=document.createElement("button");clr.type="button";clr.className="af-clear";clr.setAttribute("aria-label","Clear");clr.innerHTML="&times;";
-    var anchor=mic||send;form.insertBefore(clr,anchor);form.insertBefore(kbd,clr);
-    function sync(){form.classList.toggle("has-text",!!q.value)}
-    q.addEventListener("input",sync);clr.addEventListener("click",function(){q.value="";sync();q.focus()});sync();
-    if(mic&&!mic.title)mic.title="Voice uses your browser’s speech service";
-  }
-  emit("widget_loaded",{});
-})();
-
-
-/* ---------- 24. signature cards: each card slowly rotates through more real dishes (crossfade + text swap) ---------- */
 (function(){
   var cards=[].slice.call(document.querySelectorAll(".hs-card[data-dishes]"));if(!cards.length)return;
   var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;

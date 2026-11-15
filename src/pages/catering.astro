@@ -22,14 +22,14 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     <!-- Hero Section -->
     <section class="ct-hero">
       <div class="ct-hero-wrap">
-        <span class="ct-kicker">GOURMET EXPERIENCES AT YOUR VENUE</span>
-        <h1 class="ct-title mot-headline">Fursat Outdoor Catering</h1>
+        <span class="fk-ty-label ct-kicker">GOURMET EXPERIENCES AT YOUR VENUE</span>
+        <h1 class="fk-ty-hero ct-title mot-headline">Fursat Outdoor Catering</h1>
         <p class="ct-sub">
           Bring the flavors and hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
         </p>
         <div class="ct-hero-btns">
-          <a href="#quote" class="ct-btn-gold">Request Catering Menu & Quote</a>
-          <a href="tel:+919059670033" class="ct-btn-ghost">Call Catering Chef: +91 90596 70033</a>
+          <a href="#quote" class="fk-btn fk-btn--primary">Request Catering Menu & Quote</a>
+          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary">Call Catering Chef: +91 90596 70033</a>
         </div>
       </div>
     </section>
@@ -39,24 +39,30 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     <section class="ct-scale">
       <div class="ct-container">
         <div class="ct-sec-head text-center">
-          <span class="ct-kicker">OUR CATERING SCALE</span>
-          <h2 class="ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
+          <span class="fk-ty-label ct-kicker">OUR CATERING SCALE</span>
+          <h2 class="fk-ty-h2 ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
         </div>
         <div class="ct-scale-grid">
-          <div class="ct-stat-card">
-            <div class="ct-stat-number">30–80</div>
-            <div class="ct-stat-unit">Guests</div>
-            <div class="ct-stat-label">Intimate Gatherings</div>
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">30–80</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Intimate Gatherings</p>
+            </div>
           </div>
-          <div class="ct-stat-card">
-            <div class="ct-stat-number">80–300</div>
-            <div class="ct-stat-unit">Guests</div>
-            <div class="ct-stat-label">Corporate &amp; Social Events</div>
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">80–300</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Corporate &amp; Social Events</p>
+            </div>
           </div>
-          <div class="ct-stat-card">
-            <div class="ct-stat-number">300–1500</div>
-            <div class="ct-stat-unit">Guests</div>
-            <div class="ct-stat-label">Grand Weddings &amp; Conventions</div>
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">300–1500</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Grand Weddings &amp; Conventions</p>
+            </div>
           </div>
         </div>
       </div>
@@ -66,13 +72,13 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     <section class="ct-gallery-strip">
       <div class="ct-gallery-scroll">
         <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_02.webp" alt="Fursat Interior Space" loading="lazy" />
+          <img src="/assets/interior/fursat_space_02.webp" srcset="/assets/interior/fursat_space_02-480.webp 480w, /assets/interior/fursat_space_02-720.webp 720w, /assets/interior/fursat_space_02.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Interior Space" width="1280" height="1706" loading="lazy" decoding="async" />
         </div>
         <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_05.webp" alt="Fursat Dining Area" loading="lazy" />
+          <img src="/assets/interior/fursat_space_05.webp" srcset="/assets/interior/fursat_space_05-480.webp 480w, /assets/interior/fursat_space_05-720.webp 720w, /assets/interior/fursat_space_05.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Dining Area" width="1280" height="1706" loading="lazy" decoding="async" />
         </div>
         <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_10.webp" alt="Fursat Ambiance" loading="lazy" />
+          <img src="/assets/interior/fursat_space_10.webp" srcset="/assets/interior/fursat_space_10-480.webp 480w, /assets/interior/fursat_space_10-720.webp 720w, /assets/interior/fursat_space_10.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Ambiance" width="1280" height="1706" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>
@@ -82,8 +88,8 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
       <div class="ct-container ct-quote-wrap">
         <div class="ct-form-card">
           <div class="ct-fc-head">
-            <span class="ct-kicker">GET AN ESTIMATE</span>
-            <h2>Book Fursat Outdoor Catering</h2>
+            <span class="fk-ty-label ct-kicker">GET AN ESTIMATE</span>
+            <h2 class="fk-ty-h2">Book Fursat Outdoor Catering</h2>
             <p>Provide your event details below. Our Catering Director will connect with a curated sample menu and per-head pricing.</p>
           </div>
 
@@ -129,9 +135,8 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
                 </select>
               </div>
             </div>
-            <button type="submit" class="ct-submit-btn">
+            <button type="submit" class="fk-btn fk-btn--primary">
               <span>Request Catering Proposal via WhatsApp</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
           </form>
         </div>
@@ -212,20 +217,8 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     padding: 0 20px;
     position: relative;
     z-index: 1}
-  .ct-kicker {
-    font-size: 0.8125rem;
-    font-weight:600;
-    letter-spacing: 0.16em;
-    color: #74501a;
-    display: block;
-    margin-bottom: 10px}
-  .ct-title {
-    font-family:var(--fk-serif);
-    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
-    font-weight: 600;
-    color: #1f2a1a;
-    margin: 0 0 16px;
-    line-height: 1.15}
+  
+  
   .ct-sub {
     font-size: 1.05rem;
     color: #4a4232;
@@ -236,27 +229,10 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     flex-wrap: wrap;
     justify-content: center;
     gap: 16px}
-  .ct-btn-gold {
-    padding: 14px 28px;
-    border-radius: 999px;
-    background: var(--fk-action-bg);
-    color: #fbf3e6;
-    font-weight:600;
-    text-decoration: none;border-color:var(--fk-action-rim);box-shadow:var(--fk-action-shadow);color:var(--fk-action-fg)}
-  .ct-btn-ghost {
-    padding: 14px 26px;
-    border-radius: 999px;
-    background: rgba(255,250,242,0.87);
-    border: 1px solid rgba(201,154,67,0.55);
-    color: #1f2a1a;
-    font-weight: 700;
-    text-decoration: none}
+  
+  
 
-  .ct-sec-title {
-    font-family:var(--fk-serif);
-    font-size: clamp(2rem, 4vw, 3rem);
-    color: #1f2a1a;
-    margin: 0 0 40px}
+  
 
   /* Quote Form */
   .ct-quote {
@@ -271,11 +247,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     padding: clamp(28px, 5vw, 48px)}
   .ct-fc-head {
     margin-bottom: 28px}
-  .ct-fc-head h2 {
-    font-family:var(--fk-serif);
-    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-    color: #1f2a1a;
-    margin: 6px 0 10px}
+  
   .ct-fc-head p {
     font-size: 0.95rem;
     color: #4a4232;
@@ -310,22 +282,8 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
   .ct-field input:focus, .ct-field select:focus {
     outline: none;
     border-color: #d6aa5a}
-  .ct-submit-btn {
-    all: unset;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px;
-    border-radius: 999px;
-    background: var(--fk-action-bg);
-    color: #fbf3e6;
-    font-weight:600;
-    font-size: 1rem;
-    margin-top: 10px;
-    box-shadow: 0 6px 20px rgba(201,154,67,0.28);border-color:var(--fk-action-rim);box-shadow:var(--fk-action-shadow);color:var(--fk-action-fg)}
-  .ct-submit-btn svg { width: 18px; height: 18px}
+  
+  
 
   /* Scale / Stats Section */
   .ct-scale {
@@ -339,37 +297,11 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 24px}
-  .ct-stat-card {
-    background: rgba(214,170,90,0.13);
-    border: 1px solid rgba(201,154,67,0.50);
-    border-radius: 24px;
-    padding: 36px 28px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease}
-  .ct-stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 36px rgba(201,154,67,0.14)}
-  .ct-stat-number {
-    font-family:var(--fk-serif);
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 700;
-    color: #74501a;
-    line-height: 1}
-  .ct-stat-unit {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #4a4232;
-    letter-spacing: 0.08em;
-    text-transform: uppercase}
-  .ct-stat-label {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2a1a;
-    margin-top: 4px}
+  
+  
+  
+  
+  
 
   /* Gallery Strip */
   .ct-gallery-strip {
@@ -407,5 +339,16 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
   .ct-field input:focus-visible, .ct-field select:focus-visible { outline: 3px solid #12803C; outline-offset: 2px}
   .ct-field [aria-invalid="true"] { border-color: #C4161C; box-shadow: 0 0 0 3px rgba(196,22,28,0.14)}
   .ct-err { margin: 0; min-height: 0; font-size: 0.8125rem; font-weight: 700; line-height: 1.4; color: #A8141A}
-  .ct-submit-btn { min-height: 48px}
+  
+/* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn, cards = fk-card. */
+  .ct-kicker { display: block; margin-bottom: 10px; color: #74501a }
+  .ct-title { margin: 0 0 16px; color: #1f2a1a }
+  .ct-sec-title { margin: 0 0 40px; color: #1f2a1a }
+  .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
+  .ct-form .fk-btn { width: 100% }
+  .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
+  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; padding: 40px 28px 32px }
+  .ct-stat-number { color: #74501a }
+  .ct-stat-unit { color: #4a4232 }
+  .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }
 </style>

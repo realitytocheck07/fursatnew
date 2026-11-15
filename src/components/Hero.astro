@@ -20,7 +20,7 @@ import site from '../data/site.json';
    <p class="fx-eye rv" style="--d:.25s"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z" fill="currentColor"/></svg>Good food <i>·</i> Great drinks <i>·</i> Better days</p>
    <h1 class="fx-h1" aria-label="Your Moment to Pause."><b class="l1"><u>Your</u></b><b class="l2"><u>Moment</u></b><b class="l3"><u>to Pause<s>.</s></u></b></h1>
    <p class="fx-p rv" style="--d:.55s">Café, kitchen, bar and banquet at Capital Park, Madhapur.</p>
-   <div class="fx-btns rv" style="--d:.7s"><button class="pill" type="button" data-open="book">Reserve a table <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><a class="fx-ghost" href="/menu">Explore the menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+   <div class="fx-btns rv" style="--d:.7s"><button class="fk-btn fk-btn--primary fk-btn--md pill" type="button" data-open="book">Reserve a table <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><a class="fk-btn fk-btn--secondary fk-btn--md fx-ghost" href="/menu">Explore the menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
   </div>
 
   <aside class="fx-info rv" style="--d:1.05s" aria-label="Visit Fursat"><i class="fi-d" aria-hidden="true"></i><span class="fi-a"><b>Table slots {slots[0].time} – {slots[slots.length - 1].time}</b><small>Capital Park, Madhapur · {site.phone}</small></span></aside>
@@ -29,3 +29,14 @@ import site from '../data/site.json';
   
  </div>
 </section>
+
+<style is:global>
+/* Hero buttons use the design system (fk-btn). `pill` and `fx-ghost` stay only as hooks for js/15.js (magnetic hover).
+   Desktop: the hero sits in a scaled 1536x1024 canvas, so the 44px size is written in screen pixels with --r (1 screen px in canvas units). Phone: plain px, no override needed. */
+@media (min-width: 900px) {
+  .fxhero .fx-btns .fk-btn.fk-btn--md { min-height: 0; height: 100%; padding: 0 calc(20px * var(--r)); gap: calc(8px * var(--r)); border-width: calc(2px * var(--r)); border-radius: 9999px; font-family: var(--fk-font-text); font-size: calc(14px * var(--r)); font-weight: 600; }
+}
+/* Music toggle: same type as every button (Poppins 600), pressed = the one green */
+.hx-ctl .snd { font-family: var(--fk-font-text); font-style: normal; font-weight: 600; letter-spacing: 0; border-color: var(--fk-btn-green); }
+.hx-ctl .snd[aria-pressed="true"] { background: var(--fk-btn-green); border-color: var(--fk-btn-green); color: var(--fk-btn-on-green); }
+</style>

@@ -56,21 +56,21 @@ import CornerHero from '../components/CornerHero.astro';
     <section class="bq-gallery">
       <div class="bq-container">
         <div class="bq-sec-head text-center">
-          <span class="bq-kicker">VENUE AMBIANCE</span>
-          <h2 class="bq-sec-title mot-headline">Elegance in Every Detail</h2>
+          <span class="fk-ty-label bq-kicker">VENUE AMBIANCE</span>
+          <h2 class="fk-ty-h2 bq-sec-title mot-headline">Elegance in Every Detail</h2>
         </div>
 
         <div class="bq-gal-grid">
           <div class="bq-gal-card">
-            <img src="/assets/venue/banquet/banquet-stage-01-720.webp" srcset="/assets/venue/banquet/banquet-stage-01-720.webp 720w, /assets/venue/banquet/banquet-stage-01.webp 1200w" sizes="(max-width: 767px) 100vw, 33vw" alt="The banquet stage and screen with covered chairs" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
+            <img src="/assets/venue/banquet/banquet-stage-01-720.webp" srcset="/assets/venue/banquet/banquet-stage-01-480.webp 480w, /assets/venue/banquet/banquet-stage-01-720.webp 720w, /assets/venue/banquet/banquet-stage-01.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="The banquet stage and screen with covered chairs" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
             <div class="bq-gal-tag">Main Banquet Floor</div>
           </div>
           <div class="bq-gal-card">
-            <img src="/assets/venue/banquet/banquet-hall-02-720.webp" srcset="/assets/venue/banquet/banquet-hall-02-720.webp 720w, /assets/venue/banquet/banquet-hall-02.webp 1200w" sizes="(max-width: 767px) 100vw, 33vw" alt="Banquet seating under the Fursat sign" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
+            <img src="/assets/venue/banquet/banquet-hall-02-720.webp" srcset="/assets/venue/banquet/banquet-hall-02-480.webp 480w, /assets/venue/banquet/banquet-hall-02-720.webp 720w, /assets/venue/banquet/banquet-hall-02.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="Banquet seating under the Fursat sign" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
             <div class="bq-gal-tag">Grand Dinner Seating</div>
           </div>
           <div class="bq-gal-card">
-            <img src="/assets/interior/fursat_space_14-720.webp" srcset="/assets/interior/fursat_space_14-720.webp 720w, /assets/interior/fursat_space_14.webp 1920w" sizes="(max-width: 767px) 100vw, 33vw" alt="Cocktail Counter" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
+            <img src="/assets/interior/fursat_space_14-720.webp" srcset="/assets/interior/fursat_space_14-720.webp 720w, /assets/interior/fursat_space_14.webp 1280w" sizes="(max-width: 767px) 100vw, 33vw" alt="Cocktail Counter" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
             <div class="bq-gal-tag">Private Banquet Bar</div>
           </div>
         </div>
@@ -84,8 +84,8 @@ import CornerHero from '../components/CornerHero.astro';
       <div class="bq-container bq-enquiry-wrap">
         <div class="bq-enquiry-card">
           <div class="bq-eq-head">
-            <span class="bq-kicker">RESERVE YOUR DATE</span>
-            <h2>Banquet Booking & Date Check</h2>
+            <span class="fk-ty-label bq-kicker">RESERVE YOUR DATE</span>
+            <h2 class="fk-ty-h2">Banquet Booking & Date Check</h2>
             <p>Tell us about your celebration and we will share availability and a quotation.</p>
           </div>
 
@@ -138,9 +138,8 @@ import CornerHero from '../components/CornerHero.astro';
                 </select>
               </div>
             </div>
-            <button type="submit" class="bq-submit-btn">
+            <button type="submit" class="fk-btn fk-btn--primary">
               <span>Send Enquiry via WhatsApp / Call</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
             <p class="bq-direct-call">
               Prefer calling directly? Reach our Banquet desk at <a href="tel:+919059670033">+91 90596 70033</a> or <a href="tel:+919848360033">+91 98483 60033</a>.
@@ -154,7 +153,7 @@ import CornerHero from '../components/CornerHero.astro';
 <InstaFollow handle="fursatbanquets" />
     <section class="bq-faq">
       <div class="bq-container bq-faq-inner">
-        <h2 class="bq-sec-title text-center">Banquet FAQs</h2>
+        <h2 class="fk-ty-h2 bq-sec-title text-center">Banquet FAQs</h2>
         <div class="bq-faq-list">
           <details class="bq-faq-item">
             <summary>What is the advance payment to lock a banquet date?</summary>
@@ -228,13 +227,7 @@ import CornerHero from '../components/CornerHero.astro';
     max-width: 1300px;
     margin: 0 auto;
     padding: 0 clamp(16px, 4vw, 40px)}
-  .bq-kicker {
-    font-size: 0.8125rem;
-    font-weight:600;
-    letter-spacing: 0.16em;
-    color: #74501a;
-    display: block;
-    margin-bottom: 12px}
+  
   .bq-title {
     font-family:var(--fk-serif);
     font-size: clamp(2.5rem, 6vw, 4.4rem);
@@ -295,11 +288,7 @@ import CornerHero from '../components/CornerHero.astro';
   .bq-gallery {
     padding: clamp(60px, 8vw, 100px) 0;
     background: transparent}
-  .bq-sec-title {
-    font-family:var(--fk-serif);
-    font-size: clamp(2rem, 4vw, 3rem);
-    color: #1f2a1a;
-    margin: 0 0 36px}
+  
   .bq-gal-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -346,11 +335,7 @@ import CornerHero from '../components/CornerHero.astro';
     box-shadow: 0 20px 60px rgba(90,60,20,0.22)}
   .bq-eq-head {
     margin-bottom: 28px}
-  .bq-eq-head h2 {
-    font-family:var(--fk-serif);
-    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-    color: #1f2a1a;
-    margin: 6px 0 10px}
+  
   .bq-eq-head p {
     font-size: 0.95rem;
     color: #4a4232;
@@ -386,24 +371,8 @@ import CornerHero from '../components/CornerHero.astro';
   .bq-form-field input:focus, .bq-form-field select:focus {
     outline: none;
     border-color: #d6aa5a}
-  .bq-submit-btn {
-    all: unset;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px;
-    border-radius: 999px;
-    background: var(--fk-action-bg);
-    color: #fbf3e6;
-    font-weight:600;
-    font-size: 1rem;
-    margin-top: 10px;
-    box-shadow: 0 6px 20px rgba(201,154,67,0.28);border-color:var(--fk-action-rim);box-shadow:var(--fk-action-shadow);color:var(--fk-action-fg)}
-  .bq-submit-btn svg {
-    width: 18px;
-    height: 18px}
+  
+  
   .bq-direct-call {
     font-size: 0.85rem;
     color: #4a4232;
@@ -429,6 +398,9 @@ import CornerHero from '../components/CornerHero.astro';
     border-radius: 14px;
     padding: 16px 20px}
   .bq-faq-item summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
     font-size: 1.05rem;
     font-weight: 700;
     color: #74501a;
@@ -444,5 +416,10 @@ import CornerHero from '../components/CornerHero.astro';
   .bq-form-field input:focus-visible, .bq-form-field select:focus-visible { outline: 3px solid #12803C; outline-offset: 2px}
   .bq-form-field [aria-invalid="true"] { border-color: #C4161C; box-shadow: 0 0 0 3px rgba(196,22,28,0.14)}
   .bq-err { margin: 0; min-height: 0; font-size: 0.8125rem; font-weight: 700; line-height: 1.4; color: #A8141A}
-  .bq-submit-btn { min-height: 48px}
+  
+/* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn. */
+  .bq-kicker { display: block; margin-bottom: 12px; color: #74501a }
+  .bq-sec-title { margin: 0 0 36px; color: #1f2a1a }
+  .bq-eq-head h2 { margin: 6px 0 10px; color: #1f2a1a }
+  .bq-form .fk-btn { width: 100% }
 </style>

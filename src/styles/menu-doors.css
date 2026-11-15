@@ -1,4 +1,4 @@
-/* /menu first screen: 50/50 Drinks | Food, tapped side opens to 75/25 (menu-doors.ts drives --split).
+/* /menu first screen: 50/50 Drinks | Food, tapped side opens to 75/25 (menu-doors.ts drives --rest).
    Scoped under .md inside .mv. The two sides are photographs / a dark table, so they keep dark tokens. */
 .md{--mv-bg:#0b0705;--mv-text:#F6EDDF;--mv-mute:rgb(246 237 223 / .8);--mv-gold-hi:#f3c56b;--mv-rim:#ffe2a6;--mv-ink:#2a1608;--mv-out-img:oklch(1 0 0 / .1);
   --md-gap:clamp(20px,4vw,64px);--md-ease:cubic-bezier(.23,1,.32,1);
@@ -6,7 +6,9 @@
   -webkit-tap-highlight-color:transparent}
 .md-door{position:absolute;inset:0;overflow:hidden}
 .md-door--food{z-index:1;background:radial-gradient(90% 80% at 66% 30%,#3d2617,#1a110b 62%,#0e0906)}
-.md-door--bar{z-index:2;clip-path:inset(0 calc(100% - var(--split)) 0 0)}
+.md-door--bar{z-index:2;transform:translateX(calc(var(--rest) - 100%))}
+.md-bar-in{position:absolute;inset:0;transform:translateX(calc(100% - var(--rest)))}
+/* the script sets both transforms in px every frame (wrapper -x, inner +x); these two rules are the no-script / first-paint position */
 .md:not([data-open]) .md-door,.md[data-open="drinks"] .md-door--food,.md[data-open="food"] .md-door--bar{cursor:pointer}
 
 /* ── DRINKS: bar image, slow zoom 1 → 1.05 over 18 s, warm light sweep, hexagon hotspots ── */
@@ -26,7 +28,7 @@
 .mb-spot:nth-child(2) .mb-hex{animation-delay:-.6s}.mb-spot:nth-child(3) .mb-hex{animation-delay:-1.2s}.mb-spot:nth-child(4) .mb-hex{animation-delay:-1.8s}.mb-spot:nth-child(5) .mb-hex{animation-delay:-2.4s}
 @keyframes mb-pulse{0%,100%{opacity:.3}50%{opacity:.85}}
 .mb-lab{position:absolute;left:50%;top:100%;translate:-50% 6px;padding:7px 12px 6px;border-radius:999px;white-space:nowrap;pointer-events:none;
-  font:600 .74rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8);box-shadow:0 0 0 1px rgb(255 226 166 / .9),0 0 18px rgb(255 190 90 / .45);
+  font:600 .74rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8);outline:1px solid rgb(255 226 166 / .9);
   opacity:0;transition:opacity 250ms ease,translate 300ms var(--md-ease)}
 .md[data-open="drinks"] .mb-lab{opacity:1}
 .mb-spot:is(:hover,:focus-visible,.is-hot) .mb-hex{opacity:1;animation:none;scale:1.1;background-color:rgb(255 220 150 / .16)}
@@ -36,17 +38,33 @@
 .md[data-open="food"] .mb-spots{opacity:0;pointer-events:none}
 
 /* ── FOOD: half-visible rotating table (dish positions set by menu-doors.ts) ── */
-.mt{position:absolute;z-index:2;top:0;bottom:0;left:calc(var(--split) + (100% - var(--split)) / 2);width:calc((100% - var(--split)) * .96);translate:-50% 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.mt{position:absolute;z-index:2;top:0;bottom:0;left:calc(var(--rest) + (100% - var(--rest)) / 2);width:calc((100% - var(--rest)) * .96);translate:-50% 0;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .mt-table{position:absolute;left:50%;top:var(--cy,64%);width:var(--tw,110%);height:var(--th,60%);translate:-50% -50%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(60% 60% at 50% 38%,#5a3a22,#2e1d12 58%,#1c120b);box-shadow:0 0 0 2px rgb(224 170 80 / .55),0 0 0 9px rgb(40 26 15 / .9),0 0 0 10px rgb(224 170 80 / .35),0 40px 60px -20px rgb(0 0 0 / .8),inset 0 18px 40px rgb(255 214 150 / .12),inset 0 -30px 50px rgb(0 0 0 / .5)}
-.mt-table i{position:absolute;inset:14% 18%;border-radius:50%;background:radial-gradient(closest-side,rgb(255 230 180 / .14),transparent);filter:blur(6px)}
+  outline:2px solid rgb(224 170 80 / .55);
+  background:radial-gradient(70% 38% at 50% 0,rgb(255 214 150 / .12),transparent),radial-gradient(80% 42% at 50% 100%,rgb(0 0 0 / .5),transparent),radial-gradient(60% 60% at 50% 38%,#5a3a22,#2e1d12 58%,#1c120b)}
+/* dark rim + thin gold edge (outside the outline) and the soft floor shadow: static gradient layers, nothing blurs */
+.mt-table::before{content:"";position:absolute;inset:-10px;z-index:-1;border-radius:50%;background:rgb(40 26 15 / .9);border:1px solid rgb(224 170 80 / .35)}
+.mt-table::after{content:"";position:absolute;left:4%;right:4%;top:34%;bottom:-34%;z-index:-2;border-radius:50%;background:radial-gradient(closest-side,rgb(0 0 0 / .55),rgb(0 0 0 / .22) 60%,transparent)}
+.mt-table i{position:absolute;inset:14% 18%;border-radius:50%;background:radial-gradient(closest-side,rgb(255 230 180 / .14),transparent)}
 .mt-ring{list-style:none;margin:0;padding:0;position:absolute;inset:0}
 .mt-dish{position:absolute;left:0;top:0;width:var(--d,160px);height:var(--d,160px);will-change:transform}
 .mt-plate{position:relative;display:block;width:100%;height:100%;padding:0;border:0;border-radius:50%;background:none;cursor:pointer}
-.mt-drop{position:absolute;inset:0;display:block;border-radius:50%;overflow:hidden;background:#2a1b10;
-  box-shadow:0 0 0 2px rgb(255 226 166 / .8),0 0 0 6px rgb(22 14 9 / .85),0 0 0 7px rgb(224 170 80 / .5),0 18px 26px -8px rgb(0 0 0 / .75)}
-.mt-drop img,.mt-drop video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-.mt-dish.is-front .mt-drop{box-shadow:0 0 0 2px #ffe2a6,0 0 0 6px rgb(22 14 9 / .85),0 0 0 7px rgb(255 214 140 / .9),0 0 34px rgb(255 190 90 / .5),0 24px 30px -8px rgb(0 0 0 / .8)}
+/* back dishes darken by this overlay's opacity (--dim, set by menu-doors.ts), not by an animated filter */
+.mt-plate::after{content:"";position:absolute;inset:-8px;border-radius:50%;background:#000;opacity:var(--dim,0);pointer-events:none}
+/* Each dish's rings and shadows are drawn ONCE as a gradient image on a pseudo layer (no box-shadow, no filter).
+   ::before = gold ring, dark ring, thin gold edge + soft shadow under the plate (always there).
+   ::after  = the front dish's brighter ring and gold glow; only its opacity changes when the dish turns to the front.
+   (--d = plate diameter, set by menu-doors.ts; the photo clips itself, so the layers are not cut off.) */
+.mt-drop{position:absolute;inset:0;display:block;border-radius:50%;background:#2a1b10;isolation:isolate}
+.mt-drop::before,.mt-drop::after{content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none}
+.mt-drop::before{inset:-34px -30px -52px;
+  background:
+    radial-gradient(circle calc(var(--d) / 2 + 7px) at 50% calc(50% - 9px),transparent calc(var(--d) / 2 - 1px),rgb(255 226 166 / .8) calc(var(--d) / 2),rgb(255 226 166 / .8) calc(var(--d) / 2 + 2px),rgb(22 14 9 / .85) calc(var(--d) / 2 + 2px),rgb(22 14 9 / .85) calc(var(--d) / 2 + 6px),rgb(224 170 80 / .5) calc(var(--d) / 2 + 6px),rgb(224 170 80 / .5) calc(var(--d) / 2 + 7px),transparent calc(var(--d) / 2 + 7px)),
+    radial-gradient(circle calc(var(--d) / 2 + 10px) at 50% calc(50% + 9px),rgb(0 0 0 / .72) calc(var(--d) / 2 - 21px),rgb(0 0 0 / .3) calc(var(--d) / 2 - 8px),transparent calc(var(--d) / 2 + 5px))}
+.mt-drop::after{inset:-48px -44px -48px;opacity:0;transition:opacity 250ms ease;
+  background:radial-gradient(circle calc(var(--d) / 2 + 40px) at 50% 50%,transparent calc(var(--d) / 2 - 1px),#ffe2a6 calc(var(--d) / 2),#ffe2a6 calc(var(--d) / 2 + 2px),transparent calc(var(--d) / 2 + 2px),transparent calc(var(--d) / 2 + 6px),rgb(255 214 140 / .9) calc(var(--d) / 2 + 6px),rgb(255 214 140 / .9) calc(var(--d) / 2 + 7px),rgb(255 190 90 / .42) calc(var(--d) / 2 + 7px),transparent calc(var(--d) / 2 + 40px))}
+.mt-dish.is-front .mt-drop::after{opacity:1}
+.mt-drop img,.mt-drop video{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;pointer-events:none}
 .mt-front{position:absolute;left:50%;top:var(--fy,70%);translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;pointer-events:none;width:90%;transition:opacity 300ms ease}
 .mt-front-l{font:600 .7rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mv-gold-hi)}
 .mt-front-n{font:500 clamp(1.1rem,1.7vw,1.5rem)/1.15 var(--mv-serif);color:var(--mv-text);text-wrap:balance}
@@ -54,22 +72,39 @@
 .mt-nav{position:absolute;left:50%;bottom:clamp(14px,3svh,26px);translate:-50% 0;display:flex;align-items:center;gap:10px;transition:opacity 300ms ease}
 .mt-arrow{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1.5px solid rgb(255 226 166 / .55);background:rgb(20 13 9 / .55);color:var(--mv-rim);cursor:pointer;transition:scale 150ms ease-out,background-color 200ms ease}
 .mt-arrow svg{width:20px;height:20px}
-.mt-see{min-height:44px;padding:0 20px;white-space:nowrap;border-radius:999px;border:0;cursor:pointer;font:600 .9rem/1 var(--mv-sans);color:var(--fk-action-fg);background:var(--fk-action-bg);box-shadow:0 0 0 1px var(--fk-action-rim),0 0 20px rgb(232 200 134 / .35);transition:scale 150ms ease-out}
+.mt-see{min-height:44px;padding:0 20px;white-space:nowrap;border-radius:999px;border:0;cursor:pointer;font:600 .9rem/1 var(--mv-sans);color:var(--fk-action-fg);background:var(--fk-action-bg);outline:1px solid var(--fk-action-rim);position:relative;transition:scale 150ms ease-out}
 .mt-arrow:active,.mt-see:active{scale:.96}
-@media (hover:hover) and (pointer:fine){.mt-arrow:hover{background:rgb(60 40 22 / .8)}.mt-see:hover{box-shadow:0 0 0 1px #e8c886,0 0 28px rgb(232 200 134 / .6)}}
+@media (hover:hover) and (pointer:fine){.mt-arrow:hover{background:rgb(60 40 22 / .8)}.mt-see:hover::after{opacity:1}}
 .md[data-open="drinks"] :is(.mt-front,.mt-nav){opacity:0;pointer-events:none}
 /* while the dishes hang above the table (top of the page) they float a little */
-.md[data-float] .mt-drop{animation:mt-bob 3.2s ease-in-out infinite alternate}
-.md[data-float] .mt-dish:nth-child(even) .mt-drop{animation-delay:-1.6s}
-@keyframes mt-bob{from{translate:0 -5px}to{translate:0 7px}}
 /* without the script: a simple row of the dishes instead of the table */
 .md:not(.md--js) .mt-table,.md:not(.md--js) .mt-nav,.md:not(.md--js) .mt-front{display:none}
 .md:not(.md--js) .mt-ring{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;padding:120px 20px 20px}
+.md:not(.md--js) .mt-ring{--d:110px}
 .md:not(.md--js) .mt-dish{position:relative;width:110px;height:110px}
 
 /* ── captions ── */
 .md-cap{position:absolute;z-index:3;display:flex;flex-direction:column;gap:10px;width:min(26%,420px);transition:opacity 300ms ease}
-.md-cap--bar{left:var(--md-gap);bottom:clamp(28px,8svh,72px);align-items:flex-start}
+.md-cap--bar{left:var(--md-gap);top:clamp(18px,4svh,40px);bottom:clamp(14px,3svh,28px);gap:0;align-items:stretch;justify-content:space-between;pointer-events:none}
+.md-cap--bar .md-btn{pointer-events:auto;margin-top:0}
+/* the sign sits between the two groups: head (eyebrow + sub on one line, headline under it) above it, the button below it */
+.md-cap-head{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"eye sub" "hl hl";column-gap:12px;row-gap:8px;align-items:baseline}
+.md-cap-head .md-eyebrow{grid-area:eye}
+.md-cap-head .md-hl{grid-area:hl}
+.md-cap-head .md-sub{grid-area:sub;justify-self:end;font-size:.85rem;text-align:right}
+.md-cap-foot{display:flex;align-items:flex-end}
+/* menu-doors.ts (placeCap) sets data-mode so the caption never sits on the FURSAT sign:
+   split = head top + button bottom (default) | top | bottom | left / right of the sign (column) | row = headline and button side by side at the top
+   | compact = smaller headline, no count line */
+.md-cap--bar[data-mode="top"]{bottom:auto;justify-content:flex-start;gap:12px}
+.md-cap--bar[data-mode="bottom"],.md-cap--bar[data-mode="left"],.md-cap--bar[data-mode="right"]{top:auto;bottom:clamp(28px,8svh,72px);justify-content:flex-end;gap:12px}
+.md-cap--bar[data-mode="left"],.md-cap--bar[data-mode="right"]{left:var(--cap-x);width:var(--cap-w)}
+.md-cap--bar:is([data-mode="left"],[data-mode="right"]) .md-cap-head{grid-template-columns:1fr;grid-template-areas:"eye" "hl" "sub";row-gap:6px}
+.md-cap--bar:is([data-mode="left"],[data-mode="right"]) .md-sub{justify-self:start;text-align:left}
+.md-cap--bar[data-mode="row"]{bottom:auto;width:auto;flex-direction:row;align-items:flex-end;justify-content:flex-start;gap:20px}
+.md-cap--bar[data-compact] .md-sub{display:none}
+.md-cap--bar[data-compact] .md-hl{font-size:clamp(1.4rem,2vw,1.9rem)}
+.md-cap--bar[data-compact="xs"] .md-hl{font-size:1.25rem}
 .md-cap--food{right:var(--md-gap);top:clamp(16px,3.5svh,40px);align-items:flex-end;text-align:right;gap:6px}
 .md-cap--food .md-hl{font-size:clamp(1.6rem,2.5vw,2.5rem)}
 .md-cap--food .md-btn{min-height:44px;padding:0 18px;font-size:.88rem}
@@ -78,60 +113,79 @@
 .md-hl span{font-style:italic;color:var(--mv-gold-hi)}
 .md-sub{font-size:.95rem;color:var(--mv-mute);margin:0}
 .md-btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;margin-top:4px;padding:0 22px;border:0;border-radius:999px;flex-shrink:0;white-space:nowrap;cursor:pointer;
-  font:600 .95rem/1 var(--mv-sans);color:var(--fk-action-fg);background:var(--fk-action-bg);box-shadow:0 0 0 1px var(--fk-action-rim),0 0 22px rgb(232 200 134 / .35);transition:scale 150ms ease-out,box-shadow 250ms ease}
+  font:600 .95rem/1 var(--mv-sans);color:var(--fk-action-fg);background:var(--fk-action-bg);outline:1px solid var(--fk-action-rim);position:relative;transition:scale 150ms ease-out}
 .md-btn svg{width:18px;height:18px;transition:translate 250ms var(--md-ease)}
-.md-btn--ghost{color:var(--mv-rim);background:rgb(20 13 9 / .5);box-shadow:inset 0 0 0 1.5px var(--mv-rim),0 0 22px rgb(255 190 90 / .28);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.md-btn--ghost{color:var(--mv-rim);background:rgb(20 13 9 / .72);outline:1.5px solid var(--mv-rim);outline-offset:-1.5px}
 .md-btn:active{scale:.96}
-@media (hover:hover){.md-btn:hover{box-shadow:0 0 0 1px #e8c886,0 0 30px rgb(232 200 134 / .6)}.md-btn--ghost:hover{box-shadow:inset 0 0 0 1.5px var(--mv-rim),0 0 30px rgb(255 190 90 / .5)}.md-btn:hover svg{translate:0 3px}}
+/* resting glow: a soft gradient layer behind the button, drawn once (no box-shadow, no filter) */
+.md-btn::before,.mt-see::before,.mb-lab::before{content:"";position:absolute;inset:-14px -18px;z-index:-1;border-radius:999px;pointer-events:none;background:radial-gradient(closest-side,rgb(232 200 134 / .38),transparent)}
+.md-btn--ghost::before{background:radial-gradient(closest-side,rgb(255 190 90 / .3),transparent)}
+/* big glows are drawn once on ::after; hover only fades its opacity (no box-shadow or filter is animated) */
+.md-btn::after,.mt-see::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity 250ms ease;box-shadow:0 0 0 1px #e8c886,0 0 30px rgb(232 200 134 / .6)}
+.md-btn--ghost::after{box-shadow:0 0 30px rgb(255 190 90 / .5)}
+@media (hover:hover){.md-btn:hover::after{opacity:1}.md-btn:hover svg{translate:0 3px}}
 /* the narrow side keeps only its name, as a tab back */
 .md[data-open="drinks"] .md-cap--food :is(.md-hl,.md-sub,.md-btn),.md[data-open="food"] .md-cap--bar :is(.md-hl,.md-sub,.md-btn){opacity:0;pointer-events:none}
 .md[data-open="drinks"] .md-cap--food,.md[data-open="food"] .md-cap--bar{width:auto}
 
+/* while the seam moves the ambient loops stand still (light sweep, drift, hotspot pulse, seam drops, floating dishes) */
+.md--moving :is(.md-ph,.md-sweep,.mb-hex,.md-flow,.mt-drop){animation-play-state:paused}
+/* layers are promoted only while something moves */
+.md--moving :is(.md-door--bar,.md-bar-in,.md-seam,.md-tag,.md-x,.mt){will-change:transform}
+
 /* ── seam, tag, back button ── */
-.md-seam{position:absolute;z-index:4;top:0;bottom:0;left:var(--split);width:2px;margin-left:-1px;pointer-events:none;
-  background:linear-gradient(180deg,transparent,#f3c56b 14%,#ffe2a6 50%,#f3c56b 86%,transparent);box-shadow:0 0 12px rgb(255 190 90 / .75),0 0 36px rgb(224 166 60 / .45)}
-.md-flow{position:absolute;left:50%;top:-24%;width:12px;height:24%;margin-left:-6px;border-radius:99px;opacity:0;background:radial-gradient(closest-side,#fffaf0,rgb(255 205 120 / .85) 45%,transparent);filter:blur(1.5px);animation:md-flow 4.2s linear infinite}
+.md-seam{position:absolute;z-index:4;top:0;bottom:0;left:var(--rest);width:2px;margin-left:-1px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,#f3c56b 14%,#ffe2a6 50%,#f3c56b 86%,transparent)}
+.md-seam::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:64px;margin-left:-32px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgb(224 166 60 / .16) 28%,rgb(255 190 90 / .5) 47%,rgb(255 190 90 / .5) 53%,rgb(224 166 60 / .16) 72%,transparent)}
+.md-flow{position:absolute;left:50%;top:-24%;width:12px;height:24%;margin-left:-6px;border-radius:99px;opacity:0;background:radial-gradient(closest-side,#fffaf0,rgb(255 205 120 / .85) 45%,transparent);animation:md-flow 4.2s linear infinite}
 .md-flow--b{animation-delay:-2.1s}
 @keyframes md-flow{0%{transform:translateY(0);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translateY(520%);opacity:0}}
-.md-tag,.md-x{position:absolute;z-index:5;left:var(--split);top:clamp(18px,4svh,40px);translate:-50% 0;margin:0;border-radius:999px;white-space:nowrap;box-shadow:0 0 0 1px rgb(255 226 166 / .9),0 0 26px rgb(255 190 90 / .45);transition:opacity 250ms ease}
+.md-tag,.md-x{position:absolute;z-index:5;left:var(--rest);top:clamp(18px,4svh,40px);translate:-50% 0;margin:0;border-radius:999px;white-space:nowrap;outline:1px solid rgb(255 226 166 / .9);transition:opacity 250ms ease}
 .md-tag{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 22px 9px;pointer-events:none;font:500 1.08rem/1.1 var(--mv-serif);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8)}
 .md-tag small{font:600 .62rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:#6b4513}
 .md[data-open] .md-tag{opacity:0}
+.md-tag::before,.md-x::before{content:"";position:absolute;inset:-20px -26px;z-index:-1;border-radius:999px;pointer-events:none;background:radial-gradient(closest-side,rgb(255 190 90 / .4),transparent)}
 .md-x{min-height:44px;padding:0 18px;border:0;cursor:pointer;font:600 .85rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8)}
 .md-x[hidden]{display:none}
 
 /* an empty picks pill waits until the guest leaves this screen */
 .mv.md-in .mv-picks[data-count="0"]{opacity:0;visibility:hidden;pointer-events:none}
-.md-ring{position:fixed;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;z-index:81;pointer-events:none;border:2px solid #ffe2a6;box-shadow:0 0 26px rgb(255 190 90 / .85),inset 0 0 18px rgb(255 190 90 / .5)}
+.md-ring{position:fixed;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;z-index:81;pointer-events:none;border:2px solid #ffe2a6;background:radial-gradient(closest-side,transparent 55%,rgb(255 190 90 / .45))}
 
 /* ── phones and narrow tablets: Drinks on top, Food below, seam runs across ── */
 @media (max-width:820px){
   .md{height:calc(100svh - var(--md-top,75px) - 64px);min-height:560px;max-height:860px}
-  .md-door--bar{clip-path:inset(0 0 calc(100% - var(--split)) 0)}
+  .md-door--bar{transform:translateY(calc(var(--rest) - 100%))}
+  .md-bar-in{transform:translateY(calc(100% - var(--rest)))}
   .md-ph{left:0;right:0;top:0;bottom:25%}
   .md-door--bar .md-shade{background:linear-gradient(180deg,rgb(11 7 5 / .45) 0,rgb(11 7 5 / 0) 14%,rgb(11 7 5 / .1) 26%,rgb(11 7 5 / .86) 48%,rgb(11 7 5 / .9) 52%)}
   .md-cap{width:auto;left:16px;right:16px;gap:6px;align-items:flex-start;text-align:left}
-  .md-cap--bar{bottom:calc(100% - var(--split) + 14px)}
-  .md-cap--food{top:calc(var(--split) + 12px);flex-direction:row;align-items:center;justify-content:space-between}
+  .md-cap--bar{top:auto;bottom:calc(100% - var(--rest) + 14px);justify-content:flex-start;gap:6px;align-items:flex-start}
+  .md-cap-head{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+  .md-cap-head .md-sub{text-align:left;justify-self:auto}
+  .md-cap--bar[data-mode="shift"]{left:var(--cap-x)}
+  .md-cap--food{top:calc(var(--rest) + 12px);flex-direction:row;align-items:center;justify-content:space-between}
   .md-cap--food :is(.md-hl,.md-sub){display:none}
   .md-cap--food .md-btn{min-height:44px;margin:0;padding:0 14px;font-size:.82rem}
   .md-hl{font-size:clamp(1.5rem,7vw,2.1rem)}
   .md-sub{font-size:.85rem}
   .md-btn{min-height:44px;padding:0 16px;font-size:.88rem}
-  .mt{left:0;right:0;width:auto;translate:none;top:calc(var(--split) + 56px);bottom:0}
+  .mt{left:0;right:0;width:auto;translate:none;top:calc(var(--rest) + 56px);bottom:0}
   .mt-front-n{font-size:1.05rem}
   .mt-nav{bottom:10px}
   .mt-arrow{width:44px;height:44px}
   .mt-see{min-height:44px;font-size:.82rem}
-  .md-seam{top:var(--split);bottom:auto;left:0;right:0;width:auto;height:2px;margin:-1px 0 0;background:linear-gradient(90deg,transparent,#f3c56b 10%,#ffe2a6 50%,#f3c56b 90%,transparent)}
+  .md-seam{top:var(--rest);bottom:auto;left:0;right:0;width:auto;height:2px;margin:-1px 0 0;background:linear-gradient(90deg,transparent,#f3c56b 10%,#ffe2a6 50%,#f3c56b 90%,transparent)}
+  .md-seam::before{top:50%;bottom:auto;left:0;right:0;width:auto;height:64px;margin:-32px 0 0;background:linear-gradient(180deg,transparent,rgb(224 166 60 / .16) 28%,rgb(255 190 90 / .5) 47%,rgb(255 190 90 / .5) 53%,rgb(224 166 60 / .16) 72%,transparent)}
   .md-flow{top:50%;left:-24%;width:24%;height:12px;margin:-6px 0 0;animation-name:md-flow-x}
-  .md-x{top:var(--split);left:auto;right:14px;translate:0 -50%}
+  .md-x{top:var(--rest);left:auto;right:14px;translate:0 -50%}
   /* the seam tag would sit on the captions here: keep it for screen readers only */
   .md-tag{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .md[data-open] .md-cap--food .md-btn{display:none}
   .mb-lab{font-size:.68rem;padding:6px 10px 5px}
-  .md[data-open="food"] .md-cap--bar{bottom:calc(100% - var(--split) + 8px)}
-  .md[data-open="drinks"] .md-cap--food{top:calc(var(--split) + 8px)}
+  .md[data-open="food"] .md-cap--bar{bottom:calc(100% - var(--rest) + 8px)}
+  .md[data-open="drinks"] .md-cap--food{top:calc(var(--rest) + 8px)}
   .md[data-open="drinks"] .mt{opacity:.5}
 }
 @keyframes md-flow-x{0%{transform:translateX(0);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translateX(520%);opacity:0}}

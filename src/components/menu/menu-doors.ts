@@ -2,8 +2,10 @@
 // Drinks: hexagon hotspots glow, the bar zooms toward the shelf, then its drink group opens
 // (the hotspot keeps data-go, so menu-v2 still owns the jump and the 21+ notice).
 // Food: a half-visible rotating table. Drag or swipe turns it with momentum and a spring snap,
-// the front dish grows, tapping it opens the dish sheet. Dishes hang above the table and fall onto it as
-// the page scrolls (prototype 02). Motion = springs, in-view, the landing tween; Anime.js = the hotspot glow.
+// the front dish grows, tapping it opens the dish sheet. The scroll landing onto the real table lives in TableLanding.
+// Motion = the table spring, in-view; Anime.js = the hotspot glow.
+// The seam (B1): one rAF loop eases toward the cursor; per frame only transforms move (the bar door is a
+// counter-translate reveal), so nothing reflows or repaints while the cursor sweeps the doors.
 import { animate as mAnimate, inView } from 'motion';
 import { animate as aAnimate } from 'animejs';
 
@@ -22,17 +24,60 @@ function init(md: HTMLElement) {
   /* doors in view: menu-v2 keeps an empty picks pill out of the way */
   if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => root.classList.toggle('md-in', en.isIntersecting), { threshold: 0.35 }).observe(md);
 
-  /* ── the split: one spring value drives --split (Motion) ── */
-  let split = 50;
-  let splitAnim: { stop: () => void } | null = null;
-  const paint = () => md.style.setProperty('--split', split.toFixed(2) + '%');
-  const springTo = (to: number, stiffness = 120, damping = 22) => {
-    splitAnim?.stop();
-    if (reduce) { split = to; paint(); relayout(); return; }
-    splitAnim = mAnimate(split, to, { type: 'spring', stiffness, damping, onUpdate: (v: number) => { split = v; paint(); relayout(); } });
-  };
+  /* ── the seam: ONE rAF loop eases `cur` toward `target` (the cursor, or the 25 / 50 / 75 rest) ──
+     Per frame only transforms move, all without layout or repaint:
+       the bar door is a counter-translate reveal (wrapper -x with overflow:hidden, its inner content +x), plus the
+       seam line, the tag, the back button, (phone) the two captions, and the table's content (half the seam offset).
+     The table keeps a fixed box (--rest). It is measured once when a side opens or closes, never while hovering.
+     While the seam moves, .md--moving pauses the ambient loops (light sweep, drift, pulse). */
+  const bar = md.querySelector<HTMLElement>('.md-door--bar')!, barIn = md.querySelector<HTMLElement>('.md-bar-in')!;
+  const seam = md.querySelector<HTMLElement>('.md-seam')!;
+  const tag = md.querySelector<HTMLElement>('.md-tag')!;
+  const capB = md.querySelector<HTMLElement>('.md-cap--bar')!, capF = md.querySelector<HTMLElement>('.md-cap--food')!;
+  const clampSplit = (v: number) => Math.min(65, Math.max(35, v));
+  let rest = 50;    // the layout split: 50 both sides, 75 drinks open, 25 food open (CSS --rest)
+  let cur = 50;     // the split on screen
+  let target = 50;  // where the loop is heading
+  let from = 50, s0 = 1; // an open / close starts with the table at its old size (s0) and eases it to 1
+  let raf = 0, idle = 0; // idle: .md--moving (layer promotion, paused loops) stays 250 ms after the seam stops, so a restart does not re-promote
+  let box = { L: 0, W: md.clientWidth, H: md.clientHeight }; // filled by the observer below, never read inside the loop
+  const vert = () => narrow.matches;
+  function paint() {
+    const v = vert(), px = ((cur - rest) / 100) * (v ? box.H : box.W);
+    const t = v ? `translateY(${px.toFixed(2)}px)` : `translateX(${px.toFixed(2)}px)`;
+    // counter-translate reveal: the wrapper slides left/up by x, its content slides back by x, so only the edge moves
+    const x = (((100 - cur) / 100) * (v ? box.H : box.W)).toFixed(2), ax = v ? 'Y' : 'X';
+    bar.style.transform = `translate${ax}(-${x}px)`;
+    barIn.style.transform = `translate${ax}(${x}px)`;
+    seam.style.transform = tag.style.transform = xBtn.style.transform = t;
+    capB.style.transform = capF.style.transform = v ? t : '';
+    const dn = rest - from, p = dn === 0 ? 1 : Math.min(1, Math.max(0, (cur - from) / dn));
+    if (p >= 1) s0 = 1;
+    const sc = 1 + (s0 - 1) * (1 - p);
+    mt.style.transform = (v ? `translateY(${(px / 2).toFixed(2)}px)` : `translateX(${(px / 2).toFixed(2)}px)`) + (sc === 1 ? '' : ` scale(${sc.toFixed(4)})`);
+  }
+  function frame() {
+    cur += (target - cur) * 0.18;
+    if (Math.abs(target - cur) < 0.04) cur = target;
+    paint();
+    if (cur === target) { raf = 0; idle = window.setTimeout(() => md.classList.remove('md--moving'), 250); } else raf = requestAnimationFrame(frame);
+  }
+  function run() {
+    if (reduce) { cur = target; paint(); return; }
+    clearTimeout(idle);
+    if (!raf) { md.classList.add('md--moving'); raf = requestAnimationFrame(frame); }
+  }
+  // a side opens / closes: the table box is final at once (one measure); the loop then slides the seam there
+  function settle(to: number) {
+    const oldD = geo.D;
+    rest = to;
+    md.style.setProperty('--rest', to + '%');
+    measure();
+    from = cur; s0 = reduce || !geo.D ? 1 : oldD / geo.D || 1;
+    layout();
+    target = to; run();
+  }
   let open: Side | null = null;
-  let landAll = () => {}; // set once the table exists
   let dragged = 0; // time of the last table drag: a click right after it is not a tap
   const setOpen = (side: Side | null, px?: number, py?: number) => {
     const prev = open, inside = md.contains(document.activeElement);
@@ -46,9 +91,10 @@ function init(md: HTMLElement) {
     spots.toggleAttribute('inert', side === 'food');
     // back to "Both sides": keyboard focus returns to the opener of the side that was open
     if (!side && prev && inside) md.querySelector<HTMLElement>(`[data-open-side="${prev}"]`)?.focus({ preventScroll: true });
-    springTo(side === 'drinks' ? 75 : side === 'food' ? 25 : 50);
+    if (side !== 'food') placeCap();
+    settle(side === 'drinks' ? 75 : side === 'food' ? 25 : 50);
     if (side && px != null && py != null && !reduce) flash(px, py);
-    if (side === 'food') { wake(); landAll(); }
+    if (side === 'food') wake();
   };
   // a small gold ring where the guest tapped, as the side opens
   function flash(x: number, y: number) {
@@ -60,13 +106,13 @@ function init(md: HTMLElement) {
   xBtn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(null); });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && open && !e.defaultPrevented && !document.querySelector('dialog[open]')) setOpen(null); });
 
-  // desktop: the seam follows the pointer on a spring, as in the Richmond reference (only while nothing is open)
+  // desktop: the seam eases toward the pointer (35–65 %), only while nothing is open
   md.addEventListener('pointermove', (e) => {
     if (open || reduce || !fine.matches || narrow.matches) return;
-    const r = md.getBoundingClientRect();
-    springTo(Math.min(68, Math.max(32, ((e.clientX - r.left) / r.width) * 100)));
+    target = clampSplit(((e.clientX - box.L) / box.W) * 100);
+    run();
   });
-  md.addEventListener('pointerleave', () => { if (!open && fine.matches && !narrow.matches) springTo(50, 90, 20); });
+  md.addEventListener('pointerleave', () => { if (!open && fine.matches && !narrow.matches) { target = 50; run(); } });
 
   // a tap on a closed (or the narrow) side opens it; the buttons inside keep their own jobs
   md.addEventListener('click', (e) => {
@@ -97,8 +143,50 @@ function init(md: HTMLElement) {
       if (c > 0.72) sp.dataset.edge = 'r'; else if (c < 0.28) sp.dataset.edge = 'l'; else delete sp.dataset.edge;
     });
   };
+  /* The FURSAT sign is part of the photo, so it moves with the crop. The tagline must never sit on it:
+     the sign's box (measured on hero-bar-1400.webp, fractions of the photo) is mapped to the screen with the same cover math,
+     grown by the slow zoom (1.05) and a margin, and the caption takes the first place that leaves it free. */
+  const SIGN = { x0: 0.181, y0: 0.404, x1: 0.338, y1: 0.7 }, MARGIN = 14;
+  function signBox() {
+    const W = ph.clientWidth, H = ph.clientHeight, s = Math.max(W / BW, H / BH), w = BW * s, h = BH * s, ox = (W - w) / 2, oy = (H - h) * BY;
+    const a = { l: ox + SIGN.x0 * w, t: oy + SIGN.y0 * h, r: ox + SIGN.x1 * w, b: oy + SIGN.y1 * h };
+    const cx = W * 0.5, cy = H * 0.55, z = (v: number, c: number) => c + (v - c) * 1.05; // end of the drift animation (zoom origin 50% 55%)
+    return { l: Math.min(a.l, z(a.l, cx)) - MARGIN, t: Math.min(a.t, z(a.t, cy)) - MARGIN, r: Math.max(a.r, z(a.r, cx)) + MARGIN, b: Math.max(a.b, z(a.b, cy)) + MARGIN };
+  }
+  const capParts = [...capB.querySelectorAll<HTMLElement>('.md-eyebrow,.md-hl,.md-sub,.md-btn')];
+  const hit = (a: { l: number; t: number; r: number; b: number }, b: { l: number; t: number; r: number; b: number }) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+  function placeCap() {
+    if (open === 'food') return; // the Food side shows only the small "The Bar" tab; placed again when it closes
+    const W = md.clientWidth, H = md.clientHeight, S = signBox();
+    capB.removeAttribute('data-mode'); capB.removeAttribute('data-compact'); capB.style.removeProperty('--cap-x'); capB.style.removeProperty('--cap-w');
+    if (vert()) {
+      // phone / narrow tablet: the caption sits above the seam; if the sign is on the left, it moves to the right of the sign
+      if (S.r > 0 && S.l < W * 0.5) { capB.dataset.mode = 'shift'; capB.style.setProperty('--cap-x', Math.min(S.r, W * 0.5) + 'px'); }
+      return;
+    }
+    const XV = W * 0.35 - 8; // the narrowest the bar door gets while the seam follows the cursor
+    const gap = parseFloat(getComputedStyle(capB).left) || 24;
+    const fits = () => {
+      const m = md.getBoundingClientRect();
+      return capParts.every((e) => { const q = e.getBoundingClientRect(); if (!q.width && !q.height) return true; /* hidden (compact) */ const r = { l: q.left - m.left, t: q.top - m.top, r: q.right - m.left, b: q.bottom - m.top }; return r.t >= 0 && r.b <= H && r.r <= XV + 1 && !hit(r, S); });
+    };
+    const tries: [string, boolean | 'xs', number?, number?][] = [
+      ['split', false], ['top', false], ['bottom', false],
+      ['left', false, gap, S.l - gap], ['right', false, S.r, XV - S.r],
+      ['split', true], ['top', true], ['bottom', true], ['left', true, gap, S.l - gap], ['right', true, S.r, XV - S.r], ['row', true], ['row', 'xs'],
+    ];
+    for (const [mode, compact, x, w] of tries) {
+      if (x != null && w! < 200) continue; // a side column needs room
+      capB.dataset.mode = mode;
+      if (compact) capB.dataset.compact = compact === 'xs' ? 'xs' : ''; else capB.removeAttribute('data-compact');
+      if (x != null) { capB.style.setProperty('--cap-x', x + 'px'); capB.style.setProperty('--cap-w', w + 'px'); }
+      if (fits()) return;
+    }
+    capB.dataset.mode = 'split'; capB.dataset.compact = ''; capB.style.removeProperty('--cap-x'); capB.style.removeProperty('--cap-w'); // nothing fits: the smallest version
+  }
   placeSpots();
-  if ('ResizeObserver' in window) new ResizeObserver(placeSpots).observe(ph);
+  placeCap();
+  if ('ResizeObserver' in window) { new ResizeObserver(placeSpots).observe(ph); new ResizeObserver(placeCap).observe(ph); }
 
   let passing = false;
   spots.addEventListener('click', (e) => {
@@ -131,8 +219,6 @@ function init(md: HTMLElement) {
   let angle = 0; // degrees; dish i is in front when angle = i * STEP
   let geo = { W: 0, H: 0, cx: 0, cy: 0, rx: 0, ry: 0, D: 0 };
   let front = -1;
-  // 0 = dishes hang above the table, 1 = all landed. Driven by the scroll; opening Food lands them too.
-  let fallP = reduce ? 1 : 0, autoP = reduce ? 1 : 0;
 
   function measure() {
     const W = mt.clientWidth, H = mt.clientHeight;
@@ -158,17 +244,10 @@ function init(md: HTMLElement) {
       const k = (depth + 1) / 2;
       const s = 0.4 + 0.6 * Math.pow(k, 1.6);
       const x = cx + rx * Math.sin(th), y = cy + ry * depth;
-      // falling onto the table (prototype 02): each dish lags a little behind the one before
-      const q = Math.min(1, Math.max(0, (fallP - i * 0.05) / (1 - (N - 1) * 0.05)));
-      const e = q * q; // gravity: slow at the top, fast at the table
-      const lift = (1 - e) * geo.H * (narrow.matches ? 0.22 : 0.26);
-      const rot = (1 - e) * (i % 2 ? 14 : -14);
-      if (q >= 1 && !d.dataset.landed) { d.dataset.landed = '1'; if (!reduce) d.querySelector('.mt-drop')!.animate({ scale: ['1 .86', '1 1.05', '1 1'] }, { duration: 460, easing: 'cubic-bezier(.23,1,.32,1)' }); }
-      else if (q < 0.98) delete d.dataset.landed;
-      d.style.transform = `translate(${(x - D / 2).toFixed(1)}px,${(y - D / 2 - D * 0.18 * k - lift).toFixed(1)}px) scale(${s.toFixed(3)}) rotate(${rot.toFixed(1)}deg)`;
+      d.style.transform = `translate(${(x - D / 2).toFixed(1)}px,${(y - D / 2 - D * 0.18 * k).toFixed(1)}px) scale(${s.toFixed(3)})`;
       d.style.zIndex = String(Math.round(k * 100));
       d.style.opacity = (0.35 + 0.65 * k).toFixed(2);
-      d.style.filter = k < 0.55 ? `brightness(${(0.6 + 0.5 * k).toFixed(2)})` : '';
+      d.style.setProperty('--dim', k < 0.55 ? (0.4 - 0.5 * k).toFixed(2) : '0'); // back dishes darken by an overlay (opacity), not by a filter
       if (depth > bestD) { bestD = depth; best = i; }
     });
     if (best !== front) setFront(best);
@@ -251,30 +330,22 @@ function init(md: HTMLElement) {
 
   // gentle turn every 4.5 s until the guest touches the table
   let auto = 0, touched = false, visible = false;
-  function interacted() { touched = true; clearInterval(auto); landAll(); }
+  function interacted() { touched = true; clearInterval(auto); }
   function wake() {
     if (reduce || touched || auto) return;
     auto = window.setInterval(() => { if (visible && !drag && !document.hidden && open !== 'drinks') spinTo(norm(angle) + STEP); }, 4500);
   }
 
   relayout();
-  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(mt);
+  box = { L: md.getBoundingClientRect().left, W: md.clientWidth, H: md.clientHeight };
+  paint();
+  if ('ResizeObserver' in window) {
+    // the table is measured again only when its box really changed (a side opened / closed, or the window resized)
+    new ResizeObserver(() => { if (mt.clientWidth !== geo.W || mt.clientHeight !== geo.H) relayout(); }).observe(mt);
+    new ResizeObserver(() => { box = { L: md.getBoundingClientRect().left, W: md.clientWidth, H: md.clientHeight }; paint(); }).observe(md);
+  }
+  narrow.addEventListener('change', () => { box = { L: md.getBoundingClientRect().left, W: md.clientWidth, H: md.clientHeight }; paint(); });
 
-  // the dishes fall onto the table as the page scrolls (land by 30% of this screen);
-  // opening the Food side, or touching the table, lands them without scrolling
-  const fall = () => {
-    const sp = Math.min(1, Math.max(0, window.scrollY / (md.offsetHeight * 0.3)));
-    fallP = Math.max(sp, autoP);
-    md.toggleAttribute('data-float', fallP < 0.02);
-    layout();
-  };
-  let fallRaf = 0;
-  addEventListener('scroll', () => { if (!fallRaf) fallRaf = requestAnimationFrame(() => { fallRaf = 0; fall(); }); }, { passive: true });
-  landAll = () => {
-    if (autoP >= 1) return;
-    if (reduce) { autoP = 1; fall(); return; }
-    mAnimate(autoP, 1, { duration: 1.1, ease: [0.55, 0, 1, 0.45], onUpdate: (v: number) => { autoP = v; fall(); } });
-  };
-  fall();
+  layout();
   inView(mt, () => { visible = true; wake(); return () => { visible = false; }; }, { amount: 0.3 });
 }

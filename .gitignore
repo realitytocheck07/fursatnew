@@ -4,6 +4,7 @@ dist/
 raw_assets/
 .env
 .env.*
+!.env.example
 review/photo-map.html
 
 # Large video files in public (block uncompressed raw, allow tracked production assets)
