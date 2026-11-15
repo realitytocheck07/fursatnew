@@ -3,7 +3,7 @@
 
 :root{--as-sans:var(--fk-sans,Poppins,system-ui,sans-serif);--as-serif:var(--fk-serif,"Playfair Display",Georgia,serif);--as-line:rgba(201,154,67,.35);--as-cream:#f6ecd8;--as-green-deep:#13301d;--as-ease:cubic-bezier(.23,1,.32,1);--as-sh:74 48 16}
 /* status chip: greeting + open/closed, from the real hours */
-.ah-status{display:inline-flex;align-items:center;gap:10px;margin:0 0 14px;padding:0 16px 0 12px;min-height:36px;border-radius:999px;background:var(--as-chip);color:var(--as-green);font:500 .8125rem/1.2 var(--as-sans)}
+.ah-status{display:inline-flex;align-items:center;gap:10px;margin:0 0 14px;padding:0 16px 0 12px;min-height:36px;border-radius:999px;background:var(--as-ivory,#fffaf2);border:1px solid rgba(201,154,67,.7);box-shadow:0 4px 12px -8px rgba(74,48,16,.45);color:var(--as-green);font:500 .8125rem/1.2 var(--as-sans)}
 .ah-dot{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:#2E7D32}
 .ah-dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;opacity:.5;animation:ah-ping 2.4s var(--as-ease) infinite}
 .ah-status[data-open="0"] .ah-dot{background:var(--as-gold-lo)}
@@ -11,9 +11,10 @@
 @keyframes ah-ping{0%{transform:scale(1);opacity:.5}70%,100%{transform:scale(2.6);opacity:0}}
 
 /* desk row inside the Ask card */
-.ah-desk{list-style:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:2px 8px;margin:6px 0 0;padding:6px 0 0;border-top:1px solid var(--as-line)}
-.ah-desk-l{flex-basis:100%;margin:2px 0 0;font:500 .75rem/1.3 var(--as-sans);letter-spacing:.14em;text-transform:uppercase;color:var(--as-mute)}
-.ah-desk li{display:contents}.ah-desk li.ah-desk-l{display:block}
+.ah-desk{list-style:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:2px 4px;margin:10px 0 0;padding:0}
+.ah-desk-l{flex-basis:100%;display:flex;align-items:center;gap:14px;margin:0 0 2px;font:600 .75rem/1.3 var(--as-sans);letter-spacing:.16em;text-transform:uppercase;color:#4a4232}
+.ah-desk-l::after{content:"";flex:1;max-width:260px;border-top:1px solid rgba(201,154,67,.6)}
+.ah-desk li{display:contents}.ah-desk li.ah-desk-l{display:flex}
 /* desk buttons are fk-btn fk-btn--ghost fk-btn--md in ask.astro: only the row layout lives here */
 
 /* the elephant host speaks */
@@ -44,3 +45,4 @@
 
 @media(prefers-reduced-motion:reduce){.ah-dot::after,.ah-card,.ah-typing i{animation:none}.ah-bubble{transition:none}}
 #as-results{scroll-margin-top:calc(var(--sh-h,78px) + 16px)}
+.ah-ans .ah-card{max-width:none;margin:0}

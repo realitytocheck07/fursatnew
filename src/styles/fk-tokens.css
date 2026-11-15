@@ -99,7 +99,7 @@
 /* Plaster surface for whole pages: seamless tile under the grain. */
 /* v5.6 one plaster for every page without background art (menu, banquet, catering, order, terms):
    the tile multiplied onto a warm base lands on the same peach cream as the hybrid art (#eed4b2 measured) */
-:root{--sh-h:104px;--fk-plaster-base:#f6e4c9;--fk-plaster:#f6e4c9 url(/assets/surface/plaster-tile.webp) 0 0/900px 900px;}
+:root{--sh-h:104px;--fk-plaster-base:#fdebcf;--fk-plaster:#ffefd2 url(/assets/surface/plaster-tile.webp) 0 0/900px 900px;}
 .fk-plaster{background:var(--fk-plaster);background-blend-mode:multiply}
 
 /* ===================================================================================

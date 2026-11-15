@@ -60,7 +60,7 @@
     where:function(){return{icon:"pin",title:"Find us",body:esc(D.address)+".",acts:btn(D.maps,"Open in Maps","",1)+btn("tel:+"+D.whatsapp,"Call us","ghost")}},
     party:function(){return{icon:"gift",title:"Parties and events",body:"Birthdays, corporate and kitty parties, bar parties, catering and the banquet hall. Plan it in three short steps right here, then we continue on WhatsApp.",acts:btn("#plan","Plan an event")+btn("/party","See party packages","ghost")}},
     call:function(){return{icon:"phone",title:"Call or WhatsApp",body:esc(D.phone)+". We reply on WhatsApp.",acts:btn("tel:+"+D.whatsapp,"Call us")+btn(WA+encodeURIComponent("Hi Fursat!"),"WhatsApp us","ghost",1)}},
-    hello:function(){return{icon:"hi",title:greet()+", welcome to Fursat",body:"Tell me what you feel like eating or drinking, or use the desk for a table, hours, directions or a party.",acts:""}}
+    hello:function(){return{icon:"hi",title:greet()+', welcome to <span class="brand-t">Fursat</span>',body:"Tell me what you feel like eating or drinking, or use the desk for a table, hours, directions or a party.",acts:""}}
   };
   var RULES=[
     ["hello",/^\s*(hi+|hello|hey+|namaste|good (morning|afternoon|evening))\W*$/],

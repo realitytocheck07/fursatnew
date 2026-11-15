@@ -17,7 +17,7 @@ HEROES = {
   'cafe':    ('arch.png',  [[('dishes/new/cappuccino.webp', (0.5, 0.5))], [('dishes/new/iced-latte.webp', (0.5, 0.5))], [('dishes/new/biscoff-cheesecake.webp', (0.5, 0.55))]]),
   'bar':     ('hex.png',   [[('dishes/new/fursat-rahasyam.webp', (0.5, 0.45))], [('dishes/new/guntur-karam-wings.webp', (0.5, 0.5))], [('dishes/new/chicken-tikka-angara.webp', (0.5, 0.5))]]),
   'party':   ('ovals.png', [[('venue/interior/long-table-dining.webp', (0.45, 0.62)), ('venue/banquet/banquet-hall-02.webp', (0.5, 0.45))],
-                            [('venue/interior/mural-booths.webp', (0.5, 0.5)), ('venue/banquet/banquet-tables-03.webp', (0.5, 0.55))]]),
+                            [('venue/interior/mural-booths.webp', (0.5, 0.5)), ('interior/fursat_space_08.webp', (0.5, 0.55))]]),
   'banquet': ('blob.png',  [[('venue/banquet/banquet-tables-05.webp', (0.5, 0.6))], [('venue/banquet/banquet-stage-01.webp', (0.5, 0.5))], [('venue/banquet/banquet-hall-04.webp', (0.5, 0.5))]]),
 }
 OUT = A + 'heroes/'
