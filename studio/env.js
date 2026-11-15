@@ -3,7 +3,7 @@
 const PLACEHOLDER = 'TODO_PROJECT_ID'
 
 export function readEnv({ projectId, dataset }) {
-  const rawId = (projectId || PLACEHOLDER).trim()
+  const rawId = (projectId || 'l7nho91v').trim() // public Fursat project ID; studio/.env can override
   const isPlaceholder = rawId === PLACEHOLDER
   return {
     isPlaceholder,

@@ -20,9 +20,12 @@ function env(name: string): string {
   return String((meta && meta[name]) ?? (proc && proc[name]) ?? '').trim();
 }
 
-/** Project ID and dataset from env. Returns null when the project is not set up yet. */
+// Public Sanity project ID (not a secret). An env value overrides it.
+const DEFAULT_PROJECT_ID = 'l7nho91v';
+
+/** Project ID and dataset from env, else the default. Returns null only if the ID is a placeholder. */
 export function getSanityConfig(): SanityConfig | null {
-  const projectId = env('PUBLIC_SANITY_PROJECT_ID');
+  const projectId = env('PUBLIC_SANITY_PROJECT_ID') || DEFAULT_PROJECT_ID;
   if (!projectId || projectId === 'TODO_PROJECT_ID') return null;
   return { projectId, dataset: env('PUBLIC_SANITY_DATASET') || 'production' };
 }
