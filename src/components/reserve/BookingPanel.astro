@@ -41,7 +41,7 @@ const conditions: string[] = [];
     <header class="rs-phead">
       <span class="rs-hicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg></span>
       <div class="rs-htxt">
-        <h2 id="rs-book-h" class="fk-ty-h3" tabindex="-1">Book Your Experience</h2>
+        <h1 id="rs-book-h" class="fk-ty-h3" tabindex="-1">Book Your Experience</h1>
         <p class="rs-psub">We confirm on WhatsApp. <span class="rs-reqnote">* Required</span></p>
       </div>
       <i class="rs-hrule" aria-hidden="true"></i>
@@ -171,12 +171,13 @@ const conditions: string[] = [];
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.1"/></svg>
         <span id="rs-err-t"></span>
       </p>
+      <p class="rs-cond" role="note">A request, not a confirmed booking. Not confirmed until we reply on WhatsApp.<br />{conditions.length ? conditions.join(' · ') + ' · ' : ''}Seating is a preference.</p>
+      <input type="checkbox" name="botcheck" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <button type="button" id="res-submit-btn" class="fk-btn fk-btn--primary rs-submit">
         <svg class="rs-cta-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg>
         <span>Request a Table</span>
         <svg class="rs-cta-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       </button>
-      <p class="rs-cond" role="note">A request, not a confirmed booking. Not confirmed until we reply on WhatsApp.<br />{conditions.length ? conditions.join(' · ') + ' · ' : ''}Seating is a preference.</p>
       <p class="rs-fine" id="rs-fine">Opens WhatsApp with your details.</p>
       <noscript><p class="rs-fine"><a href="https://wa.me/919059670033?text=Hi%20Fursat!%20I%20would%20like%20to%20reserve%20a%20table." target="_blank" rel="noopener">No JavaScript? Request a table on WhatsApp.</a></p></noscript>
     </div>
@@ -619,7 +620,6 @@ const conditions: string[] = [];
     renderAll();
     panel.scrollIntoView({ block: 'start' }); panel.focus({ preventScroll: true });
   }));
-  qsa('[data-scroll-book]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); panel.scrollIntoView({ block: 'start' }); panel.focus({ preventScroll: true }); }));
 
   /* ───────── submit: wa.me/919059670033 with the message (format unchanged) ───────── */
   const submit = $('res-submit-btn');
@@ -651,6 +651,7 @@ const conditions: string[] = [];
     const date = friendly(booking.date), seating = booking.zone || 'No preference', occasion = booking.occasion || 'Dining';
     const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (offerOf() ? '\n• Offer: ' + offerOf() : '');
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
+    window.fkForm?.send('restaurant', 'Table booking', { name, phone, guests: String(booking.guests), date, time: booking.time, seating, occasion, offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
     const w = window.open(url, '_blank');
     const fine = $('rs-fine');
     fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';

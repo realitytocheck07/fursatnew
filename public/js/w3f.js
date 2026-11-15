@@ -7,7 +7,7 @@
     send(kind, subject, fields, honeypot) {
       const key = keys[kind];
       if (!key) return Promise.resolve(false);
-      if (honeypot && (honeypot.checked || honeypot.value)) return Promise.resolve(true);
+      if (honeypot && (honeypot.type === 'checkbox' ? honeypot.checked : honeypot.value)) return Promise.resolve(true);
       const body = { access_key: key, subject: 'FURSAT website: ' + subject, from_name: 'FURSAT website', form: subject, page: location.pathname, ...fields };
       return fetch('https://api.web3forms.com/submit', {
         method: 'POST',

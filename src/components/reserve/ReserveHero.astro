@@ -1,6 +1,7 @@
 ---
 // ReserveHero.astro — /reserve hero (P3 restyle). Left column of the stage: real lounge photo in the blobDining organic frame
 // (warm grade + green vignette via CSS), headline, CTAs and the live ticket as a green card (same card position as the mock's address card).
+// The visible page title (h1) is "Book Your Experience" in the form below, so the headline here is a styled paragraph and the page has one h1 on every screen size. One CTA only: the form is on this page already.
 // The ticket is the existing LiveTicket 'aside' variant: it mirrors the form (aria-hidden) and is hidden ≤1040px where the inline copy shows inside the form.
 import OrganicFrame from '../fx/OrganicFrame.astro';
 import LiveTicket from './LiveTicket.astro';
@@ -12,7 +13,7 @@ import LiveTicket from './LiveTicket.astro';
     </div>
     <div class="fk-organic__body rs-hero-in">
       <p class="rs-hk rs-rise">Good food. Great company.</p>
-      <h1 class="fk-ty-h2 rs-h1 rs-rise" id="rs-h1">Your evening<br />deserves a <span class="rs-gold" data-t="Fursat.">Fursat.</span></h1>
+      <p class="fk-ty-h2 rs-h1 rs-rise" id="rs-h1">Your evening<br />deserves a <span class="rs-gold" data-t="Fursat.">Fursat.</span></p>
       <p class="rs-sub rs-rise rs-s" style="--rs-d:80ms">Experience the vibe. Feel the Fursat.</p>
       <svg class="rs-orn rs-rise" viewBox="0 0 260 16" aria-hidden="true">
         <defs>
@@ -25,10 +26,6 @@ import LiveTicket from './LiveTicket.astro';
       <div class="rs-cta rs-rise rs-c" style="--rs-d:140ms">
         <a class="fk-btn fk-btn--secondary fk-btn--md fk-btn--on-dark" href="/party">
           <span>Plan a Celebration</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="fk-btn fk-btn--primary fk-btn--md fk-btn--on-dark rs-btn-book" href="#book" data-scroll-book>
-          <span>Reserve a Table</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>

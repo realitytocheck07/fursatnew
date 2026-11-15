@@ -223,10 +223,14 @@ function init(md: HTMLElement) {
   function measure() {
     const W = mt.clientWidth, H = mt.clientHeight;
     const ph = narrow.matches;
-    const D = Math.max(56, Math.min(W * (ph ? 0.27 : 0.19), H * (ph ? 0.34 : 0.24)));
+    let D = Math.max(56, Math.min(W * (ph ? 0.27 : 0.19), H * (ph ? 0.34 : 0.24)));
     const rx = W * (ph ? 0.38 : 0.41), ry = Math.min(H * (ph ? 0.13 : 0.14), rx * 0.3);
+    // desktop: the caption (headline + "Full food menu") sits above the table; the table never rides up under it
+    const capBottom = ph ? 0 : Math.max(0, capF.getBoundingClientRect().bottom - mt.getBoundingClientRect().top) + 10;
+    if (capBottom) D = Math.max(56, Math.min(D, (H - 138 - capBottom - 2 * ry) / 0.77));
     // keep the front dish, its name (~50px) and the arrows (~70px) inside the panel
-    const cy = Math.min(H * (ph ? 0.36 : 0.56), H - (ph ? 114 : 138) - ry - D * 0.32);
+    let cy = Math.min(H * (ph ? 0.36 : 0.56), H - (ph ? 114 : 138) - ry - D * 0.32);
+    if (capBottom) cy = Math.max(cy, capBottom + ry + D * 0.45);
     geo = { W, H, cx: W / 2, cy, rx, ry, D };
     mt.style.setProperty('--d', D + 'px');
     mt.style.setProperty('--cy', (cy / H) * 100 + '%');

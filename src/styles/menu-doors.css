@@ -66,7 +66,7 @@
 .mt-dish.is-front .mt-drop::after{opacity:1}
 .mt-drop img,.mt-drop video{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;pointer-events:none}
 .mt-front{position:absolute;left:50%;top:var(--fy,70%);translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;pointer-events:none;width:90%;transition:opacity 300ms ease}
-.mt-front-l{font:600 .7rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mv-gold-hi)}
+.mt-front-l{font:600 .75rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:var(--mv-gold-hi)}
 .mt-front-n{font:500 clamp(1.1rem,1.7vw,1.5rem)/1.15 var(--mv-serif);color:var(--mv-text);text-wrap:balance}
 .mt-front-p{font:600 .95rem/1 var(--mv-sans);color:var(--mv-mute)}
 .mt-nav{position:absolute;left:50%;bottom:clamp(14px,3svh,26px);translate:-50% 0;display:flex;align-items:center;gap:10px;transition:opacity 300ms ease}
@@ -143,7 +143,7 @@
 @keyframes md-flow{0%{transform:translateY(0);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translateY(520%);opacity:0}}
 .md-tag,.md-x{position:absolute;z-index:5;left:var(--rest);top:clamp(18px,4svh,40px);translate:-50% 0;margin:0;border-radius:999px;white-space:nowrap;outline:1px solid rgb(255 226 166 / .9);transition:opacity 250ms ease}
 .md-tag{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 22px 9px;pointer-events:none;font:500 1.08rem/1.1 var(--mv-serif);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8)}
-.md-tag small{font:600 .62rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:#6b4513}
+.md-tag small{font:600 .75rem/1 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:#6b4513}
 .md[data-open] .md-tag{opacity:0}
 .md-tag::before,.md-x::before{content:"";position:absolute;inset:-20px -26px;z-index:-1;border-radius:999px;pointer-events:none;background:radial-gradient(closest-side,rgb(255 190 90 / .4),transparent)}
 .md-x{min-height:44px;padding:0 18px;border:0;cursor:pointer;font:600 .85rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8)}

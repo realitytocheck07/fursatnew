@@ -163,6 +163,7 @@ const ico: Record<string, string> = {
       <div class="eh-nav">
         <button type="button" class="fk-btn fk-btn--secondary" id="eh-back" hidden>Back</button>
         <button type="button" class="fk-btn fk-btn--primary" id="eh-next">Next</button>
+        <input type="checkbox" name="botcheck" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <button type="submit" class="fk-btn fk-btn--primary" id="eh-send" hidden>
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.040 2a9.900 9.900 0 0 0-8.470 15.040L2 22l5.100-1.340A9.900 9.900 0 1 0 12.040 2zm0 1.800a8.100 8.100 0 1 1-4.200 15.020l-.3-.18-3 .79.8-2.920-.2-.31A8.100 8.100 0 0 1 12.040 3.800z" /></svg>
           <span>Send on WhatsApp</span>
@@ -379,6 +380,7 @@ const ico: Record<string, string> = {
     // earlier steps were validated on Next; re-check quietly in case a field changed
     if (!(checkGuests() && checkDate() && checkTime())) { show(1, true); validate(1); return; }
     if (hasPkg() && !checkPkg()) { show(2, true); return; }
+    if (window.fkForm) window.fkForm.send('events', 'Event enquiry', { occasion: tiles[cur].name, guests: guests.value.trim(), date: date.value, time: time.value, name: name.value.trim(), phone: digits(), note: note.value.trim() }, form.querySelector('[name=botcheck]'));
     var url = 'https://wa.me/' + D.wa + '?text=' + encodeURIComponent(message());
     fine.textContent = 'Opening WhatsApp with your enquiry.';
     window.open(url, '_blank', 'noopener');

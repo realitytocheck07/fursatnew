@@ -7,9 +7,7 @@
 .ah-dot{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:#2E7D32}
 .ah-dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;opacity:.5;animation:ah-ping 2.4s var(--as-ease) infinite}
 .ah-status[data-open="0"] .ah-dot{background:var(--as-gold-lo)}
-.ah-sep{opacity:.5}
 .ah-status{white-space:nowrap;max-width:100%}
-@media(max-width:560px){#ah-greet,.ah-sep{display:none}}
 @keyframes ah-ping{0%{transform:scale(1);opacity:.5}70%,100%{transform:scale(2.6);opacity:0}}
 
 /* desk row inside the Ask card */
@@ -19,8 +17,7 @@
 /* desk buttons are fk-btn fk-btn--ghost fk-btn--md in ask.astro: only the row layout lives here */
 
 /* the elephant host speaks */
-.ah-frame{position:relative}
-.ah-bubble{position:absolute;z-index:5;right:calc(100% - 18px);top:6%;display:flex;align-items:center;gap:10px;width:max-content;max-width:260px;min-height:44px;padding:10px 18px;border:0;border-radius:22px 22px 22px 6px;background:rgb(252 249 238/.96);color:var(--as-green);font:500 .875rem/1.35 var(--as-sans);text-align:left;cursor:pointer;touch-action:manipulation;box-shadow:0 10px 26px rgb(var(--as-sh)/.28);transition:transform .15s var(--as-ease)}
+.ah-bubble{position:absolute;z-index:5;left:56%;bottom:24%;display:flex;align-items:center;gap:10px;width:max-content;max-width:260px;min-height:44px;padding:10px 18px;border:0;border-radius:22px 22px 22px 6px;background:rgb(252 249 238/.96);color:var(--as-green);font:500 .875rem/1.35 var(--as-sans);text-align:left;cursor:pointer;touch-action:manipulation;box-shadow:0 10px 26px rgb(var(--as-sh)/.28);transition:transform .15s var(--as-ease)}
 .ah-bubble[hidden]{display:none}
 @media(max-width:899px){.ah-bubble{display:none!important}}
 .ah-bubble:active{transform:scale(.97)}

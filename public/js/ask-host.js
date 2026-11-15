@@ -36,8 +36,7 @@
   /* ---------- status chip ---------- */
   var chip=document.getElementById("ah-status");
   function paintStatus(){
-    if(!chip)return;var s=status(),g=document.getElementById("ah-greet"),o=document.getElementById("ah-open");
-    if(g)g.textContent=greet();
+    if(!chip)return;var s=status(),o=document.getElementById("ah-open");
     if(o)o.textContent=s.open?"Open now, until "+s.until:"Closed now, opens "+(s.today?"":"tomorrow ")+s.next;
     chip.setAttribute("data-open",s.open?"1":"0");
   }
@@ -107,7 +106,7 @@
   document.querySelectorAll("[data-desk]").forEach(function(b){b.addEventListener("click",function(){q.value="";show(b.getAttribute("data-desk"))})});
 
   /* ---------- the host speaks: a bubble beside the elephant, real prompts only ---------- */
-  var bub=document.getElementById("ah-bubble"),photo=document.querySelector(".ah-frame");
+  var bub=document.getElementById("ah-bubble"),photo=document.querySelector(".ah-hero");
   if(bub&&photo){
     var P=[
       {t:"Hungry? Try “something spicy under 400”",q:"Something spicy under 400"},
