@@ -29,15 +29,27 @@ import CornerHero from '../components/CornerHero.astro';
       alt="The Fursat banquet hall set with long red and gold tables, framed in gold"
       ctas={[{ label: 'Build your menu', href: '#packages', primary: true }, { label: 'Enquire for dates', href: '#enquire' }]} />
 
-    <!-- Venue facts: one plain line. TODO(client): confirm each fact. -->
-    <section class="bq-specs" aria-label="Venue facts">
+    <!-- Venue Capacity & Specs -->
+    <section class="bq-specs">
       <div class="bq-container">
-        <p class="bq-facts">
-          <span>Up to <b>350</b> guests floating</span>
-          <span><b>220</b> seated at round tables</span>
-          <span><b>4K</b> dual laser projection &amp; AV</span>
-          <span><b>100%</b> valet parking &amp; lift access</span>
-        </p>
+        <div class="bq-specs-grid">
+          <div class="bq-spec-box">
+            <span class="bq-spec-val">350</span>
+            <span class="bq-spec-lbl">Max Floating Capacity</span>
+          </div>
+          <div class="bq-spec-box">
+            <span class="bq-spec-val">220</span>
+            <span class="bq-spec-lbl">Round-Table Seating</span>
+          </div>
+          <div class="bq-spec-box">
+            <span class="bq-spec-val">4K</span>
+            <span class="bq-spec-lbl">Dual Laser Projection & AV</span>
+          </div>
+          <div class="bq-spec-box">
+            <span class="bq-spec-val">100%</span>
+            <span class="bq-spec-lbl">Valet Parking & Lift Access</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -253,22 +265,29 @@ import CornerHero from '../components/CornerHero.astro';
     font-weight: 700;
     text-decoration: none}
 
-  /* Venue facts: one plain line */
+  /* Specs Bar */
   .bq-specs {
+    background: #efd8b8;
     border-top: 1px solid rgba(201,154,67,0.40);
     border-bottom: 1px solid rgba(201,154,67,0.40);
-    padding: 20px 0}
-  .bq-facts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 28px;
-    margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #4a4232;
+    padding: 32px 0}
+  .bq-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 24px;
     text-align: center}
-  .bq-facts b { font-family: var(--fk-serif); font-size: 1.15rem; color: #74501a}
+  .bq-spec-val {
+    font-family:var(--fk-serif);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #74501a;
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px}
+  .bq-spec-lbl {
+    font-size: 0.85rem;
+    color: #4a4232;
+    font-weight: 600}
 
   /* Gallery */
   .bq-gallery {

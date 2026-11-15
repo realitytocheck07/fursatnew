@@ -15,7 +15,7 @@ import '../../styles/fk-tokens.css';
 interface Cta { label: string; href: string; primary?: boolean; book?: boolean }
 interface Pillar { icon: string; title: string; line: string }
 interface Photo { src: string; alt: string; pos?: string; w?: number; h?: number }
-interface Card { tag?: string; name: string; price?: string; text?: string; img?: Photo; icon?: string }
+interface Card { tag?: string; name: string; price?: string; text: string; img?: Photo; icon?: string }
 interface Props {
   active: string; mobileActive?: string;
   kicker: string; h1a: string; h1b: string; lead: string; ctas: Cta[];
@@ -39,14 +39,15 @@ const icons: Record<string, string> = {
   menu: '<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
 };
 const elephant = 'M109.5 10.2 L100.2 6.0 L81.5 4.0 L70.5 8.0 L61.0 18.5 L60.0 24.2 L62.8 30.5 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L79.5 24.0 L76.2 27.0 L71.8 25.2 L71.8 22.5 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L88.2 44.0 L73.5 52.0 L64.5 58.0 L55.0 67.5 L51.0 74.5 L48.0 83.5 L48.0 98.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L80.2 119.8 L88.2 116.8 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L89.2 123.0 L82.2 126.0 L66.5 126.0 L56.5 122.0 L50.2 118.0 L43.8 110.2 L40.2 102.0 L29.5 107.0 L20.2 114.2 L14.0 123.5 L5.2 139.2 L13.2 138.0 L13.0 150.2 L12.0 160.2 L13.0 166.2 L14.5 170.8 L35.2 170.8 L35.8 163.5 L39.8 157.2 L48.2 155.8 L53.0 160.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L78.2 157.0 L86.2 155.8 L92.0 161.5 L92.5 170.8 L117.8 170.2 L116.8 159.5 L115.8 142.5 L117.8 127.5 L125.8 114.2 L130.8 103.2 L133.8 94.2 L135.8 81.2 L135.8 64.5 L133.8 55.2 L128.8 39.2 L121.8 24.5Z';
-// a card without its own photo is a clean text card (no stand-in photo)
+// cards without their own photo (e.g. cocktails) use real bar photos
+const cardFallback: Photo[] = [{ src: '/assets/interior/bar-front.webp', alt: '' }, { src: '/assets/interior/bar-back.webp', alt: '' }, { src: '/assets/interior/tour-bar.webp', alt: '' }, { src: '/assets/tour/img/sm/bar.webp', alt: '' }];
 // Resized files next to each photo (name-480.webp, name-720.webp). Value: [width of the original, widths made, factor].
 // factor > 1 = a wide photo cropped into a 4:3 box, which needs more pixels than the box is wide.
 const VAR: Record<string, [number, number[], number?]> = {
   '/assets/interior/fursat_space_05': [1280, [480, 720]], '/assets/interior/fursat_space_15': [1280, [480, 720]], '/assets/interior/fursat_space_06': [1280, [480, 720]],
   '/assets/dishes/new/cafe-mocha': [1067, [480, 720]], '/assets/dishes/new/cappuccino': [1067, [480, 720]], '/assets/dishes/new/iced-latte': [1067, [480, 720]], '/assets/dishes/new/og-french-toast': [1107, [480, 720]],
   '/assets/dishes/new/chicken-tikka-angara': [1067, [480, 720]], '/assets/dishes/new/guntur-karam-wings': [1138, [480, 720]], '/assets/dishes/new/nalla-karam-kodi-vepudu': [1067, [480, 720]],
-  '/assets/dishes/new/fursat-rahasyam': [1067, [480, 720]], '/assets/dishes/new/gongura-muchatlu': [1067, [480, 720]], '/assets/dishes/new/life-fursat-bhai': [1067, [480, 720]],
+  '/assets/dishes/new/fursat-rahasyam': [1067, [480, 720]], '/assets/dishes/new/gongura-muchatlu': [1067, [480, 720]],
   '/assets/interior/tour-bar': [1050, [480, 720]], '/assets/interior/bar-front': [1200, [720], 2.15],
 };
 const srcsetOf = (src: string) => { const b = src.replace(/\.webp$/, ''); const v = VAR[b]; return v ? [...v[1].map((w) => `${b}-${w}.webp ${w}w`), `${src} ${v[0]}w`].join(', ') : undefined; };
@@ -64,9 +65,12 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
   <CornerHero page={heroKey} id="xp-h1" kicker={p.kicker} h1a={p.h1a} h1b={p.h1b} lead={p.lead} ctas={p.ctas} alt={p.hero.alt} />
 
   <section class="xp-band" aria-label={`${p.h1a} highlights`}>
-    <ul class="xp-facts" data-fk-stagger="80">
+    <ul class="xp-pillars" data-fk-stagger="80">
       {p.pillars.map((pl) => (
-        <li class="xp-fact"><strong class="fk-ty-h4">{pl.title}</strong><span>{pl.line}</span></li>
+        <li class="xp-pillar">
+          <span class="xp-ring"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[pl.icon]} /></span>
+          <span class="xp-pt"><strong class="fk-ty-h4">{pl.title}</strong><small>{pl.line}</small></span>
+        </li>
       ))}
     </ul>
 
@@ -99,17 +103,15 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
       <h2 class="xp-sec-h fk-ty-h2" id="xp-cards-h">{p.cardsTitle}</h2>
       <ul class="xp-cards fk-cards" data-fx-pop>
         {p.cards.map((c, i) => (
-          <li class:list={['fk-card', { 'fk-card--text': !c.img }]} data-fx-tilt>
-            {c.img && (
-              <div class="fk-card__ph">
-                <img src={c.img.src} srcset={srcsetOf(c.img.src)} sizes={cardSizes(c.img.src)} alt={c.img.alt} width="600" height="450" loading="lazy" decoding="async" />
-                <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon ?? p.pillars[i % p.pillars.length].icon]} /></span>
-              </div>
-            )}
+          <li class="fk-card" data-fx-tilt>
+            <div class="fk-card__ph">
+              <img src={(c.img ?? cardFallback[i % cardFallback.length]).src} srcset={srcsetOf((c.img ?? cardFallback[i % cardFallback.length]).src)} sizes={cardSizes((c.img ?? cardFallback[i % cardFallback.length]).src)} alt={c.img?.alt ?? ''} width="600" height="450" loading="lazy" decoding="async" />
+              <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon ?? p.pillars[i % p.pillars.length].icon]} /></span>
+            </div>
             <div class="fk-card__b">
               {c.tag && <span class="fk-card__tag">{c.tag}</span>}
               <h3 class="fk-card__t fk-ty-h4">{c.name}</h3>
-              {c.text && <p class="fk-card__p">{c.text}</p>}
+              <p class="fk-card__p">{c.text}</p>
               <div class="fk-card__foot">
                 {c.price ? <span class="fk-card__price" data-fx-count>{c.price}</span> : <span></span>}
                 <a class="fk-card__go" href={p.cardsLink?.href ?? '/menu'} aria-label={`${c.name} on the menu`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></a>
@@ -166,11 +168,13 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
   /* below the stage: the green band continues */
   /* v5.17 band under the corner hero: highlights, moments photos, closing line (replaces the old traced art stage) */
   .xp-band { background: radial-gradient(120% 80% at 50% 0%, #1b3a26 0%, #10261a 70%); color: #fbf3e6; padding: clamp(40px, 5vw, 72px) clamp(16px, 5vw, 80px); }
-  .xp-facts { max-width: 1240px; margin: 0 auto clamp(40px, 5vw, 72px); display: flex; flex-wrap: wrap; justify-content: center; border-block: 1px solid rgba(243,197,107,.32); }
-  .xp-fact { flex: 1 1 220px; display: grid; gap: 4px; padding: 20px clamp(14px, 2vw, 28px); text-align: center; }
-  .xp-fact + .xp-fact { border-left: 1px solid rgba(243,197,107,.22); }
-  .xp-fact strong { color: #f3c56b; }
-  .xp-fact span { font: 400 .94rem/1.5 var(--fk-sans); color: rgba(246,234,214,.86); }
+  .xp-pillars { max-width: 1240px; margin: 0 auto clamp(40px, 5vw, 72px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px); }
+  .xp-pillar { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 22px 16px; border-radius: 22px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(243,197,107,.28); }
+  .xp-ring { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #2b5236, #14321e); box-shadow: 0 0 0 2px #c99a43, 0 0 0 6px rgba(201,154,67,.16); }
+  .xp-ring svg { width: 30px; height: 30px; fill: none; stroke: #f3c56b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .xp-pt { display: grid; gap: 4px; }
+  .xp-pt strong { color: #fbf3e6; }
+  .xp-pt small { font: 400 .88rem/1.45 var(--fk-sans); color: rgba(246,234,214,.78); }
   .xp-moments { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
   .xp-mo-text { display: grid; gap: 16px; justify-items: start; }
   .xp-h2 { color: #fbf3e6; }
@@ -186,8 +190,8 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
   .xp-orn { display: flex; align-items: center; gap: 14px; width: min(300px, 70%); }
   .xp-orn i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #c99a43, transparent); }
   .xp-orn svg { width: 28px; height: 34px; fill: #eda05a; }
-  @media (max-width: 900px) { .xp-moments { grid-template-columns: 1fr; } }
-  @media (max-width: 700px) { .xp-fact { flex-basis: 100%; text-align: left; padding: 14px 4px; } .xp-fact + .xp-fact { border-left: 0; border-top: 1px solid rgba(243,197,107,.22); } }
+  @media (max-width: 900px) { .xp-pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xp-moments { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { .xp-pt small { display: none; } .xp-pillar { padding: 18px 10px; } }
   .xp-cards-sec, .xp-faq { background: #10261a; padding: clamp(32px, 4vw, 64px) clamp(16px, 5vw, 80px) clamp(40px, 5vw, 72px); text-align: center; }
   .xp-sec-kicker { font: 600 .78rem/1.3 var(--fk-sans); letter-spacing: .2em; text-transform: uppercase; color: #e8c27a; }
   .xp-sec-h { color: #fbf3e6; margin: .35rem 0 clamp(24px, 3vw, 40px) !important; }

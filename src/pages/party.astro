@@ -6,23 +6,37 @@ import PartyStage from '../components/party/PartyStage';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import MobileBar from '../components/MobileBar.astro';
+import HyWindows from '../components/hybrid/HyWindows.astro';
 import CornerHero from '../components/CornerHero.astro';
+import pDesk from '../../scripts/bg-specs/party-desk.out.json';
 import '../styles/fk-tokens.css';
 // v4 hybrid: textless background art (public/assets/bg/party-*) + live HTML; motion in src/scripts/fk-motion.ts.
 // P5 restyle: one real photo per package group (TODO(client): real banquet-hall and party photos).
 const closePhoto = { src: '/assets/interior/tour-high-tables.webp', alt: 'High tables at Fursat ready for a party', w: 1050, h: 1400, pos: '50% 55%' };
-// each package group has its own real photos (no shared shelf photo)
+const elephant = 'M109.5 10.2 L100.2 6.0 L81.5 4.0 L70.5 8.0 L61.0 18.5 L60.0 24.2 L62.8 30.5 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L79.5 24.0 L76.2 27.0 L71.8 25.2 L71.8 22.5 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L88.2 44.0 L73.5 52.0 L64.5 58.0 L55.0 67.5 L51.0 74.5 L48.0 83.5 L48.0 98.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L80.2 119.8 L88.2 116.8 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L89.2 123.0 L82.2 126.0 L66.5 126.0 L56.5 122.0 L50.2 118.0 L43.8 110.2 L40.2 102.0 L29.5 107.0 L20.2 114.2 L14.0 123.5 L5.2 139.2 L13.2 138.0 L13.0 150.2 L12.0 160.2 L13.0 166.2 L14.5 170.8 L35.2 170.8 L35.8 163.5 L39.8 157.2 L48.2 155.8 L53.0 160.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L78.2 157.0 L86.2 155.8 L92.0 161.5 L92.5 170.8 L117.8 170.2 L116.8 159.5 L115.8 142.5 L117.8 127.5 L125.8 114.2 L130.8 103.2 L133.8 94.2 L135.8 81.2 L135.8 64.5 L133.8 55.2 L128.8 39.2 L121.8 24.5Z';
+const why = [
+  { t: 'Exquisite Cuisine', i: '<path d="M3 20h18"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4M10 4h4"/>' },
+  { t: 'Elegant Ambience', i: '<path d="M9 3h6l2 6H7z"/><path d="M12 9v9M8 21h8"/><path d="M5 9h14"/>' },
+  { t: 'Warm Hospitality', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { t: 'Prime Location', i: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>' },
+];
 const cardPhotos: Record<string, string[]> = {
-  bar: ['/assets/tour/img/sm/lounge.webp', '/assets/tour/img/sm/sofa-corner.webp', '/assets/tour/img/sm/booths.webp', '/assets/tour/img/sm/garden-window.webp'],
-  elite: ['/assets/tour/img/sm/dining.webp', '/assets/venue/interior/long-table-dining-720.webp'],
-  banquet: ['/assets/venue/banquet/banquet-hall-02-720.webp', '/assets/venue/banquet/banquet-hall-04-720.webp', '/assets/venue/banquet/banquet-stage-01-720.webp', '/assets/venue/banquet/banquet-tables-05-720.webp', '/assets/venue/banquet/banquet-hall-06-720.webp'],
+  bar: ['/assets/interior/bar-front.webp', '/assets/interior/bar-back.webp', '/assets/interior/tour-bar.webp', '/assets/tour/img/sm/bar.webp'],
+  elite: ['/assets/tour/img/sm/dining.webp', '/assets/tour/img/sm/lounge.webp'],
+  banquet: ['/assets/tour/img/sm/booths.webp', '/assets/tour/img/sm/high-tables.webp', '/assets/tour/img/sm/sofa-corner.webp', '/assets/tour/img/sm/table-for-two.webp', '/assets/tour/img/sm/garden-window.webp'],
 };
 const groupIcon: Record<string, string> = {
   bar: '<path d="M4 4h16l-8 9z"/><path d="M12 13v7M8 20h8"/>',
   elite: '<path d="M3 20h18"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4M10 4h4"/>',
   banquet: '<path d="M8 21h8M12 15v6M7 3h10l-1 7a4 4 0 0 1-8 0z"/>',
 };
-const cardPhoto = (g: string, i: number) => cardPhotos[g][i % cardPhotos[g].length];
+// Resized files next to the package-card photos (name-480.webp, name-720.webp). Value: [width of the original, widths made, factor].
+// factor > 1 = a wide photo cropped into a 4:3 box, which needs more pixels than the box is wide.
+const VAR: Record<string, [number, number[], number?]> = { '/assets/interior/bar-front': [1200, [720], 2.15], '/assets/interior/bar-back': [1200, [480, 720]], '/assets/interior/tour-bar': [1050, [480, 720]] };
+const srcsetOf = (src: string) => { const b = src.replace(/\.webp$/, ''); const v = VAR[b]; return v ? [...v[1].map((w) => `${b}-${w}.webp ${w}w`), `${src} ${v[0]}w`].join(', ') : undefined; };
+const pkSizes = (src: string) => { const k = VAR[src.replace(/\.webp$/, '')]?.[2]; const m = (n: string) => (k ? `calc(${n} * ${k})` : n); return `(max-width: 393px) ${m('84vw')}, (max-width: 899px) ${m('330px')}, ${m('280px')}`; };
+const cardPhoto = (g: string, i: number) => (cardPhotos[g] || [])[i % (cardPhotos[g] || ['']).length] || groupPhoto[g];
+const groupPhoto: Record<string, string> = { bar: '/assets/tour/img/sm/bar.webp', elite: '/assets/tour/img/sm/dining.webp', banquet: '/assets/tour/img/sm/booths.webp' };
 // CLIENT/LEGAL TO CONFIRM: liquor brand names stay off the public page until cleared (Telangana excise advertising rules).
 const SHOW_LIQUOR_BRANDS = false;
 // ASSUMPTION TO CONFIRM: the printed prices ("4999+Taxes") read as per guest.
@@ -36,9 +50,9 @@ const waHi = waBase + encodeURIComponent('Hi Fursat! I would like to plan a part
 const groupOf = (id: string) => data.groups.find((g: any) => g.id === id)!;
 const fromPrice = (id: string) => Math.min(...data.packages.filter((p: any) => p.group === id).map((p: any) => p.price));
 const occasions = [
-  { id: 'birthday', t: 'Birthdays & anniversaries', g: 'elite', cta: 'Buffet packages for birthdays', base: '/assets/venue/interior/long-table-dining', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'A long table set for a group celebration at Fursat' },
+  { id: 'birthday', t: 'Birthdays & anniversaries', g: 'elite', base: '/assets/venue/interior/long-table-dining', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'A long table set for a group celebration at Fursat' },
   { id: 'corporate', t: 'Corporate gatherings', g: 'banquet', base: '/assets/venue/banquet/banquet-tables-03', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'The banquet hall in a U-shaped layout for a corporate meeting', link: { href: '/banquet#enquire', label: 'Enquire about the hall' } },
-  { id: 'kitty', t: 'Kitty parties', g: 'elite', cta: 'Buffet packages for kitty parties', base: '/assets/venue/interior/mural-booths', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'Booths beside the Hyderabad mural wall at Fursat' },
+  { id: 'kitty', t: 'Kitty parties', g: 'elite', base: '/assets/venue/interior/mural-booths', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'Booths beside the Hyderabad mural wall at Fursat' },
   { id: 'barbash', t: 'Bar bashes', g: 'bar', base: '/assets/interior/fursat_space_08', sized: true, ow: 1280, w: 1280, h: 1706, alt: 'The bar counter at Fursat', note: 'Alcohol is served to guests aged 21 and above only.' },
 ];
 ---
@@ -53,7 +67,8 @@ const occasions = [
     alt="Two oval gold windows showing the Fursat dining hall and the banquet hall, set for a party"
     ctas={[{ label: 'Explore our packages', href: '#pk-main', primary: true }, { label: 'Chat on WhatsApp', href: waHi, external: true }]} />
   <div class="hy pa-hy">
-    <div class="hy-slice hy-mid" aria-hidden="true"></div>
+    <div class="hy-slice hy-mid" aria-hidden="true"></div><div class="hy-slice hy-bot" aria-hidden="true"></div>
+    <HyWindows data={pDesk} slice={2} photos={[closePhoto]} view="d" anchor="bottom" />
 
     <div class="hy-flow pa-flow">
   <section class="pa-occ" aria-labelledby="pa-occ-h">
@@ -75,7 +90,7 @@ const occasions = [
             <p class="fk-card__p">{groupOf(o.g).blurb}{o.note ? ' ' + o.note : ''}</p>
             <p class="fk-card__price"><span>From {inr(fromPrice(o.g))}</span><small>+ taxes, {UNIT}</small></p>
             <div class="pa-oc-act">
-              <button type="button" class="fk-btn fk-btn--primary fk-btn--md" data-occ={o.g}><span>{o.cta ?? `See ${groupOf(o.g).label} packages`}</span></button>
+              <button type="button" class="fk-btn fk-btn--primary fk-btn--md" data-occ={o.g}><span>See {groupOf(o.g).label} packages</span></button>
               {o.link && <a class="fk-btn fk-btn--secondary fk-btn--md" href={o.link.href}><span>{o.link.label}</span></a>}
             </div>
           </div>
@@ -95,10 +110,9 @@ const occasions = [
         <div class="pk-row">
           {data.packages.filter((p: any) => p.group === g.id).map((p: any, i: number) => (
             <article class="pk fk-card" style={`--i:${i}`} data-id={p.id} data-price={p.price} data-name={p.name}>
-              <div class="pk-ph fk-card__ph" aria-hidden="true"><img src={cardPhoto(p.group, i)} sizes="(max-width: 767px) 84vw, 280px" alt="" width="540" height="720" loading="lazy" decoding="async" /><span class="fk-card__badge"><svg viewBox="0 0 24 24" set:html={groupIcon[p.group]} /></span></div>
+              <div class="pk-ph fk-card__ph" aria-hidden="true"><img src={cardPhoto(p.group, i)} srcset={srcsetOf(cardPhoto(p.group, i))} sizes={pkSizes(cardPhoto(p.group, i))} alt="" width="540" height="720" loading="lazy" decoding="async" /><span class="fk-card__badge"><svg viewBox="0 0 24 24" set:html={groupIcon[p.group]} /></span></div>
               <div class="pk-face fk-card__b" data-tone={p.tone}>
                 <h3 class="fk-card__t fk-ty-h4">{p.name}</h3>
-                <p class="pk-price"><span class="pk-amt" data-fx-count>{inr(p.price)}</span><small class="pk-unit">+ taxes, {UNIT}</small></p>
                 <dl class="pk-sum">
                   {lead(p).map(([h, v]: string[]) => <div><dt>{h}</dt><dd>{v}</dd></div>)}
                   {p.drinks && <div><dt>Drinks{p.drinks.serve ? ' \u00b7 ' + p.drinks.serve : ''}</dt><dd>{p.drinks.lines.join(' \u00b7 ')}</dd></div>}
@@ -120,7 +134,8 @@ const occasions = [
                   )}
                 </details>
                 {p.group === 'banquet' && <a class="pk-build" href={`/banquet?pkg=${p.id}#packages`}>Choose the dishes for this menu <span aria-hidden="true">→</span></a>}
-                <div class="fk-card__foot pk-foot">
+                <div class="fk-card__foot">
+                  <p class="pk-price fk-card__price"><span class="pk-amt" data-fx-count>{inr(p.price)}</span><small class="pk-unit">+ taxes, {UNIT}</small></p>
                   <button class="pk-plan fk-card__go" type="button" data-plan={p.id} aria-label={`Plan this party: ${p.name}`} title="Plan this party"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
                 </div>
               </div>
@@ -168,17 +183,27 @@ const occasions = [
   </main>
     </div>
 
-  </div>
-  <section class="pa-end" aria-labelledby="pa-close-h">
-    <figure class="pa-end-ph"><img src={closePhoto.src} alt={closePhoto.alt} width={closePhoto.w} height={closePhoto.h} loading="lazy" decoding="async" style={`object-position:${closePhoto.pos}`} /></figure>
-    <div class="pa-end-tx" data-fx-reveal>
-      <blockquote class="pa-end-q">Good food, great company and unforgettable moments.</blockquote>
-      <p class="pa-end-line">Exquisite cuisine &middot; Elegant ambience &middot; Warm hospitality &middot; Prime location</p>
+    <figure class="pa-quote" data-fx-reveal>
+      <svg class="pa-qm" viewBox="0 0 40 32" aria-hidden="true"><path d="M0 32V18C0 8 6 2 16 0l2 5c-6 2-9 6-9 11h8v16zm22 0V18c0-10 6-16 16-18l2 5c-6 2-9 6-9 11h8v16z"/></svg>
+      <blockquote>Good food, great company and unforgettable moments.</blockquote>
+      <div class="hy-orn pa-q-orn" aria-hidden="true"><i></i><svg viewBox="0 0 140 176"><path d={elephant} /></svg><i></i></div>
+    </figure>
+
+    <div class="pa-why">
+      <h2 class="fk-ty-h2 hy-h2 pa-why-h" data-fx-reveal>Why Choose FURSAT?</h2>
+      <ul class="pa-plates" data-fx-pop>
+        {why.map((w, i) => (
+          <li class={`pa-plate pa-plate--${i + 1}`} data-fx-tilt><svg viewBox="0 0 24 24" aria-hidden="true" set:html={w.i} /><span>{w.t}</span></li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="pa-close" data-fx-reveal>
       <h2 id="pa-close-h" class="fk-ty-h2">Let&rsquo;s Celebrate <em>Together</em></h2>
       <p>Pick a package above and send your plan on WhatsApp. We confirm every party personally.</p>
       <a class="fk-btn fk-btn--primary fk-btn--md fk-btn--on-dark" href={waHi} target="_blank" rel="noopener"><span>Plan on WhatsApp</span></a>
     </div>
-  </section>
+  </div>
 </div>
 <InstaFollow handle="fursatbanquets" />
 <SiteFooter />
@@ -280,13 +305,41 @@ const occasions = [
 
 /* ───────── v4 hybrid stage ───────── */
 .pa{flex:none;background:#f6e6d1;color:var(--fk-ink);font-family:var(--fk-sans)}
-.pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:0;background:#f6e6d1}
-.pa-flow{padding:clamp(24px,3vw,48px) 0 clamp(40px,5vw,72px);z-index:3}
+.pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:500;background:#f6e6d1}
+.pa-flow{padding:clamp(24px,3vw,48px) 0 calc(520 * var(--u));z-index:3}
 .pa .pa-main{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
 
+.pa-quote{z-index:3;margin:0;left:calc(70 * var(--u));bottom:calc(270 * var(--u));width:calc(340 * var(--u));color:#fbf3e6;display:grid;gap:calc(14 * var(--u))}
+.pa-qm{width:calc(34 * var(--u));min-width:22px;height:auto;fill:#e8a85a}
+.pa-quote blockquote{margin:0;font:italic 500 calc(31 * var(--u))/1.25 var(--fk-serif);color:#fbf3e6;text-wrap:balance}
+.pa-q-orn{width:calc(220 * var(--u))}
+.pa-q-orn svg{fill:#e8c27a}
+.pa-why{z-index:3;left:calc(520 * var(--u));bottom:calc(270 * var(--u));width:calc(460 * var(--u));height:calc(200 * var(--u))}
+
+.pa-plates{list-style:none;margin:0;padding:0;position:absolute;inset:0}
+.pa-plate{position:absolute;top:calc(63 * var(--u));width:calc(104 * var(--u));height:calc(128 * var(--u));translate:-50% 0;display:grid;place-content:center;justify-items:center;gap:calc(8 * var(--u));text-align:center}
+.pa-plate--1{left:calc(58 * var(--u))}.pa-plate--2{left:calc(170 * var(--u))}.pa-plate--3{left:calc(280 * var(--u))}.pa-plate--4{left:calc(392 * var(--u))}
+.pa-plate svg{width:calc(32 * var(--u));min-width:18px;height:auto;fill:none;stroke:#1b3a26;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.pa-plate span{font:500 max(12px,calc(14 * var(--u)))/1.15 var(--fk-serif);color:#1b3a26;max-width:calc(84 * var(--u))}
+.pa-close{z-index:3;left:calc(60 * var(--u));bottom:calc(46 * var(--u));width:calc(470 * var(--u));display:grid;gap:calc(14 * var(--u));justify-items:start;color:#fbf3e6}
+
+.pa-close p{margin:0;font:400 clamp(12.5px,calc(15 * var(--u)),1.15rem)/1.55 var(--fk-sans);color:rgba(246,234,214,.86);max-width:44ch}
 @media(max-width:767px){
-  .pa-hy{--mid:url(/assets/bg/party-phone-1.webp);--th:2;--bh:0}
-  .pa-flow{padding:24px 0 40px}
+  .pa-hy{--mid:url(/assets/bg/party-phone-1.webp);--bot:url(/assets/bg/party-phone-2.webp);--th:2;--bh:878.7}
+  .pa-flow{padding:24px 0 calc(900 * var(--u))}
+  .pa-quote{left:calc(90 * var(--u));right:calc(90 * var(--u));width:auto;bottom:calc(612 * var(--u));justify-items:center;text-align:center;gap:2px}
+  .pa-qm{display:none}
+  .pa-quote blockquote{font-size:calc(43 * var(--u))}
+  .pa-q-orn{width:calc(360 * var(--u))}
+  .pa-why{left:0;width:100%;bottom:calc(318 * var(--u));height:calc(222 * var(--u))}
+  
+  .pa-plate{top:calc(22 * var(--u));width:calc(220 * var(--u));height:calc(190 * var(--u));gap:3px}
+  .pa-plate--1{left:calc(157 * var(--u))}.pa-plate--2{left:calc(388 * var(--u))}.pa-plate--3{left:calc(613 * var(--u))}.pa-plate--4{left:calc(840 * var(--u))}
+  .pa-plate span{font-size:12px;line-height:1.1;max-width:calc(200 * var(--u))}
+  .pa-plate svg{min-width:15px}
+  .pa-close{left:0;width:100%;bottom:calc(4 * var(--u));justify-items:center;text-align:center;gap:6px}
+  
+  .pa-close p{display:none}
 }
 
 /* v4.5 type: one sans on this page; unit line at label size */
@@ -370,22 +423,6 @@ const occasions = [
 
 .pk-build{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:4px 0 6px;font:600 .85rem/1.2 var(--fk-sans);color:#74501a;text-decoration:underline;text-underline-offset:3px}
 .pk-build:focus-visible{outline:3px solid var(--fk-focus,#1d5a32);outline-offset:2px;border-radius:6px}
-/* closing band: one photo + one plain line (replaces the quote / four icon circles / baked-art band) */
-.pa-end{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(24px,4vw,64px);align-items:center;background:#10261a;color:#fbf3e6;padding:clamp(40px,6vw,88px) clamp(16px,5vw,80px)}
-.pa-end>*{max-width:100%}
-.pa-end-ph{margin:0;aspect-ratio:4/3;overflow:hidden;border-radius:22px;box-shadow:0 0 0 1px rgba(243,197,107,.4),0 20px 40px -24px rgba(0,0,0,.6)}
-.pa-end-ph img{width:100%;height:100%;object-fit:cover;display:block}
-.pa-end-tx{display:grid;gap:14px;justify-items:start}
-.pa-end-q{margin:0;font:italic 500 var(--fk-fs-5,1.75rem)/1.25 var(--fk-serif);color:#fbf3e6;text-wrap:balance}
-.pa-end-line{margin:0;font:600 var(--fk-fs-2,.875rem)/1.6 var(--fk-sans);letter-spacing:.04em;color:#e8c27a}
-.pa-end .fk-ty-h2{margin:6px 0 0;color:#fbf3e6}
-.pa-end .fk-ty-h2 em{font-style:normal;color:#eda05a}
-.pa-end-tx p:not(.pa-end-line){margin:0;font:400 1rem/1.6 var(--fk-sans);color:rgba(246,234,214,.86);max-width:46ch}
-@media(max-width:767px){.pa-end{grid-template-columns:1fr}}
-/* package card: price first, under the name */
-.pa .pk-price{display:grid;gap:2px;margin:0 0 12px!important}
-.pa .pk-amt{font:600 var(--fk-fs-5,1.75rem)/1.1 var(--fk-serif);font-variant-numeric:tabular-nums}
-.pa .pk-foot{justify-content:flex-end}
 /* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn (no old skins). */
 .pa .pa-sec-h{margin:4px 0 14px;text-align:center;color:var(--fk-forest-900)}
 .pa-plan .fk-ty-h2,.pa-choices .fk-ty-h2,.pa-add .fk-ty-h2{margin:0 0 16px;color:var(--fk-forest-900)}
@@ -393,11 +430,16 @@ const occasions = [
 .pk-sec .fk-ty-small{margin:0 0 4px;font-weight:600}
 .pa-cols .fk-ty-label{margin:0 0 8px;color:#74501a}
 .pa .pk .fk-card__t{margin:0 0 4px;padding-top:4px;text-align:left;color:#1f2a1a}
+.pa-why-h{position:absolute;left:0;right:0;top:calc(-6 * var(--u));text-align:center}
+.pa-close .fk-ty-h2{color:#fbf3e6}
+.pa-close .fk-ty-h2 em{font-style:normal;color:#eda05a}
 .pa .pa-wa{margin-top:16px}
 .pa-oc-act .fk-btn{flex:1 1 auto}
 @media(max-width:767px){
-    .pa-plan .fk-btn{width:100%}
-  }
+  .pa-why-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .pa-plan .fk-btn{width:100%}
+  .pa-close .fk-ty-h2{font-size:var(--fk-fs-4)}
+}
 </style>
 <script is:inline src="/js/party.js"></script>
 <script is:inline>

@@ -42,11 +42,29 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
           <span class="fk-ty-label ct-kicker">OUR CATERING SCALE</span>
           <h2 class="fk-ty-h2 ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
         </div>
-        <ul class="ct-tiers">
-          <li><span class="ct-tier-n">30&ndash;80 guests</span><span class="ct-tier-l">Intimate Gatherings</span></li>
-          <li><span class="ct-tier-n">80&ndash;300 guests</span><span class="ct-tier-l">Corporate &amp; Social Events</span></li>
-          <li><span class="ct-tier-n">300&ndash;1500 guests</span><span class="ct-tier-l">Grand Weddings &amp; Conventions</span></li>
-        </ul>
+        <div class="ct-scale-grid">
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">30–80</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Intimate Gatherings</p>
+            </div>
+          </div>
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">80–300</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Corporate &amp; Social Events</p>
+            </div>
+          </div>
+          <div class="fk-card fk-card--text ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">300–1500</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Grand Weddings &amp; Conventions</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -330,11 +348,14 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
   .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .ct-form .fk-btn { width: 100% }
   .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
-  .ct-tiers { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; display: grid }
-  .ct-tiers li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 20px; padding: 16px 4px; border-top: 1px solid rgba(201,154,67,0.45) }
-  .ct-tiers li:last-child { border-bottom: 1px solid rgba(201,154,67,0.45) }
-  .ct-tier-n { font-family: var(--fk-serif); font-size: 1.35rem; font-weight: 600; color: #74501a }
-  .ct-tier-l { font-weight: 600; color: #1f2a1a }
+  .ct-scale-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px}
+  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; padding: 40px 28px 32px }
+  .ct-stat-number { color: #74501a }
+  .ct-stat-unit { color: #4a4232 }
+  .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }
   .ct-gallery-cap { margin: 8px 0 0; padding: 0 clamp(16px, 4vw, 40px); font-size: 0.875rem; color: #4a4232 }
   .ct-field select { text-overflow: ellipsis }
 </style>

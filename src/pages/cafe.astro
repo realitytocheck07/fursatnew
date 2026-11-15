@@ -2,7 +2,7 @@
 import site from '../data/site.json';
 // cafe.astro — Fursat Café (P6 restyle: shared ExperienceLayout on the baked plaster stage, mock "Café + Restaurant + Bar").
 // Content is the page's existing copy, items, prices and photos; only the design changed.
-// Wi-Fi: confirmed by the client. TODO(client): confirm Café featured items and the power-plug claim (moments text + FAQ). The facts line uses menu counts only.
+// Wi-Fi: confirmed by the client. TODO(client): confirm Café featured items and the power-plug claim (moments text + FAQ). Pillars use menu counts only.
 import Base from '../layouts/Base.astro';
 import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
 ---
@@ -42,10 +42,10 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
     cardsKicker="The café selection"
     cardsTitle="Favorites from the Counter"
     cards={[
-      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
-      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
-      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
-      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
+      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
+      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
+      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
+      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian. From our all day breakfast menu.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
     ]}
     cardsLink={{ label: 'See the full menu', href: '/menu' }}
     faqTitle="Café FAQs"
