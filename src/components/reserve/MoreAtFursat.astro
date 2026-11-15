@@ -15,7 +15,7 @@ const mIcons = [
 ];
 ---
 <section aria-labelledby="rs-m-h" class="rs-vis">
-  <div class="rs-title"><i aria-hidden="true"></i><h2 id="rs-m-h">More at Fursat</h2><i aria-hidden="true"></i></div>
+  <div class="rs-title"><i aria-hidden="true"></i><h2 id="rs-m-h" class="fk-ty-h2">More at Fursat</h2><i aria-hidden="true"></i></div>
   <div class="rs-mrow fk-cards">
     {items.map((m, i) => (
       <a class="rs-mcard rs-card-in fk-card" href={m.href} style={`--i:${i}`}>
@@ -24,7 +24,7 @@ const mIcons = [
           <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={mIcons[i]}></svg></span>
         </div>
         <div class="fk-card__b">
-          <h3 class="fk-card__t">{m.t}</h3>
+          <h3 class="fk-ty-h4 fk-card__t">{m.t}</h3>
           <p class="fk-card__p">{m.p}</p>
           <div class="fk-card__foot"><span class="fk-card__more">Know more</span><span class="fk-card__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
         </div>

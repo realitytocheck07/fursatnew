@@ -54,7 +54,7 @@
     hi:'<path d="M12 21c-5-3.5-8-6.4-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 11c0 3.6-3 6.5-8 10Z"/>'
   };
   function ico(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+"</svg>"}
-  function btn(href,text,kind,ext){return '<a class="ah-btn'+(kind?" ah-btn--"+kind:"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':"")+"><span>"+esc(text)+"</span></a>"}
+  function btn(href,text,kind,ext){return '<a class="fk-btn fk-btn--md fk-btn--'+(kind?"secondary":"primary")+' ah-btn'+(kind?" ah-btn--"+kind:"")+'" href="'+esc(href)+'"'+(ext?' target="_blank" rel="noopener"':"")+"><span>"+esc(text)+"</span></a>"}
   var ANS={
     reserve:function(){return{icon:"cal",title:"Reserve a table",body:"Send us your date, time and number of guests. We confirm every request on WhatsApp.",acts:btn("/reserve","Reserve a table")+btn(WA+encodeURIComponent("Hi Fursat! I would like to reserve a table."),"WhatsApp us","ghost",1)}},
     hours:function(){var s=status();return{icon:"clock",title:"Opening hours",body:esc(D.hours)+"."+'<br><strong class="ah-live" data-open="'+(s.open?1:0)+'">'+(s.open?"Open now, until "+s.until:"Closed now, opens "+(s.today?"":"tomorrow ")+s.next)+"</strong>",acts:btn("/reserve","Reserve a table")}},
@@ -78,7 +78,7 @@
     var a=ANS[key]();clearTimeout(timer);
     function fin(){
       out.hidden=false;out.classList.remove("pre");
-      out.innerHTML='<h2 class="rs-h" id="as-rh" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg><span>'+a.title+'</span></h2>'
+      out.innerHTML='<h2 class="fk-ty-h2 rs-h" id="as-rh" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg><span>'+a.title+'</span></h2>'
         +'<div class="ah-card"><span class="ah-ic">'+ico(a.icon)+'</span><div class="ah-tx"><p class="ah-p">'+a.body+"</p>"+(a.acts?'<div class="ah-acts">'+a.acts+"</div>":"")+"</div></div>";
       if(st)st.textContent=a.title+". "+out.querySelector(".ah-p").textContent;
       var h=document.getElementById("as-rh");if(h){h.focus({preventScroll:true});

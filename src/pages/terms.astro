@@ -17,13 +17,13 @@ import MobileBar from '../components/MobileBar.astro';
     <div class="tr-container">
       <div class="tr-doc-card">
         <span class="tr-kicker">LEGAL & POLICIES</span>
-        <h1 class="tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
+        <h1 class="fk-ty-h2 tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
         <p class="tr-updated">Last Updated: November 2026</p>
 
         <!-- TODO(client): offer terms section (FURSAT15 / 15%) removed until the client confirms the offer; restore from git history (v5.17) if confirmed. -->
         <!-- Section 2: House Rules -->
         <section class="tr-section">
-          <h2>1. House Rules & Admission Policy</h2>
+          <h2 class="fk-ty-h3">1. House Rules & Admission Policy</h2>
           <ul>
             <li>
               <b>Age Policy for Bar:</b> Alcohol service is strictly restricted to guests aged 21 and above. Valid government-issued photo ID (Aadhaar, Passport, Driving License) may be requested.
@@ -39,7 +39,7 @@ import MobileBar from '../components/MobileBar.astro';
 
         <!-- Section 3: Privacy Policy -->
         <section class="tr-section" id="privacy">
-          <h2>2. Privacy Policy</h2>
+          <h2 class="fk-ty-h3">2. Privacy Policy</h2>
           <p>
             At Fursat Kitchen | Bar (operated by Sriven Hospitality), we respect your privacy:
           </p>
@@ -58,7 +58,7 @@ import MobileBar from '../components/MobileBar.astro';
 
         <!-- Section 4: Cancellation & Refund -->
         <section class="tr-section" id="refund">
-          <h2>3. Reservation & Banquet Cancellation Policy</h2>
+          <h2 class="fk-ty-h3">3. Reservation & Banquet Cancellation Policy</h2>
           <ul>
             <li>
               <b>A-la-carte Dining:</b> No cancellation fee is charged for regular table reservations. We kindly request at least 2 hours notice if you need to reschedule.
@@ -110,11 +110,8 @@ import MobileBar from '../components/MobileBar.astro';
     display: block;
     margin-bottom: 8px}
   .tr-title {
-    font-family:var(--fk-serif);
-    font-size: clamp(2rem, 4.5vw, 3rem);
     color: #1f2a1a;
-    margin: 0 0 8px;
-    line-height: 1.2}
+    margin: 0 0 8px}
   .tr-updated {
     font-size: 0.85rem;
     color: #4a4232;
@@ -124,8 +121,6 @@ import MobileBar from '../components/MobileBar.astro';
   .tr-section {
     margin-bottom: 36px}
   .tr-section h2 {
-    font-family:var(--fk-serif);
-    font-size: 1.45rem;
     color: #74501a;
     margin: 0 0 14px}
   .tr-section p {

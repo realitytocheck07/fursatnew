@@ -85,7 +85,7 @@ const host = {
     <div class="ah-copy">
       <p class="ah-status" id="ah-status" data-open="1"><span class="ah-dot" aria-hidden="true"></span><span id="ah-greet">Welcome to Fursat</span><span class="ah-sep" aria-hidden="true">·</span><span id="ah-open">Open daily from 12 PM</span></p>
       <p class="ah-kick">Good food <i aria-hidden="true">&bull;</i> Slow moments <i aria-hidden="true">&bull;</i> Together</p>
-      <h1 class="ah-h1" id="ah-h1">Ask <span>Fursat</span></h1>
+      <h1 class="fk-ty-hero ah-h1" id="ah-h1">Ask <span>Fursat</span></h1>
       <svg class="ah-orn" viewBox="0 0 260 24" aria-hidden="true"><path d="M2 12 H104" /><path d="M156 12 H258" /><path d="M130 3 C122 9 122 15 130 21 C138 15 138 9 130 3 Z" /></svg>
       <p class="ah-lead">Tell us what you feel like eating or drinking and we will find the dish. Planning an event? <a href="#plan">Start here</a>.</p>
     </div>
@@ -100,15 +100,15 @@ const host = {
       <div class="ah-pill" role="search">
         <svg class="ah-lead-i" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mark"/></svg>
         <input class="ah-input" id="af-q" type="text" placeholder="Something spicy under 400" enterkeyhint="search" maxlength="120" autocomplete="off">
-        <button class="ah-mic" id="af-mic" type="button" aria-label="Speak your mood" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg></button>
-        <button class="ah-go fk-press" id="af-send" type="button" aria-label="Ask"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        <button class="fk-btn fk-btn--secondary fk-btn--md ah-mic" id="af-mic" type="button" aria-label="Speak your mood" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3ZM19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg></button>
+        <button class="fk-btn fk-btn--primary fk-btn--md ah-go" id="af-send" type="button" aria-label="Ask"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </div>
       <p class="ah-sr" id="as-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <ul class="ah-chips" data-for="food" aria-label="Try one of these">
         {chips.food.map(([t, ic]) => <li><button type="button" class="fk-press" data-mood={t}><svg viewBox="0 0 24 24" aria-hidden="true"><use href={'#' + ic}/></svg>{t}</button></li>)}
       </ul>
       <ul class="ah-chips" data-for="drinks" aria-label="Try one of these" hidden>{chips.drinks.map(([t]) => <li><button type="button" class="fk-press" data-mood={t}>{t}</button></li>)}</ul>
-      <ul class="ah-desk" aria-label="Reception desk"><li class="ah-desk-l" aria-hidden="true">At the desk</li><li><button type="button" data-desk="reserve">Reserve a table</button></li><li><button type="button" data-desk="hours">Hours</button></li><li><button type="button" data-desk="where">Find us</button></li><li><button type="button" data-desk="party">Parties</button></li><li><button type="button" data-desk="call">Call</button></li></ul>
+      <ul class="ah-desk" aria-label="Reception desk"><li class="ah-desk-l" aria-hidden="true">At the desk</li><li><button type="button" class="fk-btn fk-btn--ghost fk-btn--md" data-desk="reserve">Reserve a table</button></li><li><button type="button" class="fk-btn fk-btn--ghost fk-btn--md" data-desk="hours">Hours</button></li><li><button type="button" class="fk-btn fk-btn--ghost fk-btn--md" data-desk="where">Find us</button></li><li><button type="button" class="fk-btn fk-btn--ghost fk-btn--md" data-desk="party">Parties</button></li><li><button type="button" class="fk-btn fk-btn--ghost fk-btn--md" data-desk="call">Call</button></li></ul>
     </div>
   </div>
 </section>
@@ -138,7 +138,7 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .ah-copy{grid-area:copy}
 .ah-kick{margin:0;font:600 .75rem/1.4 var(--fk-sans);letter-spacing:.16em;text-transform:uppercase;color:#8a5a22}
 .ah-kick i{font-style:normal;margin:0 .4em}
-.ah-h1{margin:8px 0 0;font:500 clamp(2.6rem,1.4rem + 4.4vw,4.6rem)/1.02 var(--fk-serif);letter-spacing:-.02em;color:var(--as-green)}
+.ah-h1{margin:8px 0 0;color:var(--as-green)}
 .ah-h1 span{color:var(--as-gold-lo);font-style:italic}
 .ah-orn{display:block;width:150px;height:14px;margin:10px 0;fill:none;stroke:var(--as-gold);stroke-width:1.4}
 .ah-lead{margin:0;max-width:46ch;font:400 clamp(.95rem,.9rem + .2vw,1.05rem)/1.6 var(--fk-sans);color:#3b3326}
@@ -153,9 +153,8 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .ah-lead-i{flex:none;width:24px;height:24px;color:var(--as-green)}
 .ah-input{flex:1;min-width:0;height:54px;padding:0;border:0;outline:0;background:none;color:var(--as-ink);font:400 16px/1.2 var(--fk-sans)}
 .ah-input::placeholder{color:var(--as-mute);opacity:1}
-.ah-mic,.ah-go{flex:none;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;cursor:pointer;touch-action:manipulation}
-.ah-mic{background:none;color:var(--as-ink)}.ah-mic[hidden]{display:none}.ah-mic svg{width:19px;height:19px}.ah-mic[aria-pressed=true]{background:var(--as-chip);color:var(--as-green)}
-.ah-go{width:46px;height:46px;color:#fbf3e6;background:radial-gradient(circle at 35% 30%,#3c6a44,#1b3a24);box-shadow:0 6px 14px rgba(20,44,26,.3)}
+.fk-btn.fk-btn--md.ah-mic,.fk-btn.fk-btn--md.ah-go{flex:none;width:44px;padding:0;touch-action:manipulation}
+.ah-mic[hidden]{display:none}.ah-mic svg{width:19px;height:19px}.ah-mic[aria-pressed=true]{background:var(--as-chip)}
 .ah-go svg{width:20px;height:20px}
 .ah :is(button,input,a):focus-visible,.as-tabs button:focus-visible{outline:2px solid var(--as-green);outline-offset:3px}
 .ah-pill .ah-input:focus-visible{outline:0}
@@ -171,7 +170,7 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 @media(max-width:700px){
   .ah-in{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"copy frame" "search search";row-gap:18px}
   .ah-frame{width:104px;padding:6px;align-self:start;margin-top:8px}
-  .ah-kick{font-size:.68rem;letter-spacing:.1em}
+  .ah-kick{font-size:.75rem;letter-spacing:.08em}
   .ah-lead{grid-column:1/-1}
   .ah-orn{display:none}
 }
@@ -182,7 +181,7 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .as-main{position:relative;z-index:2;outline:0;background:var(--fk-plaster);background-blend-mode:multiply}
 .rs{width:100%;max-width:1180px;margin:0 auto;padding:clamp(16px,2.5vw,28px) clamp(16px,4vw,48px) clamp(40px,5vw,72px)}
 .rs[hidden]{display:none}
-.rs-h{scroll-margin-top:calc(var(--sh-h,84px) + 16px);display:flex;align-items:flex-start;gap:12px;margin:0 0 20px;font:500 clamp(1.5rem,1.1rem + 1.4vw,2.1rem)/1.15 var(--fk-serif);color:var(--as-green);outline:0}
+.rs-h{scroll-margin-top:calc(var(--sh-h,84px) + 16px);display:flex;align-items:flex-start;gap:12px;margin:0 0 20px;color:var(--as-green);outline:0}
 .rs-h svg{flex:none;width:26px;height:26px;margin-top:.15em;color:var(--as-leaf)}
 .rs-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2vw,24px)}
 .ar{animation:ar-rise .5s cubic-bezier(.2,0,0,1) both;animation-delay:calc(var(--k,0)*60ms)}
@@ -203,11 +202,10 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .rs-sep{display:flex;align-items:center;justify-content:center;gap:14px;margin:26px auto 14px;max-width:340px;color:var(--as-gold-lo)}
 .rs-sep::before,.rs-sep::after{content:"";flex:1;border-top:1px solid rgba(201,154,67,.5)}
 .rs-sep svg{width:22px;height:22px}
-.rs-wa{display:flex;align-items:center;justify-content:center;gap:10px;width:max-content;max-width:100%;min-height:48px;margin:0 auto;padding:0 26px;border-radius:999px;background:linear-gradient(180deg,#24502f,#14321e);border:1px solid rgba(214,170,90,.6);color:#fbf3e6;font:500 .95rem/1.2 var(--fk-sans);text-decoration:none;box-shadow:0 10px 22px rgba(14,34,20,.26)}
-.rs-wa svg{width:18px;height:18px;flex:none}
-.rs-wa:focus-visible{outline:2px solid var(--as-green);outline-offset:3px}
+/* WhatsApp button in the results: look comes from fk-btn; only layout here (its first svg is the filled WhatsApp glyph, which fk-btn svg would outline) */
+.rs-wa{width:max-content;max-width:100%;margin:0 auto}
+.rs-wa>svg:first-child{fill:currentColor;stroke:none}
 .rs-fine{margin:14px auto 0;max-width:42ch;text-align:center;font:400 .78rem/1.5 var(--fk-sans);color:var(--as-mute)}
-@media(hover:hover){.rs-wa:hover{filter:brightness(1.12)}}
 @media(max-width:900px){.rs-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.rs-list{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.ar{animation:none}}

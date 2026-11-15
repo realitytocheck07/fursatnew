@@ -1,5 +1,5 @@
 ---
-// 404.astro - page not found
+// 404.astro - page not found. Cream plaster page, one friendly line, three buttons and a search box that sends the guest to /ask?q=...
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -17,12 +17,19 @@ import MobileBar from '../components/MobileBar.astro';
     <div class="nf-inner">
       <p class="nf-code" aria-hidden="true">404</p>
       <h1 class="nf-title">We can’t find that page</h1>
-      <p class="nf-line">Let’s get you back to the table.</p>
+      <p class="nf-line">It may have moved. Try one of these, or ask us what you are looking for.</p>
       <div class="nf-actions">
-        <a href="/" class="nf-btn nf-btn--main">Home</a>
-        <a href="/menu" class="nf-btn nf-btn--line">Menu</a>
+        <a href="/menu" class="nf-btn nf-btn--main">Menu</a>
         <a href="/reserve" class="nf-btn nf-btn--line">Reserve</a>
+        <a href="/" class="nf-btn nf-btn--line">Home</a>
       </div>
+      <form class="nf-search" action="/ask" method="get" role="search">
+        <label class="nf-label" for="nf-q">Search Fursat</label>
+        <div class="nf-row">
+          <input class="nf-input" id="nf-q" name="q" type="search" maxlength="80" placeholder="Try “coffee” or “opening hours”" autocomplete="off" enterkeyhint="search" />
+          <button class="nf-go" type="submit">Search</button>
+        </div>
+      </form>
     </div>
   </main>
 
@@ -31,16 +38,23 @@ import MobileBar from '../components/MobileBar.astro';
 </Base>
 
 <style is:global>
-  .nf-page { flex: none; display: grid; place-items: center; min-height: 60vh; padding: 96px 20px 72px; background: var(--fk-plaster); background-blend-mode: multiply; color: #2b2416; text-align: center}
+  .nf-page { flex: none; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; min-height: 60vh; padding: 96px 20px 72px; background: var(--fk-plaster); background-blend-mode: multiply; color: #2b2416; text-align: center}
   html:has(.nf-page), body:has(.nf-page) { background: var(--fk-plaster); background-blend-mode: multiply}
-  .nf-inner { width: 100%; max-width: 560px}
-  .nf-code { margin: 0; font-family: var(--fk-serif, 'Playfair Display', serif); font-size: clamp(4.5rem, 18vw, 8rem); line-height: 1; color: #9a6f2a}
+  .nf-inner { width: 100%; min-width: 0; max-width: 560px}
+  .nf-code { margin: 0; font-family: var(--fk-serif, 'Playfair Display', serif); font-size: clamp(4.5rem, 18vw, 8rem); line-height: 1; color: #7a5518}
   .nf-title { margin: 8px 0 0; font-family: var(--fk-serif, 'Playfair Display', serif); font-weight: 600; font-size: clamp(1.75rem, 6vw, 2.5rem); line-height: 1.15; color: #2b2416}
-  .nf-line { margin: 12px 0 0; font-family: var(--fk-sans, 'Poppins', sans-serif); font-size: 1rem; color: #74501a}
+  .nf-line { margin: 12px auto 0; max-width: 38ch; font-family: var(--fk-sans, 'Poppins', sans-serif); font-size: 1rem; line-height: 1.5; color: #5f4214}
   .nf-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px}
   .nf-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; min-height: 48px; padding: 0 24px; border-radius: 999px; font-family: var(--fk-sans, 'Poppins', sans-serif); font-weight: 600; font-size: 0.9375rem; text-decoration: none}
   .nf-btn--main { background: var(--fk-action-bg); color: #fbf3e6; border: 1px solid #14321e}
-  .nf-btn--line { background: transparent; color: #74501a; border: 2px solid #c99a43}
-  .nf-btn:focus-visible { outline: 3px solid #12803C; outline-offset: 3px}
-  @media (max-width: 480px) { .nf-btn { flex: 1 1 100%}}
+  .nf-btn--line { background: transparent; color: #5f4214; border: 2px solid #b98a35}
+  .nf-btn:focus-visible, .nf-go:focus-visible { outline: 3px solid #12803C; outline-offset: 3px}
+  .nf-search { margin-top: 36px; text-align: left}
+  .nf-label { display: block; margin: 0 0 8px; font-family: var(--fk-sans, 'Poppins', sans-serif); font-weight: 600; font-size: 0.875rem; color: #2b2416}
+  .nf-row { display: flex; gap: 8px}
+  .nf-input { flex: 1 1 auto; width: 100%; min-width: 0; box-sizing: border-box; min-height: 48px; padding: 0 18px; border: 2px solid #b98a35; border-radius: 999px; background: rgba(255, 250, 242, .85); color: #2b2416; font-family: var(--fk-sans, 'Poppins', sans-serif); font-size: 1rem}
+  .nf-input::placeholder { color: #6b5a3a; opacity: 1}
+  .nf-input:focus-visible { outline: 3px solid #12803C; outline-offset: 2px}
+  .nf-go { flex: none; min-width: 96px; min-height: 48px; padding: 0 22px; border: 1px solid #14321e; border-radius: 999px; background: var(--fk-action-bg); color: #fbf3e6; font-family: var(--fk-sans, 'Poppins', sans-serif); font-weight: 600; font-size: 0.9375rem; cursor: pointer}
+  @media (max-width: 480px) { .nf-btn { flex: 1 1 100%} .nf-row { flex-direction: column} .nf-go { width: 100%}}
 </style>

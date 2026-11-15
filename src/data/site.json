@@ -6,6 +6,7 @@
   "phone": "+91 90596 70033",
   "phonePlain": "919059670033",
   "whatsapp": "919059670033",
+  "forms": { "restaurant": "df9a716d-4f53-4f0c-8459-e0aa4899e20d", "events": "b44ccfa2-178a-4ae4-a1d3-949ede2d4daa" },
   "email": "TODO(client)@fursatind.in",
   "address": {
     "line1": "TODO(client): Unit number, Capital Park",
@@ -27,7 +28,10 @@
     "name": "Sriven Hospitality",
     "gstin": "36AEYFS6455D1ZE",
     "fssai": "13623013000820",
-    "cin": "TODO(client): CIN if applicable"
+    "cin": "TODO(client): CIN if applicable",
+    "type": "Partnership firm",
+    "registeredOffice": "Shop No. G1, H.No. 1-98/4/1, Jain Sadguru Images Capital Park, Image Gardens Road, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081",
+    "fssaiNote": "State licence, valid up to 02 June 2027"
   },
   "social": {
     "instagram": "https://www.instagram.com/fursatind.in/",

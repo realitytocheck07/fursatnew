@@ -15,7 +15,7 @@ const icons: Record<string,string> = {
 };
 ---
 <section aria-labelledby="rs-x-h">
-  <div class="rs-title"><i aria-hidden="true"></i><h2 id="rs-x-h">Choose Your Experience</h2><i aria-hidden="true"></i></div>
+  <div class="rs-title"><i aria-hidden="true"></i><h2 id="rs-x-h" class="fk-ty-h2">Choose Your Experience</h2><i aria-hidden="true"></i></div>
   <div class="rs-xrow fk-cards">
     {cards.map((c, i) => (
       <article class="rs-xcard rs-card-in fk-card" style={`--i:${i}`}>
@@ -24,7 +24,7 @@ const icons: Record<string,string> = {
           <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon]}></svg></span>
         </div>
         <div class="fk-card__b">
-          <h3 class="fk-card__t">{c.title}</h3>
+          <h3 class="fk-ty-h4 fk-card__t">{c.title}</h3>
           <p class="fk-card__p">{c.text}</p>
           <div class="fk-card__foot">
             <span class="fk-card__more">{c.cta}</span>

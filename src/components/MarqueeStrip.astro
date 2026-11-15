@@ -78,7 +78,8 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
     /* Pause on hover */
   }
   .mq-strip:hover .mq-track,
-  .mq-strip:focus-within .mq-track {
+  .mq-strip:focus-within .mq-track,
+  .mq-strip.mq-off .mq-track {
     animation-play-state: paused;
   }
 
@@ -162,23 +163,32 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
     var targetSkew = 0;
     var rAFId = null;
 
-    // Pause off-screen via IntersectionObserver
-    var obs = new IntersectionObserver(function (entries) {
-      inView = entries[0].isIntersecting;
-      if (inView) {
+    // Run only while the strip is on screen and the tab is visible:
+    // the CSS scroll and the velocity skew both pause otherwise.
+    function sync() {
+      var run = inView && !document.hidden;
+      strip.classList.toggle('mq-off', !run);
+      if (run) {
         lastY = window.scrollY || window.pageYOffset;
-      } else if (rAFId) {
-        cancelAnimationFrame(rAFId);
-        rAFId = null;
+      } else {
+        if (rAFId) { cancelAnimationFrame(rAFId); rAFId = null; }
         currentSkew = 0;
         targetSkew = 0;
         strip.style.setProperty('--mq-skew', '0deg');
       }
+    }
+
+    // Start paused; the observer reports the real state right away.
+    strip.classList.add('mq-off');
+    var obs = new IntersectionObserver(function (entries) {
+      inView = entries[entries.length - 1].isIntersecting;
+      sync();
     }, { threshold: 0.05 });
     obs.observe(strip);
+    document.addEventListener('visibilitychange', sync);
 
     function onScroll() {
-      if (!inView) return;
+      if (!inView || document.hidden) return;
       var curY = window.scrollY || window.pageYOffset;
       var delta = curY - lastY;
       lastY = curY;
@@ -193,7 +203,7 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
 
     function tick() {
       rAFId = null;
-      if (!inView) return;
+      if (!inView || document.hidden) return;
 
       // Smooth ease back
       currentSkew += (targetSkew - currentSkew) * 0.12;

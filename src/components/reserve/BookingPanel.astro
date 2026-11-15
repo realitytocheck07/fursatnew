@@ -41,7 +41,7 @@ const conditions: string[] = [];
     <header class="rs-phead">
       <span class="rs-hicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg></span>
       <div class="rs-htxt">
-        <h2 id="rs-book-h" tabindex="-1">Book Your Experience</h2>
+        <h2 id="rs-book-h" class="fk-ty-h3" tabindex="-1">Book Your Experience</h2>
         <p class="rs-psub">We confirm on WhatsApp. <span class="rs-reqnote">* Required</span></p>
       </div>
       <i class="rs-hrule" aria-hidden="true"></i>
@@ -90,12 +90,12 @@ const conditions: string[] = [];
         <div class="rs-q rs-q-3" id="f-guests">
           <p class="rs-ql" id="rs-ql-guests"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3.2 2.4-5.5 5.5-5.5s5.5 2.3 5.5 5.5M16 6a2.8 2.8 0 0 1 0 5.4M17.5 14c2 .6 3 2.4 3 5"/></svg>Guests<span class="rs-pre">Pre-filled</span></p>
           <div class="rs-step" role="group" aria-labelledby="rs-ql-guests">
-            <button type="button" class="rs-sbtn" id="rs-g-minus" aria-label="Fewer guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md rs-sbtn" id="rs-g-minus" aria-label="Fewer guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
             <div class="rs-sval">
               <b id="rs-g-n" role="status" aria-live="polite">4 guests</b>
               <span class="rs-dots" aria-hidden="true">{Array.from({ length: 12 }, () => <i></i>)}</span>
             </div>
-            <button type="button" class="rs-sbtn" id="rs-g-plus" aria-label="More guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md rs-sbtn" id="rs-g-plus" aria-label="More guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ const conditions: string[] = [];
       <div class="rs-pickview" id="rs-pickview"><PanoramicViewer embed /></div>
       <div class="rs-pickbar" id="rs-pickbar">
         <p class="rs-pk-t" id="rs-pk-t" aria-live="polite">Tap a spot in the room</p>
-        <button type="button" class="rs-btn rs-btn-line rs-btn-sm" id="rs-pk-book" disabled>Book here</button>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-pk-book" disabled>Book here</button>
       </div>
       <p class="rs-hint rs-pk-note" id="rs-pk-note">Seating is a preference, not a guaranteed table. <button type="button" class="rs-link" id="rs-pk-photos">Show photos instead</button></p>
       <div class="rs-spots" id="rs-spots" hidden>
@@ -156,7 +156,7 @@ const conditions: string[] = [];
             <figure class="rs-spot">
               <img class="rs-ph" src={smallImg(IMGS[z.pin])} alt={`${z.name} at Fursat`} width="540" height="720" loading="lazy" decoding="async" />
               <figcaption><b>{z.name}</b><span>{z.line}</span></figcaption>
-              <button type="button" class="rs-btn rs-btn-line rs-btn-sm" data-spot={z.name}>Book here</button>
+              <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" data-spot={z.name}>Book here</button>
             </figure>
           ))}
         </div>
@@ -171,7 +171,7 @@ const conditions: string[] = [];
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.1"/></svg>
         <span id="rs-err-t"></span>
       </p>
-      <button type="button" id="res-submit-btn" class="rs-btn rs-btn-solid rs-submit">
+      <button type="button" id="res-submit-btn" class="fk-btn fk-btn--primary rs-submit">
         <svg class="rs-cta-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg>
         <span>Request a Table</span>
         <svg class="rs-cta-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
@@ -183,14 +183,14 @@ const conditions: string[] = [];
 
     <!-- ───── Request sent (R3d) ───── -->
     <div class="rs-done" id="rs-done" hidden>
-      <h3 class="rs-stamp" id="rs-done-h" tabindex="-1">Request sent</h3>
+      <h3 class="fk-ty-h3 rs-stamp" id="rs-done-h" tabindex="-1">Request sent</h3>
       <dl class="rs-sum rs-done-sum" id="rs-done-sum"></dl>
       <p class="rs-done-note">We’ll confirm on WhatsApp. Didn’t open? <a id="rs-resend" href="https://wa.me/919059670033" target="_blank" rel="noopener">Send again</a></p>
       <div class="rs-done-actions">
-        <button type="button" class="rs-btn rs-btn-line" id="rs-ics"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4M10 15h4"/></svg>Add to calendar</button>
-        <a class="rs-btn rs-btn-line" id="rs-dir" href={mapsUrl} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Get directions<span class="rs-sr"> (opens Google Maps in a new tab)</span></a>
-        <button type="button" class="rs-btn rs-btn-line" id="rs-story"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M12 8v6M9.5 11.5 12 8l2.5 3.5"/></svg>Share to Story</button>
-        <button type="button" class="rs-btn rs-btn-line" id="rs-again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>Make another booking</button>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-ics"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4M10 15h4"/></svg>Add to calendar</button>
+        <a class="fk-btn fk-btn--secondary fk-btn--md" id="rs-dir" href={mapsUrl} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Get directions<span class="rs-sr"> (opens Google Maps in a new tab)</span></a>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-story"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M12 8v6M9.5 11.5 12 8l2.5 3.5"/></svg>Share to Story</button>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>Make another booking</button>
       </div>
       <p class="rs-done-s" id="rs-done-s" role="status" aria-live="polite"></p>
     </div>
@@ -763,12 +763,12 @@ const conditions: string[] = [];
 
 <style is:global>
   /* R1 a11y: 44px targets, field errors, required marks. Colours are existing tokens only. */
-  .rs-page .rs-hy .rs-sbtn{width:45px;height:45px}
-  .rs-page .rs-hy .rs-btn,.rs-page .rs-hy .rs-btn-sm,.rs-page .rs-hy .rs-mode{min-height:45px}
+  .rs-page .rs-hy .fk-btn.rs-sbtn{width:45px;height:45px;min-height:0}
+  .rs-page .rs-hy .fk-btn,.rs-page .rs-hy .rs-mode{min-height:45px}
   .rs-page .rs-hy .rs-link{display:block;min-height:44px;text-align:left}
   /* the desktop fit-zoom scales the panel; --rs-z (set by reserve.astro) lifts targets so they still render at 45px */
-  .rs-page .rs-hy .rs-panel :is(.rs-btn,.rs-mode,.rs-chip,.rs-qr,.rs-link,.rs-send,.rs-box,.rs-box input,.rs-box select,.rs-comp input){min-height:calc(45px / var(--rs-z, 1))}
-  .rs-page .rs-hy .rs-panel .rs-sbtn{width:calc(45px / var(--rs-z, 1));height:calc(45px / var(--rs-z, 1))}
+  .rs-page .rs-hy .rs-panel :is(.fk-btn,.rs-mode,.rs-chip,.rs-qr,.rs-link,.rs-send,.rs-box,.rs-box input,.rs-box select,.rs-comp input){min-height:calc(45px / var(--rs-z, 1))}
+  .rs-page .rs-hy .rs-panel .fk-btn.rs-sbtn{width:calc(45px / var(--rs-z, 1));height:calc(45px / var(--rs-z, 1));min-height:0}
   .rs-reqnote{white-space:nowrap}
   .rs-ferr{margin:6px 4px 0;font-size:.84rem;line-height:1.4;color:var(--rs-danger)}
   .rs-ferr:empty{display:none}

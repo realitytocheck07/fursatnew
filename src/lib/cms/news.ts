@@ -173,7 +173,10 @@ async function loadBuiltInData(): Promise<NewsData> {
   } catch {
     // not running under Vite
   }
-  const [news, slots, party] = await Promise.all([import('../../data/news.json', { with: { type: 'json' } }), import('../../data/slots.json', { with: { type: 'json' } }), import('../../data/party.json', { with: { type: 'json' } })]);
+  // Plain Node (no Vite): load the JSON with import attributes. The specifier is built at run time on purpose, so Vite does not
+  // try to bundle it and warn that these files are also imported elsewhere without attributes.
+  const file = (n: string) => `../../data/${n}.json`;
+  const [news, slots, party] = await Promise.all(['news', 'slots', 'party'].map((n) => import(/* @vite-ignore */ file(n), { with: { type: 'json' } })));
   return { news: (news as any).default ?? news, slots: (slots as any).default ?? slots, party: (party as any).default ?? party };
 }
 

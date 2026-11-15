@@ -137,14 +137,9 @@
 .hy-orn--draw { display: block; width: calc(260 * var(--u)); min-width: 160px; height: auto; overflow: visible; }
 .hy-orn--draw path { fill: none; stroke: #c98a3a; stroke-width: 1.4; stroke-linecap: round; }
 .hy-btns { display: flex; flex-wrap: wrap; gap: 12px; }
-.fk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 46px; padding: 0 clamp(18px, calc(26 * var(--u)), 30px); border-radius: 999px; font: 500 clamp(14px, calc(16 * var(--u)), 1.1rem) / 1 var(--fk-serif); text-decoration: none; cursor: pointer; transition: transform 150ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease; -webkit-tap-highlight-color: transparent; }
+.fk-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .fk-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms cubic-bezier(.2, 0, 0, 1); }
-.fk-btn--solid { color: #fbf3e6; background: linear-gradient(180deg, #24502f, #14321e); border: 1px solid rgba(214, 170, 90, .6); box-shadow: 0 12px 26px rgba(14, 34, 20, .28), inset 0 1px 0 rgba(255, 255, 255, .18); }
-.fk-btn--line { color: #2b2416; background: rgba(255, 250, 242, .72); border: 1px solid #d9732a; box-shadow: 0 6px 16px rgba(122, 78, 24, .12), inset 0 1px 0 #fff; }
-.fk-btn--gold { color: #f6d692; background: rgba(10, 30, 18, .35); border: 1px solid #d6aa5a; }
-.fk-btn:not(:disabled):active { transform: scale(.96); }
-.fk-btn:focus-visible { outline: 2px solid #24502f; outline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { .fk-btn:hover svg { transform: translateX(3px); } .fk-btn--solid:hover { box-shadow: 0 16px 32px rgba(14, 34, 20, .34), inset 0 1px 0 rgba(255, 255, 255, .22); } }
+@media (hover: hover) and (pointer: fine) { .fk-btn:hover svg { transform: translateX(3px); } }
 
 /* icon inside a baked gold ring */
 .hy-ring { display: grid; place-items: center; width: calc(var(--r, 40) * 2 * var(--u)); height: calc(var(--r, 40) * 2 * var(--u)); border-radius: 50%; translate: -50% -50%; }
@@ -253,23 +248,22 @@ html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 @keyframes fk-sweep{from{transform:translateX(-130%) skewX(-18deg)}to{transform:translateX(230%) skewX(-18deg)}}
 
 /* main action: green, gold rim; the one place a light sweep is allowed */
-.sh-plaster .sh-reserve-btn,.sh-plaster .sh-mp-reserve,.fk-btn--solid{position:relative;overflow:hidden;background:var(--fk-action-bg);color:var(--fk-action-fg);border:1px solid var(--fk-action-rim);box-shadow:var(--fk-action-shadow)}
-.sh-plaster .sh-reserve-btn::after,.fk-btn--solid::after{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,236,190,.35),transparent);transform:translateX(-130%) skewX(-18deg);pointer-events:none}
+.sh-plaster .sh-reserve-btn,.sh-plaster .sh-mp-reserve{position:relative;overflow:hidden;background:var(--fk-action-bg);color:var(--fk-action-fg);border:1px solid var(--fk-action-rim);box-shadow:var(--fk-action-shadow)}
+.sh-plaster .sh-reserve-btn::after{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,236,190,.35),transparent);transform:translateX(-130%) skewX(-18deg);pointer-events:none}
 .sh-plaster .sh-link.active{color:#9c4f1c}
 .fk-card__go{box-shadow:0 0 0 1px var(--fk-action-rim),0 8px 18px -8px rgba(14,34,20,.5)}
 .fk-card__badge{box-shadow:0 0 0 1px var(--fk-edge),0 4px 12px -4px rgba(60,40,10,.25)}
 .fk-card__badge svg{stroke:var(--fk-icon-gold)}
 @media (hover:hover) and (pointer:fine){
-  .sh-plaster .sh-reserve-btn:hover,.fk-btn--solid:hover{box-shadow:var(--fk-action-shadow-hover)}
+  .sh-plaster .sh-reserve-btn:hover{box-shadow:var(--fk-action-shadow-hover)}
   .fk-card:hover{border-color:var(--fk-edge);box-shadow:0 22px 44px -20px rgba(90,60,20,.38),0 0 0 1px var(--fk-edge)}
   .fk-card:hover .fk-card__go{box-shadow:var(--fk-action-shadow-hover)}
-  .fk-btn--line:hover{box-shadow:0 0 0 1px rgba(217,115,42,.55),0 10px 22px -10px rgba(122,78,24,.4),inset 0 1px 0 #fff}
 }
 @media (prefers-reduced-motion:no-preference){
   .sh-plaster .sh-reserve-btn::after{animation:fk-sweep 1.1s cubic-bezier(.2,0,0,1) 1.2s 1 both}
-  @media (hover:hover) and (pointer:fine){.sh-plaster .sh-reserve-btn:hover::after,.fk-btn--solid:hover::after{animation:fk-sweep .8s cubic-bezier(.2,0,0,1) 1 both}}
+  @media (hover:hover) and (pointer:fine){.sh-plaster .sh-reserve-btn:hover::after{animation:fk-sweep .8s cubic-bezier(.2,0,0,1) 1 both}}
 }
-@media (prefers-reduced-motion:reduce){.sh-plaster .sh-reserve-btn::after,.fk-btn--solid::after{display:none}}
+@media (prefers-reduced-motion:reduce){.sh-plaster .sh-reserve-btn::after{display:none}}
 /* focus: crisp brown ring, visible on cream and on gold */
 .hy a:focus-visible,.hy button:focus-visible,.fk-card a:focus-visible,.fk-card button:focus-visible,.sh-plaster a:focus-visible,.sh-plaster button:focus-visible{outline:2px solid var(--fk-focus);outline-offset:3px}
 /* v4.5: restyled pages hand the shared sans to legacy chrome (mobile bar, header dropdown, skip link) */
@@ -345,7 +339,7 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0 10V3.2C9 0.6 20 0.4 31 2.4C42 4.4 52 6.2 64 4.6C76 3 88 0.8 100 1.6V10Z'/%3E%3C/svg%3E") 0 0 / 100% 18px no-repeat, linear-gradient(#000,#000) 0 17px / 100% calc(100% - 17px) no-repeat; }
 /* ═════ v5.18 DESIGN SYSTEM (Phase 4A) — ADD-ONLY, not applied to any page yet ═════
    New names only: --fk-fs-*, .fk-ty-*, .fk-btn--primary|secondary|ghost|on-dark|lg|md, .fk-card--text.
-   Existing .fk-btn / .fk-btn--solid|line|gold and .fk-card are untouched. Phase 4B swaps pages over (see DESIGN-SYSTEM.md). */
+   Old .fk-btn--solid|line|gold removed (Session J). Phase 4B swaps pages over (see DESIGN-SYSTEM.md). */
 
 /* 1. TYPE SCALE — 7 steps, nothing below 12px. Playfair = headings, Poppins = text. */
 :root{

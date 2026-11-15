@@ -1,7 +1,7 @@
 /* ---------- 30. magnetic hero buttons (decorative; mouse only; ≤6px; eases home on leave) ---------- */
 (function(){
   if(!matchMedia("(hover:hover) and (pointer:fine)").matches||matchMedia("(prefers-reduced-motion:reduce)").matches)return;
-  var els=[].slice.call(document.querySelectorAll(".fx-btns .pill,.fx-btns .fx-ghost,.fx-reserve"));
+  var els=[].slice.call(document.querySelectorAll(".fx-btns .fk-btn"));
   els.forEach(function(el){
     var tx=0,ty=0,x=0,y=0,raf=0;
     function loop(){x+=(tx-x)*.16;y+=(ty-y)*.16;el.style.translate=x.toFixed(2)+"px "+y.toFixed(2)+"px";

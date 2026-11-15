@@ -47,6 +47,15 @@ const OFFER_ENABLED = false;
 <SiteHeader active="home" />
 <SvgDefs />
 <main id="main" tabindex="-1">
+<!-- First-screen fonts (intro caption + hero): fetch early so they do not swap in after first paint. -->
+<link rel="preload" href="/assets/7f74c1fdae.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/assets/2189d39dfb.woff" as="font" type="font/woff" crossorigin>
+<script is:inline>
+/* Same maths as fit() in 10.js, run before the hero is laid out, so the stage does not jump when 10.js loads. */
+(function(){var r=document.documentElement,w=r.clientWidth||innerWidth,h=innerHeight,u=.9,c=function(v,a,b){return Math.max(a,Math.min(b,v))};
+if(w>=900)u=c(Math.min(w/1536,(h-30)/1024),.4,1.5);
+var sp=h-30-1024*u;r.style.setProperty("--u",u.toFixed(4));r.style.setProperty("--ex",w>=900?Math.round(c(w/u-1536,0,520)):0);r.style.setProperty("--gap",(w>=900&&sp>140?Math.round(sp/2-15):0)+"px")})();
+</script>
 <Hero />
 
 <!-- ── Offer Strip ──────────────────────────────────────────────────── -->
@@ -96,21 +105,28 @@ const OFFER_ENABLED = false;
 <script is:inline defer src="/js/09.js"></script>
 <script is:inline defer id="fx-js" src="/js/10.js"></script>
 <script is:inline defer src="/js/11.js"></script>
-<script is:inline defer src="/js/12.js"></script>
 <script is:inline defer src="/js/13.js"></script>
 <script is:inline defer src="/js/14.js"></script>
 <script is:inline defer src="/js/15.js"></script>
-<script is:inline defer src="/js/16.js"></script>
 <script is:inline defer src="/js/17.js"></script>
 <script is:inline defer src="/js/18.js"></script>
 <script is:inline defer src="/js/19.js"></script>
+<script is:inline>
+/* 12.js (party packages) and 16.js (reels) are not needed for the first screen: load them when the browser is idle,
+   or at the first touch / key / scroll, whichever comes first. They keep their order (12 then 16). */
+(function(){var done=0;function go(){if(done)return;done=1;["/js/12.js","/js/16.js"].forEach(function(u){var s=document.createElement("script");s.src=u;s.async=false;document.body.appendChild(s)});["pointerdown","keydown","scroll","touchstart"].forEach(function(t){removeEventListener(t,go)})}
+["pointerdown","keydown","scroll","touchstart"].forEach(function(t){addEventListener(t,go,{passive:true})});
+function idle(){if(window.requestIdleCallback)requestIdleCallback(go,{timeout:2500});else setTimeout(go,1500)}
+if(document.readyState==="complete")idle();else addEventListener("load",idle)})();
+</script>
 <MobileBar active="home" />
 <script is:inline src="/js/motion-kit.js"></script>
 </Base>
 <style is:global>
 /* ── Hero: first screen only (dish cards now live in their own section) ── */
 .fx-p { font-size: calc(12.5px / var(--u)); line-height: 1.4; }
-@media (max-width: 899px) { .fx-p { font-size: 16px; } .fxhero .pill, .fxhero .fx-ghost { height: 44px; font-size: 15px; } }
+.fxhero .fx-btns .fk-btn { white-space: nowrap; }
+@media (max-width: 899px) { .fx-p { font-size: 16px; } }
 
 /* ── Hero corner: music + video pause ── */
 .hx-ctl { position: absolute; top: calc(16px / var(--u)); right: calc(16px / var(--u)); z-index: 8; display: flex; align-items: center; gap: calc(8px / var(--u)); pointer-events: auto; }
@@ -147,8 +163,7 @@ html.lock #vz .vz-t { display: inline; }
   .fxhero .fx-eye { top: calc(98px - 8px * var(--r)); font-size: calc(13px * var(--r)); line-height: calc(18px * var(--r)); letter-spacing: .14em; }
   .fxhero .fx-p { font-size: calc(17px * var(--r)) !important; line-height: calc(26px * var(--r)) !important; }
   .fxhero .fx-btns { left: 130px; top: calc(336px + 58px * var(--r)); width: max-content; height: calc(44px * var(--r)); display: flex; gap: calc(12px * var(--r)); }
-  .fxhero .pill, .fxhero .fx-ghost { position: relative; left: auto; top: auto; width: auto; height: 100%; padding: 0 calc(22px * var(--r)); gap: calc(8px * var(--r)); border-radius: calc(22px * var(--r)); font: 600 calc(15px * var(--r)) / 1 var(--sans); white-space: nowrap; }
-  .fxhero .pill svg, .fxhero .fx-ghost svg { width: calc(14px * var(--r)); height: calc(14px * var(--r)); }
+  .fxhero .fx-btns .fk-btn svg { width: calc(14px * var(--r)); height: calc(14px * var(--r)); }
   .fxhero .fx-info { left: calc(130px + var(--ex, 0) * .14px); top: calc(336px + 118px * var(--r)); width: auto; max-width: none; padding: calc(8px * var(--r)) calc(18px * var(--r)) calc(8px * var(--r)) calc(14px * var(--r)); border-radius: calc(14px * var(--r)); gap: calc(12px * var(--r)); }
   .fxhero .fi-d { width: calc(9px * var(--r)); height: calc(9px * var(--r)); }
   .fxhero .fi-a { gap: calc(2px * var(--r)); }
