@@ -11,6 +11,8 @@
   if(pkg&&n){pkg.addEventListener("change",function(){update();window.dispatchEvent(new CustomEvent("fursat:pkg"))});n.addEventListener("input",update);
     document.getElementById("pa-minus").addEventListener("click",function(){n.value=Math.max(1,guests()-1);update()});
     document.getElementById("pa-plus").addEventListener("click",function(){n.value=Math.min(500,guests()+1);update()});update()}
+  if(wa&&pkg&&n)wa.addEventListener("click",function(){var o=pkg.options[pkg.selectedIndex],g=guests();
+    if(window.fkForm)window.fkForm.send("events","Party plan",{package:o.textContent.split(" \u2013 ")[0],guests:g||"to be confirmed"},document.querySelector("#pa-plan [name=botcheck]"))});
   document.querySelectorAll("[data-plan]").forEach(function(b){b.addEventListener("click",function(){
     if(pkg){pkg.value=b.getAttribute("data-plan");update()}
     pose("cheer",1500);stars();window.dispatchEvent(new CustomEvent("fursat:plan"));var t=document.getElementById("pa-plan");if(t)t.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});if(n)n.focus({preventScroll:true})})});

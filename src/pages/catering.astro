@@ -1,6 +1,6 @@
 ---
 // catering.astro - Outdoor Catering by Fursat
-// TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500), "weddings", "bar service" and delivery area are unconfirmed.
+// TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500), "weddings", "bar service", delivery area and the "Catering Director" role are unconfirmed. Kept as the owner decided.
 import InstaFollow from '../components/InstaFollow.astro';
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
@@ -28,8 +28,8 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
           Bring the flavors and hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
         </p>
         <div class="ct-hero-btns">
-          <a href="#quote" class="fk-btn fk-btn--primary">Request Catering Menu & Quote</a>
-          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary">Call Catering Chef: +91 90596 70033</a>
+          <a href="#quote" class="fk-btn fk-btn--primary">Request a quote</a>
+          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary">Call us: +91 90596 70033</a>
         </div>
       </div>
     </section>
@@ -42,45 +42,28 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
           <span class="fk-ty-label ct-kicker">OUR CATERING SCALE</span>
           <h2 class="fk-ty-h2 ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
         </div>
-        <div class="ct-scale-grid">
-          <div class="fk-card fk-card--text ct-stat-card">
-            <div class="fk-card__b">
-              <p class="fk-ty-h2 ct-stat-number">30–80</p>
-              <p class="fk-ty-label ct-stat-unit">Guests</p>
-              <p class="fk-ty-body ct-stat-label">Intimate Gatherings</p>
-            </div>
-          </div>
-          <div class="fk-card fk-card--text ct-stat-card">
-            <div class="fk-card__b">
-              <p class="fk-ty-h2 ct-stat-number">80–300</p>
-              <p class="fk-ty-label ct-stat-unit">Guests</p>
-              <p class="fk-ty-body ct-stat-label">Corporate &amp; Social Events</p>
-            </div>
-          </div>
-          <div class="fk-card fk-card--text ct-stat-card">
-            <div class="fk-card__b">
-              <p class="fk-ty-h2 ct-stat-number">300–1500</p>
-              <p class="fk-ty-label ct-stat-unit">Guests</p>
-              <p class="fk-ty-body ct-stat-label">Grand Weddings &amp; Conventions</p>
-            </div>
-          </div>
-        </div>
+        <ul class="ct-tiers">
+          <li><span class="ct-tier-n">30&ndash;80 guests</span><span class="ct-tier-l">Intimate Gatherings</span></li>
+          <li><span class="ct-tier-n">80&ndash;300 guests</span><span class="ct-tier-l">Corporate &amp; Social Events</span></li>
+          <li><span class="ct-tier-n">300&ndash;1500 guests</span><span class="ct-tier-l">Grand Weddings &amp; Conventions</span></li>
+        </ul>
       </div>
     </section>
 
-    <!-- Gallery Strip -->
-    <section class="ct-gallery-strip">
+    <!-- Gallery strip: dishes from our kitchen (real photos; no outdoor catering photos exist yet: TODO(client)) -->
+    <section class="ct-gallery-strip" aria-label="From our kitchen at Capital Park">
       <div class="ct-gallery-scroll">
-        <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_02.webp" srcset="/assets/interior/fursat_space_02-480.webp 480w, /assets/interior/fursat_space_02-720.webp 720w, /assets/interior/fursat_space_02.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Interior Space" width="1280" height="1706" loading="lazy" decoding="async" />
-        </div>
-        <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_05.webp" srcset="/assets/interior/fursat_space_05-480.webp 480w, /assets/interior/fursat_space_05-720.webp 720w, /assets/interior/fursat_space_05.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Dining Area" width="1280" height="1706" loading="lazy" decoding="async" />
-        </div>
-        <div class="ct-gallery-item">
-          <img src="/assets/interior/fursat_space_10.webp" srcset="/assets/interior/fursat_space_10-480.webp 480w, /assets/interior/fursat_space_10-720.webp 720w, /assets/interior/fursat_space_10.webp 1280w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Fursat Ambiance" width="1280" height="1706" loading="lazy" decoding="async" />
-        </div>
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/nalli-gosht-biryani-half-720.webp" srcset="/assets/dishes/new/nalli-gosht-biryani-half-480.webp 480w, /assets/dishes/new/nalli-gosht-biryani-half-720.webp 720w, /assets/dishes/new/nalli-gosht-biryani-half.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalli gosht biryani" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/chicken-tikka-angara-720.webp" srcset="/assets/dishes/new/chicken-tikka-angara-480.webp 480w, /assets/dishes/new/chicken-tikka-angara-720.webp 720w, /assets/dishes/new/chicken-tikka-angara.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Chicken tikka angara" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/nalla-karam-kodi-vepudu-720.webp" srcset="/assets/dishes/new/nalla-karam-kodi-vepudu-480.webp 480w, /assets/dishes/new/nalla-karam-kodi-vepudu-720.webp 720w, /assets/dishes/new/nalla-karam-kodi-vepudu.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalla karam kodi vepudu" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
       </div>
+      <p class="ct-gallery-cap">From our kitchen at Capital Park</p>
     </section>
 
     <!-- Catering Quote Form -->
@@ -94,6 +77,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
           </div>
 
           <form class="ct-form" action="https://wa.me/919059670033" target="_blank" data-wa-form data-wa-intro="Hi Fursat! 👋 I would like a catering quote:" novalidate>
+            <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
             <p class="ct-req">Fields marked * are required.</p>
             <div class="ct-row">
               <div class="ct-field">
@@ -103,7 +87,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
               </div>
               <div class="ct-field">
                 <label for="ct-f2">Contact number <span aria-hidden="true">*</span></label>
-                <input type="tel" id="ct-f2" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="ct-f2-e" placeholder="e.g. 98483 60033" />
+                <input type="tel" id="ct-f2" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="ct-f2-e" placeholder="Your phone number" />
                 <p class="ct-err" id="ct-f2-e" role="alert"></p>
               </div>
             </div>
@@ -136,7 +120,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
               </div>
             </div>
             <button type="submit" class="fk-btn fk-btn--primary">
-              <span>Request Catering Proposal via WhatsApp</span>
+              <span>Request a proposal</span>
             </button>
           </form>
         </div>
@@ -152,7 +136,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
 <script>
   const form = document.querySelector('form[data-wa-form]');
   if (form) {
-    const fields = Array.from(form.querySelectorAll('input, select'));
+    const fields = Array.from(form.querySelectorAll('input:not([name=botcheck]), select'));
     const digits = (v) => { let x = v.replace(/\D/g, ''); if (x.length > 10 && x.startsWith('91')) x = x.slice(2); if (x.length === 11 && x[0] === '0') x = x.slice(1); return x; };
     const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
     const errOf = (el) => document.getElementById(el.getAttribute('aria-describedby') || '');
@@ -177,14 +161,16 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
       let first = null;
       fields.forEach((el) => { if (!el.dataset.v) return; const m = check(el); show(el, m); if (m && !first) first = el; });
       if (first) { first.focus(); return; }
-      const lines = [form.dataset.waIntro];
+      const lines = [form.dataset.waIntro], sent = {};
       fields.forEach((el) => {
         const t = el.dataset.v; let v = el.value.trim();
         if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
         else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();
         lines.push('\u2022 ' + el.dataset.l + ': ' + v);
+        sent[el.dataset.l] = v;
       });
+      window.fkForm?.send('events', 'Catering enquiry', sent, form.querySelector('[name=botcheck]'));
       window.open('https://wa.me/919059670033?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
     });
   }
@@ -293,10 +279,6 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     border-bottom: 1px solid rgba(201,154,67,0.35)}
   .ct-sec-head {
     margin-bottom: 40px}
-  .ct-scale-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px}
   
   
   
@@ -320,6 +302,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
     background: rgba(214,170,90,0.35);
     border-radius: 999px}
   .ct-gallery-item {
+    margin: 0;
     flex: 0 0 clamp(260px, 30vw, 420px);
     aspect-ratio: 4/3;
     overflow: hidden;
@@ -347,8 +330,11 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
   .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .ct-form .fk-btn { width: 100% }
   .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
-  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; padding: 40px 28px 32px }
-  .ct-stat-number { color: #74501a }
-  .ct-stat-unit { color: #4a4232 }
-  .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }
+  .ct-tiers { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; display: grid }
+  .ct-tiers li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 20px; padding: 16px 4px; border-top: 1px solid rgba(201,154,67,0.45) }
+  .ct-tiers li:last-child { border-bottom: 1px solid rgba(201,154,67,0.45) }
+  .ct-tier-n { font-family: var(--fk-serif); font-size: 1.35rem; font-weight: 600; color: #74501a }
+  .ct-tier-l { font-weight: 600; color: #1f2a1a }
+  .ct-gallery-cap { margin: 8px 0 0; padding: 0 clamp(16px, 4vw, 40px); font-size: 0.875rem; color: #4a4232 }
+  .ct-field select { text-overflow: ellipsis }
 </style>

@@ -1,5 +1,6 @@
 ---
 // terms.astro - Fursat House Rules, Privacy & Cancellation Policy
+// TODO(client): confirm the grace period, the 2-hour reschedule notice, the 7-day refund window and the administrative fee. Kept as the owner decided.
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -19,14 +20,15 @@ import MobileBar from '../components/MobileBar.astro';
         <span class="tr-kicker">LEGAL & POLICIES</span>
         <h1 class="fk-ty-h2 tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
         <p class="tr-updated">Last Updated: November 2026</p>
+        <nav class="tr-jump" aria-label="On this page"><a href="#rules">House rules</a><a href="#privacy">Privacy</a><a href="#refund">Cancellation &amp; refunds</a></nav>
 
         <!-- TODO(client): offer terms section (FURSAT15 / 15%) removed until the client confirms the offer; restore from git history (v5.17) if confirmed. -->
         <!-- Section 2: House Rules -->
-        <section class="tr-section">
+        <section class="tr-section" id="rules">
           <h2 class="fk-ty-h3">1. House Rules & Admission Policy</h2>
           <ul>
             <li>
-              <b>Age Policy for Bar:</b> Alcohol service is strictly restricted to guests aged 21 and above. Valid government-issued photo ID (Aadhaar, Passport, Driving License) may be requested.
+              <b>Age Policy for Bar:</b> Alcohol service is strictly restricted to guests aged 21 and above. Valid government-issued photo ID may be requested.
             </li>
             <li>
               <b>Table Holding:</b> Reserved tables are held for a short grace period past the confirmed reservation time. <!-- TODO(client): confirm grace period (20 minutes was a placeholder) --> In case of delay, please inform our reception at +91 90596 70033.
@@ -45,10 +47,10 @@ import MobileBar from '../components/MobileBar.astro';
           </p>
           <ul>
             <li>
-              <b>Information We Collect:</b> When you reserve a table, enter our mascot offer modal, or submit a banquet enquiry, we collect your name, phone number, and reservation preferences.
+              <b>Information We Collect:</b> When you reserve a table or send a banquet, party or catering enquiry, we collect your name, phone number and preferences. <!-- TODO(client): confirm what is collected and kept -->
             </li>
             <li>
-              <b>How We Use It:</b> We use this data solely to confirm table reservations, send coupon codes, communicate updates regarding your booking via SMS/WhatsApp, and coordinate banquet proposals.
+              <b>How We Use It:</b> We use this data solely to confirm table reservations, communicate updates regarding your booking via SMS/WhatsApp, and coordinate event proposals.
             </li>
             <li>
               <b>No Third-Party Sharing:</b> We never sell, rent, or trade your personal contact details to external marketing agencies or brokers.
@@ -58,10 +60,10 @@ import MobileBar from '../components/MobileBar.astro';
 
         <!-- Section 4: Cancellation & Refund -->
         <section class="tr-section" id="refund">
-          <h2 class="fk-ty-h3">3. Reservation & Banquet Cancellation Policy</h2>
+          <h2 class="fk-ty-h3">3. Cancellation &amp; Refunds</h2>
           <ul>
             <li>
-              <b>A-la-carte Dining:</b> No cancellation fee is charged for regular table reservations. We kindly request at least 2 hours notice if you need to reschedule.
+              <b>A-la-carte Dining:</b> No cancellation fee is charged for regular table reservations. We kindly request at least 2 hours notice if you need to reschedule. <!-- TODO(client): confirm the 2-hour notice -->
             </li>
             <li>
               <b>Banquet & Private Events:</b> Advance deposits for banquet dates are refundable up to 7 days prior to the scheduled event date, subject to an administrative fee. <!-- TODO(client): confirm refund window (7 days) and fee (10% was a placeholder) -->
@@ -72,7 +74,7 @@ import MobileBar from '../components/MobileBar.astro';
         <!-- Contact Box -->
         <div class="tr-contact-box">
           <p>
-            For any clarifications regarding our terms or reservations, contact our General Manager at:
+            For any clarifications regarding our terms or reservations, contact us at:
             <br />
             <b>Fursat Kitchen | Bar</b> · Capital Park, Madhapur, Hyderabad · <a href="mailto:hello@fursatind.in">hello@fursatind.in</a> · +91 90596 70033
           </p>
@@ -166,5 +168,10 @@ import MobileBar from '../components/MobileBar.astro';
     color: #4a4232;
     line-height: 1.6}
   .tr-contact-box a {
+    display: inline-block;
+    padding: 12px 0;
     color: #74501a}
+  .tr-section { scroll-margin-top: calc(var(--sh-h, 78px) + 16px)}
+  .tr-jump { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: -20px 0 28px}
+  .tr-jump a { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.9rem; font-weight: 600; color: #74501a}
 </style>

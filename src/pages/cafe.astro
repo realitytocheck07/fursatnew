@@ -2,7 +2,7 @@
 import site from '../data/site.json';
 // cafe.astro — Fursat Café (P6 restyle: shared ExperienceLayout on the baked plaster stage, mock "Café + Restaurant + Bar").
 // Content is the page's existing copy, items, prices and photos; only the design changed.
-// TODO(client): confirm Café featured items, and the Wi-Fi / power-plug claims (moments text + FAQ). Pillars use menu counts only.
+// Wi-Fi: confirmed by the client. TODO(client): confirm Café featured items and the power-plug claim (moments text + FAQ). The facts line uses menu counts only.
 import Base from '../layouts/Base.astro';
 import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
 ---
@@ -33,7 +33,7 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
     ]}
     momentsA="Spaces Designed"
     momentsB="to Unwind"
-    momentsText="Quiet lunch breaks, afternoon meetings and evening desserts. Café booths and high tables with power plugs and Wi-Fi."
+    momentsText="Quiet lunch breaks, afternoon meetings and evening desserts. Café booths and high tables with power plugs and free Wi-Fi."
     momentsCta={{ label: 'Book a Café Booth', href: '/reserve', book: true }}
     big={{ src: '/assets/interior/fursat_space_05.webp', alt: 'Café interior with natural light', w: 1920, h: 2560 }}
     top={{ src: '/assets/interior/fursat_space_15.webp', alt: 'Artisan coffee bar counter', w: 1920, h: 2560 }}
@@ -42,16 +42,16 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
     cardsKicker="The café selection"
     cardsTitle="Favorites from the Counter"
     cards={[
-      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
-      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
-      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
-      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian. From our all day breakfast menu.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
+      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
+      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
+      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
+      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
     ]}
     cardsLink={{ label: 'See the full menu', href: '/menu' }}
     faqTitle="Café FAQs"
     faq={[
       { q: 'What are the café opening hours?', a: `Our café is open ${site.hours.display}. Perfect for quiet lunch breaks, afternoon meetings, and evening desserts.` },
-      { q: 'Is high-speed Wi-Fi and power available for remote working?', a: 'Yes, our café booths and high-table areas are equipped with convenient power plugs and complimentary high-speed Wi-Fi for remote work or meetings.' },
+      { q: 'Is Wi-Fi and power available for remote working?', a: 'Yes, our café booths and high-table areas are equipped with convenient power plugs and free Wi-Fi for remote work or meetings.' },
       { q: 'Can I order café items along with the main restaurant menu?', a: 'Yes, all café beverages, shakes, and desserts can be ordered from any table across Fursat.' },
     ]}
   />

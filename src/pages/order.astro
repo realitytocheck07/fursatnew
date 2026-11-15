@@ -23,7 +23,7 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
       <div class="od-hero-bg" aria-hidden="true"></div>
       <div class="od-hero-inner">
         <span class="fk-ty-label od-pill">TAKEAWAY</span>
-        <h1 class="fk-ty-hero od-hero-title mot-headline">Order for takeaway</h1>
+        <h1 class="fk-ty-hero od-hero-title mot-headline">Takeaway on WhatsApp</h1>
         <p class="fk-ty-body od-hero-sub">Direct from our kitchen. Prepared fresh for pickup at Capital Park, Madhapur.</p>
 
         <div class="od-card">
@@ -33,8 +33,9 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
           <div class="od-actions">
             <a href={waUrl} target="_blank" rel="noopener" class="fk-btn fk-btn--primary od-wa-btn">
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.63C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.3C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-              <span>Order via WhatsApp (+91 90596 70033)</span>
+              <span>Order on WhatsApp</span>
             </a>
+            <p class="od-num">+91 90596 70033</p>
             <a href="/menu" class="fk-btn fk-btn--secondary">Browse Full Menu</a>
           </div>
         </div>
@@ -97,11 +98,12 @@ const waUrl = `https://wa.me/919059670033?text=${waMessage}`;
 
   @media (max-width: 420px) { .od-hero { min-height: 0; padding-top: 20px; padding-bottom: 40px; } }
 /* Phase 4B: layout + colour only. */
-  .od-pill { display: inline-block; padding: 6px 16px; border-radius: 999px; background: rgba(214,170,90,0.21); border: 1px solid #d6aa5a; color: #74501a; margin-bottom: 16px }
+  .od-pill { display: inline-block; padding: 6px 16px; border-radius: 999px; background: rgba(214,170,90,0.21); border: 1px solid #d6aa5a; color: #5a3b0f; margin-bottom: 16px }
   .od-hero-title { margin: 0 0 12px; color: #1f2a1a }
   .od-hero-sub { margin: 0 0 32px; color: #4a4232 }
   .od-coming-soon { margin: 0 0 10px; color: #74501a }
   .od-desc { margin: 0 0 28px; color: #4a4232 }
+  .od-num { margin: -4px 0 0; font-size: 0.9375rem; font-weight: 600; color: #4a4232 }
   .od-wa-btn { width: 100%; max-width: 440px }
   .od-wa-btn svg { width: 24px; height: 24px; flex-shrink: 0 }
 </style>

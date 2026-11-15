@@ -1,6 +1,7 @@
 ---
 // banquet.astro - The Royal Banquet Hall at Fursat
-// Hero, photos, capacity specs, event packages, sample menu & enquiry form
+// Hero, photos, capacity line, event packages, sample menu & enquiry form
+// TODO(client): confirm the capacity line (350 floating / 220 round-table, dual 4K laser projection & AV, valet parking & lift access) and the 30% advance deposit in the FAQ. Kept as the owner decided.
 import InstaFollow from '../components/InstaFollow.astro';
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
@@ -28,27 +29,15 @@ import CornerHero from '../components/CornerHero.astro';
       alt="The Fursat banquet hall set with long red and gold tables, framed in gold"
       ctas={[{ label: 'Build your menu', href: '#packages', primary: true }, { label: 'Enquire for dates', href: '#enquire' }]} />
 
-    <!-- Venue Capacity & Specs -->
-    <section class="bq-specs">
+    <!-- Venue facts: one plain line. TODO(client): confirm each fact. -->
+    <section class="bq-specs" aria-label="Venue facts">
       <div class="bq-container">
-        <div class="bq-specs-grid">
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">350</span>
-            <span class="bq-spec-lbl">Max Floating Capacity</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">220</span>
-            <span class="bq-spec-lbl">Round-Table Seating</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">4K</span>
-            <span class="bq-spec-lbl">Dual Laser Projection & AV</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">100%</span>
-            <span class="bq-spec-lbl">Valet Parking & Lift Access</span>
-          </div>
-        </div>
+        <p class="bq-facts">
+          <span>Up to <b>350</b> guests floating</span>
+          <span><b>220</b> seated at round tables</span>
+          <span><b>4K</b> dual laser projection &amp; AV</span>
+          <span><b>100%</b> valet parking &amp; lift access</span>
+        </p>
       </div>
     </section>
 
@@ -70,8 +59,8 @@ import CornerHero from '../components/CornerHero.astro';
             <div class="bq-gal-tag">Grand Dinner Seating</div>
           </div>
           <div class="bq-gal-card">
-            <img src="/assets/interior/fursat_space_14-720.webp" srcset="/assets/interior/fursat_space_14-720.webp 720w, /assets/interior/fursat_space_14.webp 1280w" sizes="(max-width: 767px) 100vw, 33vw" alt="Cocktail Counter" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
-            <div class="bq-gal-tag">Private Banquet Bar</div>
+            <img src="/assets/venue/banquet/banquet-tables-03-720.webp" srcset="/assets/venue/banquet/banquet-tables-03-480.webp 480w, /assets/venue/banquet/banquet-tables-03-720.webp 720w, /assets/venue/banquet/banquet-tables-03.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="The banquet hall with long tables laid out in a U shape" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="960" />
+            <div class="bq-gal-tag">Table layout</div>
           </div>
         </div>
       </div>
@@ -90,6 +79,7 @@ import CornerHero from '../components/CornerHero.astro';
           </div>
 
           <form class="bq-form" id="bq-form" action="https://wa.me/919059670033" target="_blank" data-wa-form data-wa-intro="Hi Fursat! 👋 I would like to enquire about the banquet hall:" novalidate>
+            <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
             <p class="bq-req">Fields marked * are required.</p>
             <div class="bq-form-row">
               <div class="bq-form-field">
@@ -99,7 +89,7 @@ import CornerHero from '../components/CornerHero.astro';
               </div>
               <div class="bq-form-field">
                 <label for="eq-phone">Mobile / WhatsApp number <span aria-hidden="true">*</span></label>
-                <input type="tel" id="eq-phone" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="eq-phone-e" placeholder="e.g. 98483 60033" />
+                <input type="tel" id="eq-phone" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="eq-phone-e" placeholder="Your phone number" />
                 <p class="bq-err" id="eq-phone-e" role="alert"></p>
               </div>
             </div>
@@ -139,10 +129,10 @@ import CornerHero from '../components/CornerHero.astro';
               </div>
             </div>
             <button type="submit" class="fk-btn fk-btn--primary">
-              <span>Send Enquiry via WhatsApp / Call</span>
+              <span>Send enquiry</span>
             </button>
             <p class="bq-direct-call">
-              Prefer calling directly? Reach our Banquet desk at <a href="tel:+919059670033">+91 90596 70033</a> or <a href="tel:+919848360033">+91 98483 60033</a>.
+              Your enquiry opens in WhatsApp. Prefer to call? Reach our Banquet desk at <a href="tel:+919059670033">+91 90596 70033</a> or <a href="tel:+919848360033">+91 98483 60033</a>.
             </p>
           </form>
         </div>
@@ -157,6 +147,7 @@ import CornerHero from '../components/CornerHero.astro';
         <div class="bq-faq-list">
           <details class="bq-faq-item">
             <summary>What is the advance payment to lock a banquet date?</summary>
+            <!-- TODO(client): confirm the 30% advance deposit -->
             <p>A 30% advance deposit secures your date on the Fursat banquet calendar. The remaining balance is payable on or before the day of the event.</p>
           </details>
           <details class="bq-faq-item">
@@ -179,7 +170,7 @@ import CornerHero from '../components/CornerHero.astro';
 <script>
   const form = document.querySelector('form[data-wa-form]');
   if (form) {
-    const fields = Array.from(form.querySelectorAll('input, select'));
+    const fields = Array.from(form.querySelectorAll('input:not([name=botcheck]), select'));
     const digits = (v) => { let x = v.replace(/\D/g, ''); if (x.length > 10 && x.startsWith('91')) x = x.slice(2); if (x.length === 11 && x[0] === '0') x = x.slice(1); return x; };
     const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
     const errOf = (el) => document.getElementById(el.getAttribute('aria-describedby') || '');
@@ -204,14 +195,16 @@ import CornerHero from '../components/CornerHero.astro';
       let first = null;
       fields.forEach((el) => { if (!el.dataset.v) return; const m = check(el); show(el, m); if (m && !first) first = el; });
       if (first) { first.focus(); return; }
-      const lines = [form.dataset.waIntro];
+      const lines = [form.dataset.waIntro], sent = {};
       fields.forEach((el) => {
         const t = el.dataset.v; let v = el.value.trim();
         if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
         else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();
         lines.push('\u2022 ' + el.dataset.l + ': ' + v);
+        sent[el.dataset.l] = v;
       });
+      window.fkForm?.send('events', 'Banquet enquiry', sent, form.querySelector('[name=botcheck]'));
       window.open('https://wa.me/919059670033?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
     });
   }
@@ -260,29 +253,22 @@ import CornerHero from '../components/CornerHero.astro';
     font-weight: 700;
     text-decoration: none}
 
-  /* Specs Bar */
+  /* Venue facts: one plain line */
   .bq-specs {
-    background: #efd8b8;
     border-top: 1px solid rgba(201,154,67,0.40);
     border-bottom: 1px solid rgba(201,154,67,0.40);
-    padding: 32px 0}
-  .bq-specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 24px;
-    text-align: center}
-  .bq-spec-val {
-    font-family:var(--fk-serif);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #74501a;
-    display: block;
-    line-height: 1;
-    margin-bottom: 6px}
-  .bq-spec-lbl {
-    font-size: 0.85rem;
+    padding: 20px 0}
+  .bq-facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 28px;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: #4a4232;
-    font-weight: 600}
+    text-align: center}
+  .bq-facts b { font-family: var(--fk-serif); font-size: 1.15rem; color: #74501a}
 
   /* Gallery */
   .bq-gallery {
@@ -422,4 +408,5 @@ import CornerHero from '../components/CornerHero.astro';
   .bq-sec-title { margin: 0 0 36px; color: #1f2a1a }
   .bq-eq-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .bq-form .fk-btn { width: 100% }
+  .bq-direct-call a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px }
 </style>
