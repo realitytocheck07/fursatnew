@@ -1,17 +1,18 @@
 ---
 import InstaFollow from '../components/InstaFollow.astro';
 import Base from '../layouts/Base.astro';
-import data from '../data/party.json';
-import PartyStage from '../components/party/PartyStage';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import MobileBar from '../components/MobileBar.astro';
 import HyWindows from '../components/hybrid/HyWindows.astro';
 import CornerHero from '../components/CornerHero.astro';
+import PartyPackages from '../components/party/PartyPackages.astro';
+import PartyBuilder from '../components/party/PartyBuilder.astro';
 import pDesk from '../../scripts/bg-specs/party-desk.out.json';
 import '../styles/fk-tokens.css';
-// v4 hybrid: textless background art (public/assets/bg/party-*) + live HTML; motion in src/scripts/fk-motion.ts.
-// P5 restyle: one real photo per package group (TODO(client): real banquet-hall and party photos).
+// v5.36 redesign: hero (CornerHero + labels) -> Our Party Packages (4 cards) -> Build Your Celebration -> closing panel.
+// All packages, prices, dishes and add-ons come from src/data/party.json (read by the two party components).
+// TODO(client): real banquet-hall and party photos for the closing panel.
 const closePhoto = { src: '/assets/interior/tour-high-tables.webp', alt: 'High tables at Fursat ready for a party', w: 1050, h: 1400, pos: '50% 55%' };
 const elephant = 'M109.5 10.2 L100.2 6.0 L81.5 4.0 L70.5 8.0 L61.0 18.5 L60.0 24.2 L62.8 30.5 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L79.5 24.0 L76.2 27.0 L71.8 25.2 L71.8 22.5 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L88.2 44.0 L73.5 52.0 L64.5 58.0 L55.0 67.5 L51.0 74.5 L48.0 83.5 L48.0 98.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L80.2 119.8 L88.2 116.8 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L89.2 123.0 L82.2 126.0 L66.5 126.0 L56.5 122.0 L50.2 118.0 L43.8 110.2 L40.2 102.0 L29.5 107.0 L20.2 114.2 L14.0 123.5 L5.2 139.2 L13.2 138.0 L13.0 150.2 L12.0 160.2 L13.0 166.2 L14.5 170.8 L35.2 170.8 L35.8 163.5 L39.8 157.2 L48.2 155.8 L53.0 160.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L78.2 157.0 L86.2 155.8 L92.0 161.5 L92.5 170.8 L117.8 170.2 L116.8 159.5 L115.8 142.5 L117.8 127.5 L125.8 114.2 L130.8 103.2 L133.8 94.2 L135.8 81.2 L135.8 64.5 L133.8 55.2 L128.8 39.2 L121.8 24.5Z';
 const why = [
@@ -20,167 +21,30 @@ const why = [
   { t: 'Warm Hospitality', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
   { t: 'Prime Location', i: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>' },
 ];
-const cardPhotos: Record<string, string[]> = {
-  bar: ['/assets/interior/bar-front.webp', '/assets/interior/bar-back.webp', '/assets/interior/tour-bar.webp', '/assets/tour/img/sm/bar.webp'],
-  elite: ['/assets/tour/img/sm/dining.webp', '/assets/tour/img/sm/lounge.webp'],
-  banquet: ['/assets/tour/img/sm/booths.webp', '/assets/tour/img/sm/high-tables.webp', '/assets/tour/img/sm/sofa-corner.webp', '/assets/tour/img/sm/table-for-two.webp', '/assets/tour/img/sm/garden-window.webp'],
-};
-const groupIcon: Record<string, string> = {
-  bar: '<path d="M4 4h16l-8 9z"/><path d="M12 13v7M8 20h8"/>',
-  elite: '<path d="M3 20h18"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4M10 4h4"/>',
-  banquet: '<path d="M8 21h8M12 15v6M7 3h10l-1 7a4 4 0 0 1-8 0z"/>',
-};
-// Resized files next to the package-card photos (name-480.webp, name-720.webp). Value: [width of the original, widths made, factor].
-// factor > 1 = a wide photo cropped into a 4:3 box, which needs more pixels than the box is wide.
-const VAR: Record<string, [number, number[], number?]> = { '/assets/interior/bar-front': [1200, [720], 2.15], '/assets/interior/bar-back': [1200, [480, 720]], '/assets/interior/tour-bar': [1050, [480, 720]] };
-const srcsetOf = (src: string) => { const b = src.replace(/\.webp$/, ''); const v = VAR[b]; return v ? [...v[1].map((w) => `${b}-${w}.webp ${w}w`), `${src} ${v[0]}w`].join(', ') : undefined; };
-const pkSizes = (src: string) => { const k = VAR[src.replace(/\.webp$/, '')]?.[2]; const m = (n: string) => (k ? `calc(${n} * ${k})` : n); return `(max-width: 393px) ${m('84vw')}, (max-width: 899px) ${m('330px')}, ${m('280px')}`; };
-const cardPhoto = (g: string, i: number) => (cardPhotos[g] || [])[i % (cardPhotos[g] || ['']).length] || groupPhoto[g];
-const groupPhoto: Record<string, string> = { bar: '/assets/tour/img/sm/bar.webp', elite: '/assets/tour/img/sm/dining.webp', banquet: '/assets/tour/img/sm/booths.webp' };
-// CLIENT/LEGAL TO CONFIRM: liquor brand names stay off the public page until cleared (Telangana excise advertising rules).
-const SHOW_LIQUOR_BRANDS = false;
-// ASSUMPTION TO CONFIRM: the printed prices ("4999+Taxes") read as per guest.
-const UNIT = 'per guest';
 const WA = '919059670033';
-const inr = (n: number) => '\u20b9' + n.toLocaleString('en-IN');
-const lead = (p: any) => p.sections.slice(0, 4).map((s: any) => [s.h, s.rule || (s.lines || []).join(' \u00b7 ')]);
-const waBase = 'https://wa.me/' + WA + '?text=';
-const waHi = waBase + encodeURIComponent('Hi Fursat! I would like to plan a party.');
-// "Pick your occasion": text comes from party.json group blurbs and prices only (no extra claims).
-const groupOf = (id: string) => data.groups.find((g: any) => g.id === id)!;
-const fromPrice = (id: string) => Math.min(...data.packages.filter((p: any) => p.group === id).map((p: any) => p.price));
-const occasions = [
-  { id: 'birthday', t: 'Birthdays & anniversaries', g: 'elite', base: '/assets/venue/interior/long-table-dining', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'A long table set for a group celebration at Fursat' },
-  { id: 'corporate', t: 'Corporate gatherings', g: 'banquet', base: '/assets/venue/banquet/banquet-tables-03', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'The banquet hall in a U-shaped layout for a corporate meeting', link: { href: '/banquet#enquire', label: 'Enquire about the hall' } },
-  { id: 'kitty', t: 'Kitty parties', g: 'elite', base: '/assets/venue/interior/mural-booths', sized: true, ow: 1200, w: 1200, h: 1600, alt: 'Booths beside the Hyderabad mural wall at Fursat' },
-  { id: 'barbash', t: 'Bar bashes', g: 'bar', base: '/assets/interior/fursat_space_08', sized: true, ow: 1280, w: 1280, h: 1706, alt: 'The bar counter at Fursat', note: 'Alcohol is served to guests aged 21 and above only.' },
-];
+const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I would like to plan a party.');
 ---
 <Base title="Parties & Events — Fursat Kitchen | Bar, Madhapur" description="Birthdays, corporate gatherings, kitty parties and bar bashes at Fursat, Madhapur. Bar party, elite buffet and banquet packages." canonical="https://fursatind.in/party/" preloadImages={[{ href: '/assets/heroes/party-768.webp', media: '(max-width: 820px)', type: 'image/webp' }, { href: '/assets/heroes/party-1536.webp', media: '(min-width: 821px)', type: 'image/webp' }]}>
 <a class="skip" href="#pk-main">Skip to main content</a>
 <div class="pa">
   <SiteHeader active="celebrate" variant="plaster" />
   <script is:inline>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('fx-pre'); setTimeout(function () { document.documentElement.classList.remove('fx-pre'); }, 3500); }</script>
-  <CornerHero page="party" id="pa-h1" kicker="Parties & events"
-    h1a="Plan your party" h1b="at Fursat"
+  <CornerHero page="party" id="pa-h1" kicker="Celebrate beautifully at FURSAT"
+    h1a="Every Occasion Deserves a Beautiful" h1b="Celebration" hlColor="#c02a1a"
+    sub="Make yours unforgettable." subHl="unforgettable"
     lead="Pick a package, tell us how many are coming, and we will confirm the rest on WhatsApp."
-    alt="Two oval gold windows showing the Fursat dining hall and the banquet hall, set for a party"
-    ctas={[{ label: 'Explore our packages', href: '#pk-main', primary: true }, { label: 'Chat on WhatsApp', href: waHi, external: true }]} />
+    labels={[['Birthdays', 'Corporate'], ['Kitty parties', 'Bar bashes']]}
+    alt="Two oval gold windows with photos of Fursat set for a party"
+    ctas={[{ label: 'Plan Your Party', href: '#pa-plan', primary: true }, { label: 'See Packages', href: '#pa-packs' }]} />
   <div class="hy pa-hy">
     <div class="hy-slice hy-mid" aria-hidden="true"></div><div class="hy-slice hy-bot" aria-hidden="true"></div>
     <HyWindows data={pDesk} slice={2} photos={[closePhoto]} view="d" anchor="bottom" />
 
     <div class="hy-flow pa-flow">
-  <section class="pa-occ" aria-labelledby="pa-occ-h">
-    <h2 class="fk-ty-h2 pa-sec-h" id="pa-occ-h">Pick your occasion</h2>
-    <p class="pa-blurb">Choose what you are celebrating. We open the package type that fits.</p>
-    <div class="fk-cards pa-occ-grid" data-fk-stagger="80">
-      {occasions.map((o) => (
-        <article class="fk-card pa-oc" id={o.id}>
-          <div class="fk-card__ph">
-            <img
-              src={o.sized ? `${o.base}-720.webp` : `${o.base}.webp`}
-              srcset={o.sized ? `${o.base}-480.webp 480w, ${o.base}-720.webp 720w, ${o.base}.webp ${o.ow}w` : undefined}
-              sizes="(max-width: 599px) 91vw, (max-width: 999px) 45vw, (max-width: 1300px) 22vw, 264px"
-              alt={o.alt} width={o.w} height={o.h} loading="lazy" decoding="async" />
-          </div>
-          <div class="fk-card__b">
-            <span class="fk-card__tag">{groupOf(o.g).label}</span>
-            <h3 class="fk-card__t fk-ty-h4">{o.t}</h3>
-            <p class="fk-card__p">{groupOf(o.g).blurb}{o.note ? ' ' + o.note : ''}</p>
-            <p class="fk-card__price"><span>From {inr(fromPrice(o.g))}</span><small>+ taxes, {UNIT}</small></p>
-            <div class="pa-oc-act">
-              <button type="button" class="fk-btn fk-btn--primary fk-btn--md" data-occ={o.g}><span>See {groupOf(o.g).label} packages</span></button>
-              {o.link && <a class="fk-btn fk-btn--secondary fk-btn--md" href={o.link.href}><span>{o.link.label}</span></a>}
-            </div>
-          </div>
-        </article>
-      ))}
-    </div>
-  </section>
-  <main id="pk-main" tabindex="-1" class="pa-main">
-    <div class="pa-host" id="pa-host" data-pose="idle"><div class="pa-stage"><img class="pa-p pa-idle" src="/assets/ask-mascot-md.webp" srcset="/assets/ask-mascot-md-240.webp 240w, /assets/ask-mascot-md.webp 400w" sizes="(max-width: 767px) 125px, 148px" alt="Fursat&rsquo;s elephant host in a gold crown and sunglasses" width="400" height="400" loading="lazy" decoding="async"><img class="pa-p pa-cheer" src="/assets/ask-mascot-cheer-md.webp" srcset="/assets/ask-mascot-cheer-md-240.webp 240w, /assets/ask-mascot-cheer-md.webp 400w" sizes="(max-width: 767px) 125px, 148px" alt="" width="400" height="400" loading="lazy" decoding="async"></div></div>
-    <h2 class="fk-ty-h2 pa-sec-h">Our Party Packages</h2>
-    <div class="pa-tabs" role="group" aria-label="Choose a package type">
-      {data.groups.map((g, i) => <button type="button" data-tab={g.id} aria-pressed={i === 0 ? 'true' : 'false'}>{g.label}</button>)}
-    </div>
-    {data.groups.map((g, gi) => (
-      <section class="pa-group" data-group={g.id} hidden={gi !== 0 ? true : undefined} aria-label={g.label}>
-        <p class="pa-blurb">{g.blurb}</p>
-        <div class="pk-row">
-          {data.packages.filter((p: any) => p.group === g.id).map((p: any, i: number) => (
-            <article class="pk fk-card" style={`--i:${i}`} data-id={p.id} data-price={p.price} data-name={p.name}>
-              <div class="pk-ph fk-card__ph" aria-hidden="true"><img src={cardPhoto(p.group, i)} srcset={srcsetOf(cardPhoto(p.group, i))} sizes={pkSizes(cardPhoto(p.group, i))} alt="" width="540" height="720" loading="lazy" decoding="async" /><span class="fk-card__badge"><svg viewBox="0 0 24 24" set:html={groupIcon[p.group]} /></span></div>
-              <div class="pk-face fk-card__b" data-tone={p.tone}>
-                <h3 class="fk-card__t fk-ty-h4">{p.name}</h3>
-                <dl class="pk-sum">
-                  {lead(p).map(([h, v]: string[]) => <div><dt>{h}</dt><dd>{v}</dd></div>)}
-                  {p.drinks && <div><dt>Drinks{p.drinks.serve ? ' \u00b7 ' + p.drinks.serve : ''}</dt><dd>{p.drinks.lines.join(' \u00b7 ')}</dd></div>}
-                </dl>
-                <details class="pk-more">
-                  <summary>Everything included</summary>
-                  {p.sections.map((s: any) => (
-                    <div class="pk-sec">
-                      <h4 class="fk-ty-small">{s.h}{s.rule ? ' \u2013 ' + s.rule : ''}</h4>
-                      <p>{(s.items || s.lines).join(' \u00b7 ')}</p>
-                    </div>
-                  ))}
-                  {p.drinks && (
-                    <div class="pk-sec">
-                      <h4 class="fk-ty-small">Drinks{p.drinks.serve ? ' \u2013 serving ' + p.drinks.serve : ''}</h4>
-                      <p>{[...(SHOW_LIQUOR_BRANDS ? p.drinks.brands : []), ...p.drinks.lines].join(' \u00b7 ')}</p>
-                      {p.group === 'bar' && <p class="pk-age">Alcohol is served to guests aged 21 and above only.</p>}
-                    </div>
-                  )}
-                </details>
-                {p.group === 'banquet' && <a class="pk-build" href={`/banquet?pkg=${p.id}#packages`}>Choose the dishes for this menu <span aria-hidden="true">→</span></a>}
-                <div class="fk-card__foot">
-                  <p class="pk-price fk-card__price"><span class="pk-amt" data-fx-count>{inr(p.price)}</span><small class="pk-unit">+ taxes, {UNIT}</small></p>
-                  <button class="pk-plan fk-card__go" type="button" data-plan={p.id} aria-label={`Plan this party: ${p.name}`} title="Plan this party"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    ))}
-
-    <div class="pa-lower">
-    <section class="pa-plan" id="pa-plan" aria-labelledby="pa-plan-h">
-      <h2 id="pa-plan-h" class="fk-ty-h2">Estimate your party</h2>
-      <PartyStage client:visible poster="/assets/party-stage-poster.webp" />
-      <div class="pa-fields">
-        <label for="pa-pkg">Package</label>
-        <select id="pa-pkg">{data.packages.map((p: any) => <option value={p.id} data-price={p.price}>{p.name} &ndash; {inr(p.price)}</option>)}</select>
-        <label for="pa-n">Guests</label>
-        <div class="pa-step"><button type="button" id="pa-minus" aria-label="Fewer guests">&minus;</button><input id="pa-n" type="number" inputmode="numeric" min="1" max="500" value="25"><button type="button" id="pa-plus" aria-label="More guests">+</button></div>
-      </div>
-      <p class="pa-total" id="pa-total" aria-live="polite"></p>
-      <p class="pa-fine">Estimate before taxes, {UNIT}. Your final quote is confirmed by the Fursat team.</p>
-      <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-      <a class="fk-btn fk-btn--primary pa-wa" id="pa-wa" href={waHi} target="_blank" rel="noopener">Send this plan on WhatsApp</a>
-    </section>
-
-    <div class="pa-right">
-    <section class="pa-choices" aria-labelledby="pa-ch-h">
-      <h2 id="pa-ch-h" class="fk-ty-h2">Choose your dishes</h2>
-      <p class="pa-blurb">For Platinum, Gold, Silver and the Elite packages. Banquet menus list their dishes on the card.</p>
-      {data.choices.map((c: any) => (
-        <details class="pa-acc">
-          <summary>{c.h}</summary>
-          <div class="pa-cols">{c.cols.map((col: any) => <div>{col.h && <h3 class="fk-ty-label">{col.h}</h3>}<ul>{col.items.map((it: string) => <li>{it}</li>)}</ul></div>)}</div>
-        </details>
-      ))}
-    </section>
-
-    <section class="pa-add" aria-labelledby="pa-ad-h">
-      <h2 id="pa-ad-h" class="fk-ty-h2">Add-ons</h2>
-      <ul class="pa-addlist">{data.addons.map((a: any) => <li><span>{a.n}</span><b>{inr(0).replace('0', a.p)}</b></li>)}</ul>
-      <p class="pa-fine">Add-on prices are as printed on the Fursat party menu.</p>
-    </section>
-    </div>
-    </div>
-  </main>
+      <main id="pk-main" tabindex="-1" class="pa-main">
+        <PartyPackages />
+        <PartyBuilder />
+      </main>
     </div>
 
     <figure class="pa-quote" data-fx-reveal>
@@ -190,7 +54,7 @@ const occasions = [
     </figure>
 
     <div class="pa-why">
-      <h2 class="fk-ty-h2 hy-h2 pa-why-h" data-fx-reveal>Why Choose FURSAT?</h2>
+      <h2 class="fk-ty-h2 hy-h2 pa-why-h" data-fx-reveal>Why Choose <span class="pa-fursat">FURSAT</span>?</h2>
       <ul class="pa-plates" data-fx-pop>
         {why.map((w, i) => (
           <li class={`pa-plate pa-plate--${i + 1}`} data-fx-tilt><svg viewBox="0 0 24 24" aria-hidden="true" set:html={w.i} /><span>{w.t}</span></li>
@@ -210,105 +74,11 @@ const occasions = [
 <MobileBar active="celebrate" />
 <script>import '../scripts/fk-motion';</script>
 <style is:global>
-:root{--pk-red:#A83A26;--pk-green:#34522A;--pk-cream:#F6EBD3}
-.pa{min-height:100svh;background:var(--rl-bg);color:var(--rl-ink)}
-.pa-top{padding:max(16px,env(safe-area-inset-top)) var(--pad,clamp(20px,5vw,84px)) 0}
-.pa-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--rl-ink);text-decoration:none;font:600 1rem/1 var(--sans,"Manrope",system-ui,sans-serif)}
-.pa-back svg{width:20px;height:20px;transition:transform .15s var(--rl-ease)}
-.pa-back:focus-visible,.pk-plan:focus-visible,.pa-tabs button:focus-visible,.pk-more summary:focus-visible,.pa-acc summary:focus-visible,.pa-fields select:focus-visible,.pa-step button:focus-visible,.pa-step input:focus-visible{outline:2px solid var(--rl-gold);outline-offset:3px}
-.pa-main{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,48px) var(--pad,clamp(20px,5vw,84px)) clamp(56px,8vw,112px);outline:0}
-.pa-host{display:grid;justify-items:center;margin:0 0 8px}
-.pa-stage{position:relative;isolation:isolate;width:clamp(112px,32vw,148px);aspect-ratio:1;display:grid}
-.pa-stage::after{content:"";position:absolute;left:18%;right:18%;bottom:-2px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--rl-deep) 70%,transparent);transform:scaleY(.6);z-index:-1}
-@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){.pa-stage{transform:perspective(560px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s var(--rl-ease)}.pa-stage::after{translate:var(--sh,0px) 0;transition:translate .2s var(--rl-ease)}}
-.pa-p{grid-area:1/1;width:100%;height:100%;object-fit:contain;opacity:0;transform-origin:50% 100%;transition:opacity .15s var(--rl-ease)}
-.pa-host[data-pose="idle"] .pa-idle,.pa-host[data-pose="cheer"] .pa-cheer{opacity:1}
-.pa-host[data-pose="cheer"] .pa-cheer{animation:pa-hop .6s var(--rl-ease) 2}
-@keyframes pa-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px) scale(.97,1.04)}70%{transform:translateY(0) scale(1.04,.96)}}
-.pa-star{position:absolute;left:50%;top:42%;width:12px;height:12px;margin:-6px 0 0 -6px;background:var(--rl-gold);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);pointer-events:none;animation:pa-star .9s var(--rl-ease) forwards}
-@keyframes pa-star{from{opacity:1;transform:translate(0,0) scale(.5)}to{opacity:0;transform:translate(var(--sx),var(--sy)) scale(1.1)}}
-.pa-h{margin:0 0 12px;text-align:center;font:500 clamp(2rem,6.5vw,4rem)/1.08 var(--serif,"Playfair Display",Georgia,serif);letter-spacing:-.02em;text-wrap:balance}
-.pa-sub{margin:0 auto 28px;max-width:52ch;text-align:center;font:400 1.0625rem/1.5 var(--sans,"Manrope",system-ui,sans-serif);color:var(--rl-dim)}
-.pa-tabs{display:flex;width:max-content;max-width:100%;margin:0 auto 20px;gap:4px;padding:4px;border:1px solid var(--rl-line);border-radius:999px;overflow-x:auto}
-.pa-tabs button{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:transparent;color:var(--rl-ink);white-space:nowrap;font:600 .875rem/1 var(--sans,"Manrope",system-ui,sans-serif);cursor:pointer;touch-action:manipulation;transition:transform .15s var(--rl-ease),background-color .15s var(--rl-ease),color .15s var(--rl-ease)}
-.pa-tabs button:active{transform:scale(.97)}
-.pa-tabs button[aria-pressed="true"]{background:var(--rl-gold);color:var(--rl-deep)}
-.pa-blurb{margin:0 0 20px;text-align:center;font:400 1rem/1.5 var(--sans,"Manrope",system-ui,sans-serif);color:var(--rl-dim)}
-.pa-group[hidden]{display:none}
-.pk-row{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 28px;margin:0 calc(var(--pad,20px)*-1);padding-inline:var(--pad,20px);scroll-padding-inline:var(--pad,20px);align-items:flex-start;overscroll-behavior-x:contain}
-.pk{flex:0 0 min(84vw,330px);scroll-snap-align:center;perspective:900px;animation:pk-in .5s var(--rl-ease) backwards;animation-delay:calc(min(var(--i),5)*60ms)}
-@keyframes pk-in{from{opacity:0;transform:scale(.95) translateY(8px)}}
-.pk-face{position:relative;transform-style:preserve-3d;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s var(--rl-ease);padding:72px 24px 24px;border-radius:165px 165px 24px 24px;color:var(--pk-cream);text-align:center;box-shadow:0 16px 28px color-mix(in srgb,var(--rl-deep) 55%,transparent)}
-.pk-face[data-tone="red"]{background:var(--pk-red)}
-.pk-face[data-tone="green"]{background:var(--pk-green)}
-
-.pk-price{margin:0 0 20px;display:grid;gap:2px;transform:translateZ(34px)}
-.pk-unit{font:500 .875rem/1.3 var(--sans,"Manrope",system-ui,sans-serif)}
-.pk-sum{margin:0 0 16px;text-align:left;display:grid;gap:10px}
-.pk-sum div{padding-top:10px;border-top:1px solid color-mix(in srgb,var(--pk-cream) 40%,transparent)}
-.pk-sum dt{font:700 .9375rem/1.3 var(--sans,"Manrope",system-ui,sans-serif)}
-.pk-sum dd{margin:2px 0 0;font:400 .9375rem/1.4 var(--sans,"Manrope",system-ui,sans-serif)}
-.pk-more{margin:0 0 16px;text-align:left}
-.pk-more summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font:700 .9375rem/1.3 var(--sans,"Manrope",system-ui,sans-serif);text-decoration:underline;text-underline-offset:4px}
-.pk-more summary:focus-visible{outline-color:var(--pk-cream)}
-.pk-sec{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--pk-cream) 40%,transparent)}
-
-.pk-sec p{margin:0;font:400 .9375rem/1.5 var(--sans,"Manrope",system-ui,sans-serif)}
-.pk-sec .pk-age{margin-top:6px;font-weight:700}
-
-.pk-plan:active,.pa-step button:active{transform:scale(.97)}
-.pk-plan:focus-visible{outline-color:var(--pk-cream);outline-offset:3px}
-.pa-plan,.pa-choices,.pa-add{margin-top:clamp(32px,6vw,64px);max-width:720px;margin-inline:auto}
-
-.pa-fields{display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:center}
-.pa-fields label{font:600 .9375rem/1.3 var(--sans,"Manrope",system-ui,sans-serif)}
-.pa-fields select,.pa-step input{min-height:48px;width:100%;padding:0 12px;border:1px solid var(--rl-line);border-radius:12px;background:transparent;color:var(--rl-ink);font:500 1rem/1.2 var(--sans,"Manrope",system-ui,sans-serif)}
-.pa-fields select option{color:#1A1608}
-.pa-step{display:grid;grid-template-columns:48px 1fr 48px;gap:8px}
-.pa-step button{min-height:48px;border:1px solid var(--rl-line);border-radius:12px;background:transparent;color:var(--rl-ink);font:600 1.25rem/1 var(--sans,"Manrope",system-ui,sans-serif);cursor:pointer;touch-action:manipulation;transition:transform .15s var(--rl-ease)}
-.pa-step input{text-align:center}
-.pa-total{margin:20px 0 4px;font:500 clamp(1.75rem,6vw,2.5rem)/1.1 var(--serif,"Playfair Display",Georgia,serif)}
-.pa-fine{margin:0 0 16px;font:400 .875rem/1.4 var(--sans,"Manrope",system-ui,sans-serif);color:var(--rl-dim)}
-
-.pa-acc{border-top:1px solid var(--rl-track)}
-.pa-acc:last-of-type{border-bottom:1px solid var(--rl-track)}
-.pa-acc summary{min-height:56px;display:flex;align-items:center;cursor:pointer;font:500 1.25rem/1.25 var(--serif,"Playfair Display",Georgia,serif)}
-.pa-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 24px;padding:0 0 20px}
-
-.pa-cols ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font:400 .9375rem/1.4 var(--sans,"Manrope",system-ui,sans-serif);color:var(--rl-dim)}
-.pa-addlist{list-style:none;margin:0 0 12px;padding:0}
-.pa-addlist li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--rl-track);font:500 1rem/1.3 var(--sans,"Manrope",system-ui,sans-serif)}
-@media(min-width:900px){.pk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));overflow:visible;margin:0;padding:8px 0 28px;gap:24px}.pk{flex:none}}
-@media(hover:hover){.pk-plan:hover{background:transparent;color:var(--pk-cream)}.pa-tabs button:hover:not([aria-pressed="true"]){background:color-mix(in srgb,var(--rl-gold) 20%,transparent)}.pa-back:hover svg{transform:translateX(-4px)}.pa-step button:hover{border-color:var(--rl-gold)}}
-@media(prefers-reduced-motion:reduce){.pk,.pa-star,.pa-host[data-pose="cheer"] .pa-cheer{animation:none!important}.pa-star{display:none}.pk-face{transition:none}}
-/* ───────── P5 restyle: plaster, baked hero stage, embossed package cards ───────── */
-.pa-main{max-width:1240px;padding-top:clamp(8px,2vw,24px)}
-
-.pa-blurb{color:#5a5040}
-.pa-tabs{border-color:rgba(201,154,67,.45);background:linear-gradient(180deg,#f1e3cf,#f8eee2);box-shadow:inset 0 2px 5px rgba(122,78,24,.14),inset 0 -1px 0 rgba(255,255,255,.9)}
-.pa-tabs button{color:var(--fk-forest-800);font-family:var(--fk-sans)}
-.pa-tabs button[aria-pressed="true"]{background:linear-gradient(180deg,#21492b,#12301c);color:#fbf5e6;box-shadow:0 5px 12px rgba(14,34,20,.28)}
-.pa .pk{position:relative;inset:auto;z-index:auto;display:block;visibility:visible;align-items:initial;justify-content:initial}
-@media(min-width:768px){.pa .pk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));overflow:visible;margin:0;padding:8px 0 28px;gap:18px}.pa .pk{flex:none}}
-.pk-unit,.pk-sum dt{color:#74501a!important}
-.pk-sum dd,.pk-sec p{color:#4a4232!important}
-.pa-plan,.pa-acc,.pa-addlist{background:var(--fk-cream-100);border-radius:26px;border:0;box-shadow:0 0 0 1px rgba(201,154,67,.4),0 0 0 6px #f6ead8,0 0 0 7px rgba(255,255,255,.8),0 22px 40px rgba(42,27,8,.16),inset 0 2px 3px rgba(255,255,255,.9)}
-.pa-plan{padding:clamp(20px,3vw,36px);margin:clamp(32px,4vw,56px) 7px 0}
-
-.pa-acc{margin:12px 7px}.pa-addlist{padding:16px 22px;margin:0 7px}
-.sf-footer{background:var(--fk-forest-900)}
-.pa-fields label{color:#74501a;font:600 .78rem/1.3 var(--fk-sans);letter-spacing:.12em;text-transform:uppercase}
-.pa-fields select,.pa-step input{color:var(--fk-ink);background:#fcf7f0;border:1px solid rgba(201,154,67,.5);border-radius:14px;box-shadow:inset 0 2px 4px rgba(122,78,24,.12)}
-.pa-step button{color:var(--fk-forest-900);background:linear-gradient(180deg,#fffaf3,#f3e4cf);border:1px solid rgba(201,154,67,.5);border-radius:50%}
-.pa-total{color:var(--fk-forest-900);font-family:var(--fk-serif)}
-.pa-fine{color:#5a5040}
-
-/* ───────── v4 hybrid stage ───────── */
+/* hybrid stage: textless background art + the closing panel (quote, plates, band) laid over the bottom slice */
 .pa{flex:none;background:#f6e6d1;color:var(--fk-ink);font-family:var(--fk-sans)}
 .pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:500;background:#f6e6d1}
-.pa-flow{padding:clamp(24px,3vw,48px) 0 calc(520 * var(--u));z-index:3}
-.pa .pa-main{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
-
+.pa-flow{padding:clamp(8px,1.5vw,24px) 0 calc(520 * var(--u));z-index:3}
+.pa .pa-main{display:block;outline:0}
 .pa-quote{z-index:3;margin:0;left:calc(70 * var(--u));bottom:calc(270 * var(--u));width:calc(340 * var(--u));color:#fbf3e6;display:grid;gap:calc(14 * var(--u))}
 .pa-qm{width:calc(34 * var(--u));min-width:22px;height:auto;fill:#e8a85a}
 .pa-quote blockquote{margin:0;font:italic 500 calc(31 * var(--u))/1.25 var(--fk-serif);color:#fbf3e6;text-wrap:balance}
@@ -341,118 +111,18 @@ const occasions = [
   
   .pa-close p{display:none}
 }
-
-/* v4.5 type: one sans on this page; unit line at label size */
-.pa{--sans:var(--fk-sans)}
-
-.pa .pk-unit{font:400 .75rem/1.3 var(--fk-sans)}
-/* v4.4 colour roles: selected tab = gold, main action = green */
-.pa .pa-tabs button[aria-pressed="true"]{background:var(--fk-selected-bg)!important;color:var(--fk-selected-fg)!important;box-shadow:var(--fk-selected-shadow)!important}
-
-/* dish menus inside "Choose your dishes": readable on the cream panel (were pale cream text from the old dark theme) */
-.pa .pa-cols{color:#2b2416}
-
-.pa .pa-cols li{color:#3b3326;font-size:.95rem;line-height:1.5}
-/* party cards use the shared .fk-card shape */
-.pa .pk.fk-card{margin:0;background:linear-gradient(180deg,#fbf3e7,#f6e7d2)}
-.pa .pk-face.fk-card__b{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important;padding:0 20px 18px!important;transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .3s cubic-bezier(.2,0,0,1)}
-
-.pa .pk-price{margin:0!important;text-align:left}
-.pa .pk-amt{font:var(--fk-t-price);color:#a8261b}
-.pa .pk-sum{padding-top:10px;margin:2px 0 8px}
-.pa .pk.fk-card{perspective:none}
-.pa .pk-face.fk-card__b{transform-style:flat;border-radius:0;position:relative;z-index:1}
-.pa .pk-price{transform:none}
-
-.pa .pk-plan.fk-card__go{width:44px;min-height:44px;height:44px;padding:0;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3d6b43,#22442a);color:#fbf3e7;flex:none}
-@media(hover:hover){.pa .pk-plan.fk-card__go:hover{background:radial-gradient(circle at 35% 30%,#47794d,#2b4a2f);color:#fbf3e7}}
-/* ───────── v4.1 party middle: clean, aligned, equal cards ───────── */
-.pa-hy .hy-mid{background-size:100% 100%}
-.pa-hy .hy-mid::after{content:"";position:absolute;inset:0;background:url(/assets/surface/plaster-tile.webp) 0 0/900px 900px;mix-blend-mode:multiply;opacity:.55}
-.pa .pa-main{max-width:1240px}
-.pa .pa-host{margin:0 auto -6px}
-
-.pa .pa-tabs{margin:0 auto}
-.pa .pa-blurb{text-align:center;margin:14px 0 26px;color:#5a5040}
-@media(min-width:768px){
-  .pa .pk-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:20px;padding:10px 8px 30px;margin:0;overflow:visible}
-  .pa .pk{flex:1 1 220px;min-width:220px;max-width:280px;display:flex;flex-direction:column;margin:0}
-  .pa .pk-face{flex:1;display:flex;flex-direction:column}
-  .pa .pk-more{margin-bottom:16px}
-}
-.pa .pa .pk-sum{display:grid;gap:10px;margin:0 0 14px;padding-top:14px;border-top:1px solid rgba(214,170,90,.35)}
-.pa .pk-sum dt{font:var(--fk-t-label)!important;letter-spacing:.06em}
-.pa .pk-sum dd{margin:2px 0 0;font-size:.88rem;line-height:1.45}
-.pa .pk-more summary{font-size:.85rem;color:#1b3a26;cursor:pointer}
-
-.pa-lower{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(20px,3vw,44px);align-items:start;margin:clamp(20px,3vw,40px) 0 0}
-.pa .pa-plan{margin:0;position:sticky;top:96px}
-
-.pa .pa-fields{display:grid;grid-template-columns:auto 1fr;gap:12px 14px;align-items:center}
-.pa .pa-fields select{min-height:46px;padding:0 14px;width:100%}
-.pa .pa-step{display:grid;grid-template-columns:46px 1fr 46px;gap:8px}
-.pa .pa-step button{width:46px;height:46px}
-.pa .pa-step input{min-height:46px;text-align:center}
-.pa .pa-total{font-size:1.9rem!important;margin:18px 0 4px!important}
-
-.pa-right{display:grid;gap:clamp(22px,3vw,36px)}
-.pa .pa-choices,.pa .pa-add{margin:0}
-
-.pa .pa-choices .pa-blurb{text-align:left;margin:0 0 14px}
-.pa .pa-acc{margin:0 0 10px;border-radius:18px}
-.pa .pa-acc summary{padding:15px 48px 15px 22px;font:var(--fk-t-faq);color:#1b3a26;cursor:pointer;list-style:none;position:relative}
-.pa .pa-acc summary::-webkit-details-marker{display:none}
-.pa .pa-acc summary::after{content:"+";position:absolute;right:20px;top:50%;translate:0 -50%;font:400 1.4rem/1 var(--fk-sans);color:#c0632a;transition:rotate .2s}
-.pa .pa-acc[open] summary::after{rotate:45deg}
-.pa .pa-cols{padding:0 22px 18px}
-.pa .pa-addlist{margin:10px 0 0;list-style:none;padding:14px 22px}
-.pa .pa-addlist li{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px dashed rgba(214,170,90,.4)}
-.pa .pa-addlist li:last-child{border-bottom:0}
-@media(max-width:900px){.pa-lower{grid-template-columns:1fr}.pa .pa-plan{position:static}}
-@media(max-width:767px){.pa .pa-lower,.pa .pa-right{min-width:0}.pa .pa-acc,.pa .pa-addlist,.pa .pa-plan{margin-left:0;margin-right:0}}
-/* ───────── v5.9.2 Pick your occasion (merged from /events) ───────── */
-.pa-occ{max-width:1240px;margin:0 auto;padding:0 clamp(16px,4vw,48px) clamp(28px,4vw,56px)}
-.pa-occ .pa-blurb{margin:0 0 22px}
-.pa-occ-grid{grid-template-columns:1fr}
-@media(min-width:600px){.pa-occ-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(min-width:1000px){.pa-occ-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.pa-oc{scroll-margin-top:110px}
-.pa-oc .fk-card__t{padding-right:0}
-.pa-oc .fk-card__price{margin:4px 0 0}
-.pa-oc-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:10px}
-
-.pk-build{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:4px 0 6px;font:600 .85rem/1.2 var(--fk-sans);color:#74501a;text-decoration:underline;text-underline-offset:3px}
-.pk-build:focus-visible{outline:3px solid var(--fk-focus,#1d5a32);outline-offset:2px;border-radius:6px}
-/* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn (no old skins). */
-.pa .pa-sec-h{margin:4px 0 14px;text-align:center;color:var(--fk-forest-900)}
-.pa-plan .fk-ty-h2,.pa-choices .fk-ty-h2,.pa-add .fk-ty-h2{margin:0 0 16px;color:var(--fk-forest-900)}
-.pa-choices .fk-ty-h2,.pa-add .fk-ty-h2{margin-bottom:6px}
-.pk-sec .fk-ty-small{margin:0 0 4px;font-weight:600}
-.pa-cols .fk-ty-label{margin:0 0 8px;color:#74501a}
-.pa .pk .fk-card__t{margin:0 0 4px;padding-top:4px;text-align:left;color:#1f2a1a}
-.pa-why-h{position:absolute;left:0;right:0;top:calc(-6 * var(--u));text-align:center}
+/* middle slice = plain cream plaster, so cards and the builder sit on the same cream as the hero */
+.pa-hy .hy-mid{background:var(--fk-plaster);background-blend-mode:multiply}
+.sf-footer{background:var(--fk-forest-900)}
+.pa-why-h{position:absolute;left:0;right:0;top:calc(-6 * var(--u));text-align:center;color:#1b3a26}
+.pa-fursat{color:#2a5019}
 .pa-close .fk-ty-h2{color:#fbf3e6}
 .pa-close .fk-ty-h2 em{font-style:normal;color:#eda05a}
-.pa .pa-wa{margin-top:16px}
-.pa-oc-act .fk-btn{flex:1 1 auto}
-@media(max-width:767px){
-  .pa-why-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-  .pa-plan .fk-btn{width:100%}
-  .pa-close .fk-ty-h2{font-size:var(--fk-fs-4)}
-}
+@media(max-width:767px){.pa-why-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.pa-close .fk-ty-h2{font-size:var(--fk-fs-4)}}
+/* hero: second button = cream with a gold rim */
+.pa .ch-btns .fk-btn--secondary{border-color:#c99a43;background:#fcf7f0}
+/* phone: leave room for the summary bar so it never covers the footer links */
+@media(max-width:767px){.pa{overflow-x:clip}}
 </style>
 <script is:inline src="/js/party.js"></script>
-<script is:inline>
-/* v5.12b authored moment: an occasion card opens its package tab with a short slide from the side the tab sits on.
-   Runs after party.js (which shows the group on the same click). Transform + opacity only; none under reduced motion. */
-(function(){
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches||!Element.prototype.animate)return;
-  var tabs=[].slice.call(document.querySelectorAll('[data-tab]'));
-  document.querySelectorAll('[data-occ]').forEach(function(b){b.addEventListener('click',function(){
-    var id=b.getAttribute('data-occ'),g=document.querySelector('.pa-group[data-group="'+id+'"]');if(!g||g.hidden)return;
-    var i=tabs.findIndex(function(t){return t.getAttribute('data-tab')===id}),mid=(tabs.length-1)/2,x=i<mid?-24:i>mid?24:0;
-    g.animate([{opacity:0,transform:'translate('+x+'px,12px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(0.23,1,0.32,1)'});
-  })});
-})();
-</script>
 </Base>
