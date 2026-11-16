@@ -1,0 +1,41 @@
+---
+// One dish in the full menu: a plain row, or a glass card when the dish has a real photo (dish-photos.json).
+// Hooks the menu script reads: [data-row], .mv-open, .mv-iname, .mv-idesc, .mv-note, .mv-item-price, .fk-chip, [data-add].
+import { money } from './cart';
+interface Props {
+  i: { name: string; section: string; description?: string; note?: string; price: number | null; veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string };
+  name: string;
+  vs: { label: string; value: number }[];
+  attrs: Record<string, string>;
+  photo?: { src: string; w: number; h: number };
+}
+const { i, name, vs, attrs, photo } = Astro.props as Props;
+const row = { 'data-row': '', 'data-sec': i.section, 'data-veg': i.veg ? '1' : '0', 'data-text': `${name} ${i.description ?? ''} ${i.section}`.toLowerCase(), ...(i.image ? { 'data-img': i.image } : {}) };
+---
+<li class={photo ? 'mv-item mv-item--card fk-card fk-card--glass' : 'mv-item'} {...row}>
+  {photo && (
+    <div class="fk-card__ph"><img src={photo.src} alt="" width={photo.w} height={photo.h} loading="lazy" decoding="async" /></div>
+  )}
+  <div class={photo ? 'fk-card__b' : 'mv-item-row'}>
+    <div class="mv-item-text">
+      <h4 class={photo ? 'fk-card__t mv-item-name' : 'mv-item-name'}><button class="mv-open" type="button" aria-haspopup="dialog" inert><span class="mv-iname">{name}</span></button></h4>
+      {i.description && <p class={photo ? 'fk-card__p mv-idesc' : 'mv-idesc'}>{i.description}</p>}
+      {i.note && <p class="mv-note">{i.note}</p>}
+      <div class="fk-chips">
+        <span class={i.veg ? 'fk-chip fk-chip--veg' : 'fk-chip fk-chip--nonveg'}>{i.veg ? 'Veg' : 'Non-veg'}</span>
+        {i.spicy && <span class="fk-chip fk-chip--spicy">Spicy</span>}
+        {i.chefSpecial && <span class="fk-chip fk-chip--pick">Chef's pick</span>}
+      </div>
+    </div>
+    <div class="mv-item-buy">
+      <span class="mv-item-price num">
+        {vs.length > 1
+          ? vs.map((v) => <span><small>{v.label}</small> {money(v.value)}</span>)
+          : i.price != null ? money(i.price) : '—'}
+      </span>
+      {i.price != null && (
+        <button class="mv-add" type="button" aria-label={`Add ${name} to picks`} {...attrs}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      )}
+    </div>
+  </div>
+</li>

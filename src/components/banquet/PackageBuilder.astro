@@ -50,9 +50,9 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
       <p class="pb-lead">Pick a package, choose your dishes course by course, and send the menu to us on WhatsApp. Prices are per guest, plus taxes.</p>
     </header>
 
-    <div class="pb-pkgs" role="radiogroup" aria-label="Banquet package">
+    <div class="pb-pkgs fk-seg" role="radiogroup" aria-label="Banquet package">
       {pkgs.map((p: any, i: number) => (
-        <button type="button" class="pb-pkg" role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-pkg={p.id} data-price={p.price} data-kind={p.kind}>
+        <button type="button" class={`pb-pkg${i === 0 ? ' is-on' : ''}`} role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-pkg={p.id} data-price={p.price} data-kind={p.kind} data-sum={p.sum}>
           <span class={`pb-dot ${p.veg ? 'is-veg' : 'is-nv'}`} aria-hidden="true"></span>
           <span class="pb-kind">{p.kind}</span>
           <span class="pb-price">{inr(p.price)}</span>
@@ -61,6 +61,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
         </button>
       ))}
     </div>
+    <p class="pb-cap" id="pb-cap" aria-hidden="true">{inr(first.price)} per guest + taxes · {first.sum}</p>
 
     <div class="pb-body">
       <div class="pb-panels">
@@ -76,7 +77,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
                     : <span class="pb-rule pb-rule--incl">Included</span>}
                 </legend>
                 {c.pick
-                  ? <div class="pb-chips">{c.items.map((it: string) => <button type="button" class="pb-chip" aria-pressed="false" data-item={it}>{it}</button>)}</div>
+                  ? <div class="pb-chips">{c.items.map((it: string) => <button type="button" class="fk-pill pb-chip" aria-pressed="false" data-item={it}>{it}</button>)}</div>
                   : <p class="pb-incl">{c.items.join(' · ')}</p>}
               </fieldset>
             ))}
@@ -145,9 +146,10 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   }
   function selectPkg(btn, focus) {
     cur = btn;
-    pkgBtns.forEach(function (b) { var on = b === btn; b.setAttribute('aria-checked', on); b.tabIndex = on ? 0 : -1; });
+    pkgBtns.forEach(function (b) { var on = b === btn; b.setAttribute('aria-checked', on); b.classList.toggle('is-on', on); b.tabIndex = on ? 0 : -1; });
     qa('.pb-panel').forEach(function (p) { p.hidden = p.dataset.panel !== btn.dataset.pkg; });
     if (focus) btn.focus();
+    q('#pb-cap').textContent = inr(btn.dataset.price) + ' per guest + taxes · ' + btn.dataset.sum;
     live.textContent = btn.dataset.kind + ' package, ' + inr(btn.dataset.price) + ' per guest selected';
     refresh();
     try { history.replaceState(null, '', '?pkg=' + btn.dataset.pkg + '#packages'); } catch (e) {}
@@ -205,21 +207,23 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-lead { margin: 0; font: 400 1rem/1.6 var(--fk-sans); color: var(--pb-mute); }
 
 /* package selector */
-.pb-pkgs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: clamp(22px, 3vw, 32px); }
-.pb-pkg { position: relative; display: grid; gap: 2px; justify-items: start; text-align: left; padding: 16px 16px 14px; border-radius: 18px; border: 1.5px solid var(--pb-edge); background: var(--pb-card); color: var(--pb-ink); font: inherit; cursor: pointer; transition-property: transform, box-shadow, background-color, border-color; transition-duration: var(--fk-dur-2, 200ms); transition-timing-function: var(--fk-ease-out, ease); -webkit-tap-highlight-color: transparent; }
-.pb-pkg:active { transform: scale(.98); }
-.pb-pkg[aria-checked="true"] { background: var(--fk-selected-bg); border-color: #c99a43; box-shadow: 0 10px 26px -14px rgb(120 80 20 / .55); }
-.pb-pkg:focus-visible { outline: 3px solid var(--fk-focus, #1d5a32); outline-offset: 3px; }
-@media (hover: hover) { .pb-pkg:not([aria-checked="true"]):hover { border-color: #c99a43; transform: translateY(-2px); } }
-.pb-dot { position: absolute; top: 16px; right: 16px; width: 14px; height: 14px; border: 1.5px solid currentColor; border-radius: 3px; display: grid; place-items: center; }
+.pb-pkgs.fk-seg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; box-sizing: border-box; border-radius: 26px; margin-bottom: clamp(22px, 3vw, 32px); }
+.pb-pkgs > :global(.fk-seg__thumb) { border-radius: 22px; }
+.pb-pkg { position: relative; display: grid; gap: 2px; justify-items: start; align-content: start; text-align: left; min-height: 44px; padding: 14px 16px 12px; border-radius: 22px; color: var(--ui2-ink); }
+.pb-pkgs.fk-seg > .pb-pkg { white-space: normal; min-width: 0; padding: 14px 16px 12px; border-radius: 22px; }
+.pb-pkgs.fk-seg > .pb-pkg.is-on { color: var(--ui2-cream); }
+.pb-pkg.is-on { color: var(--ui2-cream); }
+.pb-dot { position: absolute; top: 14px; right: 14px; width: 14px; height: 14px; border: 1.5px solid currentColor; border-radius: 3px; display: grid; place-items: center; }
 .pb-dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .pb-dot.is-veg { color: #1f7a3a; } .pb-dot.is-nv { color: #a3341a; }
+.pb-pkg.is-on .pb-dot { color: #fff; }
 .pb-kind { font: 600 .75rem/1.2 var(--fk-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--fk-text-gold); }
-.pb-pkg[aria-checked="true"] .pb-kind { color: #4a3208; }
 .pb-price { font: 600 clamp(1.5rem, 2.4vw, 1.9rem)/1.15 var(--fk-serif); font-variant-numeric: tabular-nums; }
 .pb-per { font: 400 .75rem/1.3 var(--fk-sans); color: var(--pb-mute); }
 .pb-sum { margin-top: 8px; font: 500 .78rem/1.4 var(--fk-sans); color: var(--pb-mute); }
-.pb-pkg[aria-checked="true"] .pb-per, .pb-pkg[aria-checked="true"] .pb-sum { color: #3d2a0c; }
+.pb-pkg.is-on .pb-kind { color: #f3d9a0; }
+.pb-pkg.is-on .pb-per, .pb-pkg.is-on .pb-sum { color: rgb(246 236 216 / .85); }
+.pb-cap { display: none; }
 
 /* body */
 .pb-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(18px, 2.4vw, 28px); align-items: start; }
@@ -238,13 +242,9 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-course.is-done .pb-rule { background: #2e7d4a; color: #fff; }
 .pb-rule--incl { background: rgb(46 125 74 / .12); color: #24603a; }
 .pb-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.pb-chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid #dcc6a0; background: #fffaf2; color: var(--pb-ink); font: 500 .875rem/1.2 var(--fk-sans); cursor: pointer; transition-property: background-color, border-color, color, transform, opacity; transition-duration: var(--fk-dur-2, 200ms); transition-timing-function: var(--fk-ease-out, ease); -webkit-tap-highlight-color: transparent; }
-.pb-chip:active { transform: scale(.96); }
-.pb-chip[aria-pressed="true"] { background: var(--fk-action-bg); border-color: #14321e; color: var(--fk-action-fg); }
-.pb-chip[aria-pressed="true"]::before { content: "✓ "; }
+.pb-chip { white-space: normal; text-align: center; line-height: 1.25; padding: 8px 14px; font-size: .875rem; font-weight: 500; }
+.pb-chip[aria-pressed="true"]::before { content: "✓"; }
 .pb-chip.is-locked { opacity: .5; }
-.pb-chip:focus-visible { outline: 3px solid var(--fk-focus, #1d5a32); outline-offset: 2px; }
-@media (hover: hover) { .pb-chip:not([aria-pressed="true"]):hover { border-color: #c99a43; background: #fff4e0; } }
 .pb-incl { margin: 0; font: 400 .92rem/1.6 var(--fk-sans); color: var(--pb-mute); }
 .pb-course.is-nudge { animation: pb-nudge 360ms var(--fk-ease-out, ease); }
 @keyframes pb-nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
@@ -274,7 +274,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .pb-dock { display: none; }
 
-@media (max-width: 1100px) { .pb-pkgs { grid-template-columns: repeat(5, minmax(200px, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; } .pb-pkg { scroll-snap-align: start; } }
+@media (max-width: 1100px) { .pb-per, .pb-sum { display: none; } .pb-pkgs.fk-seg > .pb-pkg { padding: 12px 10px; } .pb-dot { top: 10px; right: 8px; } .pb-cap { display: block; margin: -14px 0 22px; text-align: center; font: 500 .85rem/1.45 var(--fk-sans); color: var(--pb-mute); } }
 @media (max-width: 900px) {
   .pb-body { grid-template-columns: 1fr; }
   .pb-sum-card { position: static; }
@@ -283,8 +283,8 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   .pb-dock:not([hidden]) { position: fixed; left: 10px; right: 10px; bottom: calc(82px + env(safe-area-inset-bottom)); z-index: 8000; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px; background: #13301d; color: #f6ecd8; box-shadow: 0 16px 32px -16px rgb(0 0 0 / .6); font: 500 .9rem/1 var(--fk-sans); }
 }
 @media (max-width: 640px) {
+  .pb-kind { letter-spacing: .02em; font-size: .75rem; } .pb-price { font-size: 1rem; } .pb-pkgs.fk-seg > .pb-pkg { padding: 10px 4px; justify-items: center; text-align: center; } .pb-dot { position: static; order: -1; margin-bottom: 4px; }
   .pb-panel { grid-template-columns: 1fr; }
-  .pb-pkgs { grid-template-columns: repeat(5, minmax(168px, 1fr)); margin-inline: calc(-1 * clamp(16px, 4vw, 40px)); padding-inline: clamp(16px, 4vw, 40px); scroll-padding-inline: clamp(16px, 4vw, 40px); }
   
 }
 @media (prefers-reduced-motion: reduce) {

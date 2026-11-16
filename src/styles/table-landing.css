@@ -1,4 +1,4 @@
-/* /menu Phase 3: the dishes leave the food door and land on the real table photo as the page scrolls.
+/* /menu Phase 3: dishes drop onto the plates of the table scene as the page scrolls.
    Scoped under .tl. Only transform + opacity move after load. The scene is dark like the doors, so it keeps its own dark tokens.
    Track = 150svh (130svh on phones) holding one sticky 100svh stage. No script, or reduced motion: the dishes are already placed. */
 .tl{--tl-text:#F6EDDF;--tl-mute:rgb(246 237 223 / .85);--tl-gold:#f3c56b;--tl-rim:#ffe2a6;--tl-ink:#2a1608;
@@ -7,10 +7,12 @@
 .tl--js{height:150vh;height:150svh}
 @media (max-width:820px){.tl--js{height:130vh;height:130svh}}
 
-/* the stage pins to the top of the screen while the track scrolls past; overflow stays visible so the plates can start above it, over the doors */
+/* the stage pins to the top of the screen while the track scrolls past; overflow stays visible */
 .tl-stage{position:sticky;top:0;height:100vh;height:100svh}
 .tl-bg{position:absolute;inset:0;overflow:hidden;background:#0b0705;will-change:transform} /* own layer: the photo is rasterised once, not on the frame the stage pins */
-.tl-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 70%;display:block}
+.tl-bg picture{position:absolute;inset:0;display:block}
+.tl-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
+.tl--fit .tl-bg img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 64px,#000 calc(100% - 64px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 64px,#000 calc(100% - 64px),transparent 100%)}
 .tl-shade{position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,rgb(11 7 5 / .88) 0,rgb(11 7 5 / .5) 24%,rgb(11 7 5 / .12) 46%,rgb(11 7 5 / .12) 62%,rgb(11 7 5 / .86) 100%)}
 
@@ -21,21 +23,17 @@
 .tl-hl span{font-style:italic;color:var(--tl-gold)}
 .tl-sub{margin:0;font-size:.95rem;color:var(--tl-mute);text-shadow:0 1px 10px rgb(0 0 0 / .6)}
 
-/* ── landing spots: the script sets --x --y --d from the photo. Before it runs they sit in a row. ── */
+/* ── landing spots: the script sets --x --y (plate centre), --pw --ph (plate size), --dw (dish width) from the scene. Before it runs they sit in a row. ── */
 .tl-spots{position:absolute;inset:0;z-index:3;margin:0;padding:0;list-style:none;pointer-events:none}
-.tl-spot{position:absolute;left:var(--x,calc(14% + var(--i) * 17%));top:var(--y,60%);width:var(--d,clamp(88px,12vw,190px));aspect-ratio:1;translate:-50% -50%;z-index:calc(10 - var(--i))}
+.tl-spot{position:absolute;left:var(--x,calc(14% + var(--i) * 17%));top:var(--y,62%);width:0;height:0;z-index:calc(10 - var(--i));
+  --pw:clamp(60px,12vw,200px);--ph:calc(var(--pw) * .6);--dw:calc(var(--pw) * 1.25)}
 .tl-spot[hidden]{display:none}
-.tl-ring{position:absolute;inset:-9%;border-radius:50%;border:1.5px dashed rgb(243 197 107 / .75);transition:opacity 400ms ease}
-.tl-ring--solid{border-style:solid;border-color:rgb(255 226 166 / .55);opacity:0}
-.tl-spot.is-landed .tl-ring:not(.tl-ring--solid){opacity:0}
-.tl-spot.is-landed .tl-ring--solid{opacity:1}
-.tl-shadow{position:absolute;left:4%;right:4%;bottom:-9%;height:30%;border-radius:50%;background:radial-gradient(closest-side,rgb(0 0 0 / .65),transparent);transform-origin:50% 50%;will-change:transform,opacity}
-/* the flying plate: the script moves this one box */
-.tl-plate{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform,opacity}
-.tl-drop{position:absolute;inset:0;display:block;border-radius:50%;overflow:hidden;background:#2a1b10;
-  box-shadow:0 0 0 2px rgb(255 226 166 / .8),0 0 0 6px rgb(22 14 9 / .85),0 0 0 7px rgb(224 170 80 / .5),0 18px 26px -8px rgb(0 0 0 / .75)}
-.tl-drop img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-.tl-label{position:absolute;left:50%;top:calc(100% + 16px);translate:-50% 0;width:max-content;max-width:210px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
+/* contact shadow: an ellipse under the dish, blurred 10px, 35% black; it grows as the dish lands */
+.tl-shadow{position:absolute;left:0;top:0;width:var(--pw);height:var(--ph);translate:-50% -50%;border-radius:50%;background:rgb(0 0 0 / .35);filter:blur(10px);transform-origin:50% 50%;will-change:transform,opacity}
+/* the dish cut-out: its own plate sits over the table plate, bottom edge on the plate's bottom edge. The script moves this one box. */
+.tl-plate{position:absolute;left:0;top:0;width:var(--dw);aspect-ratio:var(--ar,1);translate:-50% calc(-100% + var(--ph) * .5);transform-origin:50% 100%;will-change:transform,opacity}
+.tl-plate img{display:block;width:100%;height:100%;pointer-events:none;user-select:none}
+.tl-label{position:absolute;left:0;top:calc(var(--ph) * .5 + 18px);translate:-50% 0;width:max-content;max-width:210px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
   opacity:0;transform:translateY(12px);transition:opacity 500ms ease 120ms,transform 700ms var(--tl-ease) 120ms}
 .tl-spot.is-landed .tl-label{opacity:1;transform:none}
 .tl-label b{font:500 clamp(.95rem,1.15vw,1.1rem)/1.2 var(--mv-serif,"Playfair Display",Georgia,serif);color:var(--tl-text);text-wrap:balance;text-shadow:0 2px 14px rgb(0 0 0 / .8)}
@@ -59,7 +57,6 @@
 @media (max-width:820px){
   .tl-head{top:clamp(40px,7svh,72px)}
   .tl-label{display:none}
-  .tl-ring{inset:-7%}
   .tl-legend{left:16px;right:16px;bottom:calc(16px + 72px + 44px + 14px);width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;z-index:4;
     display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;text-shadow:0 1px 10px rgb(0 0 0 / .85)}
   .tl-legend li{display:flex;flex-direction:column;gap:2px;font-size:.8125rem;line-height:1.25;color:var(--tl-text)}
@@ -76,5 +73,5 @@
 @media (prefers-reduced-motion:reduce){
   .tl--js{height:auto}
   .tl--js .tl-stage{position:relative;height:min(100svh,760px)}
-  .tl :is(.tl-ring,.tl-label,.tl-btn,.tl-btn svg){transition:none!important}
+  .tl :is(.tl-label,.tl-btn,.tl-btn svg){transition:none!important}
 }

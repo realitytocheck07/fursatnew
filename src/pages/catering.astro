@@ -42,22 +42,22 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
           <span class="fk-ty-label ct-kicker">OUR CATERING SCALE</span>
           <h2 class="fk-ty-h2 ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
         </div>
-        <div class="ct-scale-grid">
-          <div class="fk-card fk-card--text ct-stat-card">
+        <div class="ct-scale-grid fk-rail fk-rail--cards fk-rail--m" data-dots>
+          <div class="fk-card fk-card--glass ct-stat-card">
             <div class="fk-card__b">
               <p class="fk-ty-h2 ct-stat-number">30–80</p>
               <p class="fk-ty-label ct-stat-unit">Guests</p>
               <p class="fk-ty-body ct-stat-label">Intimate Gatherings</p>
             </div>
           </div>
-          <div class="fk-card fk-card--text ct-stat-card">
+          <div class="fk-card fk-card--glass ct-stat-card">
             <div class="fk-card__b">
               <p class="fk-ty-h2 ct-stat-number">80–300</p>
               <p class="fk-ty-label ct-stat-unit">Guests</p>
               <p class="fk-ty-body ct-stat-label">Corporate &amp; Social Events</p>
             </div>
           </div>
-          <div class="fk-card fk-card--text ct-stat-card">
+          <div class="fk-card fk-card--glass ct-stat-card">
             <div class="fk-card__b">
               <p class="fk-ty-h2 ct-stat-number">300–1500</p>
               <p class="fk-ty-label ct-stat-unit">Guests</p>
@@ -129,7 +129,7 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
               </div>
               <div class="ct-field">
                 <label for="ct-f6">Preferred cuisine mix (optional)</label>
-                <select id="ct-f6" name="cuisine" data-l="Cuisine">
+                <select id="ct-f6" name="cuisine" data-l="Cuisine" data-fk-sheet>
                   <option value="North Indian + Royal Hyderabadi">North Indian + Royal Hyderabadi</option>
                   <option value="Pan-Asian + Continental">Pan-Asian + Continental</option>
                   <option value="Pure Vegetarian Feast">Pure Vegetarian Feast</option>
@@ -348,11 +348,11 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
   .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .ct-form .fk-btn { width: 100% }
   .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
-  .ct-scale-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px}
-  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; padding: 40px 28px 32px }
+  .ct-scale-grid.fk-rail--m { display: flex; grid-template-columns: none; gap: 12px}
+  @media (min-width: 768px) {
+    .ct-scale-grid.fk-rail--m { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px}
+  }
+  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; margin: 0; padding: 40px 28px 32px }
   .ct-stat-number { color: #74501a }
   .ct-stat-unit { color: #4a4232 }
   .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }

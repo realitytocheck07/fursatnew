@@ -61,7 +61,7 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
       </div>
     )}
     {cards.length > 0 && (
-    <ul class="hn-row" data-n={cards.length} data-pin={hasPin ? '' : undefined} data-fk-stagger="80">
+    <ul class="hn-row fk-rail fk-rail--cards fk-rail--m" data-n={cards.length} data-pin={hasPin ? '' : undefined} data-dots>
       {cards.map((c, i) => {
         const pin = hasPin && i === 0;
         const lead = i === 0;
@@ -69,7 +69,7 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
         const ends = c.kind !== 'news' ? endLabel(c.endsAt) : '';
         return (
           <li class:list={['hn-item', pin && 'hn-item--pin']} data-ends={c.endsAt ? endIso(c.endsAt) : undefined}>
-            <article class:list={['fk-card', 'hn-card', !c.image && 'fk-card--text']}>
+            <article class:list={['fk-card', 'fk-card--glass', 'hn-card', !c.image && 'fk-card--text']}>
               {c.image ? (
                 <div class="fk-card__ph hn-ph" style={lq(c.image.lqip)}>
                   <img src={c.image.src} srcset={c.image.srcset} sizes={SIZES} width={c.image.w} height={c.image.h} alt={c.image.alt} loading="lazy" decoding="async" />
@@ -134,9 +134,9 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
   .hn-title { color: #18301f; }
 
   /* Desktop and tablet: wrapping row, the last short row is centred. Pinned card = 2 cells wide. */
-  .hn-row { --gap: clamp(16px, 2vw, 28px); list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
-  .hn-item { display: flex; min-width: 0; flex: 0 1 calc((100% - var(--gap)) / 2 - .5px); }
-  .hn-item--pin { flex-basis: 100%; }
+  .hn .hn-row { --gap: clamp(16px, 2vw, 28px); list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+  .hn .hn-row > .hn-item { display: flex; min-width: 0; flex: 0 1 calc((100% - var(--gap)) / 2 - .5px); }
+  .hn .hn-row > .hn-item--pin { flex-basis: 100%; }
   .hn-card { flex: 1; }
 
   /* Photo: the box has a fixed 4:3 ratio before the image loads (no layout shift); LQIP colour sits behind. */
@@ -164,7 +164,7 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
   .hn-ends { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #14301c; }
   .hn-ends svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .hn-terms { color: #5b4a2c; }
-  .hn-terms a { color: #14301c; text-decoration: underline; text-underline-offset: 2px; padding-block: 4px; }
+  .hn-terms a { color: #14301c; text-decoration: underline; text-underline-offset: 2px; display: inline-flex; align-items: center; min-height: 44px; }
   .hn-card .fk-card__foot { justify-content: flex-start; }
   .hn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -179,42 +179,23 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
     .hn-item--pin .fk-card--text, .hn-item--pin .hn-card.fk-card--text { grid-template-columns: 1fr; }
   }
   @media (min-width: 1024px) {
-    .hn-item { flex-basis: calc((100% - 2 * var(--gap)) / 3 - .5px); }
-    .hn-item--pin { flex-basis: calc(2 * (100% - 2 * var(--gap)) / 3 + var(--gap) - .5px); }
-    .hn-row[data-n="4"]:not([data-pin]) .hn-item { flex-basis: calc((100% - 3 * var(--gap)) / 4 - .5px); }
-    .hn-row[data-n="3"][data-pin] .hn-item--pin { flex-basis: 100%; } /* pinned + 2: full-width pinned, the two sit centred below */
+    .hn .hn-row > .hn-item { flex-basis: calc((100% - 2 * var(--gap)) / 3 - .5px); }
+    .hn .hn-row > .hn-item--pin { flex-basis: calc(2 * (100% - 2 * var(--gap)) / 3 + var(--gap) - .5px); }
+    .hn .hn-row[data-n="4"]:not([data-pin]) > .hn-item { flex-basis: calc((100% - 3 * var(--gap)) / 4 - .5px); }
+    .hn .hn-row[data-n="3"][data-pin] > .hn-item--pin { flex-basis: 100%; } /* pinned + 2: full-width pinned, the two sit centred below */
   }
 
-  /* Phone: one horizontal snap row, the next card peeks in. */
+  /* Phone: swipe rail (fk-rail--cards gives snap + peek + dots). Text-only cards have no photo to overlap. */
   @media (max-width: 767px) {
-    .hn-row { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gut);
-      margin-inline: calc(-1 * var(--gut)); padding: 6px var(--gut) 28px; margin-block: -6px -16px; scrollbar-width: none; }
-    .hn-row::-webkit-scrollbar { display: none; }
-    .hn-item, .hn-item--pin { flex: 0 0 min(78vw, 360px); scroll-snap-align: start; }
-    .hn-row[data-n="1"] .hn-item { flex-basis: 100%; }
+    .hn .hn-row { display: flex; flex-wrap: nowrap; justify-content: flex-start; padding: 8px var(--gut) 14px; margin: 0 calc(-1 * var(--gut)); gap: 12px; scroll-padding-inline: var(--gut); }
+    .hn .hn-row > .hn-item, .hn .hn-row > .hn-item--pin { flex: 0 0 min(80vw, 340px); }
+    .hn .hn-row[data-n="1"] > .hn-item { flex-basis: 100%; }
   }
-
-
-  /* One lead card + a plain list for the rest (was four same-size cards). Same content, same data. */
-  .hn-item:not(:first-child) .hn-card { background: none; box-shadow: none; border-radius: 0; border: 0; border-top: 1px solid rgb(168 115 28 / .35); -webkit-mask: none; mask: none; }
-  .hn-item:not(:first-child) .hn-card::before, .hn-item:not(:first-child) .hn-card::after { display: none; }
-  .hn-item:not(:first-child) .fk-card__b { padding: 18px 0 20px; gap: 6px; }
-  .hn-item:not(:first-child) .hn-ico { display: none; }
-  .hn-item:not(:first-child) .hn-top { margin: 0; }
+  .hn-card.fk-card--text .fk-card__b { margin: 0; padding-top: 18px; }
+  .hn-row .fk-card__ph { -webkit-mask: none; mask: none; }
+  /* Desktop: pinned card (photo left, text right) keeps its flat, wide layout. */
   @media (min-width: 768px) {
-    .hn-row:not([data-n="1"]) { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: clamp(28px, 4vw, 56px); row-gap: 0; align-items: start; }
-    .hn-row:not([data-n="1"]) .hn-item { flex: none; }
-    .hn-row:not([data-n="1"]) .hn-item:first-child { grid-row: 1 / span 8; grid-column: 1; }
-    .hn-row:not([data-n="1"]) .hn-item:not(:first-child) { grid-column: 2; }
-    .hn-row:not([data-n="1"]) .hn-item:nth-child(2) .hn-card { border-top: 0; }
-    .hn-item:not(:first-child) .fk-card__b { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; row-gap: 4px; align-items: center; }
-    .hn-item:not(:first-child) .fk-card__b > * { grid-column: 1; }
-    .hn-item:not(:first-child) .fk-card__b > .fk-card__foot { grid-column: 2; grid-row: 1 / span 4; margin: 0; }
-  }
-  @media (max-width: 767px) {
-    .hn-row { display: block; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
-    .hn-item, .hn-item--pin, .hn-row[data-n="1"] .hn-item { display: block; width: auto; }
-    .hn-item:first-child { margin-bottom: 8px; }
+    .hn-item--pin .fk-card__b { margin: 0; }
   }
 
   @media (hover: hover) and (pointer: fine) { .hn-card:hover { transform: translateY(-3px); } }

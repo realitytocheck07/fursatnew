@@ -65,8 +65,8 @@ const conditions: string[] = [];
       <div class="rs-qgrid">
         <div class="rs-q" id="f-date">
           <p class="rs-ql" id="rs-ql-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Select Date</p>
-          <div class="rs-chips rs-dates" id="rs-dates" role="radiogroup" aria-labelledby="rs-ql-date">
-            <label class="rs-chip rs-cal" id="rs-cal">
+          <div class="rs-chips rs-dates fk-rail fk-rail--m" id="rs-dates" role="radiogroup" aria-labelledby="rs-ql-date">
+            <label class="rs-chip fk-pill rs-cal" id="rs-cal">
               <span class="rs-cw" id="rs-cal-t">More</span>
               <span class="rs-cd"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span id="rs-cal-d"></span></span>
               <input type="date" id="res-date" class="rs-calinp" aria-label="More dates: pick another date" />
@@ -76,9 +76,9 @@ const conditions: string[] = [];
 
         <div class="rs-q" id="f-time">
           <p class="rs-ql" id="rs-ql-time"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Select Time<span class="rs-req" aria-hidden="true"> *</span></p>
-          <div class="rs-chips rs-times" id="rs-times" role="radiogroup" aria-labelledby="rs-ql-time" aria-required="true" aria-describedby="rs-time-err">
+          <div class="rs-chips rs-times fk-rail fk-rail--m" id="rs-times" role="radiogroup" aria-labelledby="rs-ql-time" aria-required="true" aria-describedby="rs-time-err">
             {slots.map(s => (
-              <button type="button" class="rs-chip" role="radio" aria-checked="false" tabindex="-1" data-m={s.min} data-t={s.text} data-d={s.discount}>
+              <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="false" tabindex="-1" data-m={s.min} data-t={s.text} data-d={s.discount}>
                 <span class="rs-tm">{s.text}</span>{s.discount > 0 && <span class="rs-off">{s.discount}% off</span>}
               </button>
             ))}
@@ -102,7 +102,7 @@ const conditions: string[] = [];
         <div class="rs-q rs-q-3" id="f-occasion">
           <label class="rs-ql" for="res-occasion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.4 5 5.4.7-4 3.8 1 5.4-4.8-2.7-4.8 2.7 1-5.4-4-3.8 5.4-.7z"/></svg>Occasion<span class="rs-sr"> (optional)</span><span class="rs-long" aria-hidden="true"> (optional)</span><span class="rs-pre">Pre-filled</span></label>
           <div class="rs-box">
-            <select id="res-occasion">
+            <select id="res-occasion" data-fk-sheet="Occasion">
               {occasions.map(o => <option value={o.v}>{o.t}</option>)}
             </select>
           </div>
@@ -111,10 +111,10 @@ const conditions: string[] = [];
 
         <div class="rs-q" id="f-zone">
           <p class="rs-ql" id="rs-ql-zone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M4 12.5a2 2 0 0 1 2-1.5 2 2 0 0 1 2 2V15h8v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 1.5V17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM6.5 18v2M17.5 18v2"/></svg>Seating<span class="rs-long"> Preference</span></p>
-          <div class="rs-chips rs-zones" id="rs-zones" role="radiogroup" aria-labelledby="rs-ql-zone">
-            <button type="button" class="rs-chip" role="radio" aria-checked="true" data-v=""><span>No preference</span></button>
+          <div class="rs-chips rs-zones fk-rail fk-rail--m" id="rs-zones" role="radiogroup" aria-labelledby="rs-ql-zone">
+            <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="true" data-v=""><span>No preference</span></button>
             {zones.map(z => (
-              <button type="button" class="rs-chip" role="radio" aria-checked="false" tabindex="-1" data-v={z.v}>
+              <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="false" tabindex="-1" data-v={z.v}>
                 <img class="rs-zt rs-ph" src={`/assets/reserve/zone-${z.img}.webp`} alt="" width="72" height="72" loading="lazy" decoding="async" /><span>{z.v}</span>
               </button>
             ))}
@@ -173,7 +173,7 @@ const conditions: string[] = [];
       </p>
       <p class="rs-cond" role="note">A request, not a confirmed booking. Not confirmed until we reply on WhatsApp.<br />{conditions.length ? conditions.join(' · ') + ' · ' : ''}Seating is a preference.</p>
       <input type="checkbox" name="botcheck" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-      <button type="button" id="res-submit-btn" class="fk-btn fk-btn--primary rs-submit">
+      <button type="button" id="res-submit-btn" class="fk-btn fk-btn--book rs-submit">
         <svg class="rs-cta-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg>
         <span>Request a Table</span>
         <svg class="rs-cta-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
@@ -263,26 +263,7 @@ const conditions: string[] = [];
     el.animate(RM.matches ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: EASE });
   }
 
-  /* ───────── chip groups: roving tabindex, arrow keys, sliding selection pill ───────── */
-  const boxes = qsa('.rs-chips');
-  boxes.forEach((box) => {
-    const pill = document.createElement('i'); pill.className = 'rs-pill'; pill.setAttribute('aria-hidden', 'true'); box.insertBefore(pill, box.firstChild); box._pill = pill;
-  });
-  function place(box) {
-    const pill = box._pill; if (!pill) return;
-    const on = box.querySelector('[aria-checked="true"], .rs-cal.is-on');
-    if (!on || !box.offsetParent) { pill.style.opacity = '0'; return; }
-    pill.style.width = on.offsetWidth + 'px'; pill.style.height = on.offsetHeight + 'px';
-    pill.style.transform = 'translate(' + on.offsetLeft + 'px,' + on.offsetTop + 'px)';
-    pill.style.opacity = '1';
-    box.classList.add('has-pill');
-    if (!box._live) { box._live = true; requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('is-live'))); }
-  }
-  const placeAll = () => boxes.forEach(place);
-  if ('ResizeObserver' in window) { const ro = new ResizeObserver((es) => es.forEach((e) => place(e.target))); boxes.forEach((b) => ro.observe(b)); }
-  window.addEventListener('resize', placeAll);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeAll);
-
+  /* ───────── chip groups: roving tabindex + arrow keys (selection = .fk-pill / aria-checked) ───────── */
   function setChecked(chip, on) { chip.setAttribute('aria-checked', on ? 'true' : 'false'); chip.tabIndex = on ? 0 : -1; }
   function roving(box) { /* make sure one radio per group is tabbable */
     const radios = qsa('[role="radio"]', box).filter((r) => !r.disabled);
@@ -304,7 +285,7 @@ const conditions: string[] = [];
   const dateChips = [];
   for (let i = 0; i < 6; i++) {
     const d = addDays(new Date(), i), v = ymd(d);
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'rs-chip'; b.setAttribute('role', 'radio'); b.dataset.d = v;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'rs-chip fk-pill'; b.setAttribute('role', 'radio'); b.dataset.d = v;
     const top = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : DAYS[d.getDay()];
     b.setAttribute('aria-label', (i < 2 ? top + ', ' : '') + friendly(v));
     b.innerHTML = '<span class="rs-cw"></span><span class="rs-cd"></span>';
@@ -371,7 +352,6 @@ const conditions: string[] = [];
 
     zoneChips.forEach((c) => setChecked(c, c.dataset.v === booking.zone));
     roving($('rs-zones'));
-    placeAll();
   }
 
   /* ───────── live ticket (both copies) ───────── */

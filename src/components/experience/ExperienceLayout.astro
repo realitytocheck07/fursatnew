@@ -101,9 +101,9 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
     <section class="xp-cards-sec" id={p.cardsId} aria-labelledby="xp-cards-h">
       {p.cardsKicker && <p class="xp-sec-kicker">{p.cardsKicker}</p>}
       <h2 class="xp-sec-h fk-ty-h2" id="xp-cards-h">{p.cardsTitle}</h2>
-      <ul class="xp-cards fk-cards" data-fx-pop>
+      <ul class="xp-cards fk-cards fk-rail fk-rail--cards fk-rail--m" data-dots data-fx-pop>
         {p.cards.map((c, i) => (
-          <li class="fk-card" data-fx-tilt>
+          <li class="fk-card fk-card--glass">
             <div class="fk-card__ph">
               <img src={(c.img ?? cardFallback[i % cardFallback.length]).src} srcset={srcsetOf((c.img ?? cardFallback[i % cardFallback.length]).src)} sizes={cardSizes((c.img ?? cardFallback[i % cardFallback.length]).src)} alt={c.img?.alt ?? ''} width="600" height="450" loading="lazy" decoding="async" />
               <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon ?? p.pillars[i % p.pillars.length].icon]} /></span>
@@ -120,7 +120,7 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
           </li>
         ))}
       </ul>
-      {p.cardsLink && <p class="xp-cards-more"><a class="fk-btn fk-btn--secondary fk-btn--on-dark" href={p.cardsLink.href}><span>{p.cardsLink.label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></p>}
+      {p.cardsLink && <p class="xp-cards-more"><a class="fk-btn fk-btn--secondary fk-btn--md fk-btn--on-dark" href={p.cardsLink.href}><span>{p.cardsLink.label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a></p>}
     </section>
   )}
 
@@ -208,8 +208,10 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
 
   /* ── phone: its own taller art and composition ── */
   @media (max-width: 767px) {
-    .xp-cards { max-width: 420px; }
+    .xp-cards-sec .xp-cards { max-width: none; margin: 0 -16px; padding: 8px 16px 14px; scroll-padding-inline: 16px; text-align: left; }
   }
+  .xp-cards-sec .fk-dots i { background: rgba(251, 243, 230, .35); }
+  .xp-cards-sec .fk-dots i.is-on { background: #e8c27a; }
   /* v5.12b clip-path wipe on the first card photo (see inline script) */
   @media (prefers-reduced-motion: no-preference) {
     .xp-clip { clip-path: inset(0 0 100% 0); }

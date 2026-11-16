@@ -66,23 +66,23 @@ const BADGE: Record<string, string> = {"drink": "<path d=\"M6 3h12l-1.5 7a4.5 4.
   <div class="hs-head" data-fk-reveal>
     <h2 class="fk-ty-h2" id="hs-h">Crafted for the Season</h2>
     <p>A few favorites, curated with intention.</p>
-    <a class="fk-btn fk-btn--ghost fk-btn--md" href="/menu">View full menu</a>
+    <a class="fk-btn fk-btn--secondary fk-btn--md" href="/menu">View full menu</a>
   </div>
-  <div class="hs-cards" data-fk-stagger="80">
+  <div class="hs-cards fk-rail fk-rail--cards fk-rail--m" data-dots>
     {cards.map((c) => {
       const d0 = c.dishes[0];
       return (
-        <article class="hs-card fk-card fk-lift" data-name={d0.name} data-price={d0.tray} data-kind={c.kind} data-dishes={JSON.stringify(c.dishes.map((d) => [d.name, d.note, d.priceText, d.tray]))} data-menus={JSON.stringify(c.dishes.map((d) => d.menuName))}>
+        <article class="hs-card fk-card fk-card--glass" data-name={d0.name} data-price={d0.tray} data-kind={c.kind} data-dishes={JSON.stringify(c.dishes.map((d) => [d.name, d.note, d.priceText, d.tray]))} data-menus={JSON.stringify(c.dishes.map((d) => d.menuName))}>
           <span class="hs-badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={BADGE[c.kind] || BADGE.plate} /></span>
-          <div class="hs-img">
+          <div class="hs-img fk-card__ph">
             {c.dishes.map((d, i) => (
-              <img class:list={['hs-sl', { on: i === 0 }]} src={d.img.src} srcset={d.img.srcset} sizes="(min-width: 900px) 25vw, 72vw" alt={d.alt} width={d.img.w} height={d.img.h} loading="lazy" decoding="async" />
+              <img class:list={['hs-sl', { on: i === 0 }]} src={d.img.src} srcset={d.img.srcset} sizes="(min-width: 768px) 25vw, 80vw" alt={d.alt} width={d.img.w} height={d.img.h} loading="lazy" decoding="async" />
             ))}
           </div>
-          <div class="hs-body">
-            <h3 class="fk-ty-h4">{d0.name}</h3>
-            <p>{d0.note}</p>
-            <b class="hs-price">{d0.priceText}</b>
+          <div class="hs-body fk-card__b">
+            <h3 class="fk-card__t">{d0.name}</h3>
+            <p class="fk-card__p">{d0.note}</p>
+            <b class="hs-price fk-card__price">{d0.priceText}</b>
           </div>
           <a class="hs-link" href={`/menu#dish=${encodeURIComponent(d0.menuName)}`} aria-label={`See ${d0.name} on the menu`}></a>
           <button class="hs-add" type="button" aria-label={`Add ${d0.name} to my picks`} aria-pressed="false">
@@ -112,32 +112,27 @@ const BADGE: Record<string, string> = {"drink": "<path d=\"M6 3h12l-1.5 7a4.5 4.
 .hs-add:focus-visible{outline:2px solid #C94716;outline-offset:3px}
 
 .hs-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);padding:0 clamp(12px,2vw,28px)}
-.hs-card{position:relative;display:flex;flex-direction:column;min-width:0}
-.hs-img{position:relative;aspect-ratio:4/3.4;background:#d9cdb3;overflow:hidden;margin-bottom:-12%;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0H100V100C99 100 95 100 91 97C86 93 84 84 77 81C70 78 62 79 50 80C36 81 18 82 0 80Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0H100V100C99 100 95 100 91 97C86 93 84 84 77 81C70 78 62 79 50 80C36 81 18 82 0 80Z'/%3E%3C/svg%3E") 0 0/100% 100% no-repeat;}
+.hs-card{min-width:0}
+.hs-card .hs-img{background:#d9cdb3}
 .hs-badge{position:absolute;left:14px;top:14px;z-index:3;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(251,243,231,.94);box-shadow:0 0 0 1px #d6aa5a,0 4px 12px -4px rgba(60,40,10,.25)}
 .hs-badge svg{width:21px;height:21px;fill:none;stroke:#8a5a22;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.hs-body{position:relative;z-index:1}
 .hs-sl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease}
 .hs-sl.on{opacity:1}
-.hs-body{padding:16px 64px 18px 18px;min-height:112px;transition:opacity .45s ease}
+.hs-card .hs-body{padding-right:64px;min-height:112px;transition:opacity .45s ease}
 .hs-body.sw{opacity:0}
-.hs-body h3{color:#1A1608}
-.hs-body p{margin:4px 0 0;font:400 12.5px/1.45 Poppins,system-ui,sans-serif;color:#4a4330;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.hs-price{display:block;margin-top:8px;font:600 14px/1.2 Poppins,system-ui,sans-serif;color:#1A1608;font-variant-numeric:tabular-nums}
-.hs-link{position:absolute;inset:0;z-index:1;border-radius:26px}
+.hs-card .hs-price{text-align:left}
+.hs-link{position:absolute;inset:0;z-index:2;border-radius:24px}
 .hs-link:focus-visible{outline:3px solid #C94716;outline-offset:-3px}
-.hs-add{z-index:2;position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;border:0;background:var(--fk-btn-green);color:#F8F3E6;display:grid;place-items:center;cursor:pointer;transition:transform .2s,background .2s;touch-action:manipulation}
+.hs-add{z-index:3;position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;border:0;background:var(--fk-btn-green);color:#F8F3E6;display:grid;place-items:center;cursor:pointer;transition:transform .2s,background .2s;touch-action:manipulation}
 .hs-add svg{width:18px;height:18px;transition:transform .25s}
 .hs-add:active{transform:scale(.96)}
 .hs-add[aria-pressed=true]{background:#C94716}.hs-add[aria-pressed=true] svg{transform:rotate(45deg)}
 @media(hover:hover){.hs-add:hover{background:var(--fk-btn-green-hover)}.hs-add[aria-pressed=true]:hover{background:#a83a10}}
 
-@media(max-width:899px){
-  .hs-cards{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
-  .hs-cards::-webkit-scrollbar{display:none}
-  .hs-card{flex:0 0 min(72vw,320px);scroll-snap-align:center}
-  .hs-card:first-child{margin-left:0}
-  .hs-img{aspect-ratio:4/3}
+@media(max-width:767px){
+  .hs-cards{display:flex;padding:8px 16px 14px;margin:0;scroll-padding-inline:16px}
+  .hs-card{flex:0 0 min(80vw,340px)}
 }
+@media(min-width:768px) and (max-width:1023px){.hs-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.hs-sl,.hs-body,.hs-add{transition:none}}
 </style>

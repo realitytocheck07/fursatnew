@@ -1,26 +1,31 @@
 ---
-// /menu Phase 3: "The Table". The dishes leave the food door and land on the real long-table photo as the page scrolls
-// (prototype 02). Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
-// Dishes come from menu-table.json (the table ring), so names, prices and photos match the menu. No script or reduced motion: they are already placed.
+// /menu Phase 3: "The Table" (v5.38). Cut-out dishes drop onto the plates of the new table scene as the page scrolls.
+// Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
+// Names and prices come from menu-table.json (the table ring, via food.json). No script or reduced motion: the dishes are already on the plates.
 import '../../styles/table-landing.css';
 interface Dish { title: string; label: string; price: string; dn: string; sm: string; clip: string }
 interface Props { dishes: Dish[]; count?: number; max?: number }
 const { dishes, count, max = 5 } = Astro.props;
 
-// Real food photos only, in the order they land (nearest place at the table first). A ring dish without a dishes/ photo is never used.
-const PICK = ['Ustad Special Nalli Gosht Biryani', 'Guntur Karam Wings', 'Angara Chicken Tikka', 'Nalla Karam Kodi Vepudu', 'Biscoff Cheesecake'];
-const real = (d: Dish) => d.sm.startsWith('/assets/dishes/') && !/jerk/i.test(d.title);
-const chosen: Dish[] = PICK.map((t) => dishes.find((d) => d.title === t)).filter((d): d is Dish => !!d && real(d));
-for (const d of dishes) if (chosen.length < 4 && real(d) && !chosen.includes(d)) chosen.push(d);
-const list = chosen.slice(0, max);
-if (list.length < 4) throw new Error('TableLanding: needs at least 4 ring dishes that have a real photo');
+// The 5 cut-outs (public/assets/menu/table/), left to right on desktop. Phones show 3: biryani, tikka angara, cheesecake (`phone`).
+const CUT: Record<string, { f: string; w: number; h: number; phone: boolean }> = {
+  'Ustad Special Nalli Gosht Biryani': { f: 'nalli-gosht-biryani-half', w: 900, h: 849, phone: true },
+  'Guntur Karam Wings': { f: 'guntur-karam-wings', w: 900, h: 639, phone: false },
+  'Angara Chicken Tikka': { f: 'chicken-tikka-angara', w: 900, h: 518, phone: true },
+  'Nalla Karam Kodi Vepudu': { f: 'nalla-karam-kodi-vepudu', w: 900, h: 484, phone: false },
+  'Biscoff Cheesecake': { f: 'biscoff-cheesecake', w: 900, h: 758, phone: true },
+};
+const list: Dish[] = Object.keys(CUT).map((t) => dishes.find((d) => d.title === t)).filter((d): d is Dish => !!d).slice(0, max);
+if (list.length < 3) throw new Error('TableLanding: needs the table dishes (food.json titles changed?)');
+const IMG = '/assets/menu/table/';
 ---
 <section class="tl" id="tl" aria-labelledby="tl-title" data-fab-avoid>
   <div class="tl-stage" id="tl-stage">
     <div class="tl-bg" aria-hidden="true">
-      <img src="/assets/venue/interior/long-table-dining-720.webp"
-        srcset="/assets/venue/interior/long-table-dining-480.webp 480w, /assets/venue/interior/long-table-dining-720.webp 720w, /assets/venue/interior/long-table-dining.webp 1200w"
-        sizes="100vw" width="1200" height="1600" alt="" loading="lazy" decoding="async" />
+      <picture>
+        <source media="(min-width: 821px)" srcset={`${IMG}table-bg-wide-1100.webp 1100w, ${IMG}table-bg-wide-1672.webp 1672w`} sizes="100vw" width="1672" height="941" />
+        <img src={`${IMG}table-bg-tall-640.webp`} srcset={`${IMG}table-bg-tall-640.webp 640w, ${IMG}table-bg-tall-941.webp 941w`} sizes="100vw" width="941" height="1672" alt="" loading="lazy" decoding="async" />
+      </picture>
       <span class="tl-shade"></span>
     </div>
 
@@ -32,17 +37,16 @@ if (list.length < 4) throw new Error('TableLanding: needs at least 4 ring dishes
 
     <!-- the plates: decorative here, the names live in the list below -->
     <ul class="tl-spots" id="tl-spots" aria-hidden="true">
-      {list.map((d, i) => (
-        <li class="tl-spot is-landed" style={`--i:${i}`} data-title={d.title}>
-          <i class="tl-ring"></i><i class="tl-ring tl-ring--solid"></i>
+      {list.map((d, i) => { const c = CUT[d.title]; return (
+        <li class="tl-spot is-landed" style={`--i:${i};--ar:${c.w / c.h}`} data-title={d.title} data-phone={c.phone ? '1' : '0'}>
           <span class="tl-shadow"></span>
-          <span class="tl-plate"><span class="tl-drop"><img src={d.sm} alt="" width="640" height="640" decoding="async" draggable="false" /></span></span>
+          <span class="tl-plate"><img src={`${IMG}${c.f}-480.webp`} srcset={`${IMG}${c.f}-480.webp 480w, ${IMG}${c.f}-900.webp 900w`} sizes="(max-width: 820px) 40vw, 20vw" width={c.w} height={c.h} alt="" loading="lazy" decoding="async" draggable="false" /></span>
           <span class="tl-label"><b>{d.title}</b><span class="num">{d.price} · {d.label}</span></span>
         </li>
-      ))}
+      ); })}
     </ul>
     <ul class="tl-legend" aria-label="Dishes on the table">
-      {list.map((d) => (<li><b>{d.title}</b> <span class="num">{d.price}</span></li>))}
+      {list.map((d) => (<li data-phone={CUT[d.title].phone ? '1' : '0'}><b>{d.title}</b> <span class="num">{d.price}</span></li>))}
     </ul>
 
     <div class="tl-cta">

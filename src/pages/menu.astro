@@ -9,17 +9,19 @@ import featured from '../data/menu-featured.json';
 import dishPhotos from '../data/dish-photos.json';
 import tableData from '../data/menu-table.json';
 import barData from '../data/menu-bar.json';
-import { FOOD_GROUPS, DRINK_GROUPS, type Group } from '../components/menu/menuGroups';
+import { FOOD_GROUPS, DRINK_GROUPS, GROUP_ICONS, type Group } from '../components/menu/menuGroups';
 import { money } from '../components/menu/cart';
 import MenuDoors from '../components/menu/MenuDoors.astro';
+import DishRow from '../components/menu/DishRow.astro';
 import TableLanding from '../components/menu/TableLanding.astro';
+import DrinksIntro from '../components/menu/DrinksIntro.astro';
 import '../styles/fk-tokens.css';
 import '../styles/menu-v2.css';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type Raw = {
   name: string; section: string; description?: string; price: number | null;
-  veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string; thumb?: string; alc?: boolean;
+  veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string; alc?: boolean;
   price30ml?: number; priceGlass?: number | null; priceBottle?: number; priceBucket?: number;
   price500ml?: number; price330ml?: number; pricePitcher?: number; priceTower?: number;
   note?: string;
@@ -37,7 +39,7 @@ for (const [n, ph] of Object.entries(PHOTOS)) {
   if (!allNames.has(n)) throw new Error(`dish-photos.json: "${n}" is not a menu item`);
   for (const f of [ph.src, ph.sm, ph.xs]) if (!fs.existsSync(`${process.cwd()}/public${f}`)) throw new Error(`dish-photos.json: missing ${f}`);
 }
-[...food, ...drinks].forEach((s) => s.items.forEach((i) => { const ph = PHOTOS[i.name]; if (ph) { i.image = ph.src; i.thumb = ph.xs; } }));
+[...food, ...drinks].forEach((s) => s.items.forEach((i) => { const ph = PHOTOS[i.name]; if (ph) i.image = ph.src; }));
 const byName = new Map<string, Section>();
 [...food, ...drinks].forEach((s) => byName.set(s.section, s));
 
@@ -72,6 +74,11 @@ const mainLabel = (i: Item) => (i.price != null ? variants(i).find((v) => v.valu
 const groupSections = (g: Group) => g.sections.map((n) => byName.get(n)!).filter(Boolean);
 const groupCount = (g: Group) => groupSections(g).reduce((n, s) => n + s.items.length, 0);
 const groupSub = (g: Group) => (g.sections.length > 1 ? `${g.sections[0]} & more` : `${groupCount(g)} items`);
+// "Jump to" tiles: one per real section, with the item count and its group's icon
+const jump = ([['food', FOOD_GROUPS], ['drinks', DRINK_GROUPS]] as ['food' | 'drinks', Group[]][]).map(([side, groups]) => ({
+  side,
+  tiles: groups.flatMap((g) => groupSections(g).map((sec) => ({ id: `s-${slug(sec.section)}`, name: titleCase(sec.section), count: sec.items.length, icon: GROUP_ICONS[g.id] }))),
+}));
 const addAttrs = (i: Item) => {
   const lab = mainLabel(i);
   return {
@@ -136,6 +143,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
   <main class="mv" id="main" tabindex="-1" data-side="drinks">
     <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData} />
     <TableLanding dishes={tableDishes} count={foodCount} />
+    <DrinksIntro />
 
     <section class="mv-stage" aria-label="Menu overview">
       <!-- Featured drink + chef's picks (the one filter bar is the sticky bar at the top of the full list) -->
@@ -229,27 +237,45 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
       <!-- The one filter bar: Food | Drinks, live count, category chips, search, Veg / Non-veg -->
       <div class="mv-sticky" id="mv-sticky" data-fab-avoid>
         <div class="mv-sticky-in">
-          <div class="mv-seg" role="group" aria-label="Food or drinks">
-            <button class="mv-seg-b is-on" type="button" data-side-go="food" data-seg="food" aria-pressed="true">Food</button>
-            <button class="mv-seg-b" type="button" data-side-go="drinks" data-seg="drinks" aria-pressed="false">Drinks</button>
+          <div class="mv-seg fk-seg" role="group" aria-label="Food or drinks">
+            <button class="is-on" type="button" data-side-go="food" data-seg="food" aria-pressed="true">Food</button>
+            <button type="button" data-side-go="drinks" data-seg="drinks" aria-pressed="false">Drinks</button>
           </div>
           <p class="mv-count num" id="mv-count" role="status" aria-live="polite">{foodCount} dishes</p>
           {[{ side: 'food', groups: FOOD_GROUPS, label: 'Food categories' }, { side: 'drinks', groups: DRINK_GROUPS, label: 'Drink categories' }].map(({ side, groups, label }) => (
-            <div class="mv-schips" data-schips={side} role="group" aria-label={label} hidden={side !== 'food'}>
-              {groups.map((g) => (<button class="mv-schip" type="button" data-go={g.id} data-side-of={side} aria-pressed="false">{g.label}</button>))}
+            <div class="mv-schips fk-rail" data-schips={side} role="group" aria-label={label} hidden={side !== 'food'}>
+              {groups.map((g) => (<button class="mv-schip fk-pill" type="button" data-go={g.id} data-side-of={side} aria-pressed="false">{g.label}</button>))}
             </div>
           ))}
           <label class="mv-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input id="mv-q" type="search" placeholder="Search menu" autocomplete="off" enterkeyhint="search" aria-label="Search the menu" />
           </label>
+          <button class="fk-pill mv-cats" type="button" id="mv-cats" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
+            <span class="mv-cats-t">Categories</span>
+          </button>
           <div class="mv-diet" role="group" aria-label="Dietary filters">
-            <button class="mv-pill" type="button" data-diet="veg" aria-pressed="false"><i class="mv-dot mv-dot--v"></i>Veg</button>
-            <button class="mv-pill" type="button" data-diet="nonveg" aria-pressed="false"><i class="mv-dot mv-dot--n"></i>Non-veg</button>
+            <button class="fk-pill" type="button" data-diet="veg" aria-pressed="false"><i class="mv-dot mv-dot--v"></i>Veg</button>
+            <button class="fk-pill" type="button" data-diet="nonveg" aria-pressed="false"><i class="mv-dot mv-dot--n"></i>Non-veg</button>
           </div>
         </div>
       </div>
       <div class="mv-list-in">
+      <nav class="mv-jump" id="mv-jump" aria-labelledby="mv-jump-h">
+        <h3 class="mv-jump-h" id="mv-jump-h">Jump to</h3>
+        {jump.map(({ side, tiles }) => (
+          <ul class="mv-jump-grid" data-jump={side} hidden={side !== 'food'}>
+            {tiles.map((t) => (
+              <li><a class="mv-tile" href={`#${t.id}`} data-jump-to={t.id} data-side-of={side}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={t.icon} /></svg>
+                <span class="mv-tile-n">{t.name}</span>
+                <span class="mv-tile-c num">{t.count} {t.count === 1 ? 'item' : 'items'}</span>
+              </a></li>
+            ))}
+          </ul>
+        ))}
+      </nav>
         {[{ side: 'food', title: 'The Table', blurb: `${foodCount} dishes`, groups: FOOD_GROUPS }, { side: 'drinks', title: 'The Bar', blurb: `${drinkCount} drinks`, groups: DRINK_GROUPS }].map(({ side, title, blurb, groups }) => (
           <div class="mv-side" id={`mv-${side}`} data-side-block={side}>
             <header class="mv-side-h"><h2>{title}</h2><span>{blurb}</span></header>
@@ -260,29 +286,10 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
                   <section class="mv-sec" id={`s-${slug(sec.section)}`}>
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
                     <ul class="mv-items">
-                      {sec.items.map((i) => (
-                        <li class="mv-item" data-row data-sec={i.section} data-veg={i.veg ? '1' : '0'} data-text={`${titleCase(i.name)} ${i.description ?? ''} ${i.section}`.toLowerCase()} {...(i.image ? { 'data-img': i.image } : {})}>
-                          <div class={i.thumb ? 'mv-item-main has-thumb' : 'mv-item-main'}>
-                            {i.thumb && <img class="mv-thumb" src={i.thumb} alt="" width="56" height="56" loading="lazy" decoding="async" />}
-                            <span class={vegMark(i.veg)} role="img" aria-label={i.veg ? 'Vegetarian' : 'Non-vegetarian'}></span>
-                            <div>
-                              <h4 class="mv-item-name"><button class="mv-open" type="button" aria-haspopup="dialog" inert><span class="mv-iname">{titleCase(i.name)}</span></button>{i.chefSpecial && <em class="mv-chefmark">Chef's special</em>}{i.spicy && <em class="mv-spice">Spicy</em>}</h4>
-                              {i.description && <p class="mv-idesc">{i.description}</p>}
-                              {i.note && <p class="mv-note">{i.note}</p>}
-                            </div>
-                          </div>
-                          <div class="mv-item-buy">
-                            <span class="mv-item-price num">
-                              {variants(i).length > 1
-                                ? variants(i).map((v) => <span><small>{v.label}</small> {money(v.value)}</span>)
-                                : i.price != null ? money(i.price) : '—'}
-                            </span>
-                            {i.price != null && (
-                              <button class="mv-add" type="button" aria-label={`Add ${titleCase(i.name)} to picks`} {...addAttrs(i)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                      {sec.items.map((i) => {
+                        const ph = PHOTOS[i.name];
+                        return <DishRow i={i} name={titleCase(i.name)} vs={variants(i)} attrs={addAttrs(i)} photo={ph ? { src: ph.sm, w: Math.round(640 * ph.w / ph.h), h: 640 } : undefined} />;
+                      })}
                     </ul>
                   </section>
                 ))}

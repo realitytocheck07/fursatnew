@@ -413,3 +413,176 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
 
 /* 3. CARD — .fk-card is the one card (wave top, above). Only addition: a photo-less version for items with no real photo. */
 .fk-card--text .fk-card__b{padding-top:30px}
+
+/* ==========================================================================
+   UI2 (v5.37) — modern pills, buttons, cards, rails, sheets. Plain CSS, no Tailwind CDN.
+   Look: Stitch-style glass surfaces + glowing active pills, in Fursat colours.
+   Forest green #16301a, cream plaster, gold hairlines. Elephant red ONLY on Book / Reserve.
+   Motion: one-shot only (press .96 / 150ms, reveal 500ms). All of it off under prefers-reduced-motion.
+   Classes: .fk-btn(--book) .fk-pill .fk-rail .fk-seg .fk-chip .fk-sheet .fk-card--glass .fk-reveal
+   Driven by public/js/fk-ui.js. Without JS everything still reads and works.
+   ========================================================================== */
+:root{
+  --ui2-green:#16301a; --ui2-green-hi:#1f4326; --ui2-red:#c02a1a; --ui2-red-hi:#a82216;
+  --ui2-cream:#fbf3e6; --ui2-ink:#2b2416; --ui2-ink-soft:#4d4430;
+  --ui2-gold:#c99a43; --ui2-hair:rgba(201,154,67,.55); --ui2-hair-soft:rgba(201,154,67,.32);
+  --ui2-glass:rgba(255,249,236,.72); --ui2-glass-hi:rgba(253,244,226,.88);
+  --ui2-blur:blur(12px) saturate(1.25);
+  --ui2-ease:cubic-bezier(.23,1,.32,1);
+  --ui2-glow-green:0 8px 22px -6px rgba(31,90,48,.55);
+  --ui2-glow-red:0 8px 22px -6px rgba(192,42,26,.6);
+  --ui2-glow-gold:0 0 0 1px rgba(230,194,122,.75),0 6px 18px -4px rgba(230,194,122,.6);
+  --ui2-focus:#16301a;
+}
+
+/* ---- 1. BUTTONS: restyle .fk-btn (class names unchanged) ---- */
+.fk-btn.fk-btn--primary,.fk-btn.fk-btn--secondary,.fk-btn.fk-btn--book,.fk-btn.fk-btn--ghost{
+  min-height:48px;padding:0 26px;border-radius:999px;border:1px solid transparent;
+  font-family:var(--fk-sans);font-weight:600;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform var(--fk-dur-press,150ms) var(--ui2-ease),background-color 200ms ease,color 200ms ease,box-shadow 200ms ease,border-color 200ms ease;
+}
+.fk-btn.fk-btn--md.fk-btn--primary,.fk-btn.fk-btn--md.fk-btn--secondary,.fk-btn.fk-btn--md.fk-btn--book{min-height:44px;padding:0 22px}
+.fk-btn.fk-btn--primary{background:var(--ui2-green);border-color:var(--ui2-green);color:var(--ui2-cream);box-shadow:var(--ui2-glow-green),inset 0 1px 0 rgba(255,255,255,.14)}
+.fk-btn.fk-btn--book{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;background:var(--ui2-red);border-color:var(--ui2-red);color:#fff;font-size:var(--fk-fs-3);line-height:1;box-shadow:var(--ui2-glow-red),inset 0 1px 0 rgba(255,255,255,.2)}
+.fk-btn.fk-btn--secondary{background:var(--ui2-glass);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);border:1px solid var(--ui2-hair);color:var(--ui2-green);box-shadow:0 6px 16px -10px rgba(43,36,22,.3)}
+.fk-btn.fk-btn--primary:not(:disabled):active,.fk-btn.fk-btn--book:not(:disabled):active,.fk-btn.fk-btn--secondary:not(:disabled):active{transform:scale(.96)}
+.fk-btn.fk-btn--primary:focus-visible,.fk-btn.fk-btn--book:focus-visible,.fk-btn.fk-btn--secondary:focus-visible,.fk-btn.fk-btn--ghost:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:3px}
+.fk-btn.fk-btn--book:focus-visible{outline-color:var(--ui2-green)}
+.fk-btn.fk-btn--primary:is(:disabled,[aria-disabled="true"]),.fk-btn.fk-btn--book:is(:disabled,[aria-disabled="true"]){opacity:.55;box-shadow:none;cursor:not-allowed}
+@media (hover:hover) and (pointer:fine){
+  .fk-btn.fk-btn--primary:not(:disabled):hover{background:var(--ui2-green-hi);border-color:var(--ui2-green-hi)}
+  .fk-btn.fk-btn--book:not(:disabled):hover{background:var(--ui2-red-hi);border-color:var(--ui2-red-hi)}
+  .fk-btn.fk-btn--secondary:not(:disabled):hover{background:var(--ui2-glass-hi);color:var(--ui2-green);border-color:var(--ui2-gold)}
+}
+/* on dark: glass secondary in cream, primary keeps the gold fill from the base block */
+.fk-btn.fk-btn--secondary.fk-btn--on-dark{background:rgba(255,249,236,.1);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);border-color:rgba(230,194,122,.7);color:#f6e4bd;box-shadow:none}
+@media (hover:hover) and (pointer:fine){.fk-btn.fk-btn--secondary.fk-btn--on-dark:not(:disabled):hover{background:rgba(255,249,236,.2);color:#fff}}
+@media (prefers-reduced-motion:reduce){.fk-btn.fk-btn--primary,.fk-btn.fk-btn--secondary,.fk-btn.fk-btn--book{transition:none}.fk-btn.fk-btn--primary:active,.fk-btn.fk-btn--book:active,.fk-btn.fk-btn--secondary:active{transform:none!important}}
+
+/* ---- 2. FILTER PILL ---- */
+.fk-pill{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;min-height:44px;min-width:44px;padding:0 18px;border-radius:999px;
+  border:1px solid var(--ui2-hair);background:var(--ui2-glass);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);
+  color:var(--ui2-ink);font:600 .875rem/1 var(--fk-sans);white-space:nowrap;text-decoration:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform 150ms var(--ui2-ease),background-color 200ms ease,color 200ms ease,box-shadow 200ms ease,border-color 200ms ease}
+.fk-pill:active{transform:scale(.96)}
+.fk-pill:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:2px}
+.fk-pill[aria-pressed="true"],.fk-pill[aria-current="true"],.fk-pill.is-on{background:var(--ui2-green);border-color:var(--ui2-green);color:var(--ui2-cream);box-shadow:var(--ui2-glow-gold)}
+.fk-pill[aria-pressed="true"]:focus-visible,.fk-pill.is-on:focus-visible{outline-color:var(--ui2-gold)}
+.fk-pill small{font:500 .75rem/1 var(--fk-sans);opacity:.85}
+@media (hover:hover) and (pointer:fine){.fk-pill:not([aria-pressed="true"]):not(.is-on):hover{background:var(--ui2-glass-hi);border-color:var(--ui2-gold)}}
+@media (prefers-reduced-motion:reduce){.fk-pill{transition:none}.fk-pill:active{transform:none}}
+
+/* ---- 4. SWIPE RAIL ---- (fk-ui.js sets data-start="1" once scrolled away from the start, data-end="1" while more is to the right) */
+.fk-rail{--ui2-fl:0px;--ui2-fr:0px;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;padding:8px 2px;margin:-8px 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--ui2-fl),#000 calc(100% - var(--ui2-fr)),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--ui2-fl),#000 calc(100% - var(--ui2-fr)),transparent 100%)}
+.fk-rail::-webkit-scrollbar{display:none}
+.fk-rail[data-start="1"]{--ui2-fl:26px}
+.fk-rail[data-end="1"]{--ui2-fr:26px}
+.fk-rail>*{scroll-snap-align:start}
+.fk-rail:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:2px}
+/* card rail: the next card peeks about 12% */
+.fk-rail--cards{gap:12px;scroll-snap-type:x mandatory;padding:8px 16px 14px;margin:-8px -16px -14px;scroll-padding-inline:16px}
+.fk-rail--cards{-webkit-mask-image:none;mask-image:none}
+.fk-rail--cards>*{flex:0 0 calc(88% - 12px);min-width:0}
+.fk-dots{display:flex;justify-content:center;gap:7px;margin-top:10px}
+.fk-dots i{width:6px;height:6px;border-radius:50%;background:rgba(43,36,22,.28);transition:background-color 200ms ease,transform 200ms ease}
+.fk-dots i.is-on{background:var(--ui2-green);transform:scale(1.35)}
+/* rail on phones only: the page lays it out as a grid from 768px */
+@media (min-width:768px){
+  .fk-rail--m{display:grid;overflow:visible;scroll-snap-type:none;padding:0;margin:0;-webkit-mask-image:none;mask-image:none}
+  .fk-rail--m.fk-rail--cards>*{flex:none}
+  .fk-rail--m+.fk-dots{display:none}
+}
+
+/* ---- 3. SEGMENTED SWITCH ---- */
+.fk-seg{--n:2;--i:0;position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:4px;border-radius:999px;
+  border:1px solid var(--ui2-hair);background:var(--ui2-glass);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);isolation:isolate}
+.fk-seg>button,.fk-seg>[role="tab"]{position:relative;z-index:1;box-sizing:border-box;min-height:44px;min-width:44px;padding:0 20px;border:0;border-radius:999px;background:none;
+  color:var(--ui2-ink);font:600 .875rem/1 var(--fk-sans);white-space:nowrap;cursor:pointer;transition:color 220ms ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.fk-seg>button[aria-pressed="true"],.fk-seg>[aria-selected="true"],.fk-seg>.is-on{color:var(--ui2-cream)}
+.fk-seg__thumb{position:absolute;z-index:0;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / var(--n));border-radius:999px;background:var(--ui2-green);box-shadow:var(--ui2-glow-gold);
+  transform:translateX(calc(var(--i) * 100%));transition:transform 220ms ease-out;pointer-events:none}
+.fk-seg:not([data-ready])>button[aria-pressed="true"],.fk-seg:not([data-ready])>[aria-selected="true"],.fk-seg:not([data-ready])>.is-on{background:var(--ui2-green);box-shadow:var(--ui2-glow-gold)}
+.fk-seg>button:focus-visible,.fk-seg>[role="tab"]:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:1px}
+.fk-seg>button[aria-pressed="true"]:focus-visible,.fk-seg>[aria-selected="true"]:focus-visible{outline-color:var(--ui2-gold)}
+.fk-seg>button:active{transform:scale(.96)}
+@media (prefers-reduced-motion:reduce){.fk-seg__thumb,.fk-seg>button{transition:none}.fk-seg>button:active{transform:none}}
+
+/* ---- 5. CHIP: small glass pill with a 6px dot. Only Veg / Non-veg / Spicy / Chef's pick, from the data flags ---- */
+.fk-chip{--dot:var(--ui2-gold);display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:3px 10px 3px 8px;border-radius:999px;
+  border:1px solid var(--ui2-hair-soft);background:var(--ui2-glass);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:var(--ui2-ink);font:600 .75rem/1.2 var(--fk-sans);white-space:nowrap}
+.fk-chip::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--dot)}
+.fk-chip--veg{--dot:#2f8f3e}
+.fk-chip--nonveg{--dot:#c02a1a}
+.fk-chip--spicy{--dot:#e2401a}
+.fk-chip--pick{--dot:#c99a43}
+.fk-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+
+/* ---- 6. BOTTOM SHEET (phones <= 760px; a centred dialog above that) ---- */
+.fk-sheet{position:fixed;inset:auto 0 0 0;margin:0;padding:0;border:0;width:100%;max-width:none;max-height:none;background:none;color:var(--ui2-ink);overflow:visible}
+.fk-sheet:not([open]){display:none}
+.fk-sheet::backdrop{background:rgba(14,34,20,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);opacity:0;transition:opacity 220ms ease-out}
+.fk-sheet.is-in::backdrop{opacity:1}
+.fk-sheet__panel{display:flex;flex-direction:column;box-sizing:border-box;max-height:70vh;max-height:min(70vh,70dvh);border-radius:24px 24px 0 0;
+  background:#fdf3e0;border:1px solid var(--ui2-hair);border-bottom:0;box-shadow:0 -18px 50px -12px rgba(14,34,20,.45);
+  transform:translateY(100%);transition:transform 260ms var(--ui2-ease);will-change:transform}
+.fk-sheet.is-in .fk-sheet__panel{transform:none}
+.fk-sheet__panel.is-drag{transition:none}
+.fk-sheet__head{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 12px 6px 20px;touch-action:none;cursor:grab}
+.fk-sheet__head::before{content:"";position:absolute;left:50%;top:8px;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:rgba(43,36,22,.28)}
+.fk-sheet__t{margin:0;font:500 1.25rem/1.25 var(--fk-serif);color:var(--ui2-green)}
+.fk-sheet__x{flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid var(--ui2-hair);border-radius:50%;background:var(--ui2-glass);color:var(--ui2-green);cursor:pointer;touch-action:manipulation}
+.fk-sheet__x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.fk-sheet__x:focus-visible,.fk-sheet__opt:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:2px}
+.fk-sheet__body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.fk-sheet__opt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;box-sizing:border-box;min-height:48px;padding:10px 16px;margin:0 0 8px;border:1px solid var(--ui2-hair-soft);border-radius:16px;
+  background:var(--ui2-glass);color:var(--ui2-ink);font:500 1rem/1.3 var(--fk-sans);text-align:left;cursor:pointer;transition:transform 150ms var(--ui2-ease),background-color 200ms ease}
+.fk-sheet__opt:active{transform:scale(.98)}
+.fk-sheet__opt[aria-selected="true"]{background:var(--ui2-green);border-color:var(--ui2-green);color:var(--ui2-cream);box-shadow:var(--ui2-glow-gold)}
+.fk-sheet__opt[aria-selected="true"]::after{content:"";width:18px;height:18px;flex:none;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fbf3e6' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E")}
+.fk-sheet__grp{margin:10px 4px 6px;font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--fk-text-gold,#74501a)}
+html.fk-sheet-open{overflow:hidden}
+@media (min-width:761px){
+  .fk-sheet{inset:0;margin:auto;width:min(620px,calc(100% - 32px));height:fit-content;max-height:calc(100% - 32px)}
+  .fk-sheet__panel{border-radius:24px;border-bottom:1px solid var(--ui2-hair);transform:translateY(16px);opacity:0;transition:transform 260ms var(--ui2-ease),opacity 200ms ease-out}
+  .fk-sheet.is-in .fk-sheet__panel{opacity:1}
+  .fk-sheet__head{cursor:default}.fk-sheet__head::before{display:none}
+}
+@media (prefers-reduced-motion:reduce){.fk-sheet::backdrop,.fk-sheet__panel,.fk-sheet__opt{transition:none}}
+/* a select that opens the sheet on phones: add data-fk-sheet to the <select> */
+@media (max-width:760px){select[data-fk-sheet]{cursor:pointer}}
+
+/* ---- 7. GLASS CARD: .fk-card.fk-card--glass (the old wave .fk-card stays for Ask / Party, which other sessions own) ---- */
+.fk-card.fk-card--glass{display:flex;flex-direction:column;position:relative;overflow:visible;border:0;border-radius:24px;background:none;box-shadow:none;-webkit-mask:none;mask:none;color:var(--ui2-ink);
+  transition:transform 150ms var(--ui2-ease)}
+.fk-card.fk-card--glass::after{display:none}
+.fk-card--glass .fk-card__ph{position:relative;aspect-ratio:4/5;margin:0;border-radius:24px;overflow:hidden;-webkit-mask:none;mask:none;background:#e9d9bb;box-shadow:0 20px 40px -22px rgba(22,48,26,.55)}
+.fk-card--glass .fk-card__ph img{width:100%;height:100%;object-fit:cover;display:block;filter:none;transition:transform 600ms var(--ui2-ease)}
+.fk-card--glass .fk-card__b{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;gap:8px;margin:-40px 12px 0;padding:16px 16px 14px;border-radius:20px;
+  background:var(--ui2-glass-hi);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);border:1px solid var(--ui2-hair);
+  box-shadow:0 16px 32px -16px rgba(43,36,22,.4),inset 0 1px 0 rgba(255,255,255,.75)}
+.fk-card--glass .fk-card__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.fk-card--glass .fk-card__t{margin:0;padding:0;font:500 1.25rem/1.2 var(--fk-serif);letter-spacing:-.01em;color:#1b3a26;text-wrap:balance}
+.fk-card--glass .fk-card__p{margin:0;font:400 .875rem/1.5 var(--fk-sans);color:var(--ui2-ink-soft);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fk-card--glass .fk-card__price{flex:none;margin:0;font:700 1.0625rem/1.2 var(--fk-sans);font-variant-numeric:tabular-nums;color:var(--ui2-ink);text-align:right}
+.fk-card--glass .fk-card__price small{display:block;margin-top:2px;font:500 .75rem/1.2 var(--fk-sans);color:var(--ui2-ink-soft)}
+.fk-card--glass .fk-card__tag{align-self:flex-start;font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--fk-text-gold,#74501a)}
+.fk-card--glass .fk-card__foot{margin-top:auto;padding-top:6px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media (hover:hover) and (pointer:fine){
+  .fk-card.fk-card--glass:hover{box-shadow:none;border-color:transparent}
+  .fk-card--glass:hover .fk-card__ph img{transform:scale(1.04)}
+}
+@media (min-width:768px){.fk-card--glass .fk-card__ph{aspect-ratio:4/3}}
+@media (prefers-reduced-motion:reduce){.fk-card--glass .fk-card__ph img{transition:none}.fk-card--glass:hover .fk-card__ph img{transform:none}}
+
+/* ---- 8. REVEAL: fade + 16px rise once, 500ms. Visible by default; fk-ui.js arms only what is below the fold ---- */
+@media (prefers-reduced-motion:no-preference){
+  .fk-reveal.is-armed{opacity:0;transform:translateY(16px)}
+  .fk-reveal.is-armed.is-in{opacity:1;transform:none;transition:opacity 500ms ease-out,transform 500ms ease-out}
+}
+/* UI2 end */

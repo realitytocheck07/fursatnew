@@ -1,5 +1,5 @@
 // /menu client script: picks, side switching, 21+ notice, the one sticky filter bar (toggle, chips, search, Veg / Non-veg, live count), scroll-spy,
-// scroll entrance, phone dish sheet, sliding active pill.
+// scroll entrance, phone dish sheet.
 // No framework, no animation library.
 import { reducer, keyOf, money, total, count, waLink, type Line, type MenuItem } from './cart';
 
@@ -131,9 +131,9 @@ function init(root: HTMLElement) {
   function setSide(side: Side) {
     root.dataset.side = side;
     $$('[data-schips]').forEach((d) => d.toggleAttribute('hidden', d.dataset.schips !== side));
+    $$('[data-jump]').forEach((d) => d.toggleAttribute('hidden', d.dataset.jump !== side));
     $$('[data-seg]').forEach((b) => { const on = b.dataset.seg === side; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
     updateCount();
-    placeSlides(true);
   }
   function centerIn(btn: HTMLElement | null) {
     const box = btn?.parentElement;
@@ -143,7 +143,6 @@ function init(root: HTMLElement) {
   }
   function mark(id: string | null) {
     $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); if (on && b.offsetParent) centerIn(b); });
-    placeSlides(true);
   }
   // while we scroll the page ourselves (Full food / drinks menu, hotspots, chips) the scroll-spy must not flip the side:
   // passing through the other side's groups used to switch the list and the jump ended in the wrong menu.
@@ -170,53 +169,32 @@ function init(root: HTMLElement) {
     const g = t.closest<HTMLElement>('[data-go]');
     if (g) { go(g.dataset.go!, g.dataset.sideOf as Side | undefined); return; }
   });
+  /* ── Jump to: tiles in the page (wide screens) and in the sheet the Categories button opens ── */
+  const sheetApi = () => (window as unknown as { fkSheet?: { open: (o: object) => void; close: () => void } }).fkSheet;
+  let afterSheet: (() => void) | null = null;
+  const jumpTo = (id: string, side: Side) => need21(side, () => {
+    const sec = document.getElementById(id);
+    setSide(side); mark(sec?.closest<HTMLElement>('[data-group]')?.dataset.group ?? null); scrollTo(sec);
+  });
+  document.addEventListener('click', (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('[data-jump-to]');
+    if (!t) return;
+    e.preventDefault();
+    const run = () => jumpTo(t.dataset.jumpTo!, t.dataset.sideOf as Side);
+    if (t.closest('.fk-sheet')) { afterSheet = run; sheetApi()?.close(); } else run();
+  });
+  const cats = $('#mv-cats');
+  cats?.addEventListener('click', () => {
+    const side = root.dataset.side as Side, src = $(`[data-jump="${side}"]`), api = sheetApi();
+    if (!src || !api) { scrollTo($('#mv-jump')); return; }
+    const grid = src.cloneNode(true) as HTMLElement;
+    grid.removeAttribute('data-jump'); grid.removeAttribute('hidden');
+    api.open({ title: side === 'food' ? 'Jump to · Food' : 'Jump to · Drinks', body: grid, opener: cats, onClose: () => { const r = afterSheet; afterSheet = null; r?.(); } });
+  });
   dlg.addEventListener('close', () => {
     if (dlg.returnValue === 'yes') { try { localStorage.setItem(AGE, '1'); } catch { /* ignore */ } const run = pending; pending = null; run?.(); }
     else if (dlg.returnValue === 'no') { pending = null; go('f-biryani', 'food'); }
     dlg.returnValue = '';
-  });
-
-  /* ── sliding active pill (chips, toggle): one clipped fill moves under the labels ── */
-  type Slide = { box: HTMLElement; el: HTMLElement; sel: string; placed: boolean };
-  const slides: Slide[] = [];
-  function placeSlides(animate: boolean) {
-    slides.forEach((sl) => {
-      const { box, el } = sl;
-      if (!box.offsetWidth) { sl.placed = false; return; } // hidden side: place when it shows
-      const on = box.querySelector<HTMLElement>(sl.sel + '.is-on');
-      if (!on) { el.style.clipPath = 'inset(0 100% 100% 0)'; return; }
-      const W = box.scrollWidth, H = box.scrollHeight, b = box.getBoundingClientRect(), r = on.getBoundingClientRect();
-      const l = r.left - b.left + box.scrollLeft - box.clientLeft, t = r.top - b.top + box.scrollTop - box.clientTop;
-      const rad = Math.min(parseFloat(getComputedStyle(on).borderTopLeftRadius) || 0, r.height / 2);
-      el.style.width = W + 'px'; el.style.height = H + 'px';
-      el.classList.toggle('no-anim', !animate || !sl.placed);
-      el.style.clipPath = `inset(${t}px ${W - l - r.width}px ${H - t - r.height}px ${l}px round ${rad}px)`;
-      sl.placed = true;
-    });
-  }
-  if (!reduce) { // reduced motion keeps the plain colour change on the chip itself
-    [['.mv-schips', '.mv-schip', true], ['.mv-seg', '.mv-seg-b', false]].forEach(([bs, sel, tint]) => {
-      $$(bs as string).forEach((box) => {
-        const el = document.createElement('span');
-        el.className = 'mv-slide' + (tint ? ' mv-slide--tint' : ''); el.setAttribute('aria-hidden', 'true');
-        box.prepend(el); box.classList.add('has-slide');
-        slides.push({ box, el, sel: sel as string, placed: false });
-        if ('ResizeObserver' in window) new ResizeObserver(() => placeSlides(false)).observe(box);
-      });
-    });
-    requestAnimationFrame(() => placeSlides(false));
-    document.fonts?.ready.then(() => placeSlides(false));
-  }
-
-  /* ── edge fades on the chip rows (no hard cut against the toggle or the screen edge) ── */
-  $$('.mv-schips').forEach((el) => {
-    const upd = () => {
-      el.style.setProperty('--fl', el.scrollLeft > 4 ? '22px' : '0px');
-      el.style.setProperty('--fr', el.scrollLeft + el.clientWidth < el.scrollWidth - 4 ? '22px' : '0px');
-    };
-    el.addEventListener('scroll', upd, { passive: true });
-    if ('ResizeObserver' in window) new ResizeObserver(upd).observe(el);
-    upd();
   });
 
   /* ── scroll-spy: keeps the chips on the group in view ── */
@@ -354,9 +332,8 @@ function init(root: HTMLElement) {
         const g = el('span', 'mv-ghost', nm.trim()[0] || ''); const o = el('span', 'mv-orn'); o.appendChild(document.createElement('b'));
         c.append(g, o); phEl.appendChild(c);
       }
-      // tags: veg mark + label, chef's special, spicy
-      const vm = $('.mv-vm', li)?.cloneNode(true) as HTMLElement | undefined;
-      tagsEl.replaceChildren(...[vm, document.createTextNode(li.dataset.veg === '1' ? 'Vegetarian' : 'Non-vegetarian'), $('.mv-chefmark', li)?.cloneNode(true), $('.mv-spice', li)?.cloneNode(true)].filter(Boolean) as Node[]);
+      // tags: the row's own chips (Veg / Non-veg, Spicy, Chef's pick)
+      tagsEl.replaceChildren(...$$('.fk-chip', li).map((c) => c.cloneNode(true)));
       // price(s) exactly as in the list
       const pr = $('.mv-item-price', li);
       priceEl.innerHTML = pr && row ? pr.innerHTML : '';

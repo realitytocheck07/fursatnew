@@ -61,7 +61,7 @@ import CornerHero from '../components/CornerHero.astro';
           <h2 class="fk-ty-h2 bq-sec-title mot-headline">Elegance in Every Detail</h2>
         </div>
 
-        <div class="bq-gal-grid">
+        <div class="bq-gal-grid fk-rail fk-rail--cards fk-rail--m" data-dots>
           <div class="bq-gal-card">
             <img src="/assets/venue/banquet/banquet-stage-01-720.webp" srcset="/assets/venue/banquet/banquet-stage-01-480.webp 480w, /assets/venue/banquet/banquet-stage-01-720.webp 720w, /assets/venue/banquet/banquet-stage-01.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="The banquet stage and screen with covered chairs" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
             <div class="bq-gal-tag">Main Banquet Floor</div>
@@ -108,7 +108,7 @@ import CornerHero from '../components/CornerHero.astro';
             <div class="bq-form-row">
               <div class="bq-form-field">
                 <label for="eq-event">Occasion</label>
-                <select id="eq-event" name="occasion" data-l="Occasion">
+                <select id="eq-event" name="occasion" data-l="Occasion" data-fk-sheet>
                   <option value="Birthday Party">Birthday Celebration</option>
                   <option value="Wedding / Reception">Wedding / Sangeet / Reception</option>
                   <option value="Corporate Gathering">Corporate Gala / Seminar</option>
@@ -130,7 +130,7 @@ import CornerHero from '../components/CornerHero.astro';
               </div>
               <div class="bq-form-field">
                 <label for="eq-package">Interested package (optional)</label>
-                <select id="eq-package" name="package" data-l="Package">
+                <select id="eq-package" name="package" data-l="Package" data-fk-sheet>
                   <option value="₹925 Veg package">₹925 Veg package</option>
                   <option value="₹1049 Veg package">₹1,049 Veg package</option>
                   <option value="₹1299 Veg package">₹1,299 Veg package</option>
@@ -298,6 +298,10 @@ import CornerHero from '../components/CornerHero.astro';
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px}
+  .bq-gal-grid.fk-rail--m { display: flex; grid-template-columns: none; gap: 12px}
+  @media (min-width: 768px) {
+    .bq-gal-grid.fk-rail--m { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px}
+  }
   .bq-gal-card {
     position: relative;
     height: 320px;
