@@ -24,3 +24,4 @@ public/**/*.mp4
 review/lh-*.json
 *.zip
 *.zip
+!public/assets/menu/drinks-intro/*.mp4
