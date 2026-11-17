@@ -1,55 +1,84 @@
 ---
-// "What brings you in?": 5 slim tiles, one per space. Real venue photos only.
-const TILES = [
-  { href: '/restaurant-bar', label: 'Restaurant & Bar', base: '/assets/interior/fursat_space_04', alt: 'Restaurant seating with red banquettes and framed art' },
-  { href: '/cafe', label: 'Café', base: '/assets/interior/fursat_space_02', alt: 'Café lounge with sofas and a marble coffee table' },
-  { href: '/party', label: 'Parties & Events', base: '/assets/venue/banquet/banquet-stage-01', alt: 'Banquet hall set with chairs facing the stage' },
-  { href: '/banquet', label: 'Banquet', base: '/assets/venue/banquet/banquet-tables-05', alt: 'Banquet hall with a long U-shaped table setup' },
-  { href: '/catering', label: 'Catering', base: '/assets/dishes/new/nalli-gosht-biryani-half', alt: 'Ustad Special Nalli Gosht Biryani' },
+// "4 spaces under one roof": tabs (desktop .fk-seg, phone .fk-pill rail). Real venue photos only, no guest faces.
+const SPACES = [
+  { id: 'kitchen-bar', label: 'Kitchen & Bar', href: '/restaurant-bar', cta: 'See Kitchen & Bar', base: '/assets/interior/fursat_space_04', alt: 'Restaurant seating with red banquettes and framed art', line: 'Biryani, tandoor and craft cocktails, served at your table.' },
+  { id: 'social-club', label: 'Social Club', href: '/restaurant-bar#social', cta: 'See Social Club', base: '/assets/venue/interior/mural-booths', alt: 'Mural wall with cushioned booths', line: 'Cricket on the big screen and music nights.' /* TODO(client): confirm */ },
+  { id: 'bites-buffet', label: 'Bites & Buffet', href: '/cafe', cta: 'See the Café', base: '/assets/interior/fursat_space_02', alt: 'Café lounge with sofas and a marble coffee table', line: 'Easy café bites and buffet spreads.' },
+  { id: 'banquet-hall', label: 'Banquet hall', href: '/banquet', cta: 'See the Banquet hall', base: '/assets/venue/banquet/banquet-tables-05', alt: 'Banquet hall with a long U-shaped table setup', line: 'Room for celebrations, big and small.' },
 ];
-// 480 and 720 wide files exist for every tile; the browser picks by the tile's real width
-const SIZES = '(min-width: 1000px) 20vw, 50vw';
-const SIZES_LAST = '(min-width: 1000px) 20vw, (min-width: 600px) 50vw, 100vw';
 ---
 <section class="hw" id="spaces" aria-labelledby="hw-h">
+  <p class="hw-eyebrow">Four spaces under one roof</p>
   <h2 class="fk-ty-h2" id="hw-h" data-fk-reveal>What brings you in?</h2>
-  <ul class="hw-row fk-rail fk-rail--cards fk-rail--m" data-dots>
-    {TILES.map((t, i) => (
-      <li>
-        <a class="hw-tile fk-card fk-card--glass" href={t.href}>
-          <span class="fk-card__ph"><img src={`${t.base}-720.webp`} srcset={`${t.base}-480.webp 480w, ${t.base}-720.webp 720w`} sizes={i === TILES.length - 1 ? SIZES_LAST : SIZES} alt={t.alt} loading="lazy" decoding="async" width="720" height="960" /></span>
-          <span class="fk-card__b hw-label"><span class="fk-card__t">{t.label}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </a>
-      </li>
+
+  <div class="hw-tabs hw-tabs--seg fk-seg" role="tablist" aria-label="Our spaces">
+    {SPACES.map((s, i) => (
+      <button type="button" role="tab" id={`hw-t-${s.id}`} aria-controls={`hw-p-${s.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-hw={s.id}>{s.label}</button>
     ))}
-  </ul>
+  </div>
+  <div class="hw-tabs hw-tabs--rail fk-rail" role="tablist" aria-label="Our spaces">
+    {SPACES.map((s, i) => (
+      <button type="button" role="tab" class="fk-pill" aria-selected={i === 0 ? 'true' : 'false'} aria-pressed={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-hw={s.id}>{s.label}</button>
+    ))}
+  </div>
+
+  <div class="hw-panels">
+    {SPACES.map((s, i) => (
+      <article class="hw-panel fk-card fk-card--glass" id={`hw-p-${s.id}`} role="tabpanel" aria-labelledby={`hw-t-${s.id}`} data-hw={s.id} hidden={i !== 0}>
+        <span class="hw-ph"><img src={`${s.base}-720.webp`} srcset={`${s.base}-480.webp 480w, ${s.base}-720.webp 720w`} sizes="(min-width: 900px) 56vw, 92vw" alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width="720" height="540" /></span>
+        <div class="hw-info">
+          <h3 class="hw-name">{s.label}</h3>
+          <p class="hw-line">{s.line}</p>
+          <a class="fk-btn fk-btn--primary" href={s.href}>{s.cta}</a>
+        </div>
+      </article>
+    ))}
+  </div>
 </section>
 <script is:inline>
-/* Tiles sit below the fold: after the page has loaded and the browser is idle, fetch all five photos so a fast scroll never shows an empty tile. */
-(function(){function go(){document.querySelectorAll('.hw-tile img').forEach(function(i){i.loading='eager'})}
-function arm(){(window.requestIdleCallback||function(f){setTimeout(f,1200)})(go,{timeout:3000})}
-if(document.readyState==='complete')arm();else addEventListener('load',arm,{once:true})})();
+(function(){
+  var root=document.getElementById('spaces'); if(!root) return;
+  var tabs=[].slice.call(root.querySelectorAll('[role=tab]'));
+  var panels=[].slice.call(root.querySelectorAll('.hw-panel'));
+  function pick(id,focus){
+    tabs.forEach(function(t){var on=t.dataset.hw===id;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;if(t.classList.contains('fk-pill'))t.setAttribute('aria-pressed',on);if(on&&focus&&t.offsetParent)t.focus()});
+    panels.forEach(function(p){p.hidden=p.dataset.hw!==id});
+  }
+  root.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('[role=tab]');if(t)pick(t.dataset.hw)});
+  root.addEventListener('keydown',function(e){
+    var t=e.target.closest&&e.target.closest('[role=tab]');if(!t)return;
+    var list=tabs.filter(function(x){return x.offsetParent&&x.parentNode===t.parentNode});var i=list.indexOf(t),n=-1;
+    if(e.key==='ArrowRight')n=(i+1)%list.length;else if(e.key==='ArrowLeft')n=(i-1+list.length)%list.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=list.length-1;
+    if(n<0)return;e.preventDefault();pick(list[n].dataset.hw,true);
+  });
+  /* hidden panels do not load their photo: once idle, fetch them so a tab switch is instant */
+  function go(){root.querySelectorAll('.hw-panel img').forEach(function(i){i.loading='eager'})}
+  function arm(){(window.requestIdleCallback||function(f){setTimeout(f,1200)})(go,{timeout:3000})}
+  if(document.readyState==='complete')arm();else addEventListener('load',arm,{once:true});
+})();
 </script>
 
 <style is:global>
-.hw{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(36px,5vw,64px) 0 clamp(32px,4.5vw,56px)}
-.hw h2{margin:0 0 clamp(18px,2.6vw,30px);padding:0 clamp(12px,2vw,28px);text-align:center}
-.hw .hw-row{list-style:none;margin:0;padding:0 clamp(12px,2vw,28px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vw,20px)}
-.hw-tile{width:100%;height:100%;color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
-.hw-tile .fk-card__ph{aspect-ratio:3/4;max-height:340px}
-.hw .hw-label{flex:none;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;min-height:56px;margin-top:-34px;padding:10px 14px}
-.hw-label .fk-card__t{font-size:1.0625rem}
-.hw-label svg{flex:none;width:16px;height:16px;color:#1b3a26}
-.hw-tile:focus-visible{outline:3px solid #C94716;outline-offset:3px}
-@media(max-width:999px) and (min-width:768px){
-  .hw .hw-row{grid-template-columns:repeat(6,minmax(0,1fr))}
-  .hw-row li{grid-column:span 2}
-  .hw-row li:nth-child(4),.hw-row li:nth-child(5){grid-column:span 3}
-  .hw-tile .fk-card__ph{aspect-ratio:4/3;max-height:none}
-}
+.hw{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(36px,5vw,64px) clamp(16px,3vw,40px) clamp(32px,4.5vw,56px)}
+.hw-eyebrow{margin:0 0 6px;text-align:center;font:600 .8125rem/1.2 var(--fk-sans,'Poppins',sans-serif);letter-spacing:.14em;text-transform:uppercase;color:#6b5a2c}
+.hw h2{margin:0 0 clamp(16px,2.4vw,26px);text-align:center}
+.hw-tabs--seg{display:grid;margin:0 auto clamp(18px,2.4vw,28px);width:max-content;max-width:100%}
+.hw-tabs--rail{display:none}
+.hw-panels{max-width:1100px;margin:0 auto}
+.hw .hw-panel[hidden]{display:none!important}
+/* .fk-card--glass sets display:flex / overflow:visible at (0,2,0): this selector is stronger */
+.hw .hw-panel.fk-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:center;gap:clamp(18px,3.4vw,44px);padding:0}
+.hw-ph{display:block;aspect-ratio:16/10;max-height:380px;min-height:0;overflow:hidden;border-radius:24px;box-shadow:0 20px 40px -22px rgba(22,48,26,.55)}
+.hw-ph img{display:block;width:100%;height:100%;object-fit:cover}
+.hw-info{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;padding:clamp(18px,3vw,36px)}
+.hw-name{margin:0;font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(1.375rem,2.2vw,1.75rem);line-height:1.2;color:#1b3a26}
+.hw-line{margin:0;font-size:1rem;line-height:1.55;color:#3a3220}
 @media(max-width:767px){
-  .hw .hw-row{display:flex;padding:8px 16px 14px;margin:0;scroll-padding-inline:16px}
-  .hw-row li{flex:0 0 min(72vw,300px)}
-  .hw-tile .fk-card__ph{aspect-ratio:4/5;max-height:none}
+  .hw{padding-inline:0}
+  .hw-tabs--seg{display:none}
+  .hw-tabs--rail{display:flex;padding:2px 16px 12px;scroll-padding-inline:16px;margin:0 0 4px}
+  .hw-panels{padding:0 16px}
+  .hw .hw-panel.fk-card{grid-template-columns:minmax(0,1fr);gap:16px}
+  .hw-ph{aspect-ratio:4/3;max-height:none}
 }
 </style>

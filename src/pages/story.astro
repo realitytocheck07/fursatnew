@@ -36,6 +36,18 @@ const P = {
   dining: { src: '/assets/interior/fursat_space_07.webp', alt: 'The Fursat dining hall with dark wood tables, blue velvet chairs and patterned screens', w: 1920, h: 2560, pos: '50% 60%' },
   lounge: { src: '/assets/interior/tour-lounge.webp', alt: 'The lounge seating at Fursat', w: 1050, h: 1400, pos: '50% 45%' },
 };
+// Photo wall: venue + food photos only, no guests/faces (owner rule). Natural ratios give the mixed heights.
+const wall = [
+  { src: '/assets/interior/fursat_space_06-720.webp', w: 720, h: 960, alt: 'High tables and bar stools in the Fursat dining hall' },
+  { src: '/assets/dishes/new/nalli-gosht-biryani-half-720.webp', w: 720, h: 1080, alt: 'Nalli Gosht Biryani served at Fursat' },
+  { src: '/assets/interior/fursat_space_17-720.webp', w: 720, h: 540, alt: 'A sofa and orange chairs in the Fursat lounge' },
+  { src: '/assets/interior/fursat_space_04-720.webp', w: 720, h: 900, alt: 'A red sofa and blue chair against a patterned wall at Fursat' },
+  { src: '/assets/interior/bar-back-720.webp', w: 720, h: 960, alt: 'The back bar at Fursat with the lit logo' },
+  { src: '/assets/dishes/new/gongura-muchatlu-720.webp', w: 720, h: 1080, alt: 'Gongura Muchatlu cocktail' },
+  { src: '/assets/venue/interior/long-table-dining-720.webp', w: 720, h: 960, alt: 'The long dining table with a blue banquette at Fursat' },
+  { src: '/assets/dishes/new/chicken-tikka-angara-720.webp', w: 720, h: 1080, alt: 'Chicken Tikka Angara' },
+  { src: '/assets/interior/fursat_space_14-720.webp', w: 720, h: 540, alt: 'Cane chairs and indoor plants by the window at Fursat' },
+];
 const values = [
   { t: 'Exceptional Food', l: 'Authentic flavours, crafted with care.', i: '<path d="M3 20a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1Z"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4"/><path d="M10 4h4"/>' },
   { t: 'Warm Hospitality', l: 'A welcoming space for everyone.', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
@@ -95,6 +107,15 @@ const plateM = [{ x: 303, y: 2083 }, { x: 703, y: 2083 }, { x: 303, y: 2378 }, {
       </div>
     </section>
 
+    <section class="sw" aria-labelledby="sw-h">
+      <h2 class="fk-ty-h2 sw-h" id="sw-h" data-fx-reveal>A look <em>around</em></h2>
+      <ul class="sw-grid">
+        {wall.map((ph) => (
+          <li class="sw-tile"><img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" /></li>
+        ))}
+      </ul>
+    </section>
+
     <section class="st-legal-wrap" aria-labelledby="st-lh">
       <div class="fk-emboss st-legal">
         <h2 class="fk-ty-h3" id="st-lh">Business information</h2>
@@ -147,6 +168,15 @@ const plateM = [{ x: 303, y: 2083 }, { x: 703, y: 2083 }, { x: 303, y: 2378 }, {
   .st .st-bh { font-size: min(var(--fk-fs-6), calc(38 * var(--u))); }
   .st-bh em { color: #e8c27a; }
   .st-band-orn { width: calc(240 * var(--u)); }
+
+  /* Photo wall: CSS columns = masonry; photos keep their own ratio so the tile heights differ. */
+  .sw { background: #10261a; padding: clamp(40px, 6vw, 88px) 6vw 0; }
+  .sw-h { text-align: center; color: #fbf3e6; font-style: italic; margin-bottom: clamp(20px, 3vw, 36px); }
+  .sw-h em { color: #e8c27a; }
+  .sw-grid { max-width: 1100px; margin: 0 auto; columns: 3; column-gap: clamp(10px, 1.6vw, 18px); }
+  .sw-tile { break-inside: avoid; margin: 0 0 clamp(10px, 1.6vw, 18px); border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(232, 194, 122, .45), 0 10px 22px rgba(0, 0, 0, .35); background: #1b3a26; }
+  .sw-tile img { display: block; width: 100%; height: auto; }
+  @media (max-width: 767px) { .sw { padding: 36px 16px 0; } .sw-grid { columns: 2; } .sw-tile { border-radius: 14px; } }
 
   .st-legal-wrap { background: #10261a; padding: clamp(24px, 3vw, 40px) 6vw clamp(48px, 6vw, 88px); }
   .st-legal { margin: 0 auto; max-width: 44rem; border-radius: 24px; padding: 1.6rem 1.9rem 1.5rem; color: var(--fk-ink); background: #f8ead8; box-shadow: 0 0 0 1px rgba(214, 170, 90, .5), 0 0 0 6px #f1dfc3, 0 22px 40px rgba(0, 0, 0, .35), inset 0 2px 3px #fff; }

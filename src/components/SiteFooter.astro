@@ -29,6 +29,8 @@ import site from '../data/site.json';
           <a href="/menu">Full Menu</a>
           <a href="/restaurant-bar">Restaurant & Bar (21+)</a>
           <a href="/cafe">Fursat Café</a>
+          <a href="/order">Order Online</a>
+          <p class="sf-order-line">Order on <a href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a> · <a href={site.order.zomato} target="_blank" rel="noopener">Zomato</a></p>
           <a href="/ask">Ask Fursat (Mood Search)</a>
           <a href="/story">Our Story</a>
         </div>
@@ -241,6 +243,8 @@ import site from '../data/site.json';
   }
 
   /* v4.6: footer in the brand system — forest green, gold hairline, serif group titles, one sans */
+  .sf-order-line { margin: 2px 0 0; font-size: .875rem; color: rgba(241,230,210,.8); display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px }
+  .sf-link-group .sf-order-line a { display: inline-flex; width: auto; padding: 0; min-height: 32px; align-items: center }
   .sf-footer { position: relative; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); color: #f1e6d2; font-family: var(--fk-sans); border-top: 0; }
   .sf-footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, #d9b36a 20%, #e8c886 50%, #d9b36a 80%, transparent); }
   .sf-group-title { font-family: var(--fk-serif); font-weight: 500; font-size: 1.15rem; letter-spacing: 0; text-transform: none; color: #e8c886; }

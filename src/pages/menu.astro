@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import site from '../data/site.json';
 import foodData from '../data/food.json';
 import drinksData from '../data/drinks.json';
 import featured from '../data/menu-featured.json';
@@ -234,6 +235,19 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 
     <!-- Full menu: every item server-rendered (works without JS) -->
     <section class="mv-list" aria-label="Full menu" id="mv-list">
+      <!-- ORDER-STRIP (session ORDER): one slim "Order online" strip -->
+      <div class="mv-order">
+        <span class="mv-order-t">Order to your home:</span>
+        <a class="fk-pill mv-order-a" href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a>
+        <a class="fk-pill mv-order-a" href={site.order.zomato} target="_blank" rel="noopener">Zomato</a>
+      </div>
+      <style>
+        .mv-order{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:10px 16px;background:rgb(240 216 184 / .6);border-bottom:1px solid rgb(168 115 28 / .22)}
+        .mv-order-t{font:600 .875rem/1.2 var(--fk-sans);color:#2b2416}
+        .mv-order-a{background:#14301c;border:1px solid #14301c;color:#fbf5e6;font:600 .875rem/1 var(--fk-sans);text-decoration:none}
+        .mv-order-a:focus-visible{outline:3px solid #14301c;outline-offset:3px}
+      </style>
+      <!-- /ORDER-STRIP -->
       <!-- The one filter bar: Food | Drinks, live count, category chips, search, Veg / Non-veg -->
       <div class="mv-sticky" id="mv-sticky" data-fab-avoid>
         <div class="mv-sticky-in">

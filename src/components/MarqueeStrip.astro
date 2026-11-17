@@ -19,18 +19,18 @@ interface Props {
 
 const {
   items = [
-    'Hyderabadi Biryani',
-    'Tandoor Specials',
-    'Craft Cocktails',
-    'Continental',
-    'North Indian',
-    'Asian',
-    'Street Food',
-    'Desserts',
+    'Kitchen',
+    'Bar',
+    'Social Club',
+    'Bites & Buffet',
+    'Banquets',
   ],
   speed = 32,
   direction = 'left',
 } = Astro.props;
+
+// Only a few short words: repeat them so one half of the track is wider than the screen (seamless loop at 1920px).
+const half = Array.from({ length: 3 }, () => items).flat();
 
 const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
 ---
@@ -39,14 +39,14 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
   <div class="mq-skew-wrap">
     <!-- Two copies of items for seamless loop -->
     <div class:list={['mq-track', animDir]} style={`--mq-speed:${speed}s`}>
-      {items.map(item => (
+      {half.map(item => (
         <span class="mq-item">
           <span class="mq-dot" aria-hidden="true">✦</span>
           {item}
         </span>
       ))}
       {/* Duplicate for seamless wrap */}
-      {items.map(item => (
+      {half.map(item => (
         <span class="mq-item" aria-hidden="true">
           <span class="mq-dot">✦</span>
           {item}
@@ -123,7 +123,7 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
 
   .mq-dot {
     color: #E0A63C;
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     flex-shrink: 0;
   }
 

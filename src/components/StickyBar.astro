@@ -95,7 +95,15 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
     var bar = document.querySelector('.fk-bookbar[data-always]');
     if (!bar) return;
     var tick = false;
-    function check() { tick = false; bar.classList.toggle('on', window.scrollY > window.innerHeight * 0.45); }
+    function check() {
+      tick = false;
+      var on = window.scrollY > window.innerHeight * 0.45;
+      if (on !== bar.classList.contains('on')) {
+        bar.classList.toggle('on', on);
+        // let the floating Instagram/Ask buttons re-measure so they lift above the bar
+        window.dispatchEvent(new Event('resize'));
+      }
+    }
     addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(check); } }, { passive: true });
     check();
   })();

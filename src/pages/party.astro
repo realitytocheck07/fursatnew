@@ -43,6 +43,13 @@ const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I
     <div class="hy-flow pa-flow">
       <main id="pk-main" tabindex="-1" class="pa-main">
         <PartyPackages />
+        <figure class="pa-feast" data-fx-reveal>
+          <img src="/assets/feast/feast-table-1200.webp"
+            srcset="/assets/feast/feast-table-768.webp 768w, /assets/feast/feast-table-1200.webp 1200w, /assets/feast/feast-table-1600.webp 1600w"
+            sizes="(max-width: 767px) 92vw, 1100px" width="1600" height="810"
+            alt="A round table filled with plates of food and desserts" loading="lazy" decoding="async" />
+          <figcaption>A table for the whole group.</figcaption>
+        </figure>
         <PartyBuilder />
       </main>
     </div>
@@ -79,6 +86,10 @@ const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I
 .pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:500;background:#f6e6d1}
 .pa-flow{padding:clamp(8px,1.5vw,24px) 0 calc(520 * var(--u));z-index:3}
 .pa .pa-main{display:block;outline:0}
+/* feast banner: cropped real photo (no other-brand cushions), caption under it so it never covers the food */
+.pa-feast{margin:clamp(20px,3vw,44px) auto;max-width:1100px;padding:0 clamp(12px,4vw,24px)}
+.pa-feast img{display:block;width:100%;height:auto;border-radius:22px;box-shadow:0 0 0 1px rgba(214,170,90,.55),0 16px 34px rgba(60,40,10,.25)}
+.pa-feast figcaption{margin-top:12px;text-align:center;font:italic 500 clamp(18px,2.2vw,26px)/1.25 var(--fk-serif);color:#1b3a26}
 .pa-quote{z-index:3;margin:0;left:calc(70 * var(--u));bottom:calc(270 * var(--u));width:calc(340 * var(--u));color:#fbf3e6;display:grid;gap:calc(14 * var(--u))}
 .pa-qm{width:calc(34 * var(--u));min-width:22px;height:auto;fill:#e8a85a}
 .pa-quote blockquote{margin:0;font:italic 500 calc(31 * var(--u))/1.25 var(--fk-serif);color:#fbf3e6;text-wrap:balance}

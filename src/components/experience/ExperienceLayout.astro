@@ -13,7 +13,7 @@ import InstaFollow from '../InstaFollow.astro';
 import '../../styles/fk-tokens.css';
 
 interface Cta { label: string; href: string; primary?: boolean; book?: boolean }
-interface Pillar { icon: string; title: string; line: string }
+interface Pillar { icon: string; title: string; line: string; id?: string }
 interface Photo { src: string; alt: string; pos?: string; w?: number; h?: number }
 interface Card { tag?: string; name: string; price?: string; text: string; img?: Photo; icon?: string }
 interface Props {
@@ -67,7 +67,7 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
   <section class="xp-band" aria-label={`${p.h1a} highlights`}>
     <ul class="xp-pillars" data-fk-stagger="80">
       {p.pillars.map((pl) => (
-        <li class="xp-pillar">
+        <li class="xp-pillar" id={pl.id}>
           <span class="xp-ring"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[pl.icon]} /></span>
           <span class="xp-pt"><strong class="fk-ty-h4">{pl.title}</strong><small>{pl.line}</small></span>
         </li>
@@ -168,7 +168,7 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
   /* below the stage: the green band continues */
   /* v5.17 band under the corner hero: highlights, moments photos, closing line (replaces the old traced art stage) */
   .xp-band { background: radial-gradient(120% 80% at 50% 0%, #1b3a26 0%, #10261a 70%); color: #fbf3e6; padding: clamp(40px, 5vw, 72px) clamp(16px, 5vw, 80px); }
-  .xp-pillars { max-width: 1240px; margin: 0 auto clamp(40px, 5vw, 72px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 24px); }
+  .xp-pillars { max-width: 1240px; margin: 0 auto clamp(40px, 5vw, 72px); display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: clamp(14px, 2vw, 24px); }
   .xp-pillar { display: grid; justify-items: center; text-align: center; gap: 12px; padding: 22px 16px; border-radius: 22px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(243,197,107,.28); }
   .xp-ring { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #2b5236, #14321e); box-shadow: 0 0 0 2px #c99a43, 0 0 0 6px rgba(201,154,67,.16); }
   .xp-ring svg { width: 30px; height: 30px; fill: none; stroke: #f3c56b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
