@@ -1,7 +1,7 @@
 ---
-// /menu Phase 3: "The Table" (v5.39). Cut-out dishes fall from the top of the screen onto the plates of the new table scene, scrubbed by the pinned scroll.
+// /menu Phase 3: "The Table" (v5.39). Cut-out dishes fall from the top of the screen onto the new plate-free table scene, scrubbed by the pinned scroll.
 // Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
-// Names and prices come from menu-table.json (the table ring, via food.json). No script or reduced motion: the dishes are already on the plates.
+// Names and prices come from menu-table.json (the table ring, via food.json). No script or reduced motion: the dishes are already on the table.
 import '../../styles/table-landing.css';
 interface Dish { title: string; label: string; price: string; dn: string; sm: string; clip: string }
 interface Props { dishes: Dish[]; count?: number; max?: number }
@@ -23,8 +23,8 @@ const IMG = '/assets/menu/table/';
   <div class="tl-stage" id="tl-stage">
     <div class="tl-bg" aria-hidden="true">
       <picture>
-        <source media="(min-width: 821px)" srcset={`${IMG}table-bg-wide-1100.webp 1100w, ${IMG}table-bg-wide-1672.webp 1672w`} sizes="100vw" width="1672" height="941" />
-        <img src={`${IMG}table-bg-tall-640.webp`} srcset={`${IMG}table-bg-tall-640.webp 640w, ${IMG}table-bg-tall-941.webp 941w`} sizes="100vw" width="941" height="1672" alt="" loading="lazy" decoding="async" />
+        <source media="(min-width: 821px)" srcset={`${IMG}table-bg-wide-1100.webp 1100w, ${IMG}table-bg-wide-1602.webp 1602w`} sizes="100vw" width="1602" height="981" />
+        <img src={`${IMG}table-bg-tall-640.webp`} srcset={`${IMG}table-bg-tall-640.webp 640w, ${IMG}table-bg-tall-941.webp 941w`} sizes="100vw" width="941" height="1671" alt="" loading="lazy" decoding="async" />
       </picture>
       <span class="tl-shade"></span>
     </div>
@@ -35,7 +35,7 @@ const IMG = '/assets/menu/table/';
       {count ? <p class="tl-sub num">{count} dishes on the menu</p> : null}
     </div>
 
-    <!-- the plates: decorative here, the names live in the list below -->
+    <!-- the dishes: decorative here, the names live in the list below -->
     <ul class="tl-spots" id="tl-spots" aria-hidden="true">
       {list.map((d, i) => { const c = CUT[d.title]; return (
         <li class="tl-spot" style={`--i:${i};--ar:${c.w / c.h}`} data-title={d.title} data-phone={c.phone ? '1' : '0'}>

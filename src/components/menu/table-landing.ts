@@ -1,16 +1,19 @@
-// /menu Phase 3 (v5.39): cut-out dishes fall from above the screen onto the plates of the table scene, scrubbed by the pinned scroll (both directions).
+// /menu Phase 3 (v5.39): cut-out dishes fall from above the screen onto the new plate-free table scene, scrubbed by the pinned scroll (both directions).
 // One scroll-linked rAF loop. After load it only writes transform + opacity (dish, shadow). Layout is read on load and resize only.
-// The plate spots are in the scene's own pixels; place() maps them to the screen with the same cover maths as object-fit.
-// Reduced motion / no script: nothing moves, the dishes are already on the plates (the CSS default).
+// The dish spots are in the scene's own pixels; place() maps them to the screen with the same cover maths as object-fit.
+// Reduced motion / no script: nothing moves, the dishes are already on the table (the CSS default).
 const root = document.getElementById('tl');
 
 type Slot = { el: HTMLElement; dish: HTMLElement; shadow: HTMLElement; label: HTMLElement | null; on: number; dy: number; dx: number; k: number; hh: number };
 
-// Empty plate centres in image pixels (measured on the art; tuned on screenshots). pw/ph = plate width/height.
-const WIDE = { w: 1672, h: 941, pw: 200, ph: 120, y: 614, x: [194, 516, 836, 1141, 1458] };
-const TALL = { w: 941, h: 1672, pw: 210, ph: 104, y: 897, x: [140, 466, 777] };
-const ROW = 0.62; // the plate row sits at ~62% of the stage height
-const DISH = 1.25; // dish width = plate width x this
+// Dish spots in image pixels (measured on REF-new-table-wide.jpg 1602x981 / REF-new-table-tall.jpg 941x1671).
+// x = dish centre, on the bare wood just left of each napkin; y = centre of the contact shadow, halfway between the glass bottom and the table's front edge.
+// pw/ph = contact-shadow width/height; dish width = pw x DISH (about 1.1x a napkin's length). row = where y sits on screen (share of the stage height).
+// pad = side room (image px) kept free beside the outer dishes for their names. leg = y just under the dishes (phones: the name list starts here).
+// sign = the FURSAT sign box [x0, x1, bottom]; the heading keeps clear of it. head = y of the dark sofa band (phones put the heading there).
+const WIDE = { w: 1602, h: 981, pw: 116, ph: 26, y: 650, x: [183, 490, 796, 1106, 1385], row: 0.9, pad: 96, sign: [640, 970, 230], head: 0, leg: 0 };
+const TALL = { w: 941, h: 1671, pw: 98, ph: 20, y: 1000, x: [164, 500, 791], row: 0.6, pad: 24, sign: [350, 640, 380], head: 545, leg: 1024 };
+const DISH = 1.1; // dish width = shadow width x this
 const LAG = 0.1; // each dish starts 10% of the pinned scroll after the one before
 const END = 0.75; // the last dish has landed by 75%; the last 25% holds the full table while the labels fade in
 const START = { sc: 1.5, rot: [-8, 6, -5, 8, -7], sx: 0.3 }; // start scale, start tilt (deg) per dish, sideways start (x dish width)
@@ -34,16 +37,16 @@ function init(root: HTMLElement) {
   let still = reduceQ.matches, tlTop = 0, trackH = 0, stageH = 0, lastP = -1, raf = 0, active = 0;
   let pin = 1;
 
-  // 1) put the plates on the scene. Cover maths as object-fit; if cover would crop the outer plates (narrow screens), the scene is
+  // 1) put the dish spots on the scene. Cover maths as object-fit; if cover would crop the outer dishes (narrow screens), the scene is
   // scaled down to fit them instead and the edges that no longer reach the stage fade into the dark.
   function place() {
     const W = stage.clientWidth, H = stage.clientHeight, nw = narrowQ.matches, g = nw ? TALL : WIDE, xs = g.x;
     const cover = Math.max(W / g.w, H / g.h);
-    const fit = W / (xs[xs.length - 1] - xs[0] + g.pw * DISH + 24);
+    const fit = W / (xs[xs.length - 1] - xs[0] + g.pw * DISH + g.pad);
     const sc = Math.min(cover, fit), iw = g.w * sc, ih = g.h * sc;
     const mid = (xs[0] + xs[xs.length - 1]) / 2;
     const left = iw > W ? clamp(W / 2 - mid * sc, W - iw, 0) : (W - iw) / 2;
-    const top = ih > H ? clamp(ROW * H - g.y * sc, H - ih, 0) : clamp(ROW * H - g.y * sc, 0, H - ih);
+    const top = ih > H ? clamp(g.row * H - g.y * sc, H - ih, 0) : clamp(g.row * H - g.y * sc, 0, H - ih);
     const gap = sc < cover - 1e-6 && (top > 1 || top + ih < H - 1);
     root!.classList.toggle('tl--fit', gap);
     if (sc < cover - 1e-6) {
@@ -53,6 +56,10 @@ function init(root: HTMLElement) {
       const py = ih > H ? (top / (H - ih)) : 0.5, px = iw > W ? (left / (W - iw)) : 0.5;
       img.style.objectPosition = `${(px * 100).toFixed(2)}% ${(py * 100).toFixed(2)}%`;
     }
+    // keep the heading off the FURSAT sign: wide = left of the sign, phone = on the dark sofa band under it
+    root!.style.setProperty('--sign-l', (left + g.sign[0] * sc).toFixed(1) + 'px');
+    if (nw) root!.style.setProperty('--head-y', (top + g.head * sc).toFixed(1) + 'px'); else root!.style.removeProperty('--head-y');
+    if (nw) root!.style.setProperty('--leg-y', (top + g.leg * sc).toFixed(1) + 'px'); else root!.style.removeProperty('--leg-y');
     let k = 0;
     slots.forEach((s) => {
       const show = !nw || s.el.dataset.phone === '1';

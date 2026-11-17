@@ -1,6 +1,8 @@
 ---
-// AskFab — a small "Ask Fursat" button on every page (desktop and tablet; phones already have Ask in the bottom bar).
-// Page-aware: opens /ask with a starting question that fits the page the guest is on. Not shown on /ask itself.
+// AskFab — the "Ask Fursat" mascot button on every page (not on /ask). Plays a light Super-Mario routine: drops in on Home after the intro,
+// hops now and then, hops when scrolling starts, jumps + coin + a tiny hint when a new main section arrives, and jumps big on tap.
+// Page-aware: opens /ask with a starting question that fits the page the guest is on.
+// Motion is CSS transform only. Reduced motion: static, no bubbles except on tap. No sound.
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const HINTS: Record<string, string> = {
   '/cafe': 'coffee and desserts',
@@ -14,33 +16,195 @@ const q = HINTS[path];
 const href = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
 const show = path !== '/ask' && path !== '/404';
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
+// the hint bubble each kind of section gets (the page's own default comes from its path)
+const BUBBLES = { menu: 'Hungry? 🍛', party: 'Party plans? 🎉', bar: 'Cricket tonight? 🏏' /* TODO(client): confirm the cricket line */, cafe: 'Coffee break? ☕', any: 'Ask me anything!' };
+const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party', '/party': 'party', '/restaurant-bar': 'bar', '/cafe': 'cafe' };
 ---
 {show && (
-  <a class="afab" href={href} aria-label={tip} data-fk-ask>
-    <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" />
+  <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined} data-page-key={PAGE_KEY[path] || 'any'} data-bubbles={JSON.stringify(BUBBLES)}>
+    <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" data-cheer="/assets/ask-mascot-cheer-sm.webp" />
     <span class="afab-t"><b>Ask</b> <span translate="no">Fursat</span></span>
     {q && <span class="afab-q">{q}</span>}
+    <span class="afab-coin" aria-hidden="true"></span>
+    <span class="afab-bub" aria-hidden="true"></span>
   </a>
+  <script is:inline>
+  (() => {
+    const a = document.querySelector('[data-fk-ask]');
+    if (!a) return;
+    const img = a.querySelector('.afab-img'), bub = a.querySelector('.afab-bub');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const B = JSON.parse(a.dataset.bubbles || '{}');
+    const home = a.hasAttribute('data-home');
+    let live = !home;                  // Home waits for the intro; other pages are live straight away
+    let inFooter = false, lastHop = 0, lastJump = 0, lastBubble = -1e9, lastSection = '', bt = 0, idleT = 0, scrolling = 0, cheerOn = false;
+    const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {} };
+    const typing = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
+    const visible = () => !document.hidden && !a.hasAttribute('data-hold') && getComputedStyle(a).visibility !== 'hidden' && !typing() && !document.querySelector('dialog[open]');
+    const swap = (cheer) => { if (!img || cheerOn === cheer) return; cheerOn = cheer; if (cheer) { img.dataset.src = img.src; img.src = img.dataset.cheer; } else img.src = img.dataset.src || img.src; };
+    // play one move: drop | hop | jump | big | tilt. Class is removed when it ends so the next one can restart.
+    const play = (name, cheer) => {
+      if (reduce.matches && name !== 'big') return;
+      a.classList.remove('m-drop', 'm-hop', 'm-jump', 'm-big', 'm-tilt'); void a.offsetWidth;
+      a.classList.add('m-' + name); lastHop = performance.now();
+      swap(!!cheer);
+    };
+    a.addEventListener('animationend', (e) => { if (e.target !== a) return; a.className = a.className.replace(/\bm-\w+/g, '').trim(); swap(false); });
+    const coin = () => { if (reduce.matches) return; a.classList.remove('m-coin'); void a.offsetWidth; a.classList.add('m-coin'); setTimeout(() => a.classList.remove('m-coin'), 800); };
+    const say = (text, force) => {
+      const now = performance.now();
+      if (!force && (reduce.matches || now - lastBubble < 12000 || typing())) return;
+      lastBubble = now; bub.textContent = text; a.classList.add('m-say'); clearTimeout(bt);
+      bt = setTimeout(() => a.classList.remove('m-say'), 2000);
+    };
+    // --- Home: drop in once the intro is gone (heli / intro / gate / lcap are the intro's elements) ---
+    const introOn = () => document.documentElement.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((i) => document.getElementById(i));
+    const enter = () => {
+      live = true; a.setAttribute('data-early', '');
+      if (store('fk-ask-drop') !== '1' && !reduce.matches) { store('fk-ask-drop', '1'); play('drop'); }
+      else store('fk-ask-drop', '1');
+      arm();
+    };
+    if (home) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); enter(); } }, 400); } else arm();
+    // --- idle hop / tilt every 8-10 s ---
+    function idle() {
+      clearTimeout(idleT);
+      idleT = setTimeout(() => { if (live && visible() && performance.now() - lastHop > 6000) play(Math.random() < .7 ? 'hop' : 'tilt'); idle(); }, 8000 + Math.random() * 2000);
+    }
+    function arm() {
+      if (arm.done) return; arm.done = true;
+      if (!reduce.matches) idle();
+      // scroll start: one small hop
+      addEventListener('scroll', () => {
+        if (!scrolling && live && visible() && performance.now() - lastHop > 1500 && performance.now() - lastJump > 1500) play('hop');
+        scrolling = 1; clearTimeout(arm.st); arm.st = setTimeout(() => { scrolling = 0; }, 200);
+      }, { passive: true });
+      // a new main section comes into view: jump + coin + hint (one hint per 12 s)
+      if (!('IntersectionObserver' in window)) return;
+      const keyOf = (s) => {
+        const t = ((s.id || '') + ' ' + (s.getAttribute('aria-labelledby') || '') + ' ' + s.className).toLowerCase();
+        if (/season|menu|dish|food|biryani/.test(t)) return 'menu';
+        if (/celebr|banquet|party|event/.test(t)) return 'party';
+        if (/\bbar\b|cricket|social|cocktail/.test(t)) return 'bar';
+        if (/caf[eé]|coffee|dessert/.test(t)) return 'cafe';
+        return a.dataset.pageKey || 'any';
+      };
+      const io = new IntersectionObserver((es) => {
+        for (const e of es) {
+          if (!e.isIntersecting || !live) continue;
+          const id = e.target.id || e.target.className;
+          if (id === lastSection) continue;
+          const first = !lastSection; lastSection = id;
+          if (first || !visible() || performance.now() - lastJump < 1500) continue; // the section already on screen at load does not count
+          lastJump = performance.now(); play('jump', true); coin(); say(B[keyOf(e.target)] || B.any);
+        }
+      }, { rootMargin: '-35% 0px -35% 0px' });
+      document.querySelectorAll('main > section, main section[id]').forEach((s) => io.observe(s));
+    }
+    // --- hold while the footer is in view or a sticky panel sits in the corner (same rule as the Instagram button) ---
+    const hold = () => {
+      let h = inFooter;
+      if (!h) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
+        const r = el.getBoundingClientRect();
+        if (r.left < 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { h = true; break; }
+      }
+      a.toggleAttribute('data-hold', h);
+    };
+    addEventListener('scroll', hold, { passive: true }); addEventListener('resize', hold, { passive: true });
+    const foot = document.querySelector('.sf-footer');
+    if (foot && 'IntersectionObserver' in window) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; hold(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+    // --- tap: big jump + "Ask me anything!", then open Ask as today ---
+    a.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.dataset.go) return;
+      e.preventDefault(); a.dataset.go = '1';
+      play('big', true); say(B.any, true);
+      setTimeout(() => { location.href = a.href; }, 260);
+    });
+    addEventListener('pageshow', () => { delete a.dataset.go; });
+  })();
+  </script>
 )}
 <style>
-.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Poppins, system-ui, sans-serif; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
+.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Poppins, system-ui, sans-serif; transform-origin: 50% 100%; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
 .afab-img { width: 44px; height: 44px; border-radius: 50%; background: #f6e4c9; object-fit: cover; }
 .afab-t b { color: #f3c56b; font-weight: 600; }
 .afab-q { display: block; max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; color: #d9c9a6; font-size: .78rem; transition-property: max-width, opacity, margin; transition-duration: 320ms; transition-timing-function: cubic-bezier(.23,1,.32,1); }
 .afab:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
 .afab:active { transform: scale(.96); }
-@media (min-width: 768px) { .afab { display: inline-flex; } }
+/* phones: the mascot alone, on the right (the left corner is the Instagram button), above the bottom bar */
+.afab { display: inline-flex; left: auto; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); padding: 2px; gap: 0; }
+.afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (min-width: 768px) { .afab { left: 20px; right: auto; bottom: calc(20px + var(--fab-lift, 0px)); padding: 6px 18px 6px 6px; gap: 10px; } .afab-t { position: static; width: auto; height: auto; overflow: visible; clip-path: none; } .afab-q { position: static; width: auto; height: auto; clip-path: none; } }
 /* tablet: just the mascot, so it covers less of the page (the label stays for screen readers) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .afab { padding: 4px; gap: 0; }
   .afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
-/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons; it fades out again while the footer is in view */
+/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons; it fades out again while the footer is in view.
+   On Home it is live from the end of the intro (data-early) and only steps aside for the footer / a sticky panel (data-hold). */
 :global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
+:global(html.fab-js) .afab[data-early]:not([data-hold]) { opacity: 1; visibility: visible; pointer-events: auto; translate: none; transition-delay: 0s; }
 @media (hover: hover) and (pointer: fine) {
   .afab:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
   .afab:hover .afab-q, .afab:focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } }
+@media (hover: hover) and (pointer: fine) and (max-width: 1023px) { .afab:hover .afab-q { max-width: 0; opacity: 0; margin-left: 0; } }
+
+/* ---- Mario moves: transform only, origin at the feet. Curves from the motion tokens (ease-out; ease-in-out for the fall) ---- */
+.afab.m-drop { animation: afab-drop 1150ms both; }
+.afab.m-hop { animation: afab-hop 480ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-jump { animation: afab-jump 560ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-big { animation: afab-big 620ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-tilt { animation: afab-tilt 700ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes afab-drop {
+  0% { transform: translateY(calc(-100vh - 120px)) scale(1, 1); animation-timing-function: cubic-bezier(.77,0,.175,1); }
+  52% { transform: translateY(0) scale(.9, 1.14); animation-timing-function: cubic-bezier(.23,1,.32,1); }
+  62% { transform: translateY(0) scale(1.22, .72); animation-timing-function: cubic-bezier(.23,1,.32,1); }
+  74% { transform: translateY(-14px) scale(.93, 1.1); animation-timing-function: cubic-bezier(.23,1,.32,1); }
+  84% { transform: translateY(0) scale(1.06, .94) rotate(-7deg); animation-timing-function: cubic-bezier(.23,1,.32,1); }
+  92% { transform: translateY(0) scale(1) rotate(7deg); animation-timing-function: cubic-bezier(.23,1,.32,1); }
+  100% { transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes afab-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  18% { transform: translateY(0) scale(1.1, .88); }
+  50% { transform: translateY(-14px) scale(.94, 1.08); }
+  80% { transform: translateY(0) scale(1.08, .92); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes afab-jump {
+  0% { transform: translateY(0) scale(1, 1); }
+  16% { transform: translateY(0) scale(1.14, .84); }
+  46% { transform: translateY(-22px) scale(.92, 1.12); }
+  78% { transform: translateY(0) scale(1.1, .9); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes afab-big {
+  0% { transform: translateY(0) scale(1, 1); }
+  14% { transform: translateY(0) scale(1.18, .8); }
+  46% { transform: translateY(-34px) scale(.9, 1.16); }
+  80% { transform: translateY(0) scale(1.12, .88); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes afab-tilt {
+  0%, 100% { transform: rotate(0) scale(1); }
+  30% { transform: rotate(-6deg) scale(1.03); }
+  65% { transform: rotate(4deg) scale(1.02); }
+}
+
+/* gold coin that pops above the mascot (tiny, 0.8 s) */
+.afab-coin { position: absolute; left: 50%; top: -8px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8 0 22%, #f3c56b 23% 70%, #b9892c 100%); box-shadow: 0 0 0 1.5px #8a6419, 0 0 10px 2px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translateY(6px) scale(.4); }
+.afab.m-coin .afab-coin { animation: afab-coin 800ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes afab-coin {
+  0% { opacity: 0; transform: translateY(6px) scale(.4, .4); }
+  30% { opacity: 1; transform: translateY(-10px) scale(1, 1); }
+  70% { opacity: 1; transform: translateY(-14px) scale(.2, 1); }
+  100% { opacity: 0; transform: translateY(-18px) scale(.9, .9); }
+}
+/* hint bubble: beside the mascot (never above it, where the Instagram button sits); opens away from the screen edge */
+.afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Poppins, system-ui, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
+.afab.m-say .afab-bub { opacity: 1; transform: translate(0, -50%) scale(1); }
+@media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt { animation: none; } .afab.m-big { animation: none; } .afab-coin { display: none; } .afab-bub { transition: none; } }
 @media print { .afab { display: none !important; } }
 </style>

@@ -3,7 +3,7 @@
 // with the approved story mode, step-through transitions, real clips, neon, lights, sound, POV and elephant hunt.
 // Phone upgrades (9 Nov): opening pan, tilt to look, landscape collage, one-screen fit.
 // Root state classes: pv-js, is-seen, is-inside, is-focus, is-pov, is-end, is-paused, is-vid, is-nogl, is-lite, is-360, is-imm, is-dragged.
-import { SPACES as S, IMGS, smallImg, EMI, CLIPS, HOT, PAL, POV, MUSIC, ZONES } from './spaces.js';
+import { SPACES as S, IMGS, smallImg, EMI, CLIPS, HOT, PAL, POV, MUSIC, MUSIC_START, ZONES } from './spaces.js';
 
 export function initTour(root, opts = {}) { // opts.auto === false: no auto-enter into the story walk (used by the /reserve Pick-your-spot embed)
   if (!root || root.dataset.pvInit) return;
@@ -65,45 +65,64 @@ export function initTour(root, opts = {}) { // opts.auto === false: no auto-ente
   /* ---------- background music (off by default; browsers block autoplay with sound) ---------- */
   let ratio = 0, visible = false;
   const sound = (() => {
-    const btn = $('sound'); let on = false, ctx = null, gain = null, src = null, buf = null, loading = null, el = null;
+    const btn = $('sound'); let on = false, ctx = null, gain = null, src = null, buf = null, loading = null, el = null, yielded = false, timer = 0, unlock = false;
+    const flag = () => { try { return sessionStorage.getItem('fk-sound') === '1'; } catch (e) { return false; } };
+    const setFlag = (v) => { try { sessionStorage.setItem('fk-sound', v ? '1' : '0'); } catch (e) {} window.dispatchEvent(new CustomEvent('fk:sound', { detail: { on: v } })); };
     const label = () => { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.setAttribute('aria-label', on ? 'Sound off' : 'Sound on'); btn.title = on ? 'Sound off' : 'Sound on'; };
     const load = () => loading || (loading = fetch(MUSIC).then((r) => { if (!r.ok) throw new Error('music ' + r.status); return r.arrayBuffer(); }).then((a) => new Promise((res, rej) => ctx.decodeAudioData(a, res, rej))).then((b) => { buf = b; return b; }));
-    const wantPlay = () => on && ratio > 0.15 && !document.hidden;
+    const wantPlay = () => on && !yielded && ratio > 0.15 && !document.hidden;
     function fade(to, sec) { const t = ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(to, t + sec); }
+    /* loop: round 1 starts at MUSIC_START and plays to the end of the track. Every later round starts at 0:00 of the track:
+       the last LX s of a round fade out while the next round fades in (no click, no gap). Nothing is preloaded: the file loads on first play. */
+    const LX = 0.4; let nextAt = 0, round = 0;
+    function pass(at) {
+      const first = round++ === 0, o = first ? Math.min(MUSIC_START, buf.duration - 1) : 0, d = buf.duration - o;
+      const s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = buf; s.connect(g); g.connect(gain);
+      if (first) g.gain.setValueAtTime(1, at); else { g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(1, at + LX); }
+      g.gain.setValueAtTime(1, at + d - LX); g.gain.linearRampToValueAtTime(0, at + d);
+      s.start(at, o); s.stop(at + d + 0.05); src = s; nextAt = at + d - LX;
+      if (window.__fkAudioLog) window.__fkAudioLog.push({ round, at, o, d });
+    }
+    function pump() { clearTimeout(timer); if (!ctx || !buf) return; while (nextAt - ctx.currentTime < 6) pass(nextAt); timer = setTimeout(pump, 1500); }
     async function start() {
+      if (!on || yielded) return;
       const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) { el = el || Object.assign(new Audio(MUSIC), { loop: true, volume: 0.5 }); el.play().catch(() => { on = false; label(); }); return; }
+      if (!AC) {
+        if (!el) { el = new Audio(MUSIC); el.volume = 0.5; el.addEventListener('ended', () => { el.currentTime = 0; if (wantPlay()) el.play().catch(() => {}); }); el.addEventListener('loadedmetadata', () => { if (round++ === 0 && MUSIC_START < el.duration - 1) el.currentTime = MUSIC_START; }); }
+        el.play().then(() => window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'panorama' } }))).catch(() => {}); return;
+      }
       if (!ctx) { ctx = new AC(); gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination); }
       if (ctx.state === 'suspended') await ctx.resume();
+      if (ctx.state !== 'running') return arm();
       await load();
-      if (!on) return;
+      if (!wantPlay()) return;
       if (!src) { nextAt = ctx.currentTime + 0.05; pump(); }
+      window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'panorama' } }));
       fade(0.55, 1.2);
     }
-    /* smooth loop: each pass of the track fades in over XF s and, XF s before its end, the next pass starts and fades in
-       while this one fades out, so the end flows back into the start with no jump or silence */
-    const XF = 2.5; let nextAt = 0;
-    function pass(at) {
-      const d = buf.duration, s = ctx.createBufferSource(), g = ctx.createGain();
-      s.buffer = buf; s.connect(g); g.connect(gain);
-      g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(1, at + XF);
-      g.gain.setValueAtTime(1, at + d - XF); g.gain.linearRampToValueAtTime(0, at + d);
-      s.start(at); s.stop(at + d + 0.05); src = s; nextAt = at + d - XF;
+    /* flag was already on from another page but the browser has had no gesture here yet: start on the first tap or key */
+    function arm() {
+      if (unlock) return; unlock = true;
+      const go = () => { unlock = false; removeEventListener('pointerdown', go, true); removeEventListener('keydown', go, true); sync(); };
+      addEventListener('pointerdown', go, true); addEventListener('keydown', go, true);
     }
-    function pump() { if (!ctx || !buf) return; while (nextAt - ctx.currentTime < 6) pass(nextAt); setTimeout(pump, 1500); }
-    function stop() {
+    function silence(sec) {
       if (el) { el.pause(); return; }
-      if (!ctx) return; fade(0, 0.6);
-      setTimeout(() => { if (!on && ctx.state === 'running') ctx.suspend(); }, 650);
+      if (!ctx) return; clearTimeout(timer); fade(0, sec);
+      setTimeout(() => { if (!wantPlay() && ctx.state === 'running') ctx.suspend(); }, sec * 1000 + 50);
     }
     function sync() {
-      if (el) { if (wantPlay()) el.play().catch(() => {}); else el.pause(); return; }
-      if (!ctx || !src) return;
-      if (wantPlay()) ctx.resume().then(() => fade(0.55, 0.8));
-      else { fade(0, 0.3); setTimeout(() => { if (!wantPlay() && ctx.state === 'running') ctx.suspend(); }, 350); }
+      if (!wantPlay()) { silence(0.3); return; }
+      if (el) { el.play().catch(() => {}); return; }
+      if (!ctx || !src) { start().catch(() => {}); return; }
+      ctx.resume().then(() => { fade(0.55, 0.8); pump(); }).catch(() => {});
     }
-    btn.addEventListener('click', () => { on = !on; label(); if (on) start().catch(() => { on = false; label(); }); else stop(); });
+    btn.addEventListener('click', () => { yielded = false; on = !on; label(); setFlag(on); if (on) start().catch(() => { on = false; label(); }); else silence(0.6); });
+    window.addEventListener('fk:sound', (e) => { const v = !!(e.detail && e.detail.on); if (v === on) return; on = v; yielded = false; label(); if (on) sync(); else silence(0.6); });
+    window.addEventListener('fk:music', (e) => { if (e.detail && e.detail.id !== 'panorama') { yielded = true; silence(0.4); } });
     document.addEventListener('visibilitychange', sync);
+    on = flag(); label();
     return { sync };
   })();
 
@@ -399,7 +418,7 @@ void main(){
       $('explore').setAttribute('aria-expanded', on ? 'true' : 'false');
       if (on) { lastFocus = document.activeElement; visible = true; ratio = 1; setTimeout(() => $('closeImm').focus({ preventScroll: true }), 50); }
       else if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-      if (!on) { hideRotate(); leaveLandscape(); }
+      if (!on) { hideRotate(); leaveLandscape(); const r = win.getBoundingClientRect(); ratio = r.height ? Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height : 0; visible = ratio > 0; }
       sound.sync();
     }
     // Android Chrome: real full screen, then lock to landscape (iOS cannot lock, so it gets the rotate hint instead)

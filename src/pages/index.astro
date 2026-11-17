@@ -14,7 +14,6 @@ import HomeVisit from '../components/home/HomeVisit.astro';
 import HomeShared from '../components/home/HomeShared.astro';
 import MarqueeStrip from '../components/MarqueeStrip.astro';
 import PanoramicViewer from '../components/PanoramicViewer.astro';
-import Reels from '../components/Reels.astro';
 import Mascot from '../components/Mascot.astro';
 import MascotOfferModal from '../components/MascotOfferModal.astro';
 import Sparkles from '../components/Sparkles.astro';
@@ -28,7 +27,6 @@ import IntroLogo from '../components/IntroLogo.astro';
 import IntroGate from '../components/IntroGate.astro';
 import IntroCaption from '../components/IntroCaption.astro';
 import Wizard from '../components/Wizard.astro';
-import VoiceButton from '../components/VoiceButton.astro';
 // TODO(client): 15% / FURSAT15 offer not confirmed; hidden until the client confirms.
 const OFFER_ENABLED = false;
 ---
@@ -75,7 +73,6 @@ var sp=h-30-1024*u;r.style.setProperty("--u",u.toFixed(4));r.style.setProperty("
 <PanoramicViewer />
 <HomeSpaces />
 <HomeCelebrate />
-<Reels />
 <HomeStory />
 <HomeVisit />
 <HomeShared />
@@ -94,14 +91,12 @@ var sp=h-30-1024*u;r.style.setProperty("--u",u.toFixed(4));r.style.setProperty("
 <IntroGate />
 <IntroCaption />
 <Wizard />
-<VoiceButton />
 <script is:inline defer src="/js/01.js"></script>
 <script is:inline defer src="/js/02.js"></script>
 <script is:inline defer src="/js/03.js"></script>
 <script is:inline defer src="/js/05.js"></script>
 <script is:inline defer src="/js/06.js"></script>
 <script is:inline defer src="/js/07.js"></script>
-<script is:inline defer src="/js/08.js"></script>
 <script is:inline defer src="/js/09.js"></script>
 <script is:inline defer id="fx-js" src="/js/10.js"></script>
 <script is:inline defer src="/js/11.js"></script>
@@ -109,12 +104,11 @@ var sp=h-30-1024*u;r.style.setProperty("--u",u.toFixed(4));r.style.setProperty("
 <script is:inline defer src="/js/14.js"></script>
 <script is:inline defer src="/js/15.js"></script>
 <script is:inline defer src="/js/17.js"></script>
-<script is:inline defer src="/js/18.js"></script>
 <script is:inline defer src="/js/19.js"></script>
 <script is:inline>
-/* 12.js (party packages) and 16.js (reels) are not needed for the first screen: load them when the browser is idle,
-   or at the first touch / key / scroll, whichever comes first. They keep their order (12 then 16). */
-(function(){var done=0;function go(){if(done)return;done=1;["/js/12.js","/js/16.js"].forEach(function(u){var s=document.createElement("script");s.src=u;s.async=false;document.body.appendChild(s)});["pointerdown","keydown","scroll","touchstart"].forEach(function(t){removeEventListener(t,go)})}
+/* 12.js (party packages) is not needed for the first screen: load them when the browser is idle,
+   or at the first touch / key / scroll, whichever comes first. They keep their order . */
+(function(){var done=0;function go(){if(done)return;done=1;["/js/12.js"].forEach(function(u){var s=document.createElement("script");s.src=u;s.async=false;document.body.appendChild(s)});["pointerdown","keydown","scroll","touchstart"].forEach(function(t){removeEventListener(t,go)})}
 ["pointerdown","keydown","scroll","touchstart"].forEach(function(t){addEventListener(t,go,{passive:true})});
 function idle(){if(window.requestIdleCallback)requestIdleCallback(go,{timeout:2500});else setTimeout(go,1500)}
 if(document.readyState==="complete")idle();else addEventListener("load",idle)})();
@@ -152,10 +146,12 @@ if(document.readyState==="complete")idle();else addEventListener("load",idle)})(
 }
 
 /* ── v5.9.1 H1: desktop hero, real-pixel sizes inside the scaled 1536x1024 canvas (--r = 1 screen px in canvas units) ── */
-#vz { display: none !important; } /* hero keeps one music control (#snd) + pause (#fxpv); the intro-voice mute button shows only while the intro runs (html.lock) */
-html.lock #vz { display: inline-flex !important; left: 18px; right: auto; top: calc(env(safe-area-inset-top, 0px) + 84px); z-index: 2147482999; min-width: 44px; min-height: 44px; justify-content: center; }
-html.lock #vz .vz-t { display: inline; }
-#vz:focus-visible { outline: 2px solid #C94716; outline-offset: 3px; }
+/* Intro sound button: visible from the first second of the intro (html.lock), gone when the intro ends; the hero keeps #snd (music) + #fxpv (pause). */
+.fk-isnd { display: none; }
+html.lock .fk-isnd { position: fixed; left: 16px; top: calc(env(safe-area-inset-top, 0px) + 16px); z-index: 2147482999; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px 0 14px; border-radius: 9999px; border: 1px solid rgba(42,37,20,.32); background: rgba(255,250,238,.9); color: #2A2514; font: 600 14px/1 var(--fk-font-text, 'Poppins', system-ui, sans-serif); cursor: pointer; touch-action: manipulation; box-shadow: 0 10px 24px -12px rgba(0,0,0,.45); transition: transform 160ms cubic-bezier(.23,1,.32,1); }
+.fk-isnd svg { width: 20px; height: 20px; flex: none; }
+.fk-isnd:active { transform: scale(.97); }
+.fk-isnd:focus-visible { outline: 2px solid #C94716; outline-offset: 3px; }
 @media (min-width: 900px) {
   .fxhero { --r: calc(1 / var(--u)); height: calc(336px * var(--u) + 340px); }
   .hx-ctl { top: calc(22px + 16px * var(--r)); }

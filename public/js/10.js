@@ -60,9 +60,9 @@ document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;var p
     setTimeout(function(){H.classList.add("out")},620);/* helicopter scene dissolves */
     setTimeout(function(){H.remove()},1900)}
   window.__fzGo=function(){if(started)return;started=true;H.classList.add("playing");
-    v.muted=false;v.volume=.9;
+    v.muted=true;window.__fzT0=performance.now();v.addEventListener("playing",function(){window.__fzT0=performance.now()},{once:true}); /* silent: the music is the soundtrack; T0 = intro clock for the music sync */
     var p=v.play();
-    if(p&&p.catch)p.catch(function(){v.muted=true;var q=v.play();if(q&&q.catch)q.catch(hand)});
+    if(p&&p.catch)p.catch(hand);
     v.addEventListener("timeupdate",function(){if(v.duration&&v.currentTime>=v.duration-1.05)hand()});
     v.addEventListener("ended",hand);v.addEventListener("error",hand);
     t1=setTimeout(hand,8000)};
@@ -323,7 +323,7 @@ window.FursatConcierge={open:openIt,route:route};
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
   if(calm){v.removeAttribute("autoplay");try{v.pause()}catch(e){}v.preload="metadata"}
   var vis=true;
-  function play(){if(calm)return;var p=v.play();p&&p.catch&&p.catch(function(){})}
+  function play(){if(calm||(window.__fzReel&&window.__fzReel.on))return;var p=v.play();p&&p.catch&&p.catch(function(){})}
   var ready=false,live=false,hero=document.getElementById("top");
   function start(){if(live||!ready||!(hero&&hero.classList.contains("go")))return;live=true;try{v.currentTime=2.45}catch(e){}if(!calm)play()}
   v.addEventListener("loadedmetadata",function(){try{v.currentTime=2.45}catch(e){}},{once:true});
@@ -350,6 +350,44 @@ window.FursatConcierge={open:openIt,route:route};
   if(hero&&window.MutationObserver)new MutationObserver(start).observe(hero,{attributes:true,attributeFilter:["class"]});
   if("IntersectionObserver"in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){if(live)play()}else v.pause()}).observe(document.getElementById("top")||v);
   document.addEventListener("visibilitychange",function(){if(document.hidden)v.pause();else if(vis&&live)play()});
+})();
+
+/* ---------- 26b. hero reel first: hero-reel-540 plays once (after the intro), then hands over to the master loop ---------- */
+(function(){
+  var $=function(i){return document.getElementById(i)},hero=$("top"),rv=$("fxrv"),fg=$("fxrvf"),bg=$("fxrvb"),bar=$("fxrvp"),m=$("fxplv"),pv=$("fxpv"),stg=$("fxstage");
+  if(!rv||!fg||!m||!hero)return;
+  var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
+    save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false;
+  window.__fzReel={on:true};
+  if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
+  function paused(){return !!(pv&&pv.dataset.s==="paused")}
+  function load(){if(loaded)return;loaded=true;[fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}})}
+  function sync(){if(bg&&Math.abs(bg.currentTime-fg.currentTime)>.25)try{bg.currentTime=fg.currentTime}catch(e){}}
+  function tick(){raf=0;if(st!=="play")return;var d=fg.duration||60;bar.style.transform="scaleX("+Math.min(fg.currentTime/d,1).toFixed(4)+")";sync();
+    if(phone&&!warm&&d-fg.currentTime<6){warm=true;if(!m.src&&stg)stg.click()}   /* phone: start fetching the master a few seconds early */
+    raf=requestAnimationFrame(tick)}
+  function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){var q=bg.play();if(q&&q.catch)q.catch(function(){})}if(!raf)raf=requestAnimationFrame(tick)}
+  function halt(){fg.pause();if(bg)bg.pause()}
+  function begin(){if(st!=="idle")return;st="play";load();hero.classList.add("reel-on");m.pause();if(!paused())run()}
+  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);hero.classList.remove("reel-on");
+    m.classList.add("zin");rv.classList.add("out");
+    try{m.currentTime=2.45}catch(e){}
+    if(!m.src&&stg)stg.click();
+    var p=m.play();if(p&&p.catch)p.catch(function(){});
+    setTimeout(function(){m.classList.remove("zin");halt();rv.remove()},700)}
+  fg.addEventListener("ended",handoff);fg.addEventListener("error",handoff);
+  rv.querySelectorAll("source").forEach(function(s){s.addEventListener("error",function(){if(!fg.currentSrc)handoff()})});
+  if(save){handoff();return}                         /* Save-Data: skip the 60s reel, go straight to the master loop */
+  if(pv)pv.addEventListener("click",function(){setTimeout(function(){
+    if(st==="idle"&&!paused()){begin();return}
+    if(st!=="play")return;
+    m.pause();if(paused())halt();else run()},0)});
+  if("IntersectionObserver"in window)new IntersectionObserver(function(es){if(st!=="play")return;if(es[0].isIntersecting){if(!paused())run()}else halt()}).observe(hero);
+  document.addEventListener("visibilitychange",function(){if(st!=="play")return;if(document.hidden)halt();else if(!paused())run()});
+  if(calm)return;                                    /* reduced motion: poster + the play button, no autoplay */
+  var de=document.documentElement;
+  function go(){if(hero.classList.contains("go")&&!de.classList.contains("lock")){setTimeout(begin,250);return true}}   /* only after the intro has ended */
+  if(!go()&&window.MutationObserver){var mo=new MutationObserver(function(){if(go())mo.disconnect()});mo.observe(hero,{attributes:true,attributeFilter:["class"]});mo.observe(de,{attributes:true,attributeFilter:["class"]})}
 })();
 
 /* ---------- 27. intro control: one "Skip intro" opens the site straight away; crawlers, repeat visits and no-JS never see the intro ---------- */

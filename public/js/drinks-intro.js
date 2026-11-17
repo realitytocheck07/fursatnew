@@ -4,6 +4,10 @@
   var KEY = 'fk-drinks-intro', BASE = '/assets/menu/drinks-intro/', START_MS = 1500, FADE_MS = 600;
   var TRIGGER = '[data-open-side="drinks"],[data-side-go="drinks"],.mb-spot';
   var active = false;
+  var MUSIC = '/assets/audio/drinks-intro-music.mp3', MUSIC_VOL = 0.7;
+
+  // sound is on only if the visit-wide flag says so (see SOUND-CONTRACT.md)
+  function soundOn() { try { return sessionStorage.getItem('fk-sound') === '1'; } catch (e) { return false; } }
 
   function seen() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
   function mark() { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
@@ -18,7 +22,7 @@
     var phone = matchMedia('(max-width: 820px), (orientation: portrait)').matches;
     var root = document.documentElement, body = document.body;
     var prev = { r: root.style.overflow, b: body.style.overflow };
-    var shown = false, closing = false, timer;
+    var shown = false, closing = false, timer, au = null, fadeT = 0;
 
     var ov = document.createElement('div');
     ov.className = 'di'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Drinks intro video');
@@ -37,16 +41,37 @@
     skip.type = 'button'; skip.className = 'di-skip'; skip.textContent = 'Skip ✕'; skip.setAttribute('aria-label', 'Skip the drinks intro');
     ov.append(v, skip);
 
+    // music: created only now (never preloaded), plays with the video, fades out over FADE_MS, never restarts
+    function musicStop(ms) {
+      if (!au) return; var a = au; au = null; window.removeEventListener('fk:sound', onSound); window.removeEventListener('fk:music', onMusic);
+      clearInterval(fadeT);
+      if (!ms) { a.pause(); return; }
+      var t0 = Date.now(), v0 = a.volume;
+      fadeT = setInterval(function () {
+        var k = Math.min(1, (Date.now() - t0) / ms); a.volume = v0 * (1 - k);
+        if (k >= 1) { clearInterval(fadeT); a.pause(); }
+      }, 40);
+    }
+    function onSound(e) { if (!(e.detail && e.detail.on)) musicStop(0); }
+    function onMusic(e) { if (e.detail && e.detail.id !== 'drinks') musicStop(0); }
+    function musicStart() {
+      if (au || !soundOn()) return;
+      var a = new Audio(MUSIC); a.volume = MUSIC_VOL; a.loop = false; au = a;
+      window.addEventListener('fk:sound', onSound); window.addEventListener('fk:music', onMusic);
+      var p = a.play();
+      if (p && p.then) p.then(function () { if (au === a) window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } })); }, function () { if (au === a) musicStop(0); });
+    }
     function unlock() { root.style.overflow = prev.r; body.style.overflow = prev.b; }
     function cleanup() {
       document.removeEventListener('keydown', onKey, true);
-      clearTimeout(timer);
+      clearTimeout(timer); if (au) musicStop(0);
       try { v.pause(); } catch (e) {}
       v.removeAttribute('src'); v.querySelectorAll('source').forEach(function (s) { s.remove(); }); try { v.load(); } catch (e) {}
       ov.remove(); unlock(); active = false;
     }
     function close() {
       if (closing) return; closing = true;
+      musicStop(FADE_MS);
       if (!shown) { cleanup(); return; } // never started: no intro at all
       ov.classList.add('is-out'); ov.classList.remove('is-on');
       var done = false, fin = function () {
@@ -67,6 +92,7 @@
       root.style.overflow = 'hidden'; body.style.overflow = 'hidden';
       requestAnimationFrame(function () { ov.classList.add('is-on'); });
       skip.focus({ preventScroll: true });
+      musicStart();
     }
 
     ov.addEventListener('click', close); // Skip, or a tap anywhere on the video

@@ -26,22 +26,38 @@ function frame(p){var vw=VW,vh=VH,s=Math.max(vw/700,vh/875),ox=(vw-700*s)/2,oy=(
  if(b>.3&&!go){go=true;hero.classList.add("go")}}
 function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intro.remove();lcap.remove();H.classList.remove("lock");scrollTo(0,0)}
 function tick(now){if(done)return;if(t0===null)t0=now;var p=cl((now-t0-400)/D,0,1);frame(p);p<1?requestAnimationFrame(tick):finish()}
-if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};
+if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};window.__fzV=1;/* auto-enter: 11.js starts the intro at once, no tap */
  var skip=function(){if(t0!==null&&performance.now()-t0>1200)finish()};["wheel","touchmove","keydown","pointerdown"].forEach(function(n){addEventListener(n,skip,{passive:true})})}
-var CFG={musicStart:27},mu=new Audio("/assets/611fb91032.mp3"),ac,an,fd,avg=0,last=0,B=0,on=false,sb=$("snd"),bp=.504;
-mu.loop=true;window.__fzMu=mu;mu.preload="none";mu.volume=.85;
-mu.addEventListener("loadedmetadata",function(){if(mu.duration>CFG.musicStart+3&&mu.currentTime<1)mu.currentTime=CFG.musicStart},{once:true});
-function music(v){if(v){if(!ac&&/^https?:/.test(location.protocol)){try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(mu);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
- if(ac&&ac.resume)ac.resume();mu.play().then(function(){on=true;wake()}).catch(function(){on=false;sb.setAttribute("aria-pressed","false");sb.lastElementChild.textContent="Set the mood"})}else{mu.pause();on=false}
- sb.setAttribute("aria-pressed",v);sb.lastElementChild.textContent=v?"Mood on":"Set the mood";sb.classList.remove("nudge")}
-sb.onclick=function(){music(!on)};
+var mu=new Audio("/assets/audio/intro-music-sreemukhi.mp3"),ac,an,fd,avg=0,last=0,B=0,on=false,sb=$("snd"),fk=$("fksnd"),fadeT=0,bp=.504,VOL=.85;
+mu.loop=true;window.__fzMu=mu;mu.preload="none";mu.volume=0;
+/* SOUND-CONTRACT: sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id}; sound only ever starts from a tap */
+function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
+function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
+function fadeTo(v,ms,cb){cancelAnimationFrame(fadeT);var s=mu.volume,t=performance.now();(function f(n){var k=cl((n-t)/ms,0,1);mu.volume=s+(v-s)*k;if(k<1)fadeT=requestAnimationFrame(f);else if(cb)cb()})(t)}
+function ui(){sb.setAttribute("aria-pressed",on);sb.lastElementChild.textContent=on?"Mood on":"Set the mood";if(on)sb.classList.remove("nudge");
+ if(fk){fk.lastElementChild.textContent=on?"Sound off":"Sound on";fk.setAttribute("aria-label",on?"Turn sound off":"Turn sound on")}}
+/* sync=true (tapped during the intro): jump to the intro's elapsed time so the track's opening lines up with the helicopter lift. sync=false: from 0:00 with a 0.6s fade-in. */
+function start(sync){if(on)return;on=true;flag(true);ui();
+ if(!ac&&/^https?:/.test(location.protocol)){try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(mu);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
+ if(ac&&ac.resume)ac.resume();
+ emit("fk:sound",{on:true});emit("fk:music",{id:"hero"});
+ var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
+ function go(){mu.volume=0;try{mu.currentTime=sync?el()%(mu.duration||60):0}catch(e){}
+  var p=mu.play();var ok=function(){if(!on)return;if(sync){var d=el()-mu.currentTime;if(Math.abs(d)>.3&&Math.abs(d)<30)try{mu.currentTime=el()%(mu.duration||60)}catch(e){}}fadeTo(VOL,sync?250:600);wake()};
+  if(p&&p.then)p.then(ok,function(){on=false;flag(false);ui()});else ok()}
+ mu.preload="auto";if(mu.readyState>=1)go();else{mu.addEventListener("loadedmetadata",go,{once:true});mu.load()}}
+function stop(quiet,keep){if(!on)return;on=false;if(!keep)flag(false);ui();fadeTo(0,250,function(){if(!on)mu.pause()});if(!quiet)emit("fk:sound",{on:false})}
+sb.onclick=function(){on?stop():start(false)};
+if(fk)fk.onclick=function(){on?stop():start(true)};
+addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
+addEventListener("fk:music",function(e){if(e.detail&&e.detail.id!=="hero")stop(true,true)});
 var bq=0,sbv=true;
 function wake(){if(on&&!bq&&sbv&&!document.hidden)bq=requestAnimationFrame(beat)}
 if("IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
 function beat(t){bq=0;if(!on){B=0;sb.style.setProperty("--b",0);return}if(!sbv||document.hidden)return;t=t||performance.now();
  if(an){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t}}else if(t-last>504){B=1;last=t}
  B*=.9;if(B<.01)B=0;sb.style.setProperty("--b",B.toFixed(3));bq=requestAnimationFrame(beat)}
-document.addEventListener("visibilitychange",function(){if(document.hidden&&on){mu.pause()}else if(on){mu.play().catch(function(){});wake()}});
+document.addEventListener("visibilitychange",function(){if(document.hidden&&on){mu.pause()}else if(on){try{if(sessionStorage.getItem("fk-sound")!=="1")return}catch(e){}mu.play().catch(function(){});wake()}});
 var af=document.querySelector(".askwrap .af");if(af){if("IntersectionObserver"in window){new IntersectionObserver(function(e,o){if(e[0].isIntersecting){af.classList.add("in");o.disconnect()}},{threshold:.12}).observe(af)}else af.classList.add("in")}
 })();
 

@@ -270,4 +270,17 @@ import site from '../data/site.json';
     .sf-group-title { margin: 0 0 4px; }
     .sf-bottom { align-items: flex-start; }
   }
+
+  /* v5.40 one footer on every page: same width, alignment and spacing. Page CSS cannot change it:
+     it is full width, one container (--sf-w) centred with the same side padding, a fixed grid, the same background. */
+  .sf-footer, .sf-footer *, .sf-footer *::before, .sf-footer *::after { box-sizing: border-box; }
+  footer.sf-footer { display: block; width: 100%; max-width: none; min-width: 0; margin: 0; overflow-x: clip; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); }
+  footer.sf-footer .sf-container { --sf-w: 1300px; width: 100%; max-width: var(--sf-w); margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+  footer.sf-footer .sf-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; margin-bottom: 48px; }
+  footer.sf-footer .sf-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; min-width: 0; }
+  @media (min-width: 768px) { footer.sf-footer .sf-links-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 960px) { footer.sf-footer .sf-top { grid-template-columns: 300px minmax(0, 1fr); gap: 48px; } }
+  footer.sf-footer .sf-social-strip, footer.sf-footer .sf-bottom { width: 100%; }
+  /* Swiggy / Zomato links: 44px tap height like every other footer link (was 32px) */
+  footer.sf-footer .sf-link-group .sf-order-line a { min-height: var(--fk-tap, 44px); padding: 0 4px; }
 </style>

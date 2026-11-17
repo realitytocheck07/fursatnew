@@ -1,9 +1,12 @@
 ---
 // InstaFab: a small round Instagram button, one account per page (same accounts as the InstaFollow cards).
-// Desktop and tablet: bottom-left, stacked above Ask Fursat. Phone: bottom-right, above the phone bar.
-// It appears once the guest scrolls past the first screen, so it never covers a hero's buttons. Hidden on /404,
-// while the footer is in view, and while an Instagram follow card is on screen.
+// Bottom-left, stacked above Ask Fursat (phone: bottom-left, above the phone bar).
+// Home: it shows from the first screen as soon as the intro is over (then travels with the page). Other pages: it appears once the guest
+// scrolls past the first screen, so it never covers a hero's buttons. Hidden on /404, while the footer is in view, and while an Instagram follow card is on screen.
+// Home only: the account follows the section on screen (Banquet / Celebrate, Café / Bites & Buffet, Bar / Social Club, else the main one)
+// and the button glows softly (gold ring, 2 slow pulses) when it changes.
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const home = path === '/';
 const MAP: Record<string, string> = {
   '/banquet': 'fursatbanquets',
   '/party': 'fursatbanquets',
@@ -12,7 +15,7 @@ const MAP: Record<string, string> = {
 };
 const NAMES: Record<string, string> = {
   'fursatind.in': 'Kitchen | Bar',
-  fursatbanquets: 'Banquets & Events',
+  fursatbanquets: 'Banquets',
   fursat_bitesandbuffet: 'Bites & Buffet',
   fursatsocialclub: 'Social Club',
 };
@@ -22,7 +25,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 ---
 {show && (
   <a class:list={['ifab', { 'ifab--solo': solo }]} href={`https://www.instagram.com/${handle}/`} target="_blank" rel="noopener"
-     aria-label={`Fursat ${NAMES[handle]} on Instagram (opens in a new tab)`} data-ifab>
+     aria-label={`Open Fursat ${NAMES[handle]} on Instagram (opens in a new tab)`} data-ifab data-home={home ? '' : undefined} data-handle={handle} data-names={home ? JSON.stringify(NAMES) : undefined}>
     <span class="ifab-ic" aria-hidden="true">
       <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" class="ifab-dot"/></svg>
     </span>
@@ -32,6 +35,9 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 <script is:inline>
 (() => {
   const b = document.querySelector('[data-ifab]'), ask = document.querySelector('[data-fk-ask]');
+  // Home: the intro (#heli, #intro, #gate, #lcap) is on screen until the guest enters or skips it
+  const isHome = b && b.hasAttribute('data-home');
+  const introOn = () => ['heli', 'intro', 'gate', 'lcap'].some((id) => document.getElementById(id));
   if (!b) return;
   const root = document.documentElement;
   root.classList.add('fab-js');
@@ -43,7 +49,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   let raf = 0;
   const tick = () => {
     raf = 0;
-    let on = scrollY > innerHeight * 0.6 && !inFooter;
+    let on = (isHome ? !introOn() : scrollY > innerHeight * 0.6) && !inFooter;
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
     if (on) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
       const r = el.getBoundingClientRect();
@@ -82,6 +88,37 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   const mo = new MutationObserver(req);
   below().forEach((el) => mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }));
   addEventListener('transitionend', req, { passive: true });
+  // --- Home: the account follows the section on screen. Sections watched (Home markup is not edited):
+  //   #celebrate (Celebrate at Fursat)                     -> @fursatbanquets
+  //   #spaces (tabs: banquet-hall / bites-buffet / social-club / kitchen-bar) -> the selected tab's account
+  //   anywhere else (Hero, Season, What's new, Tour, Reels, Story, Visit...) -> @fursatind.in
+  if (b.dataset.names && 'IntersectionObserver' in window) {
+    const names = JSON.parse(b.dataset.names), label = b.querySelector('.ifab-t');
+    const TAB = { 'banquet-hall': 'fursatbanquets', 'bites-buffet': 'fursat_bitesandbuffet', 'social-club': 'fursatsocialclub' };
+    const MAIN = 'fursatind.in', band = new Set();
+    let cur = b.dataset.handle, gt = 0;
+    const pick = () => {
+      if (band.has('celebrate')) return 'fursatbanquets';
+      if (band.has('spaces')) { const t = document.querySelector('#spaces [role=tab][aria-selected=true]'); return (t && TAB[t.dataset.hw]) || MAIN; }
+      return MAIN;
+    };
+    const apply = () => {
+      const h = pick(); if (h === cur) return; cur = h;
+      b.dataset.handle = h; b.href = 'https://www.instagram.com/' + h + '/';
+      b.setAttribute('aria-label', 'Open Fursat ' + names[h] + ' on Instagram (opens in a new tab)');
+      if (label) label.textContent = '@' + h;
+      if (!b.classList.contains('is-on')) return; // changed while hidden: no glow
+      b.classList.remove('is-glow'); void b.offsetWidth; b.classList.add('is-glow');
+      clearTimeout(gt); gt = setTimeout(() => b.classList.remove('is-glow'), 3200);
+    };
+    // the middle 20% of the screen decides which section the guest is "in"
+    const sio = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? band.add(e.target.id) : band.delete(e.target.id))); apply(); }, { rootMargin: '-40% 0px -40% 0px' });
+    ['celebrate', 'spaces'].forEach((id) => { const el = document.getElementById(id); if (el) sio.observe(el); });
+    const sp = document.getElementById('spaces');
+    if (sp) new MutationObserver(apply).observe(sp, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
+    b.addEventListener('animationend', () => b.classList.remove('is-glow'));
+  }
+  if (isHome && introOn()) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); tick(); } }, 400); } // show the buttons the moment the intro is gone
   tick();
 })();
 </script>
@@ -106,6 +143,10 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 @media (max-width: 767px) {
   .ifab, .ifab--solo { left: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); height: 48px; padding: 2px; }
 }
-@media (prefers-reduced-motion: reduce) { .ifab, .ifab-t { transition-duration: 0s; translate: none; } .ifab:active { scale: 1; } }
+/* glow when the account changes: a gold ring that pulses twice, slowly, then rests (transform + opacity only) */
+.ifab::after { content: ""; position: absolute; inset: 0; border-radius: 999px; box-shadow: 0 0 0 2px #f3c56b, 0 0 14px 2px rgb(243 197 107 / .55); opacity: 0; pointer-events: none; }
+.ifab.is-glow::after { animation: ifab-ring 1500ms cubic-bezier(.23,1,.32,1) 2 both; }
+@keyframes ifab-ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3, 1.4); } }
+@media (prefers-reduced-motion: reduce) { .ifab, .ifab-t { transition-duration: 0s; translate: none; } .ifab:active { scale: 1; } .ifab.is-glow::after { animation: none; opacity: .8; } }
 @media print { .ifab { display: none !important; } }
 </style>

@@ -1,4 +1,4 @@
-/* /menu Phase 3: dishes drop onto the plates of the table scene as the page scrolls.
+/* /menu Phase 3: dishes drop onto the plate-free table scene as the page scrolls.
    Scoped under .tl. Only transform + opacity move after load. The scene is dark like the doors, so it keeps its own dark tokens.
    Track = 220svh (160svh on phones) holding one sticky 100svh stage. No script, or reduced motion: the dishes are already placed. */
 .tl{--tl-text:#F6EDDF;--tl-mute:rgb(246 237 223 / .85);--tl-gold:#f3c56b;--tl-rim:#ffe2a6;--tl-ink:#2a1608;
@@ -15,26 +15,27 @@
 .tl-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%;display:block}
 .tl--fit .tl-bg img{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 64px,#000 calc(100% - 64px),transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 64px,#000 calc(100% - 64px),transparent 100%)}
 .tl-shade{position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgb(11 7 5 / .88) 0,rgb(11 7 5 / .5) 24%,rgb(11 7 5 / .12) 46%,rgb(11 7 5 / .12) 62%,rgb(11 7 5 / .86) 100%)}
+  background:linear-gradient(90deg,rgb(11 7 5 / .6) 0,rgb(11 7 5 / .25) 30%,transparent 42%),
+    linear-gradient(180deg,rgb(11 7 5 / .3) 0,transparent 22%,transparent 70%,rgb(11 7 5 / .6) 100%)} /* light on the sign (top centre), the heading side and the bottom edge carry the dark */
 
 /* ── heading ── */
-.tl-head{position:absolute;z-index:4;left:var(--tl-gap);top:clamp(56px,9svh,96px);display:flex;flex-direction:column;gap:8px;max-width:min(440px,calc(100% - 2 * var(--tl-gap)))}
+.tl-head{position:absolute;z-index:4;left:var(--tl-gap);top:clamp(56px,9svh,96px);display:flex;flex-direction:column;gap:8px;max-width:min(440px,calc(100% - 2 * var(--tl-gap)),calc(var(--sign-l,999px) - var(--tl-gap) - 20px))}
 .tl-eyebrow{font:600 .75rem/1.2 var(--mv-sans,Poppins,system-ui,sans-serif);letter-spacing:.14em;text-transform:uppercase;color:var(--tl-gold)}
 .tl-hl{margin:0;font:500 clamp(1.9rem,3.2vw,3.1rem)/1.08 var(--mv-serif,"Playfair Display",Georgia,serif);letter-spacing:-.015em;color:var(--tl-text);text-wrap:balance;text-shadow:0 2px 18px rgb(0 0 0 / .55)}
 .tl-hl span{font-style:italic;color:var(--tl-gold)}
 .tl-sub{margin:0;font-size:.95rem;color:var(--tl-mute);text-shadow:0 1px 10px rgb(0 0 0 / .6)}
 
-/* ── landing spots: the script sets --x --y (plate centre), --pw --ph (plate size), --dw (dish width) from the scene. Before it runs they sit in a row. ── */
+/* ── landing spots: the script sets --x --y (shadow centre), --pw --ph (shadow size), --dw (dish width) from the scene. Before it runs they sit in a row. ── */
 .tl-spots{position:absolute;inset:0;z-index:3;margin:0;padding:0;list-style:none;pointer-events:none}
 .tl-spot{position:absolute;left:var(--x,calc(14% + var(--i) * 17%));top:var(--y,62%);width:0;height:0;z-index:calc(10 - var(--i));
   --pw:clamp(60px,12vw,200px);--ph:calc(var(--pw) * .6);--dw:calc(var(--pw) * 1.25)}
 .tl-spot[hidden]{display:none}
 /* contact shadow: an ellipse under the dish, blurred 10px, 35% black; it grows as the dish lands */
 .tl-shadow{position:absolute;left:0;top:0;width:var(--pw);height:var(--ph);translate:-50% -50%;border-radius:50%;background:rgb(0 0 0 / .35);filter:blur(10px);transform-origin:50% 50%;will-change:transform,opacity}
-/* the dish cut-out: its own plate sits over the table plate, bottom edge on the plate's bottom edge. The script moves this one box. */
+/* the dish cut-out (it carries its own plate), bottom edge on the contact shadow's bottom edge. The script moves this one box. */
 .tl-plate{position:absolute;left:0;top:0;width:var(--dw);aspect-ratio:var(--ar,1);translate:-50% calc(-100% + var(--ph) * .5);transform-origin:50% 100%;will-change:transform,opacity}
 .tl-plate img{display:block;width:100%;height:100%;pointer-events:none;user-select:none}
-.tl-label{position:absolute;left:0;top:calc(var(--ph) * .5 + 18px);translate:-50% 0;width:max-content;max-width:210px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
+.tl-label{position:absolute;left:0;top:calc(var(--ph) * .5 + 8px);translate:-50% 0;width:max-content;max-width:170px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;
   will-change:opacity} /* the script fades it in over the last 25% of the pin */
 .tl-label b{font:500 clamp(.95rem,1.15vw,1.1rem)/1.2 var(--mv-serif,"Playfair Display",Georgia,serif);color:var(--tl-text);text-wrap:balance;text-shadow:0 2px 14px rgb(0 0 0 / .8)}
 .tl-label span{font:600 .875rem/1.2 var(--mv-sans,Poppins,system-ui,sans-serif);color:var(--tl-gold);text-shadow:0 1px 10px rgb(0 0 0 / .8)}
@@ -44,7 +45,7 @@
 .tl-legend li[hidden]{display:none}
 .tl-legend b{font-weight:600}
 
-.tl-cta{position:absolute;z-index:4;right:var(--tl-gap);bottom:calc(clamp(20px,5svh,44px) + 64px)} /* clear of the Picks tray at the bottom */
+.tl-cta{position:absolute;z-index:4;right:var(--tl-gap);top:clamp(56px,9svh,96px)} /* top right, level with the heading: the table band stays clear for the dishes and names */
 .tl-btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 22px;border:0;border-radius:999px;white-space:nowrap;cursor:pointer;
   font:600 .95rem/1 var(--mv-sans,Poppins,system-ui,sans-serif);color:var(--fk-action-fg,#2a1608);background:var(--fk-action-bg,linear-gradient(180deg,#fbf3e3,#ead8b8));
   box-shadow:0 0 0 1px var(--fk-action-rim,#e8c886),0 0 22px rgb(232 200 134 / .35);transition:scale 150ms ease-out,box-shadow 250ms ease}
@@ -53,16 +54,18 @@
 .tl-btn:focus-visible{outline:2px solid var(--tl-rim);outline-offset:3px}
 @media (hover:hover){.tl-btn:hover{box-shadow:0 0 0 1px #e8c886,0 0 30px rgb(232 200 134 / .6)}.tl-btn:hover svg{translate:0 3px}}
 
-/* ── phones and narrow tablets: smaller plates, a shorter track, the names move under the table ── */
+/* ── phones and narrow tablets: smaller dishes, a shorter track, the names move under the table ── */
 @media (max-width:820px){
-  .tl-head{top:clamp(40px,7svh,72px)}
+  .tl-head{top:var(--head-y,clamp(40px,7svh,72px));max-width:calc(100% - 2 * var(--tl-gap))} /* phones: heading on the dark sofa band, under the sign */
+  .tl-hl{font-size:clamp(1.5rem,6.4vw,2rem)}
+  .tl-sub{display:none}
   .tl-label{display:none}
-  .tl-legend{left:16px;right:16px;bottom:calc(16px + 72px + 44px + 14px);width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;z-index:4;
-    display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;text-shadow:0 1px 10px rgb(0 0 0 / .85)}
+  .tl-legend{left:16px;right:16px;top:var(--leg-y,60%);width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;z-index:4;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px 12px;text-shadow:0 1px 10px rgb(0 0 0 / .85)} /* the names start just under the dishes */
   .tl-legend li{display:flex;flex-direction:column;gap:2px;font-size:.8125rem;line-height:1.25;color:var(--tl-text)}
   .tl-legend b{font:500 .875rem/1.2 var(--mv-serif,"Playfair Display",Georgia,serif)}
   .tl-legend span{font-weight:600;color:var(--tl-gold)}
-  .tl-cta{left:16px;right:16px;bottom:calc(16px + 72px);display:flex;justify-content:center}
+  .tl-cta{left:16px;right:16px;top:auto;bottom:calc(16px + 72px);display:flex;justify-content:center} /* clear of the Picks tray at the bottom */
   .tl-btn{min-height:44px;padding:0 18px;font-size:.88rem}
 }
 
