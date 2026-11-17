@@ -99,7 +99,11 @@
 /* Plaster surface for whole pages: seamless tile under the grain. */
 /* v5.6 one plaster for every page without background art (menu, banquet, catering, order, terms):
    the tile multiplied onto a warm base lands on the same peach cream as the hybrid art (#eed4b2 measured) */
-:root{--sh-h:104px;--fk-plaster-base:#fdebcf;--fk-plaster:#ffefd2 url(/assets/surface/plaster-tile.webp) 0 0/900px 900px;}
+:root{--sh-h:104px;--fk-plaster-base:#fdebcf;
+  /* new background: green glow top, ivory to warm sand, gold side glow (opaque, Menu page) */
+  --fk-bg-grad:radial-gradient(120% 45% at 50% -8%,rgba(36,80,44,.16),transparent 62%),radial-gradient(70% 40% at 100% 40%,rgba(201,162,74,.14),transparent 70%),linear-gradient(180deg,#fffaf3 0%,#fbf1e2 48%,#f3e2c6 100%);
+  /* same gradient laid over the plaster tile: the tile shows through at about 25% */
+  --fk-plaster:radial-gradient(120% 45% at 50% -8%,rgba(36,80,44,.16),transparent 62%),radial-gradient(70% 40% at 100% 40%,rgba(201,162,74,.14),transparent 70%),linear-gradient(180deg,rgba(255,250,243,.75) 0%,rgba(251,241,226,.75) 48%,rgba(243,226,198,.75) 100%),url(/assets/surface/plaster-tile.webp) 0 0/900px 900px #ffefd2;}
 .fk-plaster{background:var(--fk-plaster);background-blend-mode:multiply}
 
 /* ===================================================================================

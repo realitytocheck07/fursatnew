@@ -40,6 +40,14 @@ function init(root: HTMLElement) {
       ? lines.map((l) => `<li><span>${esc(l.item.n)}</span><span class="q"><button type="button" data-dec="${esc(l.key)}" aria-label="One less ${esc(l.item.n)}">−</button><b class="num">${l.qty}</b><button type="button" data-inc="${esc(l.key)}" aria-label="One more ${esc(l.item.n)}">+</button></span><b class="num">${money(l.item.p * l.qty)}</b></li>`).join('')
       : '<li style="grid-template-columns:1fr"><span>Nothing here yet. Tap + on any dish or drink.</span></li>';
     try { sessionStorage.setItem(KEY, JSON.stringify(lines)); } catch { /* private mode */ }
+    $$<HTMLElement>('.mv-add').forEach((b) => { // card buttons mirror the picks: "+ Add" / "✓ Added"
+      const on = lines.some((l) => l.key === keyOf(itemFrom(b)));
+      if (b.getAttribute('aria-pressed') === String(on)) return;
+      b.setAttribute('aria-pressed', String(on));
+      const nm = b.dataset.n || '';
+      b.setAttribute('aria-label', on ? `Remove ${nm} from picks` : `Add ${nm} to picks`);
+      const tx = $('.mv-add-t', b); if (tx) tx.textContent = on ? '✓ Added' : '+ Add';
+    });
     root.dispatchEvent(new CustomEvent('mv:picks'));
     const n = count(lines);
     if (ready && n !== lastN && !($<HTMLDialogElement>('#mv-sheet')?.open)) live.textContent = n ? `${n} ${n === 1 ? 'item' : 'items'} in Picks, subtotal ${money(total(lines))}` : 'Picks are empty';
@@ -78,6 +86,9 @@ function init(root: HTMLElement) {
     const add = t.closest<HTMLElement>('[data-add]');
     if (add && Number.isFinite(Number(add.dataset.p))) {
       const item = itemFrom(add);
+      if (add.classList.contains('mv-add') && add.getAttribute('aria-pressed') === 'true') { // card button: second tap removes it
+        lines = lines.filter((l) => l.key !== keyOf(item)); render(true); return;
+      }
       lines = reducer(lines, { t: 'add', item });
       if (add.hasAttribute('data-nofly')) { render(true); return; } // the phone sheet sits above the bag: no flight
       fly(add, item);

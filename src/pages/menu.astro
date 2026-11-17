@@ -295,7 +295,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
             <header class="mv-side-h"><h2>{title}</h2><span>{blurb}</span></header>
             {groups.map((g) => (
               <div class="mv-grp" id={`g-${g.id}`} data-group={g.id}>
-                <h3 class="mv-grp-h">{g.label}<span class="num">{groupCount(g)}</span></h3>
+                <h3 class="mv-grp-h">{g.label}<span class="num" data-one={groupCount(g) === 1 ? '' : undefined}>{groupCount(g)}</span></h3>
                 {groupSections(g).map((sec) => (
                   <section class="mv-sec" id={`s-${slug(sec.section)}`}>
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}

@@ -1,5 +1,5 @@
 ---
-// /menu Phase 3: "The Table" (v5.38). Cut-out dishes drop onto the plates of the new table scene as the page scrolls.
+// /menu Phase 3: "The Table" (v5.39). Cut-out dishes fall from the top of the screen onto the plates of the new table scene, scrubbed by the pinned scroll.
 // Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
 // Names and prices come from menu-table.json (the table ring, via food.json). No script or reduced motion: the dishes are already on the plates.
 import '../../styles/table-landing.css';
@@ -38,7 +38,7 @@ const IMG = '/assets/menu/table/';
     <!-- the plates: decorative here, the names live in the list below -->
     <ul class="tl-spots" id="tl-spots" aria-hidden="true">
       {list.map((d, i) => { const c = CUT[d.title]; return (
-        <li class="tl-spot is-landed" style={`--i:${i};--ar:${c.w / c.h}`} data-title={d.title} data-phone={c.phone ? '1' : '0'}>
+        <li class="tl-spot" style={`--i:${i};--ar:${c.w / c.h}`} data-title={d.title} data-phone={c.phone ? '1' : '0'}>
           <span class="tl-shadow"></span>
           <span class="tl-plate"><img src={`${IMG}${c.f}-480.webp`} srcset={`${IMG}${c.f}-480.webp 480w, ${IMG}${c.f}-900.webp 900w`} sizes="(max-width: 820px) 40vw, 20vw" width={c.w} height={c.h} alt="" loading="lazy" decoding="async" draggable="false" /></span>
           <span class="tl-label"><b>{d.title}</b><span class="num">{d.price} · {d.label}</span></span>
