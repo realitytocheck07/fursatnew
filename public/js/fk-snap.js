@@ -36,12 +36,21 @@
   })();
 
   /* html has scroll-behavior:smooth on this site: every programmatic jump must be instant */
-  function jump(y) { w.scrollTo({ top: y, left: 0, behavior: 'instant' }); }
+  /* On desktop this site scrolls <body>, not the window (07.css sets html,body{overflow:hidden;height:100%} and body scrolls).
+     Pick the real scroller every time so snapping works on both layouts. */
+  function scroller() {
+    var b = d.body;
+    if (b && getComputedStyle(root).overflowY === 'hidden' && b.scrollHeight > b.clientHeight + 1 && getComputedStyle(b).overflowY !== 'hidden') return b;
+    return null;
+  }
+  function getY() { var sc = scroller(); return sc ? sc.scrollTop : w.scrollY; }
+  function maxY() { var sc = scroller(); return sc ? sc.scrollHeight - sc.clientHeight : root.scrollHeight - w.innerHeight; }
+  function jump(y) { var sc = scroller(); if (sc) { sc.style.scrollBehavior = 'auto'; sc.scrollTop = y; } else w.scrollTo({ top: y, left: 0, behavior: 'instant' }); }
   function shH() { return parseFloat(getComputedStyle(root).getPropertyValue('--sh-h')) || 0; }
 
   /* positions are read fresh each time (a handful of rects): nothing goes stale after a resize or a late image */
   function layout() {
-    var vw = w.innerWidth, vh = w.innerHeight, y = w.scrollY, H = shH();
+    var vw = w.innerWidth, vh = w.innerHeight, y = getY(), H = shH();
     var els = [].slice.call(d.querySelectorAll('[data-snap]')).filter(function (e) { var m = +e.getAttribute('data-snap-min'); return !m || vw >= m; });
     var cut = -1; els.some(function (e, i) { if (e.hasAttribute('data-snap-last')) { cut = i; return true; } });
     if (cut >= 0) els = els.slice(0, cut + 1);
@@ -99,7 +108,7 @@
   }
 
   function go(to) {
-    var y = w.scrollY, max = root.scrollHeight - w.innerHeight;
+    var y = getY(), max = maxY();
     to = Math.max(0, Math.min(to, max));
     if (anim || Math.abs(to - y) < 2) return;
     if (reduce.matches) { jump(to); sync(); return; }
@@ -127,7 +136,7 @@
     var dir = dy > 0 ? 1 : -1;
     if (anim) { e.preventDefault(); return; }
     if (innerScroll(e.target, dir)) return;
-    var y = w.scrollY, dec = decide(dir, y, layout());
+    var y = getY(), dec = decide(dir, y, layout());
     if (dec.t === 'none') return;
     if (dec.t === 'free') {
       g.free = true;
@@ -156,7 +165,7 @@
     tc.dy = dy;
     var dir = dy > 0 ? 1 : -1;
     if (innerScroll(e.target, dir)) { tc.free = true; return; }
-    var dec = decide(dir, w.scrollY, layout());
+    var dec = decide(dir, getY(), layout());
     if (dec.t !== 'snap') { tc.free = true; tc.snap = null; return; }
     if (e.cancelable) e.preventDefault();
     tc.snap = dec;
@@ -174,11 +183,11 @@
     var t = e.target;
     if (t && t.closest && t.closest('input,textarea,select,button,summary,[contenteditable],[role=radio],[role=slider],[role=tab],[role=listbox],[role=menu]')) return;
     var k = e.key;
-    if (k === 'Home') { if (w.scrollY > 2) { e.preventDefault(); go(0); } return; }
+    if (k === 'Home') { if (getY() > 2) { e.preventDefault(); go(0); } return; }
     var dir = k === 'PageDown' || k === 'ArrowDown' || (k === ' ' && !e.shiftKey) ? 1 : k === 'PageUp' || k === 'ArrowUp' || (k === ' ' && e.shiftKey) ? -1 : 0;
     if (!dir) return;
     if (anim) { e.preventDefault(); return; }
-    var dec = decide(dir, w.scrollY, layout());
+    var dec = decide(dir, getY(), layout());
     if (dec.t !== 'snap') return;
     e.preventDefault();
     if (!e.repeat) go(dec.to);
@@ -241,7 +250,7 @@
 
   function paint() {
     tick = 0;
-    var sup = supported(), L = sup ? layout() : [], y = w.scrollY;
+    var sup = supported(), L = sup ? layout() : [], y = getY();
     root.classList.toggle('fk-snap-on', sup);
     if (!L.length) { nav.classList.add('is-off'); bar.classList.add('is-off'); return; }
     var i = idxAt(y, L), j = i; while (j > 0 && L[j].nodot) j--;
@@ -264,6 +273,7 @@
     d.addEventListener('click', onClick);
     w.addEventListener('hashchange', onHash);
     w.addEventListener('scroll', sync, { passive: true });
+    if (d.body) d.body.addEventListener('scroll', sync, { passive: true });
     w.addEventListener('resize', sync);
     reduce.addEventListener('change', sync);
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
