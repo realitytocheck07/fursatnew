@@ -29,6 +29,7 @@ const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I
 <div class="pa">
   <SiteHeader active="celebrate" variant="plaster" />
   <script is:inline>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('fx-pre'); setTimeout(function () { document.documentElement.classList.remove('fx-pre'); }, 3500); }</script>
+  <div data-snap="Welcome">
   <CornerHero page="party" id="pa-h1" kicker="Celebrate beautifully at FURSAT"
     h1a="Every Occasion Deserves a Beautiful" h1b="Celebration" hlColor="#c02a1a"
     sub="Make yours unforgettable." subHl="unforgettable"
@@ -36,21 +37,22 @@ const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I
     labels={[['Birthdays', 'Corporate'], ['Kitty parties', 'Bar bashes']]}
     alt="Two oval gold windows with photos of Fursat set for a party"
     ctas={[{ label: 'Plan Your Party', href: '#pa-plan', primary: true }, { label: 'See Packages', href: '#pa-packs' }]} />
+  </div>
   <div class="hy pa-hy">
     <div class="hy-slice hy-mid" aria-hidden="true"></div><div class="hy-slice hy-bot" aria-hidden="true"></div>
     <HyWindows data={pDesk} slice={2} photos={[closePhoto]} view="d" anchor="bottom" />
 
     <div class="hy-flow pa-flow">
       <main id="pk-main" tabindex="-1" class="pa-main">
-        <PartyPackages />
-        <figure class="pa-feast" data-fx-reveal>
+        <div data-snap="Packages"><PartyPackages /></div>
+        <figure class="pa-feast" data-snap="Feast" data-snap-nodot data-snap-min="768" data-fx-reveal>
           <img src="/assets/feast/feast-table-1200.webp"
             srcset="/assets/feast/feast-table-768.webp 768w, /assets/feast/feast-table-1200.webp 1200w, /assets/feast/feast-table-1600.webp 1600w"
             sizes="(max-width: 767px) 92vw, 1100px" width="1600" height="810"
             alt="A round table filled with plates of food and desserts" loading="lazy" decoding="async" />
           <figcaption>A table for the whole group.</figcaption>
         </figure>
-        <PartyBuilder />
+        <div data-snap="Plan" data-snap-last><PartyBuilder /></div>
       </main>
     </div>
 
@@ -136,4 +138,5 @@ const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I
 @media(max-width:767px){.pa{overflow-x:clip}}
 </style>
 <script is:inline src="/js/party.js"></script>
+<script is:inline src="/js/fk-snap.js" data-block="#pb-sheet:not([hidden])" defer></script>
 </Base>

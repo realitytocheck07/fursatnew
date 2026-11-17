@@ -123,17 +123,13 @@
   wa.addEventListener('click', mail); if (barWa) barWa.addEventListener('click', mail);
 
   /* occasion cards -> pre-select the group, scroll to the builder */
-  function toBuilder() { if (plan) plan.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); }
+  function toBuilder() { if (plan && !(window.fkSnap && window.fkSnap.goTo(plan))) plan.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); }
   $$('.pc-card').forEach(function (a) {
     a.addEventListener('click', function (e) { e.preventDefault(); setGroup(a.getAttribute('data-occ'), true); st.touched = true; render(); cheer(); toBuilder(); });
   });
   var qg = new URLSearchParams(location.search).get('group');
-  if (qg && D.groups.some(function (g) { return g.id === qg; })) { setGroup(qg, true); render(); requestAnimationFrame(toBuilder); }
-  /* hero buttons */
-  $$('a[href="#pa-plan"],a[href="#pa-packs"]').forEach(function (a) {
-    if (a.classList.contains('pc-card')) return;
-    a.addEventListener('click', function (e) { var t = $(a.getAttribute('href')); if (!t) return; e.preventDefault(); t.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); });
-  });
+  if (qg && D.groups.some(function (g) { return g.id === qg; })) { setGroup(qg, true); render(); addEventListener('load', toBuilder); }
+  /* hero buttons (#pa-plan, #pa-packs): fk-snap.js scrolls to them; without it the browser jumps there */
 
   /* card rail dots (phones) */
   var row = $('#pc-row'), dots = $$('.pc-dot');
