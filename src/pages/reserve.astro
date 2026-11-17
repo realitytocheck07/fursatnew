@@ -53,9 +53,47 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
     /* first section starts below the fixed header (--sh-h, set in fk-tokens.css) */
     .rs-page { padding-top: var(--sh-h); }
   </style>
+  <!-- phone only: shows the picked table and scrolls to the form -->
+  <div class="bk3d-sticky" id="bk3d-sticky" hidden>
+    <p class="bk3d-sticky-t" id="bk3d-sticky-t" aria-live="polite"></p>
+    <button type="button" class="fk-btn fk-btn--book fk-btn--md" id="bk3d-sticky-go"><span>Book</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></button>
+  </div>
   <SiteFooter />
   <MobileBar active="reserve" />
   <script>import '../scripts/fk-motion';</script>
+  <script>
+    // "Pick your table": 2-3 s after load, once the 3D chunk has loaded AND drawn, the left photo cross-fades into the 3D room inside the SAME
+    // window (same size and place, nothing moves). WebGL missing, Save-Data, or any error: the photo simply stays. The form works without it.
+    import { mountBooking3D } from '../components/booking3d/mount';
+    (() => {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const conn = (navigator as unknown as { connection?: { saveData?: boolean } }).connection;
+      if (conn?.saveData) return;
+      const visibleWin = () => [...document.querySelectorAll<HTMLElement>('.rs-hy .hy-win')].find((el) => el.getClientRects().length > 0);
+      let host: HTMLElement | null = null, mounted: { destroy(): void } | null = null, busy = false, failed = false;
+      const hero = document.querySelector<HTMLElement>('.rs-hero'), top = document.querySelector<HTMLElement>('.rs-seg--top');
+      const start = async () => {
+        const w = visibleWin(); if (!w || busy || failed || (host && host.parentElement === w)) return;
+        busy = true; mounted?.destroy(); mounted = null; host?.remove();
+        const h = document.createElement('div'); h.className = 'bk3d-host'; h.id = 'bk3d-host'; w.appendChild(h); host = h;
+        try {
+          mounted = await mountBooking3D(h, { reduced, desktop: matchMedia('(min-width:900px) and (pointer:fine)').matches });
+          h.classList.add('is-on'); hero?.classList.add('bk3d-on'); top?.classList.add('bk3d-grow');   // grows only on phone/tablet (CSS)
+        } catch { failed = true; h.remove(); host = null; hero?.classList.remove('bk3d-on'); top?.classList.remove('bk3d-grow'); }   // photo stays
+        busy = false;
+      };
+      const kick = () => { const go = () => setTimeout(start, 2500); 'requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 3000 }) : go(); };
+      document.readyState === 'complete' ? kick() : addEventListener('load', kick, { once: true });
+      matchMedia('(max-width:700px)').addEventListener('change', () => setTimeout(start, 300));
+      // phone sticky bar: "T7 · Booths · 4 seats → Book" scrolls to the form
+      const bar = document.getElementById('bk3d-sticky')!, txt = document.getElementById('bk3d-sticky-t')!;
+      addEventListener('fk:table', (e) => { const d = (e as CustomEvent).detail; bar.hidden = !d; txt.textContent = d ? d.line : ''; });
+      addEventListener('fk:table-clear', () => { bar.hidden = true; });
+      document.getElementById('bk3d-sticky-go')!.addEventListener('click', () => {
+        const f = document.querySelector<HTMLElement>('.rs-hy .rs-panel'); f?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      });
+    })();
+  </script>
   <script is:inline>
     (function () {
       // fit the live booking form inside the carved cream blob of the desktop art (zoom, never above 1)

@@ -121,6 +121,12 @@ const conditions: string[] = [];
           </div>
         </div>
 
+        <div class="rs-q rs-tbl" id="f-table" hidden>
+          <p class="rs-tl"><b>Table:</b> <span id="rs-tbl-t"></span> <button type="button" class="rs-link" id="rs-tbl-x">Remove</button></p>
+          <p class="rs-hint" id="rs-tbl-h" role="status" hidden></p>
+          <input type="hidden" id="res-table" name="table" value="" />
+        </div>
+
         <div class="rs-q rs-q-3" id="f-name">
           <label class="rs-ql" for="res-name"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>Your Name<span class="rs-req" aria-hidden="true"> *</span></label>
           <div class="rs-box"><input type="text" id="res-name" autocomplete="name" placeholder="Full name" required aria-required="true" aria-describedby="res-name-err" /></div>
@@ -238,6 +244,16 @@ const conditions: string[] = [];
 
   /* ───────── one booking object, shared by Quick and Concierge ───────── */
   const booking = { date: todayStr(), time: '', timeMin: -1, guests: 4, zone: '', occasion: 'Casual Dining', name: '', phone: '' };
+  /* optional table picked in the 3D room (src/components/booking3d) arrives as "fk:table" { id, seats, line } or null. The form works without it. */
+  booking.table = ''; booking.tableSeats = 0;
+  function renderTable() {
+    const el = $('f-table'); el.hidden = !booking.table;
+    $('rs-tbl-t').textContent = booking.table; $('res-table').value = booking.table;
+    const big = booking.table && booking.guests > booking.tableSeats, h = $('rs-tbl-h'); h.hidden = !big;
+    if (big) h.textContent = booking.table.split(' ')[0] + ' seats ' + booking.tableSeats + '; we’ll find you a bigger one.';
+  }
+  window.addEventListener('fk:table', (e) => { const d = e.detail; booking.table = d ? d.line : ''; booking.tableSeats = d ? d.seats : 0; renderTable(); });
+  $('rs-tbl-x').addEventListener('click', () => { window.dispatchEvent(new CustomEvent('fk:table-clear')); booking.table = ''; booking.tableSeats = 0; renderTable(); });
   const slots = qsa('#rs-times .rs-chip').map((el) => ({ el, m: Number(el.dataset.m), t: el.dataset.t, d: Number(el.dataset.d) || 0 }));
   const slotOf = () => slots.find((s) => s.m === booking.timeMin);
   const offerOf = () => { const s = slotOf(); return s && s.d > 0 ? s.d + '% off (' + s.t + ' slot)' : ''; };
@@ -388,7 +404,7 @@ const conditions: string[] = [];
   });
 
   function updateFoot() { $('rs-foot').hidden = (mode === 'chat' && chat.step !== 'summary') || mode === 'pick'; }
-  function renderAll() { renderQuick(); updateTicket(); updateFoot(); }
+  function renderAll() { renderQuick(); updateTicket(); updateFoot(); renderTable(); }
 
   /* ───────── mode switch: sliding pill (transform) + 150ms opacity cross-fade ───────── */
   const modeTabs = qsa('#rs-modes .rs-mode'), mpill = $('rs-mpill'), pQuick = $('rs-p-quick'), pChat = $('rs-p-chat'), pPick = $('rs-p-pick');
@@ -629,9 +645,9 @@ const conditions: string[] = [];
     }
     clearErr();
     const date = friendly(booking.date), seating = booking.zone || 'No preference', occasion = booking.occasion || 'Dining';
-    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (offerOf() ? '\n• Offer: ' + offerOf() : '');
+    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (booking.table ? '\n• Table: ' + booking.table : '') + (offerOf() ? '\n• Offer: ' + offerOf() : '');
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
-    window.fkForm?.send('restaurant', 'Table booking', { name, phone, guests: String(booking.guests), date, time: booking.time, seating, occasion, offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
+    window.fkForm?.send('restaurant', 'Table booking', { name, phone, guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
     const w = window.open(url, '_blank');
     const fine = $('rs-fine');
     fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';

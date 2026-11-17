@@ -59,9 +59,21 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     };
     // --- Home: drop in once the intro is gone (heli / intro / gate / lcap are the intro's elements) ---
     const introOn = () => document.documentElement.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((i) => document.getElementById(i));
+    // During the intro the pill sits at the left in elephant red (is-intro). When the intro ends it hops from there to its normal place (FLIP, transform only).
+    const inIntro = home && introOn();
+    if (inIntro) a.classList.add('is-intro');
     const enter = () => {
       live = true; a.setAttribute('data-early', '');
-      if (store('fk-ask-drop') !== '1' && !reduce.matches) { store('fk-ask-drop', '1'); play('drop'); }
+      if (inIntro) {
+        const f = a.getBoundingClientRect(); a.classList.remove('is-intro'); const l = a.getBoundingClientRect();
+        const dx = f.left - l.left, dy = f.top - l.top; store('fk-ask-drop', '1');
+        if (!reduce.matches && (dx || dy)) a.animate([
+          { transform: `translate(${dx}px, ${dy}px) scale(1, 1)`, offset: 0 },
+          { transform: `translate(${dx * .5}px, ${dy * .5 - 70}px) scale(.94, 1.08)`, offset: .45, easing: 'cubic-bezier(.77,0,.175,1)' },
+          { transform: 'translate(0, 0) scale(1.1, .88)', offset: .85, easing: 'cubic-bezier(.23,1,.32,1)' },
+          { transform: 'translate(0, 0) scale(1, 1)', offset: 1 },
+        ], { duration: 950, easing: 'cubic-bezier(.23,1,.32,1)' });
+      } else if (store('fk-ask-drop') !== '1' && !reduce.matches) { store('fk-ask-drop', '1'); play('drop'); }
       else store('fk-ask-drop', '1');
       arm();
     };
@@ -113,10 +125,74 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     addEventListener('scroll', hold, { passive: true }); addEventListener('resize', hold, { passive: true });
     const foot = document.querySelector('.sf-footer');
     if (foot && 'IntersectionObserver' in window) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; hold(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+    // --- Mario routine: one rAF loop (runs only while a move plays). Walk along the bottom edge and back, sit, or peek off the edge.
+    //     The pill moves with --wx (CSS `translate`); bob / lean / flip / squash go on the image. Transform only. Static under reduced motion. ---
+    const img2 = img, rnd = (x, y) => x + Math.random() * (y - x), phone = () => innerWidth < 768;
+    const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2), cl = (v, x, y) => Math.max(x, Math.min(y, v));
+    let st = null, wx = 0, nextAt = performance.now() + rnd(20000, 40000), raf = 0, prev = 0, lastScroll = -1e9, face = 1, phase = 0, chk = 0;
+    addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
+    const paused = () => !live || reduce.matches || document.hidden || a.hasAttribute('data-hold') || a.classList.contains('is-intro') || !(a.classList.contains('is-on') || a.hasAttribute('data-early'))
+      || typing() || !!document.querySelector('dialog[open], [aria-modal="true"]') || document.documentElement.classList.contains('fk-sheet-open') || document.documentElement.classList.contains('lock')
+      || /\bm-/.test(a.className) || a.matches(':active') || performance.now() - lastScroll < 600;
+    // is the strip the mascot would cover at offset dx free of links / buttons?
+    const spotFree = (dx, r) => {
+      const bl = r.left - wx, L = bl + dx - 6, R = bl + dx + r.width + 6, T = r.top - 6, B = r.bottom + 6;
+      for (const el of document.querySelectorAll('a, button')) {
+        if (el === a || a.contains(el)) continue;
+        const q = el.getBoundingClientRect();
+        if (!q.width || !q.height || q.right < L || q.left > R || q.bottom < T || q.top > B) continue;
+        if (getComputedStyle(el).visibility === 'hidden') continue;
+        return false;
+      }
+      return true;
+    };
+    const pathFree = (to, r) => { const n = Math.max(1, Math.ceil(Math.abs(to - wx) / 48)); for (let i = 1; i <= n; i++) if (!spotFree(wx + (to - wx) * i / n, r)) return false; return true; };
+    const draw = (bob, lean, sx, sy, ty) => {
+      a.style.setProperty('--wx', wx.toFixed(1) + 'px');
+      img2.style.transform = `translateY(${(ty + bob).toFixed(1)}px) rotate(${lean.toFixed(1)}deg) scale(${(face * sx).toFixed(3)}, ${sy.toFixed(3)})`;
+    };
+    const rest = () => { wx = 0; a.style.removeProperty('--wx'); img2.style.transform = ''; a.classList.remove('is-roam'); st = null; nextAt = performance.now() + rnd(20000, 40000); };
+    const plan = () => {
+      const r = a.getBoundingClientRect(), side = phone() ? -1 : 1, roll = Math.random();           // base is at the right on phones, at the left on desktop: walk toward the middle
+      if (roll < .55) {
+        let d = phone() ? Math.min(rnd(110, 220), innerWidth * .55) : Math.min(rnd(260, Math.max(300, innerWidth - r.width - 80)), innerWidth - r.width - 80);
+        while (d > 70 && !pathFree(side * d, r)) d *= .75;
+        if (d <= 70 || !pathFree(side * d, r)) { nextAt = performance.now() + 6000; return; }
+        const dur = phone() ? rnd(2000, 3000) : rnd(2400, 4000);
+        st = { k: 'walk', legs: [{ f: 0, t: side * d, dur }, { f: side * d, t: side * d, dur: 500 }, { f: side * d, t: 0, dur }], i: 0, t: 0, dir: side };
+      } else if (roll < .8) st = { k: 'sit', t: 0, dur: rnd(6000, 10000) };
+      else st = { k: 'peek', t: 0, dur: 2400, out: (phone() ? 1 : -1) * (r.width / 2 + 14) };
+      a.classList.add('is-roam'); prev = 0; raf = requestAnimationFrame(frame);
+    };
+    function frame(now) {
+      if (!st) return;
+      const dt = prev ? Math.min(now - prev, 50) : 0; prev = now;
+      if (paused()) { raf = requestAnimationFrame(frame); return; }                                   // freeze in place while typing / dialog / sheet / footer
+      st.t += dt;
+      if (st.k === 'walk') {
+        let g = st.legs[st.i];
+        if (st.t >= g.dur) { st.i++; st.t = 0; if (st.i > 2) { rest(); return; } g = st.legs[st.i]; }
+        const p = ease(cl(st.t / g.dur, 0, 1)); wx = g.f + (g.t - g.f) * p;
+        const moving = g.f !== g.t; if (moving) { phase += dt / 260; face = (g.t - g.f) > 0 ? 1 : -1; }
+        draw(moving ? -Math.abs(Math.sin(phase * Math.PI)) * 4 : 0, moving ? face * 3 : 0, 1, 1, 0);
+        if (moving && now - chk > 300) { chk = now; const r = a.getBoundingClientRect(), ahead = wx + face * 70; if (st.i === 0 && !spotFree(ahead, r)) { st.legs[2] = { f: wx, t: 0, dur: Math.max(900, Math.abs(wx) / Math.abs(st.legs[0].t) * st.legs[0].dur) }; st.i = 2; st.t = 0; } }
+      } else if (st.k === 'sit') {
+        const e = Math.min(1, st.t / 300, (st.dur - st.t) / 300);                                        // squash down, swing, stand up
+        draw(0, Math.sin(st.t / 650) * 4 * e, 1 + .06 * e, 1 - .12 * e, 4 * e);
+        if (st.t >= st.dur) { rest(); play('hop'); return; }
+      } else {
+        const u = st.t / st.dur, o = u < .19 ? ease(u / .19) : u < .73 ? 1 : 1 - ease((u - .73) / .27);   // slide half off the edge, hold, peek back in
+        wx = st.out * o; face = st.out > 0 ? -1 : 1;
+        draw(0, (u > .73 ? -st.out / Math.abs(st.out) * 5 * (1 - o) : 0), 1, 1, 0);
+        if (st.t >= st.dur) { rest(); return; }
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    if (!reduce.matches) setInterval(() => { if (!st && performance.now() >= nextAt) { if (paused() || document.querySelector('.afab-bub') && a.classList.contains('m-say')) { nextAt = performance.now() + 3000; } else plan(); } }, 1000);
     // --- tap: big jump + "Ask me anything!", then open Ask as today ---
     a.addEventListener('click', (e) => {
       if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.dataset.go) return;
-      e.preventDefault(); a.dataset.go = '1';
+      e.preventDefault(); a.dataset.go = '1'; st = null;
       play('big', true); say(B.any, true);
       setTimeout(() => { location.href = a.href; }, 260);
     });
@@ -143,12 +219,25 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
 /* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons; it fades out again while the footer is in view.
    On Home it is live from the end of the intro (data-early) and only steps aside for the footer / a sticky panel (data-hold). */
 :global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
-:global(html.fab-js) .afab[data-early]:not([data-hold]) { opacity: 1; visibility: visible; pointer-events: auto; translate: none; transition-delay: 0s; }
+:global(html.fab-js) .afab[data-early]:not([data-hold]) { opacity: 1; visibility: visible; pointer-events: auto; translate: var(--wx, 0px) 0; transition-delay: 0s; }
+.afab { translate: var(--wx, 0px) 0; }
+.afab.is-roam { transition-property: transform, box-shadow, opacity, visibility; } /* no easing lag on translate while walking */
+.afab-img { will-change: auto; transform-origin: 50% 100%; }
 @media (hover: hover) and (pointer: fine) {
   .afab:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
   .afab:hover .afab-q, .afab:focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
 }
 @media (hover: hover) and (pointer: fine) and (max-width: 1023px) { .afab:hover .afab-q { max-width: 0; opacity: 0; margin-left: 0; } }
+
+/* ---- in the intro (Home, before the site opens): red pill at the left with the label, above the intro layers; never over Enter / Skip / Sound ---- */
+.afab::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #c02a1a; opacity: 0; pointer-events: none; transition: opacity 600ms cubic-bezier(.23,1,.32,1); }
+:global(html.fab-js) .afab.is-intro { display: inline-flex; left: 14px; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 2147482998; padding: 5px 18px 5px 5px; gap: 8px; opacity: 1; visibility: visible; pointer-events: auto; translate: none; color: #f6ecd8; }
+@media (max-width: 767px) { :global(html.fab-js) .afab.is-intro { bottom: calc(11svh + 90px + env(safe-area-inset-bottom, 0px)); } } /* phones: in the band above the Enter button, clear of the nav bar */
+.afab.is-intro::before { opacity: 1; }
+.afab.is-intro { box-shadow: 0 14px 30px -14px rgb(10 0 0 / .7), inset 0 0 0 1.5px rgb(246 236 216 / .6); }
+.afab.is-intro .afab-t { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+.afab.is-intro .afab-t b { color: #f6ecd8; }
+.afab.is-intro .afab-q { display: none; }
 
 /* ---- Mario moves: transform only, origin at the feet. Curves from the motion tokens (ease-out; ease-in-out for the fall) ---- */
 .afab.m-drop { animation: afab-drop 1150ms both; }

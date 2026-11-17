@@ -154,3 +154,6 @@ html,body,.fxhero,.fx-card,.fx-below{transition:background-color .6s}.fx-fly{pos
 }
 @media(prefers-reduced-motion:reduce){.fx-rv{transition:opacity .3s}.fx-rv.out{transform:none}.fx-pl-rv.zin{animation:none}}
 .fxhero.reel-on .fx-dn{visibility:hidden}
+/* INTRO-ASK2: phones: Skip intro is 44px tall; on phones it sits in the band above Enter (right), so it never covers Enter or the Ask pill */
+#fxskipall{min-height:44px;padding:0 20px}
+@media(max-width:767px){#fxskipall{bottom:calc(11svh + 90px + env(safe-area-inset-bottom,0px))}}

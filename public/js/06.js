@@ -24,40 +24,50 @@ function frame(p){var vw=VW,vh=VH,s=Math.max(vw/700,vh/875),ox=(vw-700*s)/2,oy=(
  if(b>0){intro.style.background="transparent";ibox.style.webkitMaskImage=ibox.style.maskImage=m}
  lcap.style.opacity=cl(1-a*3,0,1);lcap.style.transform="translateY("+(a*26).toFixed(1)+"px)";
  if(b>.3&&!go){go=true;hero.classList.add("go")}}
-function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intro.remove();lcap.remove();H.classList.remove("lock");scrollTo(0,0)}
+function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intro.remove();lcap.remove();H.classList.remove("lock");scrollTo(0,0);dispatchEvent(new Event("fz:introend"))}
 function tick(now){if(done)return;if(t0===null)t0=now;var p=cl((now-t0-400)/D,0,1);frame(p);p<1?requestAnimationFrame(tick):finish()}
-if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};window.__fzV=1;/* auto-enter: 11.js starts the intro at once, no tap */
+if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};/* 11.js shows "Enter Fursat" and starts the intro on tap or after 2 s */
  var skip=function(){if(t0!==null&&performance.now()-t0>1200)finish()};["wheel","touchmove","keydown","pointerdown"].forEach(function(n){addEventListener(n,skip,{passive:true})})}
-var mu=new Audio("/assets/audio/intro-music-sreemukhi.mp3"),ac,an,fd,avg=0,last=0,B=0,on=false,sb=$("snd"),fk=$("fksnd"),fadeT=0,bp=.504,VOL=.85;
-mu.loop=true;window.__fzMu=mu;mu.preload="none";mu.volume=0;
-/* SOUND-CONTRACT: sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id}; sound only ever starts from a tap */
+/* INTRO-ASK2 / SOUND-CONTRACT: two tracks, one at a time. "intro" = intro-music-sreemukhi (during the intro), "vibe" = 611fb91032 (landing, "Set the mood").
+   sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id}. Sound only ever starts after a tap (or when a tap already turned it on this visit). */
+var VOL=.85,ac,an,fd,avg=0,last=0,B=0,sb=$("snd"),fk=$("fksnd"),bp=.504,ended=false;
+function mkA(s){var a=new Audio(s);a.loop=true;a.preload="none";a.volume=0;return a}
+var T={intro:{a:mkA("/assets/audio/intro-music-sreemukhi.mp3"),on:false,f:0},vibe:{a:mkA("/assets/611fb91032.mp3"),on:false,f:0}};
 function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
+function flagOn(){try{return sessionStorage.getItem("fk-sound")==="1"}catch(e){return false}}
 function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
-function fadeTo(v,ms,cb){cancelAnimationFrame(fadeT);var s=mu.volume,t=performance.now();(function f(n){var k=cl((n-t)/ms,0,1);mu.volume=s+(v-s)*k;if(k<1)fadeT=requestAnimationFrame(f);else if(cb)cb()})(t)}
-function ui(){sb.setAttribute("aria-pressed",on);sb.lastElementChild.textContent=on?"Mood on":"Set the mood";if(on)sb.classList.remove("nudge");
- if(fk){fk.lastElementChild.textContent=on?"Sound off":"Sound on";fk.setAttribute("aria-label",on?"Turn sound off":"Turn sound on")}}
-/* sync=true (tapped during the intro): jump to the intro's elapsed time so the track's opening lines up with the helicopter lift. sync=false: from 0:00 with a 0.6s fade-in. */
-function start(sync){if(on)return;on=true;flag(true);ui();
- if(!ac&&/^https?:/.test(location.protocol)){try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(mu);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
- if(ac&&ac.resume)ac.resume();
- emit("fk:sound",{on:true});emit("fk:music",{id:"hero"});
- var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
- function go(){mu.volume=0;try{mu.currentTime=sync?el()%(mu.duration||60):0}catch(e){}
-  var p=mu.play();var ok=function(){if(!on)return;if(sync){var d=el()-mu.currentTime;if(Math.abs(d)>.3&&Math.abs(d)<30)try{mu.currentTime=el()%(mu.duration||60)}catch(e){}}fadeTo(VOL,sync?250:600);wake()};
-  if(p&&p.then)p.then(ok,function(){on=false;flag(false);ui()});else ok()}
- mu.preload="auto";if(mu.readyState>=1)go();else{mu.addEventListener("loadedmetadata",go,{once:true});mu.load()}}
-function stop(quiet,keep){if(!on)return;on=false;if(!keep)flag(false);ui();fadeTo(0,250,function(){if(!on)mu.pause()});if(!quiet)emit("fk:sound",{on:false})}
-sb.onclick=function(){on?stop():start(false)};
-if(fk)fk.onclick=function(){on?stop():start(true)};
-addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
-addEventListener("fk:music",function(e){if(e.detail&&e.detail.id!=="hero")stop(true,true)});
+function fade(t,v,ms,cb){cancelAnimationFrame(t.f);var s=t.a.volume,t0=performance.now();(function f(n){var k=cl((n-t0)/ms,0,1);t.a.volume=s+(v-s)*k;if(k<1)t.f=requestAnimationFrame(f);else if(cb)cb()})(t0)}
+function ui(){var v=T.vibe.on;sb.setAttribute("aria-pressed",v);sb.lastElementChild.textContent=v?"Mood on":"Set the mood";if(v)sb.classList.remove("nudge");
+ if(fk){var a=T.intro.on||v;fk.lastElementChild.textContent=a?"Sound off":"Sound on";fk.setAttribute("aria-label",a?"Turn sound off":"Turn sound on")}}
+function hook(a){if(ac||!/^https?:/.test(location.protocol))return;try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(a);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
+var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
+/* id, sync (intro only: jump to the helicopter's elapsed time), quiet (sound was already on: no fk:sound) */
+function play(id,sync,quiet){var t=T[id],a=t.a;if(t.on)return;t.on=true;flag(true);if(id==="vibe")hook(a);if(ac&&ac.resume)ac.resume();ui();
+ if(!quiet)emit("fk:sound",{on:true});emit("fk:music",{id:id});
+ function go(){a.volume=0;try{a.currentTime=sync?el()%(a.duration||60):0}catch(e){}
+  var p=a.play(),ok=function(){if(!t.on)return;if(sync){var d=el()-a.currentTime;if(Math.abs(d)>.3&&Math.abs(d)<30)try{a.currentTime=el()%(a.duration||60)}catch(e){}}fade(t,VOL,sync?250:600);if(id==="vibe")wake()};
+  if(p&&p.then)p.then(ok,function(){t.on=false;flag(false);ui()});else ok()}
+ a.preload="auto";if(a.readyState>=1)go();else{a.addEventListener("loadedmetadata",go,{once:true});a.load()}}
+function stop(id,quiet,keep){var t=T[id];if(!t.on)return;t.on=false;if(!keep)flag(false);ui();fade(t,0,250,function(){if(!t.on)t.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
+function stopAll(quiet,keep){stop("intro",true,keep);stop("vibe",true,keep);if(!quiet)emit("fk:sound",{on:false})}
+sb.onclick=function(){T.vibe.on?stop("vibe"):play("vibe",false)};
+if(fk)fk.onclick=function(){T.intro.on||T.vibe.on?stopAll():play("intro",true)};
+addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stopAll(true)});
+addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i)["intro","vibe"].forEach(function(k){if(k!==i)stop(k,true,true)})});
+/* Enter tap / auto-start: music only if sound is already on AND a tap has happened (browser rule) */
+window.__fzIntroSound=function(tap){if(!flagOn()||T.intro.on)return;if(tap||(navigator.userActivation&&navigator.userActivation.hasBeenActive))play("intro",true,true)};
+/* intro over (finished, or Skip intro): intro fades out, vibe fades in if sound was on */
+function onEnd(){if(ended)return;ended=true;finish();var was=T.intro.on||flagOn();
+ if(T.intro.on){T.intro.on=false;fade(T.intro,0,900,function(){if(!T.intro.on)T.intro.a.pause()})}
+ if(was)play("vibe",false,true)}
+addEventListener("fz:introend",onEnd);
 var bq=0,sbv=true;
-function wake(){if(on&&!bq&&sbv&&!document.hidden)bq=requestAnimationFrame(beat)}
+function wake(){if(T.vibe.on&&!bq&&sbv&&!document.hidden)bq=requestAnimationFrame(beat)}
 if("IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
-function beat(t){bq=0;if(!on){B=0;sb.style.setProperty("--b",0);return}if(!sbv||document.hidden)return;t=t||performance.now();
+function beat(t){bq=0;if(!T.vibe.on){B=0;sb.style.setProperty("--b",0);return}if(!sbv||document.hidden)return;t=t||performance.now();
  if(an){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t}}else if(t-last>504){B=1;last=t}
  B*=.9;if(B<.01)B=0;sb.style.setProperty("--b",B.toFixed(3));bq=requestAnimationFrame(beat)}
-document.addEventListener("visibilitychange",function(){if(document.hidden&&on){mu.pause()}else if(on){try{if(sessionStorage.getItem("fk-sound")!=="1")return}catch(e){}mu.play().catch(function(){});wake()}});
+document.addEventListener("visibilitychange",function(){["intro","vibe"].forEach(function(k){var t=T[k];if(document.hidden&&t.on){t.a.pause()}else if(t.on){if(!flagOn())return;t.a.play().catch(function(){});wake()}})});
 var af=document.querySelector(".askwrap .af");if(af){if("IntersectionObserver"in window){new IntersectionObserver(function(e,o){if(e[0].isIntersecting){af.classList.add("in");o.disconnect()}},{threshold:.12}).observe(af)}else af.classList.add("in")}
 })();
 

@@ -396,7 +396,7 @@ window.FursatConcierge={open:openIt,route:route};
   try{seen=sessionStorage.getItem("fz_seen")==="1"}catch(e){}
   function any(){return ids.some(function(i){return document.getElementById(i)})}
   function skipAll(){ids.forEach(function(i){var e=document.getElementById(i);e&&e.remove()});de.classList.remove("lock");var h=document.getElementById("top");h&&h.classList.add("go");
-    try{sessionStorage.setItem("fz_seen","1")}catch(e){}var b=document.getElementById("fxskipall");b&&b.remove();scrollTo(0,0)}
+    try{sessionStorage.setItem("fz_seen","1")}catch(e){}var b=document.getElementById("fxskipall");b&&b.remove();scrollTo(0,0);dispatchEvent(new Event("fz:introend"))}
   if(seen){skipAll();return}
   if(!any())return;
   var b=document.createElement("button");b.id="fxskipall";b.type="button";b.textContent="Skip intro";b.setAttribute("aria-label","Skip intro and open the site");b.addEventListener("click",skipAll);document.body.appendChild(b);
