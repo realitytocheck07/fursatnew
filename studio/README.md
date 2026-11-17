@@ -9,7 +9,7 @@ Where the client edits the Home "What's new" section. Own folder, own `package.j
    cd studio
    npm i
    ```
-2. **Add the project ID.** Copy `.env.example` to `.env`, then replace `TODO_PROJECT_ID` with the real ID from sanity.io/manage (the ID is public, not a secret). Keep `SANITY_STUDIO_DATASET=production`.
+2. **Add the project ID.** Copy `.env.example` to `.env`. It already holds the Fursat project ID `l7nho91v` (public, not a secret); change it only to use another project. Keep `SANITY_STUDIO_DATASET=production`.
    ```
    cp .env.example .env
    ```

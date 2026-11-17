@@ -40,12 +40,12 @@ Plan limits to remember (Free, checked on sanity.io/pricing on 14 Nov 2026): 2 w
 
 ## 2. Put the project ID in `studio/.env` and `.env`
 
-Open the Codespace at `/workspaces/fursat-astro`.
+Open the Codespace at `/workspaces/fursatnew`.
 
-1. Studio file: copy `studio/.env.example` to `studio/.env`. Fill in the project ID and the dataset `production`.
-2. Site file: copy `.env.example` (repo root) to `.env`. Fill in the same project ID and dataset.
-3. The names inside are, for example, `SANITY_STUDIO_PROJECT_ID` (studio) and `SANITY_PROJECT_ID` (site).
-   `CHECK:` use the exact names written in `studio/.env.example`, `.env.example` and `studio/README.md`. Those files come from phases C1 and C2.
+The project ID is **`l7nho91v`** (public, safe to commit) and the dataset is `production`. It is already the built-in default in both the Studio and the site, so these files only matter if you want to point at a different project.
+1. Studio file: copy `studio/.env.example` to `studio/.env` (it already holds `SANITY_STUDIO_PROJECT_ID=l7nho91v` and `SANITY_STUDIO_DATASET=production`).
+2. Site file: copy `.env.example` (repo root) to `.env` (it already holds `PUBLIC_SANITY_PROJECT_ID=l7nho91v` and `PUBLIC_SANITY_DATASET=production`).
+3. The exact names are `SANITY_STUDIO_PROJECT_ID` / `SANITY_STUDIO_DATASET` (studio) and `PUBLIC_SANITY_PROJECT_ID` / `PUBLIC_SANITY_DATASET` (site).
 4. `CHECK:` run `git status`. `.env` and `studio/.env` must **not** appear as new files. If they do, stop and tell me; do not commit them.
 5. **Cloudflare must know the project ID too**, because Cloudflare builds the site, not your Codespace.
    - Click path: Cloudflare dashboard -> **Workers & Pages** -> your Pages project -> **Settings** -> **Variables and secrets** (or **Environment variables**). `CHECK:` label.
@@ -125,7 +125,7 @@ Click path: Cloudflare dashboard -> **Workers & Pages** -> your Pages project ->
 4. Keep it open, or in a password manager, until steps 7 and 8 are done. Then close it.
 
 Two things to `CHECK:`
-- **Which project?** The plan calls the project `fursat-preview`. The `deploy` script in `package.json` uses the name `fursat-kitchen-bar`. Use the project that serves the site people see. The one you pick is the one whose hook you create.
+- **Which project?** The Pages project is the one connected to `realitytocheck07/fursatnew` (the old `fursat-preview` project is being deleted). The `deploy` script in `package.json` uses the name `fursat-kitchen-bar`; ignore it, the site is built by Cloudflare from Git. Use the project that serves the site people see. The one you pick is the one whose hook you create.
 - **Git connected?** Deploy hooks only exist on Pages projects that are connected to the GitHub repo. A project made by "direct upload" (wrangler) has no deploy hook option. If you do not see **Deploy hooks**, the project is not Git-connected: stop and ask me.
 
 ## 7. Create the Sanity webhook
@@ -156,7 +156,7 @@ Notes:
 
 ## 8. Add the GitHub secret `CF_DEPLOY_HOOK`
 
-Click path: GitHub -> repo `alekyareality/fursat-astro` -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**.
+Click path: GitHub -> repo `realitytocheck07/fursatnew` -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**.
 
 1. Name: **`CF_DEPLOY_HOOK`** (exactly this).
 2. Secret: paste the same deploy hook URL as in step 7.
@@ -171,6 +171,8 @@ The file `.github/workflows/daily-rebuild.yml` uses it. It runs every day at 00:
 - Also `CHECK:` GitHub pauses timed workflows when a repo has no activity for 60 days. If the daily rebuild stops, open **Actions** and enable it again.
 
 When it is on `main`, test it: **Actions** tab -> **Daily rebuild** -> **Run workflow**. A green tick means Cloudflare accepted it. A red cross with "Secret CF_DEPLOY_HOOK is missing" means step 8 was not done. A red cross with "refused" means the hook was deleted or changed (see step 10).
+
+**Important:** GitHub only runs scheduled (06:00) workflows, and shows the "Run workflow" button, from the repo's **default branch**. If the default branch of `fursatnew` is still the old `main`, the daily rebuild will **not** run until `design/reference-layout` is merged into `main` (or you set the default branch to `design/reference-layout` in repo Settings -> Branches). Until then, a card with a future Start date goes live only when someone publishes in Sanity.
 
 ## 9. Test the whole chain with a "TEST – delete me" card
 

@@ -103,7 +103,10 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   check('fallback: fetch fails -> built-in cards', down.source === 'fallback' && same(down.items, expected.items) && down.items.length >= 3, down.source);
   check('fallback: log line says fallback and why', logs[0] === '[cms] news: fallback (Sanity unreachable)', logs[0]);
 
-  const noId = await getNews({ now: NOW, data, log }); // real sanityQuery, no PUBLIC_SANITY_PROJECT_ID set
+  const prevId = process.env.PUBLIC_SANITY_PROJECT_ID;
+  process.env.PUBLIC_SANITY_PROJECT_ID = 'TODO_PROJECT_ID'; // the real ID is the default now, so ask for the placeholder to test "no project ID"
+  const noId = await getNews({ now: NOW, data, log }); // real sanityQuery, nothing fetched
+  if (prevId === undefined) delete process.env.PUBLIC_SANITY_PROJECT_ID; else process.env.PUBLIC_SANITY_PROJECT_ID = prevId;
   check('fallback: no project ID -> built-in cards, nothing fetched', noId.source === 'fallback' && logs[1] === '[cms] news: fallback (no project ID set)', logs[1]);
 
   const empty = await getNews({ now: NOW, data, log, query: async () => ({ data: { settings: { showBuiltIn: true }, cards: [] } }) });
