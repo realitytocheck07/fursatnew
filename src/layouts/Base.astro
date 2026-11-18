@@ -1,6 +1,7 @@
 ---
 import AskFab from '../components/AskFab.astro';
 import InstaFab from '../components/InstaFab.astro';
+import WaAgent from '../components/WaAgent.astro';
 import fs from 'node:fs';
 import ld from '../data/ld.json';
 import site from '../data/site.json';
@@ -181,5 +182,6 @@ const ogDims = imgDims(PUBLIC + ogPath);
 <slot />
 <AskFab />
 <InstaFab />
+<WaAgent />
 </body>
 </html>
