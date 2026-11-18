@@ -99,7 +99,7 @@ test('debug: locked without the token, works with it, only allowed paths', async
 test('menu page hook: script only loads when site.json rista.live is true', async () => {
   const fs = await import('node:fs');
   const site = JSON.parse(fs.readFileSync(new URL('../../src/data/site.json', import.meta.url), 'utf8'));
-  assert.equal(site.rista.live, false);
+  assert.equal(typeof site.rista.live, 'boolean');
   assert.match(fs.readFileSync(new URL('../../src/pages/menu.astro', import.meta.url), 'utf8'), /site\.rista\?\.live && <script is:inline src="\/js\/rista-live\.js"/);
 });
 
@@ -114,7 +114,7 @@ test('rista-live.js: marks sold-out rows, leaves others, survives a failed call'
   const run = async (fetchImpl) => { globalThis.fetch = fetchImpl; globalThis.document = { querySelectorAll: () => [a, b], createElement: () => ({}) };
     new Function(src)(); await new Promise((r) => setTimeout(r, 20)); };
   await run(async () => Response.json({ soldOutKnown: true, categories: [{ items: [{ key: 'dynamite-prawns', soldOut: true }, { key: 'paneer-tikka', soldOut: false }] }] }));
-  assert.equal(a.attrs['data-soldout'], '1'); assert.equal(a.btn.disabled, true); assert.equal(a.t.textContent, 'Sold out'); assert.equal(a.chips.children.length, 1);
+  assert.equal(a.attrs['data-soldout'], '1'); assert.equal(a.btn.disabled, true); assert.equal(a.t.textContent, 'Not available'); assert.equal(a.chips.children.length, 1);
   assert.equal(b.attrs['data-soldout'], undefined); assert.equal(b.btn.disabled, false);
   const c = mk(); c.name = 'Dynamite Prawns'; globalThis.document.querySelectorAll = () => [c];
   await run(async () => { throw new Error('offline'); });

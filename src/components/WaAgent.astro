@@ -196,6 +196,7 @@ html.lock .waf { display: none; }
 .waf-oa { flex: none; width: 20px; height: 20px; color: #9a6f2a; transition: transform 200ms var(--waf-ease); }
 .waf-oa svg { width: 20px; height: 20px; }
 @media (hover: hover) { .waf-opt:hover::before { transform: scaleX(1); } .waf-opt:hover .waf-oa { transform: translateX(4px); } .waf-opt:hover { box-shadow: 0 10px 20px -12px rgb(43 36 22 / .55), inset 0 0 0 1px rgb(201 154 67 / .8); } }
+@media (max-width: 767px) { .waf-fab, .waf-tease { display: none; } }
 @media (min-width: 768px) {
   .waf-fab { right: 20px; bottom: calc(20px + var(--fab-lift, 0px)); width: 56px; height: 56px; }
   .waf-tease { right: 88px; bottom: calc(32px + var(--fab-lift, 0px)); }

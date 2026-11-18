@@ -17,9 +17,9 @@
         if (!n || !out[slug(n.textContent)] || li.hasAttribute('data-soldout')) return;
         li.setAttribute('data-soldout', '1');
         var chips = li.querySelector('.fk-chips');
-        if (chips) { var c = document.createElement('span'); c.className = 'fk-chip fk-chip--soldout'; c.textContent = 'Sold out'; chips.appendChild(c); }
+        if (chips) { var c = document.createElement('span'); c.className = 'fk-chip fk-chip--soldout'; c.textContent = 'Not available'; chips.appendChild(c); }
         var b = li.querySelector('.mv-add');
-        if (b) { b.disabled = true; b.setAttribute('aria-disabled', 'true'); var s = b.querySelector('.mv-add-t'); if (s) s.textContent = 'Sold out'; }
+        if (b) { b.disabled = true; b.setAttribute('aria-disabled', 'true'); var s = b.querySelector('.mv-add-t'); if (s) s.textContent = 'Not available'; }
       });
     })
     .catch(function () { if (t) clearTimeout(t); });
