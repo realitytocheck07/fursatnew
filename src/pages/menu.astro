@@ -361,6 +361,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
   </dialog>
 
   <SiteFooter />
+  {site.rista?.live && <script is:inline src="/js/rista-live.js" defer></script>}
 </Base>
 
 <script>

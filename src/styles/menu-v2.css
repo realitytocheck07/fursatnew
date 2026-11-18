@@ -536,3 +536,8 @@ html:has(.mv){background:var(--fk-plaster-base)}
 
 /* Drinks: no Veg/Non-veg chip on bar items (owner review) */
 #mv-drinks .fk-chip--veg,#mv-drinks .fk-chip--nonveg{display:none}
+
+/* Rista live stock (public/js/rista-live.js): dish marked sold out */
+.mv-card[data-soldout] .mv-c-thumb img,.mv-card[data-soldout] .mv-c-ph{opacity:.5;filter:grayscale(.6)}
+.fk-chip--soldout{background:#ececec;color:#4a4a4a;border:1px solid #cfcfcf}
+.mv-card .mv-add[disabled]{background:#ececec;color:#4a4a4a;border:1px solid #cfcfcf;cursor:not-allowed}
