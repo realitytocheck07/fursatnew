@@ -6,8 +6,11 @@
   var active = false;
   var MUSIC = '/assets/audio/drinks-intro-music.mp3', MUSIC_VOL = 0.7;
 
-  // sound is on only if the visit-wide flag says so (see SOUND-CONTRACT.md)
-  function soundOn() { try { return sessionStorage.getItem('fk-sound') === '1'; } catch (e) { return false; } }
+  // DRINKS-SOUND: the drinks music has its own on/off (button on the video). It starts from the tap that opens Drinks
+  // and is NOT tied to the home-page Sound / Mood buttons. Off only if the guest switched it off this visit.
+  var SKEY = 'fk-drinks-sound';
+  function musicWanted() { try { return sessionStorage.getItem(SKEY) !== '0'; } catch (e) { return true; } }
+  function setWanted(v) { try { sessionStorage.setItem(SKEY, v ? '1' : '0'); } catch (e) {} }
 
   function seen() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
   function mark() { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
@@ -39,11 +42,14 @@
     }
     var skip = document.createElement('button');
     skip.type = 'button'; skip.className = 'di-skip'; skip.textContent = 'Skip ✕'; skip.setAttribute('aria-label', 'Skip the drinks intro');
-    ov.append(v, skip);
+    var snd = document.createElement('button');
+    snd.type = 'button'; snd.className = 'di-snd';
+    snd.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></svg><span></span>';
+    ov.append(v, skip, snd);
 
     // music: created only now (never preloaded), plays with the video, fades out over FADE_MS, never restarts
     function musicStop(ms) {
-      if (!au) return; var a = au; au = null; window.removeEventListener('fk:sound', onSound); window.removeEventListener('fk:music', onMusic);
+      if (!au) return; var a = au; au = null; window.removeEventListener('fk:music', onMusic);
       clearInterval(fadeT);
       if (!ms) { a.pause(); return; }
       var t0 = Date.now(), v0 = a.volume;
@@ -52,15 +58,38 @@
         if (k >= 1) { clearInterval(fadeT); a.pause(); }
       }, 40);
     }
-    function onSound(e) { if (!(e.detail && e.detail.on)) musicStop(0); }
-    function onMusic(e) { if (e.detail && e.detail.id !== 'drinks') musicStop(0); }
-    function musicStart() {
-      if (au || !soundOn()) return;
-      var a = new Audio(MUSIC); a.volume = MUSIC_VOL; a.loop = false; au = a;
-      window.addEventListener('fk:sound', onSound); window.addEventListener('fk:music', onMusic);
-      var p = a.play();
-      if (p && p.then) p.then(function () { if (au === a) window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } })); }, function () { if (au === a) musicStop(0); });
+    function sndUi() {
+      var want = musicWanted() && !!au;
+      snd.setAttribute('aria-pressed', want ? 'true' : 'false');
+      snd.setAttribute('aria-label', want ? 'Turn drinks music off' : 'Turn drinks music on');
+      snd.lastChild.textContent = want ? 'Sound on' : 'Sound off';
     }
+    function onMusic(e) { if (e.detail && e.detail.id !== 'drinks') { musicStop(0); sndUi(); } }
+    // prime: runs inside the tap that opened Drinks (browsers only allow sound from a tap). Starts muted, unmuted when the video plays.
+    function musicPrime() {
+      if (au || !musicWanted()) return;
+      var a = new Audio(MUSIC); a.loop = false; a.volume = MUSIC_VOL; a.muted = true; au = a;
+      window.addEventListener('fk:music', onMusic);
+      var p = a.play();
+      if (p && p.catch) p.catch(function () { if (au === a) { musicStop(0); sndUi(); } });
+    }
+    function musicStart() {
+      if (!au || !musicWanted()) { sndUi(); return; }
+      try { au.currentTime = Math.min(v.currentTime || 0, au.duration || 1e9); } catch (e) {}
+      au.volume = MUSIC_VOL; au.muted = false;
+      var p = au.play(); if (p && p.catch) p.catch(function () {});
+      window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } }));
+      sndUi();
+    }
+    function toggleSound(e) {
+      e.stopPropagation(); // never closes the video
+      if (musicWanted() && au) { setWanted(false); au.pause(); sndUi(); return; }
+      setWanted(true);
+      if (!au) { musicPrime(); }
+      if (au) { try { au.currentTime = Math.min(v.currentTime || 0, au.duration || 1e9); } catch (er) {} au.muted = false; au.volume = MUSIC_VOL; var p = au.play(); if (p && p.catch) p.catch(function () {}); window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } })); }
+      sndUi();
+    }
+    snd.addEventListener('click', toggleSound);
     function unlock() { root.style.overflow = prev.r; body.style.overflow = prev.b; }
     function cleanup() {
       document.removeEventListener('keydown', onKey, true);
@@ -85,7 +114,7 @@
     }
     function onKey(e) {
       if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); }
-      else if (e.key === 'Tab') { e.preventDefault(); skip.focus(); } // Skip is the only control: keep focus on it
+      else if (e.key === 'Tab') { e.preventDefault(); (document.activeElement === skip ? snd : skip).focus(); } // two controls: Skip and the sound button
     }
     function start() {
       if (shown || closing) return; shown = true; clearTimeout(timer);
@@ -102,6 +131,7 @@
     document.addEventListener('keydown', onKey, true);
     document.body.append(ov);
     timer = setTimeout(function () { if (!shown) close(); }, START_MS); // not started in 1.5s: open normally
+    musicPrime(); sndUi();
     var p = v.play(); if (p && p.catch) p.catch(function () { close(); });
   }
 
