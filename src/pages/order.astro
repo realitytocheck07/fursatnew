@@ -28,9 +28,11 @@ const picks = (featured.chefPicks as { name: string; role: string }[])
   .filter(Boolean) as any[];
 
 const wa = (text: string) => `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
-// TODO(client): confirm pickup orders by WhatsApp are accepted. Until Rista pickup is live (site.json order.pickup), the Pickup button opens WhatsApp.
-const pickupHref = order.pickup ? '#pickup' : wa('Hi Fursat, I would like to place a pickup order.');
-const pickupLabel = order.pickup ? 'Order for pickup' : 'Pickup on WhatsApp';
+// Pickup opens the Fursat DotPe store (site.json order.dotpe): DotPe does the menu, phone OTP and payment.
+// If order.dotpe is ever empty, the button falls back to WhatsApp. (order.pickup is the unused in-site pickup block.)
+const dotpe = order.dotpe;
+const pickupHref = dotpe || wa('Hi Fursat, I would like to place a pickup order.');
+const pickupLabel = dotpe ? 'Order for pickup' : 'Pickup on WhatsApp';
 
 // WhatsApp glyph for the pickup button (hidden once real pickup ordering is live)
 const waIcon = '<svg class="od-wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 19Z"/><path d="M9 9c0 3 3 6 6 6l1.2-1.4-2-1-1 .7c-.9-.4-1.6-1.1-2-2l.7-1-1-2Z"/></svg>';
@@ -100,8 +102,8 @@ const menuTiles = [
               <h2 class="od-ct" id="od-t-pick">Pickup from <span class="g">Fursat</span></h2>
               <p class="od-cs">Skip the wait, collect it fresh</p>
               <ul class="od-feat"><li>Pick your own time</li><li>Capital Park, Madhapur</li></ul>
-              <a class="od-btn od-btn--wa" href={pickupHref} target={order.pickup ? undefined : '_blank'} rel={order.pickup ? undefined : 'noopener'}>
-                <Fragment set:html={order.pickup ? '' : waIcon} /><span>{pickupLabel}</span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <a class="od-btn od-btn--wa" href={pickupHref} target="_blank" rel="noopener">
+                <Fragment set:html={dotpe ? '' : waIcon} /><span>{pickupLabel}<span class="od-vh"> (opens in a new tab)</span></span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </a>
             </article>
 
