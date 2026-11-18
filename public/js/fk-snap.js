@@ -8,7 +8,7 @@
      data-snap-last      last snap point: tall content scrolls freely, then the page scrolls normally
    Script tag option: data-block="css selector" = extra "something is open" selector that pauses snapping.
    A section taller than the screen scrolls freely once its top is reached; snapping resumes at its edges.
-   Off for: reduced motion, screens shorter than 560px, a focused text field, any open dialog or sheet. */
+   Off for: reduced motion, screens shorter than 420px, a focused text field, any open dialog or sheet. */
 (function () {
   'use strict';
   if (window.fkSnap) return;
@@ -79,7 +79,7 @@
     return { t: 'snap', to: p.tall ? p.limit : p.target };
   }
 
-  function supported() { return !reduce.matches && w.innerHeight >= 560 && d.querySelectorAll('[data-snap]').length > 1; }
+  function supported() { return !reduce.matches && w.innerHeight >= 420 && d.querySelectorAll('[data-snap]').length > 1; }
   function dialogOpen() { return !!d.querySelector(BLOCK) || root.style.overflow === 'hidden'; }
   function fieldFocused() {
     var a = d.activeElement; if (!a || a === d.body) return false;
@@ -91,7 +91,7 @@
   /* an inner scroller (sheet, textarea, list) that can still move keeps the gesture */
   function innerScroll(el, dir) {
     for (; el && el !== d.body && el !== root; el = el.parentElement) {
-      if (el.scrollHeight <= el.clientHeight + 1) continue;
+      if (el.scrollHeight - el.clientHeight < 40) continue; /* a sideways rail with a few px of vertical slack is not a vertical scroller */
       var oy = getComputedStyle(el).overflowY;
       if (oy !== 'auto' && oy !== 'scroll') continue;
       if (dir > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0) return true;
@@ -282,6 +282,11 @@
     sync();
   }
 
-  w.fkSnap = { goTo: goTo };
+  /* console help: fkSnap.why() says if snapping is on and, if not, why */
+  function why() {
+    var r = { snapOn: enabled(), reducedMotion: reduce.matches, viewportHeight: w.innerHeight, minHeight: 420, snapSections: d.querySelectorAll('[data-snap]').length, dialogOrLockOpen: dialogOpen(), fieldFocused: fieldFocused(), scrollerIsBody: !!scroller(), scrollY: getY(), maxY: maxY() };
+    console.table(r); return r;
+  }
+  w.fkSnap = { goTo: goTo, why: why };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init); else init();
 })();
