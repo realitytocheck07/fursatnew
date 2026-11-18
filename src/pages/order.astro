@@ -55,7 +55,7 @@ const menuTiles = [
   title="Order Online — Pickup, Swiggy & Zomato | Fursat Kitchen | Bar | Madhapur"
   description="Order Fursat Kitchen | Bar your way: pick up at Capital Park, Madhapur, or get it delivered on Swiggy or Zomato. Browse the full menu or reserve a table."
   canonical="https://fursatind.in/order/"
-  ogImage="https://fursatind.in/assets/fursat_space_10.webp"
+  ogImage="https://fursatind.in/assets/order/order-hero-1200.webp"
   ogImageAlt="Fursat Kitchen | Bar — Order online in Madhapur"
 >
   <SiteHeader active="order" variant="plaster" />
@@ -63,20 +63,19 @@ const menuTiles = [
   <main class="od-page" id="main">
     <!-- the scene: round-table photo fades into a cream-gold floor; sidebar + 3 cards + menu strip all sit on it -->
     <div class="od-scene" id="choose">
-      <img class="od-hero-bg" src="/assets/feast/feast-table-1600.webp" srcset="/assets/feast/feast-table-768.webp 768w, /assets/feast/feast-table-1200.webp 1200w, /assets/feast/feast-table-1600.webp 1600w" sizes="100vw" width="1600" height="810" alt="" fetchpriority="high" decoding="async" />
-      <svg class="od-palace" viewBox="0 0 320 120" aria-hidden="true"><path d="M0 119h320M14 119V70h18v49M23 70V56M52 119V52q20-34 40 0v67M72 36V22M112 119V62h12v-12l6-9 6 9v12h12v57M170 119V58q24-40 48 0v61M194 28V14M236 119V72h16v47M262 119V84q16-24 32 0v35"/></svg>
+      <picture class="od-hero-pic">
+        <source media="(max-width:760px)" srcset="/assets/order/order-hero-phone-720.webp 720w, /assets/order/order-hero-phone-1112.webp 1112w" sizes="100vw" />
+        <img class="od-hero-bg" src="/assets/order/order-hero-1600.webp" srcset="/assets/order/order-hero-768.webp 768w, /assets/order/order-hero-1200.webp 1200w, /assets/order/order-hero-1600.webp 1600w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async" />
+      </picture>
 
       <div class="od-hero-in">
         <p class="od-k"><span>Order online</span></p>
         <h1 class="od-h" id="od-h1">Choose how you want to <em>order</em></h1>
         <p class="od-sub">Pick your preferred way to enjoy Fursat.</p>
-        <i class="od-rule" aria-hidden="true"></i>
-      </div>
-      <p class="od-script" aria-hidden="true">Good Food.<br>Great Vibes.</p>
-      <div class="od-col" aria-hidden="true">
-        <img class="od-col-a" src="/assets/dishes/new/nalli-gosht-biryani-half-720.webp" alt="" width="720" height="720" decoding="async" />
-        <img class="od-col-b" src="/assets/dishes/new/iced-latte-480.webp" alt="" width="480" height="480" loading="lazy" decoding="async" />
-        <img class="od-col-c" src="/assets/dishes/new/cappuccino-480.webp" alt="" width="480" height="480" loading="lazy" decoding="async" />
+        <div class="od-chips" aria-hidden="true">
+          <img src="/assets/dishes/new/iced-latte-480.webp" alt="" width="92" height="92" loading="lazy" decoding="async" />
+          <img src="/assets/menu/table/biscoff-cheesecake-480.webp" alt="" width="92" height="92" loading="lazy" decoding="async" />
+        </div>
       </div>
 
       <div class="od-grid">
@@ -108,8 +107,7 @@ const menuTiles = [
             </article>
 
             <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-sw">
-              <span class="od-logo"><img src="/assets/brand/swiggy-mark.svg" alt="" width="64" height="64" decoding="async" /></span>
-              <span class="od-badge od-badge--sw" aria-hidden="true"><svg viewBox="0 0 64 64"><path fill="#fff" d="M25 24.5c0-4.2 3.2-7.3 7.4-7.3 2.7 0 4.9 1.1 6.1 2.9.5.8.3 1.8-.6 2.3-.8.5-1.8.3-2.4-.5-.6-.8-1.7-1.3-3.1-1.3-2.1 0-3.4 1.2-3.4 2.9 0 1.5 1 2.4 3.6 3.3 4.7 1.6 6.7 3.4 6.7 7 0 4.3-3.3 7.1-8 7.1-3.1 0-5.7-1.3-7-3.4-.5-.8-.3-1.8.6-2.3.8-.5 1.9-.3 2.5.5 1 1.3 2.3 1.9 4 1.9 2.4 0 3.8-1.1 3.8-2.8 0-1.6-1-2.5-3.9-3.5-4.4-1.5-6.3-3.3-6.3-7z"/></svg></span>
+              <span class="od-brand" aria-hidden="true"><img src="/assets/brand/swiggy-mark.svg" alt="" width="64" height="64" decoding="async" /><b class="od-brand-sw">Swiggy</b></span>
               <h2 class="od-ct" id="od-t-sw">Order on <span class="r">Swiggy</span></h2>
               <p class="od-cs">Fast &amp; reliable delivery</p>
               <ul class="od-feat"><li>Home delivery</li><li>Live order tracking</li></ul>
@@ -119,8 +117,7 @@ const menuTiles = [
             </article>
 
             <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-zo">
-              <span class="od-logo od-logo--zomato"><img src="/assets/brand/zomato-logo.svg" alt="" width="160" height="64" decoding="async" /></span>
-              <span class="od-badge od-badge--zo" aria-hidden="true">z</span>
+              <span class="od-brand" aria-hidden="true"><img class="od-brand-zo" src="/assets/brand/zomato-logo.svg" alt="" width="160" height="64" decoding="async" /></span>
               <h2 class="od-ct" id="od-t-zo">Order on <span class="r">Zomato</span></h2>
               <p class="od-cs">Great food, great service</p>
               <ul class="od-feat"><li>Easy reorders</li><li>Easy payments</li></ul>

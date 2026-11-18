@@ -7,21 +7,23 @@
 :is(.od-steps a,.od-btn,.od-tile,.od-route,.od-cat,.od-chip,.od-dots button,.od-picks a):focus-visible{outline:3px solid var(--fk-focus,#8a5a14);outline-offset:3px}
 
 /* ---- scene ---- */
-.od-scene{position:relative;isolation:isolate;overflow:hidden;padding:clamp(28px,4.4vw,60px) clamp(14px,3.4vw,52px) clamp(24px,3vw,40px);background:linear-gradient(180deg,#f7e8cc 0%,#fbf3e7 100%)}
-.od-hero-bg{position:absolute;inset:0 0 auto;z-index:-3;width:100%;height:min(66%,640px);object-fit:cover;object-position:50% 45%;filter:brightness(.5) saturate(1.1);-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
-.od-hero-in{position:relative;text-align:center;max-width:760px;margin:0 auto clamp(26px,3.4vw,46px);color:#fbeedd}
-.od-k{margin:0 0 12px;display:flex;align-items:center;justify-content:center;gap:16px;font:600 .8125rem/1 var(--fk-sans);letter-spacing:.34em;text-transform:uppercase;color:#e6b85c}
-.od-k::before,.od-k::after{content:"";width:clamp(24px,6vw,72px);height:1px;background:rgba(230,184,92,.7)}
-.od-h{margin:0;font:500 clamp(2.1rem,1rem + 4.2vw,4.1rem)/1.06 var(--fk-serif);letter-spacing:-.01em;color:#fff8ee;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.45)}
-.od-h em{font-style:italic;color:#e6b85c}
-.od-sub{margin:12px 0 0;font:400 1.0625rem/1.5 var(--fk-sans);color:#f1e2c8}
-.od-rule{display:block;width:clamp(120px,16vw,200px);height:2px;margin:18px auto 0;background:linear-gradient(90deg,transparent,#e6b85c,transparent)}
-.od-script{position:absolute;top:clamp(70px,9vw,130px);right:clamp(16px,4vw,70px);margin:0;rotate:-8deg;text-align:left;font:italic 500 clamp(1.3rem,.9rem + 1.6vw,2.2rem)/1.2 var(--fk-serif);color:#fbeedd;text-shadow:0 2px 14px rgba(0,0,0,.5)}
-.od-palace{position:absolute;right:clamp(0px,2vw,30px);bottom:0;z-index:-1;width:clamp(180px,24vw,340px);height:auto;fill:none;stroke:rgba(201,154,67,.45);stroke-width:1.3;pointer-events:none}
-.od-col img{position:absolute;z-index:0;object-fit:cover;border-radius:50%;border:2px solid rgba(230,184,92,.85);box-shadow:0 18px 40px -10px rgba(0,0,0,.65)}
-.od-col-a{left:clamp(6px,2.4vw,40px);top:clamp(70px,9vw,140px);width:clamp(120px,19vw,300px);height:clamp(120px,19vw,300px)}
-.od-col-b{right:clamp(14px,3vw,60px);top:clamp(200px,15.5vw,250px);width:clamp(70px,8vw,128px);height:clamp(70px,8vw,128px)}
-.od-col-c{right:clamp(100px,13vw,220px);top:clamp(225px,17vw,270px);width:clamp(56px,6vw,92px);height:clamp(56px,6vw,92px)}
+/* the hero photo is the client's own image, shown exactly as supplied (no colour wash). Only a light ivory fade sits on its left edge so the dark headline reads; it fades into the cream floor at the bottom. */
+.od-scene{--od-ph:min(56.25vw,900px);position:relative;isolation:isolate;overflow:hidden;padding:clamp(30px,4.2vw,58px) clamp(14px,3.4vw,52px) clamp(24px,3vw,40px);background:linear-gradient(180deg,#fbf1de 0%,#fdf7ec 60%,#fbf3e7 100%)}
+.od-hero-pic{position:absolute;inset:0 0 auto;z-index:-3;display:block;height:var(--od-ph);-webkit-mask-image:linear-gradient(#000 70%,transparent 99%);mask-image:linear-gradient(#000 70%,transparent 99%)}
+.od-hero-bg{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.od-scene::before{content:"";position:absolute;inset:0 0 auto;height:var(--od-ph);z-index:-2;pointer-events:none;background:linear-gradient(90deg,rgba(255,249,238,.96) 0%,rgba(255,249,238,.84) 22%,rgba(255,249,238,.4) 36%,rgba(255,249,238,0) 46%)}
+/* fk-tokens.css pads this page 92-148px below the header for the other pages; the photo here starts right under the header */
+.od-page#main{padding-top:var(--sh-h,104px)}
+.od-hero-in{position:relative;max-width:1300px;margin:0 auto clamp(30px,4.4vw,64px);text-align:left}
+.od-k{margin:0 0 14px;display:flex;align-items:center;justify-content:flex-start;gap:14px;font:600 .8125rem/1 var(--fk-sans);letter-spacing:.34em;text-transform:uppercase;color:var(--od-gold-d)}
+.od-k::before,.od-k::after{content:"";width:clamp(24px,4vw,56px);height:1px;background:var(--od-gold)}
+/* ".od-page :is(h1,h2,h3)" in fk-tokens.css paints every heading dark green and outranks a bare .od-h, so the hero headline is scoped to win */
+.od-page .od-hero-in .od-h{margin:0;max-width:8.6em;font:500 clamp(2.1rem,1rem + 3.6vw,3.7rem)/1.06 var(--fk-serif);letter-spacing:-.01em;color:var(--od-green);text-wrap:balance}
+.od-page .od-hero-in .od-h em{font-style:italic;color:var(--od-red)}
+.od-sub{margin:14px 0 0;font:400 1.0625rem/1.5 var(--fk-sans);color:#3b3326}
+.od-chips{display:flex;margin-top:22px}
+.od-chips img{width:clamp(64px,6.4vw,92px);height:clamp(64px,6.4vw,92px);object-fit:cover;border-radius:50%;border:2px solid var(--od-gold);background:#f6e9d1;box-shadow:0 12px 26px -10px rgba(74,48,16,.55)}
+.od-chips img+img{margin-left:-12px}
 
 /* ---- sidebar + cards ---- */
 .od-grid{position:relative;z-index:1;display:grid;grid-template-columns:clamp(210px,17vw,250px) minmax(0,1fr);gap:clamp(14px,1.8vw,26px);align-items:stretch;max-width:1300px;margin:0 auto;padding-top:34px}
@@ -39,25 +41,21 @@
 .od-cards{min-width:0}
 .od-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.6vw,22px)}
 
-.od-card{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:center;padding:178px clamp(14px,1.6vw,22px) 20px;border-radius:28px;
+.od-card{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:center;padding:158px clamp(14px,1.6vw,22px) 20px;border-radius:28px;
   background:linear-gradient(180deg,#fffaf0,#f8ecd8);border:1px solid var(--od-edge);box-shadow:0 1px 0 #fff inset,0 20px 36px -16px rgba(74,48,16,.35),0 3px 8px rgba(74,48,16,.08);transition:transform 300ms var(--fk-ease-out)}
 .od-card--pick{border-color:var(--od-gold);box-shadow:0 1px 0 #fff inset,0 0 0 3px rgba(201,154,67,.22),0 22px 40px -14px rgba(138,90,34,.45)}
 @media (hover:hover) and (pointer:fine){.od-card:hover{transform:translateY(-4px)}}
 .od-tag{position:absolute;top:-16px;left:50%;translate:-50% 0;z-index:3;white-space:nowrap;padding:8px 16px;border-radius:999px;font:700 .75rem/1 var(--fk-sans);letter-spacing:.14em;text-transform:uppercase;color:#4a2a00;background:linear-gradient(180deg,#f7dc8b,#e9a93a);box-shadow:0 8px 16px -6px rgba(138,90,34,.6),inset 0 1px 0 rgba(255,255,255,.6)}
-/* top artwork: green panel (pickup) or skyline line-art (delivery), a badge straddling its bottom edge */
+/* top artwork: green panel (pickup) or the delivery app's own logo on cream (Swiggy, Zomato), as in the mockup */
 .od-pimg{position:absolute;inset:0 0 auto;height:128px;display:grid;place-items:center;border-radius:27px 27px 0 0;background:radial-gradient(120% 120% at 50% 0,#2f6a36,#14301c)}
 .od-pimg img{width:72px;height:72px;object-fit:contain;opacity:.95}
-.od-card--city::before{content:"";position:absolute;inset:0 0 auto;height:128px;border-radius:27px 27px 0 0;opacity:.55;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 90' fill='none' stroke='%23c99a43' stroke-width='1.2'%3E%3Cpath d='M0 88h300M8 88V56h16v32M16 56v-9M36 88V44q16-26 32 0v44M52 40v-10M84 88V34h8v-9l4-7 4 7v9h8v54M120 88V50q22-38 44 0v38M142 22v-9M178 88V40h10v-8l5-9 5 9v8h10v48M222 88V56q15-20 30 0v32M262 88V48h14v40M270 48v-8'/%3E%3C/svg%3E") center bottom/100% 100% no-repeat}
-.od-logo{position:absolute;top:14px;left:50%;translate:-50% 0;display:grid;place-items:center;width:92px;height:92px;border-radius:50%;background:#fff;border:1px solid var(--od-edge);box-shadow:0 0 0 5px rgba(255,255,255,.7),0 12px 22px -8px rgba(74,48,16,.4)}
-.od-logo img{width:50px;height:50px;object-fit:contain}
-.od-logo--zomato{width:auto;height:auto;border:0;border-radius:16px;background:none;box-shadow:0 12px 22px -8px rgba(120,20,20,.55)}
-.od-logo--zomato img{width:92px;height:auto;border-radius:16px}
+.od-brand{position:absolute;inset:0 0 auto;height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.od-brand img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(252,128,25,.35))}
+.od-brand .od-brand-sw{font:700 1.05rem/1 var(--fk-sans);letter-spacing:.22em;text-transform:uppercase;color:#e8590c}
+.od-page .od-brand img.od-brand-zo{width:128px;height:auto;border-radius:18px;border:3px solid #fff;box-shadow:0 12px 22px -8px rgba(160,20,30,.55)}
 .od-badge{position:absolute;top:104px;left:50%;translate:-50% 0;z-index:2;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:3px solid #fff8ee;box-shadow:0 8px 16px -6px rgba(74,48,16,.5);color:#fff}
 .od-badge svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .od-badge--bag{background:var(--od-green);border-color:var(--od-gold);color:#e6b85c}
-.od-badge--sw{background:#fc8019}.od-badge--sw svg{width:30px;height:30px;stroke:none}
-.od-badge--zo{background:#e23744;font:italic 700 1.5rem/1 var(--fk-sans)}
 
 .od-ct{margin:0;font:500 clamp(1.25rem,1rem + .7vw,1.65rem)/1.15 var(--fk-serif);color:var(--od-ink)}
 .od-ct .g{color:var(--od-wm)}
@@ -207,7 +205,6 @@
 
 
 /* ---- tablet + phone: sidebar becomes a step strip, the three options slide sideways ---- */
-@media (max-width:1100px){.od-script{display:none}}
 @media (max-width:960px){
   .od-grid{grid-template-columns:minmax(0,1fr);padding-top:0}
   .od-rail{flex-direction:row;align-items:center;gap:8px;padding:8px;border-radius:999px;overflow-x:auto;scrollbar-width:none}
@@ -220,11 +217,17 @@
   .od-card{flex:0 0 min(78%,320px);scroll-snap-align:center}
   .od-dots{display:flex}
   .od-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .od-col{display:none}
+}
+@media (max-width:760px){
+  /* phone: headline sits on plain ivory, the photo shows in a window below it and fades into the cards */
+  .od-scene::before{display:none}
+  .od-hero-pic{top:198px;bottom:auto;height:290px;-webkit-mask-image:linear-gradient(transparent 0,#000 18%,#000 80%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 18%,#000 80%,transparent 100%)}
+  .od-hero-bg{object-position:50% 14%}
+  .od-hero-in{margin-bottom:250px}
+  .od-hero-in .od-chips{display:none}
 }
 @media (max-width:620px){
   .od-page{padding-bottom:128px}
-  .od-col{display:none}
     .od-grid{gap:30px}
   .od-routes{grid-template-columns:minmax(0,1fr)}
   .od-ask{flex-direction:column;align-items:stretch;gap:12px}
@@ -242,3 +245,4 @@
   .od-btn:hover::before{transform:translateX(-101%)}
   .od-row{scroll-behavior:auto}
 }
+.od-page .od-ask .od-ask-t{color:#fff}

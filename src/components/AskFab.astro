@@ -11,14 +11,15 @@ const HINTS: Record<string, string> = {
   '/party': 'party starters',
   '/catering': 'biryani for a group',
   '/reserve': 'dinner for two',
+  '/order': 'what to order',
 };
 const q = HINTS[path];
 const href = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
-const show = path !== '/ask' && path !== '/404' && path !== '/order';
+const show = path !== '/ask' && path !== '/404';
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 // the hint bubble each kind of section gets (the page's own default comes from its path)
 const BUBBLES = { menu: 'Hungry? 🍛', party: 'Party plans? 🎉', bar: 'Cricket tonight? 🏏' /* TODO(client): confirm the cricket line */, cafe: 'Coffee break? ☕', any: 'Ask me anything!' };
-const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party', '/party': 'party', '/restaurant-bar': 'bar', '/cafe': 'cafe' };
+const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/banquet': 'party', '/party': 'party', '/restaurant-bar': 'bar', '/cafe': 'cafe' };
 ---
 {show && (
   <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined} data-page-key={PAGE_KEY[path] || 'any'} data-bubbles={JSON.stringify(BUBBLES)}>
