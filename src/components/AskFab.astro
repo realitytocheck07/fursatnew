@@ -14,7 +14,7 @@ const HINTS: Record<string, string> = {
 };
 const q = HINTS[path];
 const href = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
-const show = path !== '/ask' && path !== '/404';
+const show = path !== '/ask' && path !== '/404' && path !== '/order';
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 // the hint bubble each kind of section gets (the page's own default comes from its path)
 const BUBBLES = { menu: 'Hungry? 🍛', party: 'Party plans? 🎉', bar: 'Cricket tonight? 🏏' /* TODO(client): confirm the cricket line */, cafe: 'Coffee break? ☕', any: 'Ask me anything!' };
