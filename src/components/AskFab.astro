@@ -1,5 +1,5 @@
 ---
-// AskFab — the "Ask Fursat" mascot button on every page (not on /ask). Plays a light Super-Mario routine: drops in on Home after the intro,
+// AskFab — the "Ask Fursat" mascot button on every page (not on /ask). Plays a lively Super-Mario routine (more hops, spin and back-flip jumps, triple coins + sparkles, a power jump every 3rd section): drops in on Home after the intro,
 // hops now and then, hops when scrolling starts, jumps + coin + a tiny hint when a new main section arrives, and jumps big on tap.
 // Page-aware: opens /ask with a starting question that fits the page the guest is on.
 // Motion is CSS transform only. Reduced motion: static, no bubbles except on tap. No sound.
@@ -25,7 +25,8 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" data-cheer="/assets/ask-mascot-cheer-sm.webp" />
     <span class="afab-t"><b>Ask</b> <span translate="no">Fursat</span></span>
     {q && <span class="afab-q">{q}</span>}
-    <span class="afab-coin" aria-hidden="true"></span>
+    <span class="afab-coin" aria-hidden="true"></span><span class="afab-coin c2" aria-hidden="true"></span><span class="afab-coin c3" aria-hidden="true"></span>
+    <span class="afab-spk" aria-hidden="true"><i style="--sx:-30px;--sy:-34px"></i><i style="--sx:0px;--sy:-46px"></i><i style="--sx:30px;--sy:-34px"></i><i style="--sx:-42px;--sy:-8px"></i><i style="--sx:42px;--sy:-8px"></i><i style="--sx:0px;--sy:-24px"></i></span>
     <span class="afab-bub" aria-hidden="true"></span>
   </a>
   <script is:inline>
@@ -37,23 +38,23 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     const B = JSON.parse(a.dataset.bubbles || '{}');
     const home = a.hasAttribute('data-home');
     let live = !home;                  // Home waits for the intro; other pages are live straight away
-    let inFooter = false, lastHop = 0, lastJump = 0, lastBubble = -1e9, lastSection = '', bt = 0, idleT = 0, scrolling = 0, cheerOn = false;
+    let inFooter = false, lastHop = 0, lastJump = 0, lastBubble = -1e9, lastSection = '', bt = 0, idleT = 0, scrolling = 0, cheerOn = false, combo = 0;
     const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {} };
     const typing = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
     const visible = () => !document.hidden && !a.hasAttribute('data-hold') && getComputedStyle(a).visibility !== 'hidden' && !typing() && !document.querySelector('dialog[open]');
     const swap = (cheer) => { if (!img || cheerOn === cheer) return; cheerOn = cheer; if (cheer) { img.dataset.src = img.src; img.src = img.dataset.cheer; } else img.src = img.dataset.src || img.src; };
-    // play one move: drop | hop | jump | big | tilt. Class is removed when it ends so the next one can restart.
+    // play one move: drop | hop | jump | big | tilt | spin | flip | power. Class is removed when it ends so the next one can restart.
     const play = (name, cheer) => {
       if (reduce.matches && name !== 'big') return;
-      a.classList.remove('m-drop', 'm-hop', 'm-jump', 'm-big', 'm-tilt'); void a.offsetWidth;
+      a.classList.remove('m-drop', 'm-hop', 'm-jump', 'm-big', 'm-tilt', 'm-spin', 'm-flip', 'm-power'); void a.offsetWidth;
       a.classList.add('m-' + name); lastHop = performance.now();
       swap(!!cheer);
     };
     a.addEventListener('animationend', (e) => { if (e.target !== a) return; a.className = a.className.replace(/\bm-\w+/g, '').trim(); swap(false); });
-    const coin = () => { if (reduce.matches) return; a.classList.remove('m-coin'); void a.offsetWidth; a.classList.add('m-coin'); setTimeout(() => a.classList.remove('m-coin'), 800); };
+    const coin = () => { if (reduce.matches) return; a.classList.remove('m-coin'); void a.offsetWidth; a.classList.add('m-coin'); setTimeout(() => a.classList.remove('m-coin'), 1100); };
     const say = (text, force) => {
       const now = performance.now();
-      if (!force && (reduce.matches || now - lastBubble < 12000 || typing())) return;
+      if (!force && (reduce.matches || now - lastBubble < 6000 || typing())) return;
       lastBubble = now; bub.textContent = text; a.classList.add('m-say'); clearTimeout(bt);
       bt = setTimeout(() => a.classList.remove('m-say'), 2000);
     };
@@ -81,14 +82,14 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     // --- idle hop / tilt every 8-10 s ---
     function idle() {
       clearTimeout(idleT);
-      idleT = setTimeout(() => { if (live && visible() && performance.now() - lastHop > 6000) play(Math.random() < .7 ? 'hop' : 'tilt'); idle(); }, 8000 + Math.random() * 2000);
+      idleT = setTimeout(() => { if (live && visible() && performance.now() - lastHop > 3000) { const r = Math.random(); play(r < .35 ? 'hop' : r < .6 ? 'spin' : r < .8 ? 'flip' : 'tilt'); if (r > .6 && r < .8) coin(); } idle(); }, 4000 + Math.random() * 2000);
     }
     function arm() {
       if (arm.done) return; arm.done = true;
       if (!reduce.matches) idle();
       // scroll start: one small hop
       addEventListener('scroll', () => {
-        if (!scrolling && live && visible() && performance.now() - lastHop > 1500 && performance.now() - lastJump > 1500) play('hop');
+        if (!scrolling && live && visible() && performance.now() - lastHop > 900 && performance.now() - lastJump > 900) play(Math.random() < .5 ? 'hop' : 'spin');
         scrolling = 1; clearTimeout(arm.st); arm.st = setTimeout(() => { scrolling = 0; }, 200);
       }, { passive: true });
       // a new main section comes into view: jump + coin + hint (one hint per 12 s)
@@ -107,8 +108,8 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
           const id = e.target.id || e.target.className;
           if (id === lastSection) continue;
           const first = !lastSection; lastSection = id;
-          if (first || !visible() || performance.now() - lastJump < 1500) continue; // the section already on screen at load does not count
-          lastJump = performance.now(); play('jump', true); coin(); say(B[keyOf(e.target)] || B.any);
+          if (first || !visible() || performance.now() - lastJump < 900) continue; // the section already on screen at load does not count
+          lastJump = performance.now(); combo++; play(combo % 3 === 0 ? 'power' : combo % 2 ? 'jump' : 'flip', true); coin(); say(B[keyOf(e.target)] || B.any);
         }
       }, { rootMargin: '-35% 0px -35% 0px' });
       document.querySelectorAll('main > section, main section[id]').forEach((s) => io.observe(s));
@@ -129,7 +130,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     //     The pill moves with --wx (CSS `translate`); bob / lean / flip / squash go on the image. Transform only. Static under reduced motion. ---
     const img2 = img, rnd = (x, y) => x + Math.random() * (y - x), phone = () => innerWidth < 768;
     const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2), cl = (v, x, y) => Math.max(x, Math.min(y, v));
-    let st = null, wx = 0, nextAt = performance.now() + rnd(20000, 40000), raf = 0, prev = 0, lastScroll = -1e9, face = 1, phase = 0, chk = 0;
+    let st = null, wx = 0, nextAt = performance.now() + rnd(8000, 15000), raf = 0, prev = 0, lastScroll = -1e9, face = 1, phase = 0, chk = 0;
     addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
     const paused = () => !live || reduce.matches || document.hidden || a.hasAttribute('data-hold') || a.classList.contains('is-intro') || !(a.classList.contains('is-on') || a.hasAttribute('data-early'))
       || typing() || !!document.querySelector('dialog[open], [aria-modal="true"]') || document.documentElement.classList.contains('fk-sheet-open') || document.documentElement.classList.contains('lock')
@@ -151,13 +152,13 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
       a.style.setProperty('--wx', wx.toFixed(1) + 'px');
       img2.style.transform = `translateY(${(ty + bob).toFixed(1)}px) rotate(${lean.toFixed(1)}deg) scale(${(face * sx).toFixed(3)}, ${sy.toFixed(3)})`;
     };
-    const rest = () => { wx = 0; a.style.removeProperty('--wx'); img2.style.transform = ''; a.classList.remove('is-roam'); st = null; nextAt = performance.now() + rnd(20000, 40000); };
+    const rest = () => { wx = 0; a.style.removeProperty('--wx'); img2.style.transform = ''; a.classList.remove('is-roam'); st = null; nextAt = performance.now() + rnd(8000, 15000); };
     const plan = () => {
       const r = a.getBoundingClientRect(), side = phone() ? -1 : 1, roll = Math.random();           // base is at the right on phones, at the left on desktop: walk toward the middle
       if (roll < .55) {
         let d = phone() ? Math.min(rnd(110, 220), innerWidth * .55) : Math.min(rnd(260, Math.max(300, innerWidth - r.width - 80)), innerWidth - r.width - 80);
         while (d > 70 && !pathFree(side * d, r)) d *= .75;
-        if (d <= 70 || !pathFree(side * d, r)) { nextAt = performance.now() + 6000; return; }
+        if (d <= 70 || !pathFree(side * d, r)) { nextAt = performance.now() + 3000; return; }
         const dur = phone() ? rnd(2000, 3000) : rnd(2400, 4000);
         st = { k: 'walk', legs: [{ f: 0, t: side * d, dur }, { f: side * d, t: side * d, dur: 500 }, { f: side * d, t: 0, dur }], i: 0, t: 0, dir: side };
       } else if (roll < .8) st = { k: 'sit', t: 0, dur: rnd(6000, 10000) };
@@ -179,7 +180,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
       } else if (st.k === 'sit') {
         const e = Math.min(1, st.t / 300, (st.dur - st.t) / 300);                                        // squash down, swing, stand up
         draw(0, Math.sin(st.t / 650) * 4 * e, 1 + .06 * e, 1 - .12 * e, 4 * e);
-        if (st.t >= st.dur) { rest(); play('hop'); return; }
+        if (st.t >= st.dur) { rest(); play('power'); coin(); return; }
       } else {
         const u = st.t / st.dur, o = u < .19 ? ease(u / .19) : u < .73 ? 1 : 1 - ease((u - .73) / .27);   // slide half off the edge, hold, peek back in
         wx = st.out * o; face = st.out > 0 ? -1 : 1;
@@ -193,7 +194,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
     a.addEventListener('click', (e) => {
       if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.dataset.go) return;
       e.preventDefault(); a.dataset.go = '1'; st = null;
-      play('big', true); say(B.any, true);
+      play('big', true); coin(); say(B.any, true);
       setTimeout(() => { location.href = a.href; }, 260);
     });
     addEventListener('pageshow', () => { delete a.dataset.go; });
@@ -245,6 +246,9 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
 .afab.m-jump { animation: afab-jump 560ms cubic-bezier(.23,1,.32,1) both; }
 .afab.m-big { animation: afab-big 620ms cubic-bezier(.23,1,.32,1) both; }
 .afab.m-tilt { animation: afab-tilt 700ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-spin { animation: afab-spin 760ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-flip { animation: afab-flip 820ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-power { animation: afab-power 1100ms cubic-bezier(.23,1,.32,1) both; }
 @keyframes afab-drop {
   0% { transform: translateY(calc(-100vh - 120px)) scale(1, 1); animation-timing-function: cubic-bezier(.77,0,.175,1); }
   52% { transform: translateY(0) scale(.9, 1.14); animation-timing-function: cubic-bezier(.23,1,.32,1); }
@@ -257,22 +261,45 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
 @keyframes afab-hop {
   0% { transform: translateY(0) scale(1, 1); }
   18% { transform: translateY(0) scale(1.1, .88); }
-  50% { transform: translateY(-14px) scale(.94, 1.08); }
+  50% { transform: translateY(-26px) scale(.94, 1.1); }
   80% { transform: translateY(0) scale(1.08, .92); }
   100% { transform: translateY(0) scale(1, 1); }
 }
 @keyframes afab-jump {
   0% { transform: translateY(0) scale(1, 1); }
   16% { transform: translateY(0) scale(1.14, .84); }
-  46% { transform: translateY(-22px) scale(.92, 1.12); }
+  46% { transform: translateY(-40px) scale(.92, 1.14); }
   78% { transform: translateY(0) scale(1.1, .9); }
   100% { transform: translateY(0) scale(1, 1); }
 }
 @keyframes afab-big {
   0% { transform: translateY(0) scale(1, 1); }
   14% { transform: translateY(0) scale(1.18, .8); }
-  46% { transform: translateY(-34px) scale(.9, 1.16); }
+  46% { transform: translateY(-60px) scale(.9, 1.18); }
   80% { transform: translateY(0) scale(1.12, .88); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes afab-spin {
+  0% { transform: perspective(500px) translateY(0) rotateY(0) scale(1, 1); }
+  16% { transform: perspective(500px) translateY(0) rotateY(0) scale(1.12, .86); }
+  50% { transform: perspective(500px) translateY(-42px) rotateY(180deg) scale(.94, 1.1); }
+  82% { transform: perspective(500px) translateY(0) rotateY(360deg) scale(1.1, .9); }
+  100% { transform: perspective(500px) translateY(0) rotateY(360deg) scale(1, 1); }
+}
+@keyframes afab-flip {
+  0% { transform: translateY(0) rotate(0) scale(1, 1); }
+  16% { transform: translateY(0) rotate(0) scale(1.12, .86); }
+  55% { transform: translateY(-52px) rotate(-200deg) scale(.94, 1.08); }
+  84% { transform: translateY(0) rotate(-360deg) scale(1.1, .9); }
+  100% { transform: translateY(0) rotate(-360deg) scale(1, 1); }
+}
+@keyframes afab-power {
+  0% { transform: translateY(0) scale(1, 1); }
+  12% { transform: translateY(0) scale(1.2, .78); }
+  34% { transform: translateY(-72px) scale(.88, 1.2); }
+  52% { transform: translateY(0) scale(1.14, .86); }
+  68% { transform: translateY(-30px) scale(.94, 1.1); }
+  84% { transform: translateY(0) scale(1.08, .92); }
   100% { transform: translateY(0) scale(1, 1); }
 }
 @keyframes afab-tilt {
@@ -284,6 +311,13 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
 /* gold coin that pops above the mascot (tiny, 0.8 s) */
 .afab-coin { position: absolute; left: 50%; top: -8px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8 0 22%, #f3c56b 23% 70%, #b9892c 100%); box-shadow: 0 0 0 1.5px #8a6419, 0 0 10px 2px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translateY(6px) scale(.4); }
 .afab.m-coin .afab-coin { animation: afab-coin 800ms cubic-bezier(.23,1,.32,1) both; }
+.afab-coin.c2 { margin-left: -24px; } .afab-coin.c3 { margin-left: 8px; }
+.afab.m-coin .afab-coin.c2 { animation-delay: 140ms; } .afab.m-coin .afab-coin.c3 { animation-delay: 280ms; }
+/* sparkle burst: six small gold diamonds fly out and fade (transform + opacity only) */
+.afab-spk { position: absolute; left: 50%; top: 30%; width: 0; height: 0; pointer-events: none; }
+.afab-spk i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; background: #f3c56b; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; }
+.afab.m-coin .afab-spk i { animation: afab-spk 900ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes afab-spk { 0% { opacity: 1; transform: translate(0, 0) scale(.4); } 100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.2) rotate(90deg); } }
 @keyframes afab-coin {
   0% { opacity: 0; transform: translateY(6px) scale(.4, .4); }
   30% { opacity: 1; transform: translateY(-10px) scale(1, 1); }
@@ -294,6 +328,6 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/banquet': 'party',
 .afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Poppins, system-ui, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
 .afab.m-say .afab-bub { opacity: 1; transform: translate(0, -50%) scale(1); }
 @media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt { animation: none; } .afab.m-big { animation: none; } .afab-coin { display: none; } .afab-bub { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
 @media print { .afab { display: none !important; } }
 </style>
