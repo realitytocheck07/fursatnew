@@ -7,7 +7,7 @@
   "phonePlain": "919059670033",
   "whatsapp": "919059670033",
   "order": { "swiggy": "https://www.swiggy.com/menu/1127487", "zomato": "https://zomato.onelink.me/xqzv/tu94x96v", "pickup": false },
-  "rista": { "live": true },
+  "rista": { "live": false },
   "forms": { "restaurant": "df9a716d-4f53-4f0c-8459-e0aa4899e20d", "events": "b44ccfa2-178a-4ae4-a1d3-949ede2d4daa" },
   "email": "TODO(client)@fursatind.in",
   "address": {
