@@ -347,7 +347,7 @@ function init(root: HTMLElement) {
       tagsEl.replaceChildren(...$$('.fk-chip', li).map((c) => c.cloneNode(true)));
       // price(s) exactly as in the list
       const pr = $('.mv-item-price', li);
-      priceEl.innerHTML = pr && row ? pr.innerHTML : '';
+      priceEl.innerHTML = pr ? pr.innerHTML : '';
       // Add to Picks carries the row's own data (same item, same price, same message line)
       ['n', 'p', 'c', 'k', 'v', 'a'].forEach((k) => { if (row?.dataset[k] != null) addBtn.dataset[k] = row.dataset[k]; else delete addBtn.dataset[k]; });
       if (li.dataset.img) addBtn.dataset.img = li.dataset.img; else delete addBtn.dataset.img;
