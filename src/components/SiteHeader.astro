@@ -24,6 +24,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
 
     <!-- Desktop Navigation -->
     <nav class="sh-nav" aria-label="Main Navigation">
+      <span class="sh-ind" aria-hidden="true"></span>
       <a href="/" class:list={["sh-link", { active: active === 'home' }]} aria-current={active === 'home' ? 'page' : undefined}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
       <!-- Menu Dropdown -->
       <div class="sh-drop">
@@ -403,6 +404,21 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     .sh-mobile-panel { animation: none; }
     .sh-header.sh-hidden { transform: none; }
   }
+
+  /* ── HEADER-MOTION: sliding gold indicator, staggered nav entry, dropdown + phone-menu item cascade.
+        transform/opacity only, ease-out / ease-in-out tokens, every move under 300 ms. Off under reduced motion. ── */
+  .sh-nav { position: relative; }
+  .sh-ind { position: absolute; left: 0; bottom: -7px; width: 100px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, #c99a43, #9c4f1c); transform: translateX(var(--ix, 0px)) scaleX(var(--iw, 0)); transform-origin: 0 50%; opacity: 0; pointer-events: none; transition: transform 260ms cubic-bezier(.77, 0, .175, 1), opacity 200ms cubic-bezier(.23, 1, .32, 1); }
+  .sh-ind.is-on { opacity: 1; }
+  @keyframes sh-nav-in { from { opacity: 0; transform: translateY(-8px); } }
+  @keyframes sh-item-in { from { opacity: 0; transform: translateY(6px); } }
+  html:not(.sh-seen) .sh-nav > .sh-link, html:not(.sh-seen) .sh-nav > .sh-drop { animation: sh-nav-in 260ms cubic-bezier(.23, 1, .32, 1) backwards; }
+  .sh-nav > :nth-child(2) { animation-delay: 120ms; } .sh-nav > :nth-child(3) { animation-delay: 170ms; } .sh-nav > :nth-child(4) { animation-delay: 220ms; } .sh-nav > :nth-child(5) { animation-delay: 270ms; } .sh-nav > :nth-child(6) { animation-delay: 320ms; } .sh-nav > :nth-child(7) { animation-delay: 370ms; } .sh-nav > :nth-child(8) { animation-delay: 420ms; } .sh-nav > :nth-child(9) { animation-delay: 470ms; } .sh-nav > :nth-child(10) { animation-delay: 520ms; } 
+  .sh-drop:hover .sh-sub-item, .sh-drop.is-open .sh-sub-item { animation: sh-item-in 220ms cubic-bezier(.23, 1, .32, 1) backwards; }
+  .sh-drop:hover .sh-sub-item:nth-child(1), .sh-drop.is-open .sh-sub-item:nth-child(1) { animation-delay: 30ms; } .sh-drop:hover .sh-sub-item:nth-child(2), .sh-drop.is-open .sh-sub-item:nth-child(2) { animation-delay: 60ms; } .sh-drop:hover .sh-sub-item:nth-child(3), .sh-drop.is-open .sh-sub-item:nth-child(3) { animation-delay: 90ms; } .sh-drop:hover .sh-sub-item:nth-child(4), .sh-drop.is-open .sh-sub-item:nth-child(4) { animation-delay: 120ms; } .sh-drop:hover .sh-sub-item:nth-child(5), .sh-drop.is-open .sh-sub-item:nth-child(5) { animation-delay: 150ms; } .sh-drop:hover .sh-sub-item:nth-child(6), .sh-drop.is-open .sh-sub-item:nth-child(6) { animation-delay: 180ms; } .sh-drop:hover .sh-sub-item:nth-child(7), .sh-drop.is-open .sh-sub-item:nth-child(7) { animation-delay: 210ms; } .sh-drop:hover .sh-sub-item:nth-child(8), .sh-drop.is-open .sh-sub-item:nth-child(8) { animation-delay: 240ms; } 
+  .sh-mobile-panel:not([hidden]) .sh-mp-group > * { animation: sh-item-in 240ms cubic-bezier(.23, 1, .32, 1) backwards; }
+  .sh-mp-group > :nth-child(1) { animation-delay: 75ms; } .sh-mp-group > :nth-child(2) { animation-delay: 110ms; } .sh-mp-group > :nth-child(3) { animation-delay: 145ms; } .sh-mp-group > :nth-child(4) { animation-delay: 180ms; } .sh-mp-group > :nth-child(5) { animation-delay: 215ms; } .sh-mp-group > :nth-child(6) { animation-delay: 250ms; } .sh-mp-group > :nth-child(7) { animation-delay: 285ms; } 
+  @media (prefers-reduced-motion: reduce) { .sh-ind { transition: none; } html:not(.sh-seen) .sh-nav > .sh-link, html:not(.sh-seen) .sh-nav > .sh-drop, .sh-drop:hover .sh-sub-item, .sh-drop.is-open .sh-sub-item, .sh-mobile-panel:not([hidden]) .sh-mp-group > * { animation: none; } }
 </style>
 
 <script is:inline>
@@ -519,4 +535,36 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     initHeader();
   }
   document.addEventListener('astro:page-load', initHeader);
+</script>
+
+<script is:inline>
+  /* HEADER-MOTION: the gold line glides to the hovered / focused nav link and rests on the current page */
+  (() => {
+    const nav = document.querySelector('.sh-nav'), ind = nav && nav.querySelector('.sh-ind');
+    if (!nav || !ind || ind.dataset.init) return;
+    ind.dataset.init = '1';
+    let raf = 0;
+    const rest = () => nav.querySelector('.sh-link.active, .sh-link[aria-current="page"]');
+    const to = (el, instant) => {
+      if (!el) { ind.classList.remove('is-on'); return; }
+      const r = el.getBoundingClientRect(), n = nav.getBoundingClientRect();
+      if (!r.width) { ind.classList.remove('is-on'); return; }
+      const first = !ind.classList.contains('is-on');
+      if (instant || first) ind.style.transition = 'none';
+      ind.style.setProperty('--ix', (r.left - n.left + 14).toFixed(1) + 'px');
+      ind.style.setProperty('--iw', (Math.max(0, r.width - 28) / 100).toFixed(3));
+      if (instant || first) { void ind.offsetWidth; ind.style.transition = ''; }
+      ind.classList.add('is-on');
+    };
+    const home = (instant) => to(rest(), instant);
+    nav.addEventListener('pointerover', (e) => { const l = e.target.closest && e.target.closest('.sh-link'); if (l && e.pointerType !== 'touch') to(l); });
+    nav.addEventListener('focusin', (e) => { const l = e.target.closest && e.target.closest('.sh-link'); if (l) to(l); });
+    nav.addEventListener('pointerleave', () => home());
+    nav.addEventListener('focusout', (e) => { if (!nav.contains(e.relatedTarget)) home(); });
+    const again = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => home(true)); };
+    addEventListener('resize', again);
+    addEventListener('load', again);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(again);
+    home(true);
+  })();
 </script>
