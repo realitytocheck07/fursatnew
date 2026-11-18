@@ -34,20 +34,28 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
         </button>
         <div class="sh-menu" id="sh-menu-menu">
           <a href="/menu" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/menu-all.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">All Categories</span>
-            <small>North Indian, Asian, Continental & Kebabs</small>
+            <small>North Indian, Asian, Continental & Kebabs</small></span>
           </a>
           <a href="/restaurant-bar#cocktails" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/bar.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">Bar & Mixology</span>
-            <small>Artisanal Cocktails, Single Malts & Beers</small>
+            <small>Artisanal Cocktails, Single Malts & Beers</small></span>
           </a>
           <a href="/cafe#cafe-menu" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/cafe.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">Café & Coffee</span>
-            <small>Specialty Brews, Shakes & Bakes</small>
+            <small>Specialty Brews, Shakes & Bakes</small></span>
           </a>
           <a href="/menu?tab=craft" class="sh-sub-item">
-            <span class="sh-si-t">Craft Your Plate ✨</span>
-            <small>Customize your feast step-by-step</small>
+            <img class="sh-thumb" src="/assets/nav/craft.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
+            <span class="sh-si-t">Craft Your Plate</span>
+            <small>Customize your feast step-by-step</small></span>
           </a>
         </div>
       </div>
@@ -60,16 +68,22 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
         </button>
         <div class="sh-menu" id="sh-menu-celebrate">
           <a href="/party" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/party.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">Parties &amp; Events</span>
-            <small>Birthdays, kitty parties, bar bashes and packages</small>
+            <small>Birthdays, kitty parties, bar bashes and packages</small></span>
           </a>
           <a href="/banquet" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/banquet.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">The Grand Banquet Hall</span>
-            <small>Capacity 50–350 guests with AV & live stage</small>
+            <small>Capacity 50–350 guests with AV & live stage</small></span>
           </a>
           <a href="/catering" class="sh-sub-item">
+            <img class="sh-thumb" src="/assets/nav/catering.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
+            <span class="sh-si-body">
             <span class="sh-si-t">Outdoor Catering</span>
-            <small>Fursat royal dining delivered to your venue</small>
+            <small>Fursat royal dining delivered to your venue</small></span>
           </a>
         </div>
       </div>
@@ -222,7 +236,13 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   /* keeps the pointer inside the dropdown while it crosses the 8px gap under the button */
   .sh-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
   .sh-drop:hover .sh-menu, .sh-drop.is-open .sh-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition-delay: 0s; }
-  .sh-sub-item { display: flex; flex-direction: column; gap: 3px; padding: 10px 14px; border-radius: 12px; text-decoration: none; transition: background-color .2s, transform .2s; }
+  .sh-sub-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; border-radius: 14px; text-decoration: none; transition: background-color .2s, transform .2s; }
+  .sh-si-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .sh-sub-item small { text-wrap: pretty; }
+  .sh-thumb { width: 56px; height: 56px; flex: none; border-radius: 10px; object-fit: cover; background: #f3e8d4; transition: transform .3s var(--fk-ease-out, cubic-bezier(.23,1,.32,1)); }
+  .sh-menu { min-width: 320px; }
+  @media (hover: hover) { .sh-sub-item:hover .sh-thumb { transform: scale(1.06); } }
+  @media (prefers-reduced-motion: reduce) { .sh-sub-item:hover .sh-thumb { transform: none; } }
   .sh-sub-item:hover { background: rgba(243,211,140,.28); transform: translateX(2px); }
   .sh-si-t { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .9375rem; font-weight: 500; color: #14301c; }
   .sh-sub-item:hover .sh-si-t { color: #9c4f1c; }

@@ -41,14 +41,14 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
     <div class:list={['mq-track', animDir]} style={`--mq-speed:${speed}s`}>
       {half.map(item => (
         <span class="mq-item">
-          <span class="mq-dot" aria-hidden="true">✦</span>
+          <span class="mq-dot" aria-hidden="true"><svg class="mq-star" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2c.6 5.4 4.6 9.4 10 10-5.4.6-9.4 4.6-10 10-.6-5.4-4.6-9.4-10-10 5.4-.6 9.4-4.6 10-10Z"/></svg></span>
           {item}
         </span>
       ))}
       {/* Duplicate for seamless wrap */}
       {half.map(item => (
         <span class="mq-item" aria-hidden="true">
-          <span class="mq-dot">✦</span>
+          <span class="mq-dot"><svg class="mq-star" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2c.6 5.4 4.6 9.4 10 10-5.4.6-9.4 4.6-10 10-.6-5.4-4.6-9.4-10-10 5.4-.6 9.4-4.6 10-10Z"/></svg></span>
           {item}
         </span>
       ))}
@@ -125,7 +125,9 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
     color: #E0A63C;
     font-size: 0.75rem;
     flex-shrink: 0;
+    display: inline-flex;
   }
+  .mq-star { display: block; }
 
   /* ── Reduced Motion: Stop animation ───────────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
