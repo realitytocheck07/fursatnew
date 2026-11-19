@@ -235,7 +235,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 .afab::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #c02a1a; opacity: 0; pointer-events: none; transition: opacity 600ms cubic-bezier(.23,1,.32,1); }
 :global(html.fab-js) .afab.is-intro { display: inline-flex; left: 14px; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 2147482998; padding: 5px 18px 5px 5px; gap: 8px; opacity: 1; visibility: visible; pointer-events: auto; translate: none; color: #f6ecd8; }
 @media (max-width: 767px) { :global(html.fab-js) .afab.is-intro { bottom: calc(11svh + 90px + env(safe-area-inset-bottom, 0px)); } } /* phones: in the band above the Enter button, clear of the nav bar */
-.afab.is-intro::before { opacity: 1; }
+.afab.is-intro::before { opacity: 0; } /* stays forest green on the red intro (no red wash) */
 .afab.is-intro { box-shadow: 0 14px 30px -14px rgb(10 0 0 / .7), inset 0 0 0 1.5px rgb(246 236 216 / .6); }
 .afab.is-intro .afab-t { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
 .afab.is-intro .afab-t b { color: #f6ecd8; }

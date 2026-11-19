@@ -28,12 +28,14 @@ function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intr
 function tick(now){if(done)return;if(t0===null)t0=now;var p=cl((now-t0-400)/D,0,1);frame(p);p<1?requestAnimationFrame(tick):finish()}
 if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};/* 11.js shows "Enter Fursat" and starts the intro on tap or after 2 s */
  var skip=function(e){if(e&&e.target&&e.target.closest&&e.target.closest(".fk-isnd"))return;if(t0!==null&&performance.now()-t0>1200)finish()};["wheel","touchmove","keydown","pointerdown"].forEach(function(n){addEventListener(n,skip,{passive:true})})}
-/* SOUND v5.56 / SOUND-CONTRACT: ONE song (intro-music-sreemukhi, 60 s) for the intro and the landing page.
+/* SOUND v5.57 / SOUND-CONTRACT: ONE song (intro-music-sreemukhi, 60 s) for the intro and the landing page.
+   v5.57: the hero reel files now CARRY that song as their audio track, so on the landing page picture and music are one stream (exact sync, nothing to correct).
+   During the intro the separate mp3 plays (synced to the helicopter); when the reel starts, the sound switches to the reel's own audio and the mp3 fades out.
    - Tap "Enter Fursat": the song starts at once (the tap allows it) and plays to its full length, through the intro and on the landing page.
    - No tap (auto-enter after 2 s): silent. "Sound on" is offered in the intro (#fksndb) and on the landing page (#snd).
    - Either button turns it off again. The song never loops; when it ends the buttons go back to "Sound on".
    sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id:"main"}; other players (drinks, tour) take over via fk:music. */
-var IV=.85,ac,an,fd,avg=0,last=0,B=0,sb=$("snd"),fkb=$("fksndb"),fkv=$("fksndv"),ended=false;
+var IV=.85,ac,an,fd,avg=0,last=0,B=0,sb=$("snd"),fkb=$("fksndb"),fkv=$("fksndv"),ended=false,rf=$("fxrvf"),viaReel=false;
 var M={a:new Audio("/assets/audio/intro-music-sreemukhi.mp3"),on:false,f:0};M.a.preload="none";M.a.volume=0;
 function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
 function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
@@ -44,8 +46,17 @@ function ui(){var v=M.on,t=v?"Sound off":"Sound on",l=v?"Turn sound off":"Turn s
 function hook(a){if(ac||!/^https?:/.test(location.protocol))return;try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(a);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
 var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
 /* sync: during the intro the song jumps to the helicopter's elapsed time. play() is called straight from the tap (Safari / iPhone need that). */
-function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);hook(a);if(ac&&ac.resume)ac.resume();ui();
+var inIntro=function(){return document.documentElement.classList.contains("lock")};
+var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.__fzReel.on&&!calm&&!inIntro())};
+/* the reel's own audio: fade in over the song's fade-out. If the browser refuses sound (it pauses the video), re-mute, keep the picture playing and leave "Sound on" for a tap. */
+function reelSound(on,quick){if(!rf)return;if(!on){rf.muted=true;return}
+ try{rf.volume=0;rf.muted=false}catch(e){}
+ var t0=performance.now();(function f(n){var k=cl((n-t0)/(quick?200:500),0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0);
+ setTimeout(function(){var up=$("fxpv");if(rf.paused&&!rf.ended&&!document.hidden&&!(up&&up.dataset.s==="paused")&&M.on&&viaReel){rf.muted=true;var q=rf.play();if(q&&q.catch)q.catch(function(){});viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}},500)}
+function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);ui();
  emit("fk:sound",{on:true});emit("fk:music",{id:"main"});
+ if(reelUsable()){viaReel=true;reelSound(true);wake();return}
+ viaReel=false;hook(a);if(ac&&ac.resume)ac.resume();
  a.preload="auto";a.volume=0;
  var p=a.play();
  var seek=function(){try{var d=a.duration||60;if(sync){var e=el();if(e>.3)a.currentTime=Math.min(e,d-.1)}else if(a.ended||a.currentTime>=d-.2)a.currentTime=0}catch(x){}};
@@ -53,15 +64,19 @@ function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);hook(a);if(ac&
  var ok=function(){if(!M.on)return;fade(M,IV,sync?250:600);wake()};
  if(p&&p.then)p.then(ok,function(){M.on=false;flag(false);ui()});else ok()}
 /* quiet: no fk:sound (another player took over); keep: leave the sound flag as it is */
-function stop(quiet,keep){if(!M.on)return;M.on=false;if(!keep)flag(false);ui();fade(M,0,250,function(){if(!M.on)M.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
+function stop(quiet,keep){if(!M.on)return;M.on=false;if(!keep)flag(false);ui();if(viaReel){viaReel=false;reelSound(false)}else fade(M,0,250,function(){if(!M.on)M.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
 function toggle(sync){M.on?stop():play(sync)}
 if(sb)sb.onclick=function(){toggle(false)};
 if(fkb)fkb.onclick=function(){toggle(true)};
-if(fkv)fkv.oninput=function(){IV=cl(fkv.value/100,0,1);if(M.on){cancelAnimationFrame(M.f);M.a.volume=IV}};
+if(fkv)fkv.oninput=function(){IV=cl(fkv.value/100,0,1);if(M.on&&!viaReel){cancelAnimationFrame(M.f);M.a.volume=IV}};
 /* the song reached its end: back to "Sound on" */
-M.a.addEventListener("ended",function(){if(!M.on)return;M.on=false;flag(false);ui();emit("fk:sound",{on:false})});
+M.a.addEventListener("ended",function(){if(!M.on||viaReel)return;M.on=false;flag(false);ui();emit("fk:sound",{on:false})});
 addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
 addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="main")stop(true,true)});
+/* the reel starts (after the intro): if sound is on, hand over from the mp3 to the reel's own audio. The reel ending / failing turns the sound off, like the song ending. */
+if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&reelUsable()){viaReel=true;fade(M,0,200,function(){M.a.pause()});reelSound(true,true)}});
+ var reelEnd=function(){if(M.on&&viaReel){viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}};
+ rf.addEventListener("ended",reelEnd);rf.addEventListener("error",reelEnd)}
 /* the Enter tap starts the song; the 2 s auto-enter does not */
 window.__fzIntroSound=function(tap){if(tap)play(true)};
 /* intro over (finished, or Skip intro): the song keeps playing on the landing page; only the intro button goes away with the intro */
@@ -71,9 +86,9 @@ var bq=0,sbv=true;
 function wake(){if(M.on&&!bq&&sbv&&!document.hidden)bq=requestAnimationFrame(beat)}
 if(sb&&"IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
 function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);return}if(!sbv||document.hidden)return;t=t||performance.now();
- if(an){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t}}else if(t-last>504){B=1;last=t}
+ if(an&&!viaReel){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t}}else if(t-last>504){B=1;last=t}
  B*=.9;if(B<.01)B=0;if(sb)sb.style.setProperty("--b",B.toFixed(3));bq=requestAnimationFrame(beat)}
-document.addEventListener("visibilitychange",function(){if(document.hidden&&M.on){M.a.pause()}else if(M.on&&!M.a.ended){M.a.play().catch(function(){});wake()}});
+document.addEventListener("visibilitychange",function(){if(viaReel){wake();return}if(document.hidden&&M.on){M.a.pause()}else if(M.on&&!M.a.ended){M.a.play().catch(function(){});wake()}});
 var af=document.querySelector(".askwrap .af");if(af){if("IntersectionObserver"in window){new IntersectionObserver(function(e,o){if(e[0].isIntersecting){af.classList.add("in");o.disconnect()}},{threshold:.12}).observe(af)}else af.classList.add("in")}
 })();
 
