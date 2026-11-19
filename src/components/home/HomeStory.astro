@@ -1,5 +1,6 @@
 ---
 // "Our story": two lines taken word for word from /story ("Crafted for Good Times") + one real interior photo.
+import InstaFeed from '../InstaFeed.astro';
 ---
 <section class="hst" id="our-story" aria-labelledby="hst-h">
   <div class="hst-body" data-fk-reveal>
@@ -12,6 +13,7 @@
       <li><b aria-label="endless">∞</b> <span>reasons to stay longer</span></li>
     </ul>
     <div class="hst-btns"><a class="fk-btn fk-btn--secondary" href="/story">Read our story</a></div>
+    <InstaFeed handle="fursatind.in" count={3} />
   </div>
   <figure class="hst-ph" data-fk-reveal>
     <img src="/assets/interior/fursat_space_03-720.webp" alt="Fursat interior with patterned wooden screens, green plants and a black-and-white tiled floor" width="720" height="900" loading="lazy" decoding="async" />

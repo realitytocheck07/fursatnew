@@ -56,6 +56,7 @@ const momentSizes = ['(max-width: 900px) 56vw, (max-width: 1380px) 31vw, 420px',
 const cardSizes = (src: string) => { const k = VAR[src.replace(/\.webp$/, '')]?.[2]; const m = (n: string) => (k ? `calc(${n} * ${k})` : n); return `(max-width: 420px) ${m('90vw')}, (max-width: 900px) ${m('420px')}, ${m('300px')}`; };
 // Google FAQ rich results, from the same questions shown on the page
 const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
+import InstaFeed from '../InstaFeed.astro';
 ---
 
 <SiteHeader active={p.active} variant="plaster" />
@@ -132,6 +133,7 @@ const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPa
         <details class="xp-faq-item"><summary>{f.q}</summary><p>{f.a}</p></details>
       ))}
     </div>
+    {p.insta && <div class="igf-page"><InstaFeed handle={p.insta} tone="dark" /></div>}
     {p.insta && <InstaFollow handle={p.insta} tone="dark" />}
   </section>
 </main>

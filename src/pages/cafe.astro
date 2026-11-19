@@ -21,7 +21,7 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
     h1b="Slow Mornings"
     lead="Coffees, teas, milk shakes, desserts and all-day breakfast, ordered from the same menu as the rest of Fursat."
     ctas={[
-      { label: 'Explore Café Menu', href: '#cafe-menu', primary: true },
+      { label: 'Explore Café Menu', href: '/menu?menu=cafe', primary: true },
       { label: 'Book a Café Booth', href: '/reserve', book: true },
     ]}
     hero={{ src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino at Fursat Café', w: 1067, h: 1600, pos: '50% 50%' }}
@@ -47,7 +47,7 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
       { tag: 'Coffee', name: 'Iced Latte', price: '₹249', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
       { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian. From our all day breakfast menu.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
     ]}
-    cardsLink={{ label: 'See the full menu', href: '/menu' }}
+    cardsLink={{ label: 'See the full café menu', href: '/menu?menu=cafe' }}
     faqTitle="Café FAQs"
     faq={[
       { q: 'What are the café opening hours?', a: `Our café is open ${site.hours.display}. Perfect for quiet lunch breaks, afternoon meetings, and evening desserts.` },

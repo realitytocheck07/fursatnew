@@ -8,6 +8,7 @@ const groups = (party as any).groups.map((g: any) => ({
   from: rupee(Math.min(...(party as any).packages.filter((p: any) => p.group === g.id).map((p: any) => p.price))),
 }));
 const arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
+import InstaFeed from '../InstaFeed.astro';
 ---
 <section class="hc" id="celebrate" aria-labelledby="hc-h">
   <figure class="hc-ph" data-fk-reveal>
@@ -35,6 +36,7 @@ const arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
       <a class="fk-btn fk-btn--primary" href="/party">Plan my party</a>
       <a class="fk-btn fk-btn--secondary" href="/banquet">See the banquet hall</a>
     </div>
+    <InstaFeed handle="fursatbanquets" count={3} />
   </div>
 </section>
 

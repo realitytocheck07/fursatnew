@@ -137,6 +137,10 @@ function init(root: HTMLElement) {
   const AGE = 'fursat_age_ok';
   const ageOk = () => { try { return localStorage.getItem(AGE) === '1'; } catch { return false; } };
   const dlg = $<HTMLDialogElement>('#mv-age')!;
+  // CAFÉ MODE: /menu?menu=cafe (header "Café & Coffee", /cafe buttons). Only the café groups are listed (coffee, tea, shakes, smoothies,
+  // breakfast, desserts, cookies, soft drinks); the alcohol groups are hidden, so no 21+ question is needed.
+  const CAFE = new URLSearchParams(location.search).get('menu') === 'cafe';
+  if (CAFE) root.dataset.cafe = '1';
   let pending: (() => void) | null = null;
 
   function setSide(side: Side) {
@@ -166,7 +170,7 @@ function init(root: HTMLElement) {
     el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   };
   function need21(side: Side, run: () => void) {
-    if (side === 'drinks' && !ageOk()) { pending = run; if (!dlg.open) dlg.showModal(); return; }
+    if (side === 'drinks' && !CAFE && !ageOk()) { pending = run; if (!dlg.open) dlg.showModal(); return; }
     run();
   }
   function go(id: string | null, side?: Side) {
@@ -448,6 +452,13 @@ function init(root: HTMLElement) {
     };
     dragEl.addEventListener('pointerup', endDrag);
     dragEl.addEventListener('pointercancel', endDrag);
+  }
+
+  /* ── café mode: land on the café part of the menu, and offer the way back to the whole menu ── */
+  if (CAFE) {
+    const exit = $<HTMLElement>('#mv-cafe-all');
+    exit?.addEventListener('click', (e) => { e.preventDefault(); history.replaceState(null, '', location.pathname); delete root.dataset.cafe; go('f-biryani', 'food'); });
+    setTimeout(() => go('d-coffee', 'drinks'), 250);
   }
 
   /* ── one-time sheen on primary buttons (a transition, removed after it plays) ── */
