@@ -16,8 +16,14 @@ import MenuDoors from '../components/menu/MenuDoors.astro';
 import DishRow from '../components/menu/DishRow.astro';
 import TableLanding from '../components/menu/TableLanding.astro';
 import DrinksIntro from '../components/menu/DrinksIntro.astro';
+import { fitStyle } from '../components/menu/photoFit';
+import FoodGroupHead from '../components/menu/FoodGroupHead.astro';
+import DrinksShowcase from '../components/menu/DrinksShowcase.astro';
 import '../styles/fk-tokens.css';
 import '../styles/menu-v2.css';
+import '../styles/menu-drinks.css';
+import '../styles/menu-food.css';
+import '../styles/menu-wow.css';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type Raw = {
@@ -80,6 +86,14 @@ const jump = ([['food', FOOD_GROUPS], ['drinks', DRINK_GROUPS]] as ['food' | 'dr
   side,
   tiles: groups.flatMap((g) => groupSections(g).map((sec) => ({ id: `s-${slug(sec.section)}`, name: titleCase(sec.section), count: sec.items.length, icon: GROUP_ICONS[g.id] }))),
 }));
+// Food group openers: real photos of that group (never ask/dishes, never repeats), else sample dish names for a banner
+const groupHead = (g: Group) => {
+  const its = groupSections(g).flatMap((s) => s.items);
+  const seen = new Set<string>();
+  const photos = its.filter((i) => PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/') && !seen.has(PHOTOS[i.name].sm) && seen.add(PHOTOS[i.name].sm))
+    .slice(0, 3).map((i) => ({ name: titleCase(i.name).replace(/\s*\((Veg|Egg|Chicken|Mix)\)$/, ''), sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), price: i.price != null ? money(i.price) : '' }));
+  return { photos, sample: its.slice(0, 3).map((i) => titleCase(i.name)) };
+};
 const addAttrs = (i: Item) => {
   const lab = mainLabel(i);
   return {
@@ -87,6 +101,10 @@ const addAttrs = (i: Item) => {
     'data-c': i.section, 'data-k': i.kind, 'data-v': i.veg ? 'v' : 'n', ...(i.alc ? { 'data-a': '1' } : {}),
   };
 };
+// Drinks showcase: every bar item that has a real photo (dish-photos.json), in menu order
+const showcase = drinks.flatMap((s) => s.items).filter((i) => PHOTOS[i.name]).map((i) => ({
+  name: titleCase(i.name), section: i.section, price: i.price, icon: GROUP_ICONS[(DRINK_GROUPS.find((g) => g.sections.includes(i.section)) ?? DRINK_GROUPS[0]).id], sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), attrs: addAttrs(i),
+}));
 // rotating table (menu-table.json): every dish must exist and have a real photo
 const tableDishes = tableData.dishes.map((d) => {
   const it = all.find((i) => i.name === d.name);
@@ -141,7 +159,8 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
   <a class="skip" href="#main" style="min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box">Skip to main content</a>
   <SiteHeader active="menu" variant="plaster" />
 
-  <main class="mv" id="main" tabindex="-1" data-side="drinks">
+  <main class="mv" id="main" tabindex="-1" data-side="drinks" data-food-theme="forest">
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute"><defs><clipPath id="fk-wave-s" clipPathUnits="objectBoundingBox"><path d="M0,0.1371C0,0.0617 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0617 1,0.1371L1,0.8903C1,0.9657 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8457 0,0.7703Z"/></clipPath><clipPath id="fk-wave-w" clipPathUnits="objectBoundingBox"><path d="M0,0.2133C0,0.096 0.054,0 0.12,0L0.88,0C0.946,0 1,0.096 1,0.2133L1,0.8293C1,0.9467 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8267 0,0.7093Z"/></clipPath><clipPath id="fk-wave-t" clipPathUnits="objectBoundingBox"><path d="M0,0.096C0,0.0432 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0432 1,0.096L1,0.9232C1,0.976 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.856 0,0.8032Z"/></clipPath><clipPath id="fk-wave-q" clipPathUnits="objectBoundingBox"><path d="M0,0.12C0,0.054 0.054,0 0.12,0L0.88,0C0.946,0 1,0.054 1,0.12L1,0.904C1,0.97 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.85 0,0.784Z"/></clipPath></defs></svg>
     <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData} />
     <TableLanding dishes={tableDishes} count={foodCount} />
     <DrinksIntro />
@@ -293,9 +312,11 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
         {[{ side: 'food', title: 'The Table', blurb: `${foodCount} dishes`, groups: FOOD_GROUPS }, { side: 'drinks', title: 'The Bar', blurb: `${drinkCount} drinks`, groups: DRINK_GROUPS }].map(({ side, title, blurb, groups }) => (
           <div class="mv-side" id={`mv-${side}`} data-side-block={side}>
             <header class="mv-side-h"><h2>{title}</h2><span>{blurb}</span></header>
+            {side === 'drinks' && <DrinksShowcase photos={showcase} count={drinkCount} sections={drinks.length} bar={{ image: barData.image, alt: barData.alt }} />}
             {groups.map((g) => (
               <div class="mv-grp" id={`g-${g.id}`} data-group={g.id}>
                 <h3 class="mv-grp-h">{g.label}<span class="num" data-one={groupCount(g) === 1 ? '' : undefined}>{groupCount(g)}</span></h3>
+                {side === 'food' && <FoodGroupHead icon={GROUP_ICONS[g.id]} count={groupCount(g)} {...groupHead(g)} />}
                 {groupSections(g).map((sec) => (
                   <section class="mv-sec" id={`s-${slug(sec.section)}`}>
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
@@ -361,10 +382,10 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
   </dialog>
 
   <SiteFooter />
-  {site.rista?.live && <script is:inline src="/js/rista-live.js" defer></script>}
 </Base>
 
 <script>
   import '../components/menu/menu-v2';
   import '../scripts/fk-motion';
+  import '../components/menu/menu-wow';
 </script>

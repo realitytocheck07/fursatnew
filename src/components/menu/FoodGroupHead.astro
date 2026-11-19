@@ -1,0 +1,27 @@
+---
+// Opens each Food group: real dish photos of that group when they exist, otherwise a green banner with the group icon and sample dishes.
+// Not [data-row], so search and the live count ignore it. No invented images: photos come only from dish-photos.json.
+interface Photo { fit: string; name: string; sm: string; w: number; h: number; price: string }
+interface Props { icon: string; count: number; photos: Photo[]; sample: string[] }
+const { icon, count, photos, sample } = Astro.props as Props;
+const n = Math.min(photos.length, 3);
+---
+{n > 0 ? (
+  <ul class="fg fg--ph fk-rail fk-reveal" role="list" data-n={n} aria-label="Popular in this section">
+    {photos.slice(0, 3).map((p) => (
+      <li class="fg-tile">
+        <div class="fg-img">
+          <img class="fk-fit" src={p.sm} alt={p.name} width={Math.round(420 * p.w / p.h)} height="420" loading="lazy" decoding="async" style={p.fit} />
+          <span class="fg-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={icon} /></svg></span>
+        </div>
+        <div class="fg-meta"><b>{p.name}</b><i class="num">{p.price}</i></div>
+      </li>
+    ))}
+  </ul>
+) : (
+  <div class="fg fg--tx fk-reveal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={icon} /></svg>
+    <p class="fg-k"><span class="num">{count}</span> {count === 1 ? 'dish' : 'dishes'}</p>
+    <p class="fg-s">{sample.join(' · ')}</p>
+  </div>
+)}

@@ -1,0 +1,142 @@
+{
+ "CAFE LATTE": {
+  "cx": 0.5,
+  "cy": 0.62,
+  "z": 1.25
+ },
+ "CAFE MOCHA": {
+  "cx": 0.5,
+  "cy": 0.58,
+  "z": 1.05
+ },
+ "CAPPUCCINO": {
+  "cx": 0.5,
+  "cy": 0.64,
+  "z": 1.3
+ },
+ "Tiramisu": {
+  "cx": 0.55,
+  "cy": 0.62,
+  "z": 1.15
+ },
+ "Apricot Delight": {
+  "cx": 0.5,
+  "cy": 0.52,
+  "z": 1.3
+ },
+ "Biscoff Cheesecake": {
+  "cx": 0.5,
+  "cy": 0.68,
+  "z": 1.3
+ },
+ "Tres Leches": {
+  "cx": 0.5,
+  "cy": 0.66,
+  "z": 1.3
+ },
+ "OG French Toast": {
+  "cx": 0.5,
+  "cy": 0.62,
+  "z": 1.2
+ },
+ "Korean Bun": {
+  "cx": 0.5,
+  "cy": 0.72,
+  "z": 1.2
+ },
+ "Guntur Karam Wings": {
+  "cx": 0.5,
+  "cy": 0.6,
+  "z": 1.0
+ },
+ "Nalla Karam Kodi Vepudu": {
+  "cx": 0.5,
+  "cy": 0.68,
+  "z": 1.0
+ },
+ "Jeedi Pappu Kodi Pakodi": {
+  "cx": 0.55,
+  "cy": 0.6,
+  "z": 1.15
+ },
+ "Chicken Tikka (Angara/ Malai/ Hariyali)": {
+  "cx": 0.5,
+  "cy": 0.7,
+  "z": 1.1
+ },
+ "Classic Paneer Tikka": {
+  "cx": 0.5,
+  "cy": 0.72,
+  "z": 1.2
+ },
+ "Ustad Special Nalli Gosht Biryani": {
+  "cx": 0.55,
+  "cy": 0.66,
+  "z": 1.2
+ },
+ "Chicken Fry Piece Pulao": {
+  "cx": 0.5,
+  "cy": 0.5,
+  "z": 1.0
+ },
+ "Rice / Noodles (Veg)": {
+  "cx": 0.5,
+  "cy": 0.78,
+  "z": 1.15
+ },
+ "Rice / Noodles (Egg)": {
+  "cx": 0.5,
+  "cy": 0.78,
+  "z": 1.15
+ },
+ "Rice / Noodles (Chicken)": {
+  "cx": 0.5,
+  "cy": 0.78,
+  "z": 1.15
+ },
+ "Rice / Noodles (Mix)": {
+  "cx": 0.5,
+  "cy": 0.78,
+  "z": 1.15
+ },
+ "Mexican Grilled Veggie Fried Burger": {
+  "cx": 0.45,
+  "cy": 0.62,
+  "z": 1.1
+ },
+ "CREAMY BISCOFF SHAKE": {
+  "cx": 0.45,
+  "cy": 0.5,
+  "z": 1.0
+ },
+ "MIX BERRY SMOOTHIE": {
+  "cx": 0.45,
+  "cy": 0.48,
+  "z": 1.0
+ },
+ "Jamaican Jerk Chicken with Fries": {
+  "cx": 0.5,
+  "cy": 0.6,
+  "z": 1.0
+ },
+ "LIFE FURSAT BHAI": {
+  "cx": 0.55,
+  "cy": 0.55,
+  "z": 1.1
+ },
+ "FURSAT RAHASYAM": {
+  "cx": 0.5,
+  "cy": 0.55,
+  "z": 1.0
+ },
+ "ICED LATTE": {
+  "cx": 0.45,
+  "cy": 0.62,
+  "z": 1.0
+ },
+ "GONGURA MUCHATLU": {
+  "cx": 0.5,
+  "cy": 0.62,
+  "z": 1.15
+ }
+}

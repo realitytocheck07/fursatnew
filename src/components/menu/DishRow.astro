@@ -1,10 +1,10 @@
 ---
+import { fitStyle } from './photoFit';
 // One dish in the full menu: an "App card" (name, chips, ₹ pill on the left; photo thumb + Add on the right).
-// Alcohol (i.alc) is shown as a price list only: no Add button, so it can never go into Picks or a WhatsApp order.
 // Hooks the menu script reads: [data-row], .mv-open, .mv-iname, .mv-idesc, .mv-note, .mv-item-price, .fk-chip, [data-add].
 import { money } from './cart';
 interface Props {
-  i: { name: string; section: string; description?: string; note?: string; price: number | null; alc?: boolean; veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string };
+  i: { name: string; section: string; description?: string; note?: string; price: number | null; veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string };
   name: string;
   vs: { label: string; value: number }[];
   attrs: Record<string, string>;
@@ -35,9 +35,9 @@ const desc = vs.length > 1 ? (i.description ?? '').replace(/\s*Half\s*₹?\s*[\d
   </div>
   <div class="mv-c-thumb">
     {photo
-      ? <img src={photo.src} alt="" width={photo.w} height={photo.h} loading="lazy" decoding="async" />
+      ? <span class="mv-c-clip"><img class="fk-fit" src={photo.src} alt="" width={photo.w} height={photo.h} loading="lazy" decoding="async" style={fitStyle(i.name, photo.w / photo.h, 1, 0.5, 0.45)} /></span>
       : <span class="mv-c-ph" aria-hidden="true">F</span>}
-    {i.price != null && !i.alc && (
+    {i.price != null && (
       <button class="mv-add" type="button" aria-pressed="false" aria-label={`Add ${name} to picks`} {...attrs}><span class="mv-add-t" aria-hidden="true">+ Add</span></button>
     )}
   </div>
