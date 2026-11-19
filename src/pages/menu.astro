@@ -254,6 +254,18 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 
     <!-- Full menu: every item server-rendered (works without JS) -->
     <section class="mv-list" aria-label="Full menu" id="mv-list">
+      <p class="mv-cafebar" id="mv-cafebar"><span><b>Café menu</b> · coffee, tea, shakes, smoothies, breakfast &amp; desserts</span><a class="fk-pill" href="/menu" id="mv-cafe-all">Show full menu</a></p>
+      <style>
+        .mv-cafebar{display:none;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0;padding:10px 16px;background:#14301c;color:#fbf5e6;font:500 .875rem/1.3 var(--fk-sans)}
+        .mv-cafebar b{color:#e6b85c;font-weight:600}
+        .mv-cafebar .fk-pill{background:rgb(251 245 230 / .14);border:1px solid rgb(230 184 92 / .6);color:#fbf5e6;text-decoration:none;font:600 .8125rem/1 var(--fk-sans)}
+        .mv[data-cafe] .mv-cafebar{display:flex}
+        /* alcohol groups, their chips and jump tiles, and the bar showcase stay out of the café menu */
+        .mv[data-cafe] :is([data-group="d-cocktails"],[data-group="d-whisky"],[data-group="d-white"],[data-group="d-brandy"],[data-group="d-winebeer"]),
+        .mv[data-cafe] :is([data-go="d-cocktails"],[data-go="d-whisky"],[data-go="d-white"],[data-go="d-brandy"],[data-go="d-winebeer"]){display:none!important}
+        .mv[data-cafe] .mv-jump-grid li:has([data-jump-to="s-silly-classic"],[data-jump-to="s-the-classic"],[data-jump-to="s-long-island-iced-tea"],[data-jump-to="s-shooters"],[data-jump-to="s-whisky"],[data-jump-to="s-vodka"],[data-jump-to="s-gin"],[data-jump-to="s-rum"],[data-jump-to="s-brandy"],[data-jump-to="s-tequila"],[data-jump-to="s-liqueur"],[data-jump-to="s-wines"],[data-jump-to="s-beer"]){display:none}
+        .mv[data-cafe] .dk{display:none}
+      </style>
       <!-- ORDER-STRIP (session ORDER): one slim "Order online" strip -->
       <div class="mv-order">
         <span class="mv-order-t">Order to your home:</span>

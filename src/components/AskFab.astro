@@ -3,6 +3,8 @@
 // hops now and then, hops when scrolling starts, jumps + coin + a tiny hint when a new main section arrives, and jumps big on tap.
 // Page-aware: opens /ask with a starting question that fits the page the guest is on.
 // Motion is CSS transform only. Reduced motion: static, no bubbles except on tap. No sound.
+import slots from '../data/slots.json';
+import site from '../data/site.json';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const HINTS: Record<string, string> = {
   '/cafe': 'coffee and desserts',
@@ -16,6 +18,9 @@ const HINTS: Record<string, string> = {
 const q = HINTS[path];
 const href = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
 const show = path !== '/ask' && path !== '/404';
+// Offers "ear": only offers that are real and switchable in the data files (the table-booking discount in slots.json). The hidden FURSAT15 offer stays hidden until the client confirms it.
+const disc = Math.max(0, ...slots.map((x: { discount?: number }) => x.discount || 0));
+const waOffers = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent('Hi Fursat, what offers are on today?')}`;
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 // the hint bubble each kind of section gets (the page's own default comes from its path)
 const BUBBLES = { menu: 'Hungry? 🍛', party: 'Party plans? 🎉', bar: 'Cricket tonight? 🏏' /* TODO(client): confirm the cricket line */, cafe: 'Coffee break? ☕', any: 'Ask me anything!' };
@@ -30,6 +35,15 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
     <span class="afab-spk" aria-hidden="true"><i style="--sx:-30px;--sy:-34px"></i><i style="--sx:0px;--sy:-46px"></i><i style="--sx:30px;--sy:-34px"></i><i style="--sx:-42px;--sy:-8px"></i><i style="--sx:42px;--sy:-8px"></i><i style="--sx:0px;--sy:-24px"></i></span>
     <span class="afab-bub" aria-hidden="true"></span>
   </a>
+  <button class="afab-ear" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="afab-offers" data-fk-ear hidden><span aria-hidden="true">🎁</span> Offers</button>
+  <div class="afab-offers" id="afab-offers" role="dialog" aria-label="Offers at Fursat" hidden>
+    <p class="afab-of-h">Offers at Fursat</p>
+    <ul>
+      {disc > 0 && <li><b>{disc}% off</b><span>when you book a table. Pick a time slot that shows the offer.</span><a href="/reserve">Book a table →</a></li>}
+      <li><b>Today’s offers</b><span>Ask the team, they reply on WhatsApp.</span><a href={waOffers} target="_blank" rel="noopener">Ask on WhatsApp →</a></li>
+    </ul>
+    <small>Terms apply, confirm on WhatsApp.</small>
+  </div>
   <script is:inline>
   (() => {
     const a = document.querySelector('[data-fk-ask]');
@@ -135,7 +149,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
     addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
     const paused = () => !live || reduce.matches || document.hidden || a.hasAttribute('data-hold') || a.classList.contains('is-intro') || !(a.classList.contains('is-on') || a.hasAttribute('data-early'))
       || typing() || !!document.querySelector('dialog[open], [aria-modal="true"]') || document.documentElement.classList.contains('fk-sheet-open') || document.documentElement.classList.contains('lock')
-      || /\bm-/.test(a.className) || a.matches(':active') || performance.now() - lastScroll < 600;
+      || document.documentElement.classList.contains('fk-music') || /\bm-/.test(a.className) || a.matches(':active') || performance.now() - lastScroll < 600;
     // is the strip the mascot would cover at offset dx free of links / buttons?
     const spotFree = (dx, r) => {
       const bl = r.left - wx, L = bl + dx - 6, R = bl + dx + r.width + 6, T = r.top - 6, B = r.bottom + 6;
@@ -198,6 +212,30 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       play('big', true); coin(); say(B.any, true);
       setTimeout(() => { location.href = a.href; }, 260);
     });
+    // --- Offers ear: a small gold tab on the Ask pill; it follows the pill (which hops and walks) and opens a small real-offers card ---
+    const ear = document.querySelector('[data-fk-ear]'), card = document.getElementById('afab-offers');
+    if (ear && card) {
+      let open = false, lastKey = '', nudgeT = 0;
+      const place = () => {
+        requestAnimationFrame(place);
+        const cs = getComputedStyle(a), r = a.getBoundingClientRect();
+        const show = !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
+        if (!show) { if (!ear.hidden) { ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
+        if (ear.hidden) ear.hidden = false;
+        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.right - w - 8, top = r.top - ear.offsetHeight + 7;
+        const key = left.toFixed(0) + ',' + top.toFixed(0);
+        if (key !== lastKey) { lastKey = key; ear.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0)`; }
+        if (open) { card.style.left = phone() ? 'auto' : Math.max(12, r.left) + 'px'; card.style.right = phone() ? '12px' : 'auto'; card.style.bottom = (innerHeight - r.top + ear.offsetHeight + 4) + 'px'; }
+      };
+      requestAnimationFrame(place);
+      const set = (v) => { open = v; card.hidden = !v; ear.setAttribute('aria-expanded', String(v)); ear.classList.toggle('is-open', v); };
+      ear.addEventListener('click', (e) => { e.stopPropagation(); set(!open); });
+      document.addEventListener('click', (e) => { if (open && !card.contains(e.target)) set(false); });
+      addEventListener('keydown', (e) => { if (open && e.key === 'Escape') { set(false); ear.focus(); } });
+      // a tiny wiggle every ~14 s so the tab is noticed (transform only, not under reduced motion)
+      if (!reduce.matches) setInterval(() => { if (!ear.hidden && !open && visible()) { ear.classList.remove('is-nudge'); void ear.offsetWidth; ear.classList.add('is-nudge'); } }, 14000);
+    }
+    // --- Dance: while the mood music plays (html.fk-music, with --fk-beat / --fk-bdir from 06.js) Ask Fursat stays put and dances to the beat ---
     addEventListener('pageshow', () => { delete a.dataset.go; });
   })();
   </script>
@@ -331,4 +369,30 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 @media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
 @media print { .afab { display: none !important; } }
+/* ---- Dance (v5.58): the beat from the mood music (--fk-beat 0..1, eased, and --fk-bdir +/-1 flipping each beat) drives the mascot. Individual transform
+   properties (translate / rotate / scale) so it stacks with the hops and the roaming. A slow sway runs underneath so it never freezes between beats. ---- */
+:global(html.fk-music) .afab:not(.is-intro) .afab-img { translate: 0 calc(var(--fk-beat, 0) * -10px); rotate: calc(var(--fk-bdir, 1) * var(--fk-beat, 0) * 9deg); scale: calc(1 + var(--fk-beat, 0) * .1) calc(1 - var(--fk-beat, 0) * .07); animation: afab-sway 1.3s ease-in-out infinite alternate; }
+@keyframes afab-sway { from { transform: rotate(-5deg) translateX(-1.5px); } to { transform: rotate(5deg) translateX(1.5px); } }
+:global(html.fk-music) .afab:not(.is-intro)::after { content: '♪'; position: absolute; right: 8px; top: -10px; color: #f3c56b; font: 700 15px/1 Poppins, system-ui, sans-serif; opacity: calc(.35 + var(--fk-beat, 0) * .65); translate: 0 calc(var(--fk-beat, 0) * -6px); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { :global(html.fk-music) .afab .afab-img { translate: none; rotate: none; scale: none; animation: none; } :global(html.fk-music) .afab::after { display: none; } }
+
+/* ---- Offers ear: a small gold tab on the Ask pill + a real-offers card ---- */
+.afab-ear { position: fixed; left: 0; top: 0; z-index: 8499; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.afab-ear[hidden], .afab-offers[hidden] { display: none; }
+.afab-ear:active { scale: .96; }
+.afab-ear:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
+.afab-ear.is-nudge { animation: afab-ear 900ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes afab-ear { 0%, 100% { rotate: 0deg; } 20% { rotate: -7deg; } 45% { rotate: 6deg; } 70% { rotate: -3deg; } }
+.afab-offers { position: fixed; z-index: 8600; width: min(300px, calc(100vw - 24px)); padding: 14px 16px 12px; border-radius: 18px; background: #fff8e8; color: #13301d; box-shadow: 0 18px 40px -16px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(201 154 67 / .6); font-family: Poppins, system-ui, sans-serif; }
+.afab-of-h { margin: 0 0 8px; font: 600 1rem/1.2 'Playfair Display', Georgia, serif; }
+.afab-offers ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.afab-offers li { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid rgb(201 154 67 / .35); }
+.afab-offers li:last-child { border-bottom: 0; padding-bottom: 0; }
+.afab-offers li b { color: #c02a1a; font-size: .95rem; }
+.afab-offers li span { font-size: .8125rem; line-height: 1.35; }
+.afab-offers li a { display: inline-flex; align-items: center; min-height: 44px; color: #13301d; font-weight: 600; font-size: .8125rem; text-decoration: underline; text-underline-offset: 3px; }
+.afab-offers small { display: block; margin-top: 6px; color: #5b4a2a; font-size: .75rem; }
+@media (prefers-reduced-motion: reduce) { .afab-ear.is-nudge { animation: none; } }
+@media print { .afab-ear, .afab-offers { display: none !important; } }
+
 </style>

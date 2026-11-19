@@ -675,3 +675,23 @@
   .bk3d-sticky[hidden]{display:none}
   .bk3d-sticky-t{margin:0;font:600 .86rem/1.2 var(--fk-sans);color:#2b2416}
 }
+
+/* v5.58 3D FIX: on desktop/tablet the .rs-stage layer (z-index 3, inset 0) sat OVER the 3D window and swallowed every click, so tables could not be picked.
+   The stage lets clicks through; only its real content (hero, form) takes them. */
+.rs-hy .rs-stage{pointer-events:none}
+.rs-hy .rs-stage>*{pointer-events:auto}
+.rs-hy .rs-stage>.rs-hero.bk3d-on{pointer-events:none}
+/* phone: the 3D room is its own card above the form, opened by a button */
+.bk3d-launch{display:none}
+@media (max-width:899px){
+  .bk3d-launch:not([hidden]){display:flex;justify-content:center;margin:0 12px 12px}
+  .bk3d-launch .fk-btn{width:100%;justify-content:center;gap:8px}
+  .bk3d-launch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .rs-hy .bk3d-host.bk3d-host--card{position:relative;inset:auto;height:min(72svh,560px);margin:0 12px 12px;border-radius:24px;overflow:hidden;opacity:0;pointer-events:none;box-shadow:0 0 0 2px rgba(201,154,67,.75),0 18px 36px -16px rgba(14,34,20,.6)}
+  .rs-hy .bk3d-host.bk3d-host--card.is-on{opacity:1;pointer-events:auto}
+  .bk3d-host--card .bk3d-top{left:4%;right:4%;top:10px}
+  .bk3d-host--card .bk3d-zoom{display:flex}
+  .bk3d-host--card .bk3d-bottom{padding:30px 4% 12px 4%}
+  .bk3d-host--card .bk3d-note,.bk3d-host--card .bk3d-zones{display:flex}
+  .bk3d-host--card .bk3d-note{display:block}
+}

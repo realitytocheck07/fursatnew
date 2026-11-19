@@ -35,6 +35,9 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
         <HyWindows data={rPhone} slice={0} photos={[heroPhoto]} view="m" />
         <div class="rs-stage">
           <ReserveHero />
+          <div class="bk3d-launch" id="bk3d-launch" hidden>
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="bk3d-launch-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5"/></svg><span>Pick your table in 3D (optional)</span></button>
+          </div>
           <BookingPanel />
         </div>
       </section>
@@ -72,7 +75,23 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
       const visibleWin = () => [...document.querySelectorAll<HTMLElement>('.rs-hy .hy-win')].find((el) => el.getClientRects().length > 0);
       let host: HTMLElement | null = null, mounted: { destroy(): void } | null = null, busy = false, failed = false;
       const hero = document.querySelector<HTMLElement>('.rs-hero'), top = document.querySelector<HTMLElement>('.rs-seg--top');
+      // PHONE: the photo window is hidden on the phone layout, so the 3D room opens as its own card above the form, on tap (keeps the form on the first screen)
+      const phone = () => !visibleWin() && matchMedia('(max-width:899px)').matches;
+      const launch = document.getElementById('bk3d-launch')!, launchBtn = document.getElementById('bk3d-launch-btn')!;
+      const startPhone = async () => {
+        if (busy || host) return; busy = true;
+        launchBtn.setAttribute('aria-busy', 'true'); launchBtn.querySelector('span')!.textContent = 'Loading the room…';
+        const h = document.createElement('div'); h.className = 'bk3d-host bk3d-host--card'; h.id = 'bk3d-host'; launch.after(h); host = h;
+        try {
+          mounted = await mountBooking3D(h, { reduced, desktop: false, flyIn: !reduced });
+          h.classList.add('is-on'); launch.hidden = true; h.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+        } catch { failed = true; h.remove(); host = null; launchBtn.removeAttribute('aria-busy'); launchBtn.querySelector('span')!.textContent = '3D room isn’t available on this device'; launchBtn.setAttribute('disabled', ''); }
+        busy = false;
+      };
+      launchBtn.addEventListener('click', startPhone);
       const start = async () => {
+        if (phone()) { if (!failed && !host) launch.hidden = false; return; }
+        launch.hidden = true;
         const w = visibleWin(); if (!w || busy || failed || (host && host.parentElement === w)) return;
         busy = true; mounted?.destroy(); mounted = null; host?.remove();
         const h = document.createElement('div'); h.className = 'bk3d-host'; h.id = 'bk3d-host'; w.appendChild(h); host = h;
@@ -84,7 +103,7 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
       };
       const kick = () => { const go = () => setTimeout(start, 2500); 'requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 3000 }) : go(); };
       document.readyState === 'complete' ? kick() : addEventListener('load', kick, { once: true });
-      matchMedia('(max-width:700px)').addEventListener('change', () => setTimeout(start, 300));
+      matchMedia('(max-width:700px)').addEventListener('change', () => { if (host?.classList.contains('bk3d-host--card')) return; setTimeout(start, 300); });
       // phone sticky bar: "T7 · Booths · 4 seats → Book" scrolls to the form
       const bar = document.getElementById('bk3d-sticky')!, txt = document.getElementById('bk3d-sticky-t')!;
       addEventListener('fk:table', (e) => { const d = (e as CustomEvent).detail; bar.hidden = !d; txt.textContent = d ? d.line : ''; });

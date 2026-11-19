@@ -74,7 +74,17 @@ M.a.addEventListener("ended",function(){if(!M.on||viaReel)return;M.on=false;flag
 addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
 addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="main")stop(true,true)});
 /* the reel starts (after the intro): if sound is on, hand over from the mp3 to the reel's own audio. The reel ending / failing turns the sound off, like the song ending. */
-if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&reelUsable()){viaReel=true;fade(M,0,200,function(){M.a.pause()});reelSound(true,true)}});
+if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&reelUsable()){
+  /* v5.58: coming back from the mp3 (the reel was paused by scroll / tab switch while the song kept playing): put the picture where the song is */
+  try{var tt=M.a.currentTime;if(tt>.3&&Math.abs(rf.currentTime-tt)>.4)rf.currentTime=tt}catch(x){}
+  viaReel=true;fade(M,0,200,function(){M.a.pause()});reelSound(true,true)}});
+ /* v5.58 FIX "music stops before the end": the reel is paused when the hero scrolls off screen or the tab hides (10.js). Its audio is the song, so the
+    song died with it. Now, whenever the reel pauses by itself (not the guest's own pause button, not the end), the mp3 carries on from the same second. */
+ rf.addEventListener("pause",function(){if(!M.on||!viaReel||rf.ended||document.documentElement.classList.contains("lock"))return;
+  var up=$("fxpv");if(up&&up.dataset.s==="paused")return;
+  var tt=rf.currentTime,a=M.a;viaReel=false;rf.muted=true;hook(a);if(ac&&ac.resume)ac.resume();a.preload="auto";a.volume=0;
+  var go=function(){try{a.currentTime=Math.min(tt,(a.duration||60)-.1)}catch(x){}var q=a.play();if(q&&q.then)q.then(function(){if(M.on)fade(M,IV,250)},function(){});else fade(M,IV,250)};
+  if(a.readyState>=1)go();else a.addEventListener("loadedmetadata",go,{once:true});wake()});
  var reelEnd=function(){if(M.on&&viaReel){viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}};
  rf.addEventListener("ended",reelEnd);rf.addEventListener("error",reelEnd)}
 /* the Enter tap starts the song; the 2 s auto-enter does not */
@@ -83,11 +93,15 @@ window.__fzIntroSound=function(tap){if(tap)play(true)};
 function onEnd(){if(ended)return;ended=true;finish()}
 addEventListener("fz:introend",onEnd);
 var bq=0,sbv=true;
-function wake(){if(M.on&&!bq&&sbv&&!document.hidden)bq=requestAnimationFrame(beat)}
+function wake(){if(M.on&&!bq&&!document.hidden)bq=requestAnimationFrame(beat)}
 if(sb&&"IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
-function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);return}if(!sbv||document.hidden)return;t=t||performance.now();
- if(an&&!viaReel){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t}}else if(t-last>504){B=1;last=t}
- B*=.9;if(B<.01)B=0;if(sb)sb.style.setProperty("--b",B.toFixed(3));bq=requestAnimationFrame(beat)}
+var R=document.documentElement,dir=1,wasOn=false;
+/* v5.58: the beat is also published on <html> as --fk-beat (0..1, eased down smoothly) and --fk-bdir (+1/-1, flips every beat), so Ask Fursat can dance to it.
+   It runs whenever the sound is on, not only while the Sound button is on screen. */
+function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);R.style.setProperty("--fk-beat",0);if(wasOn){wasOn=false;R.classList.remove("fk-music")}return}
+ if(document.hidden)return;t=t||performance.now();if(!wasOn){wasOn=true;R.classList.add("fk-music")}
+ if(an&&!viaReel){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}}else if(t-last>504){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}
+ B*=.92;if(B<.01)B=0;if(sb&&sbv)sb.style.setProperty("--b",B.toFixed(3));R.style.setProperty("--fk-beat",B.toFixed(3));bq=requestAnimationFrame(beat)}
 document.addEventListener("visibilitychange",function(){if(viaReel){wake();return}if(document.hidden&&M.on){M.a.pause()}else if(M.on&&!M.a.ended){M.a.play().catch(function(){});wake()}});
 var af=document.querySelector(".askwrap .af");if(af){if("IntersectionObserver"in window){new IntersectionObserver(function(e,o){if(e[0].isIntersecting){af.classList.add("in");o.disconnect()}},{threshold:.12}).observe(af)}else af.classList.add("in")}
 })();
