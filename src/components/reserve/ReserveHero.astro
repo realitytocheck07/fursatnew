@@ -1,0 +1,35 @@
+---
+// ReserveHero.astro — /reserve hero (P3 restyle). Left column of the stage: real lounge photo in the blobDining organic frame
+// (warm grade + green vignette via CSS), headline, CTAs and the live ticket as a green card (same card position as the mock's address card).
+// The visible page title (h1) is "Book Your Experience" in the form below, so the headline here is a styled paragraph and the page has one h1 on every screen size. One CTA only: the form is on this page already.
+// The ticket is the existing LiveTicket 'aside' variant: it mirrors the form (aria-hidden) and is hidden ≤1040px where the inline copy shows inside the form.
+import OrganicFrame from '../fx/OrganicFrame.astro';
+import LiveTicket from './LiveTicket.astro';
+---
+<section class="rs-hero" aria-labelledby="rs-h1">
+  <OrganicFrame shape="blobDining" class="rs-hero-frame" lip={16}>
+    <div class="rs-hero-photo" style="clip-path:url(#fk-blob-dining)" aria-hidden="true">
+      <img class="rs-ph" src="/assets/tour/img/lounge.webp" alt="" width="780" height="1040" fetchpriority="high" decoding="async" />
+    </div>
+    <div class="fk-organic__body rs-hero-in">
+      <p class="rs-hk rs-rise">Good food. Great company.</p>
+      <p class="fk-ty-h2 rs-h1 rs-rise" id="rs-h1">Your evening<br />deserves a <span class="rs-gold" data-t="Fursat.">Fursat.</span></p>
+      <p class="rs-sub rs-rise rs-s" style="--rs-d:80ms">Experience the vibe. Feel the Fursat.</p>
+      <svg class="rs-orn rs-rise" viewBox="0 0 260 16" aria-hidden="true">
+        <defs>
+          <linearGradient id="rsoL" x1="0" x2="1"><stop offset="0" stop-color="#E6C27A" stop-opacity="0"/><stop offset="1" stop-color="#E6C27A"/></linearGradient>
+          <linearGradient id="rsoR" x1="0" x2="1"><stop offset="0" stop-color="#E6C27A"/><stop offset="1" stop-color="#E6C27A" stop-opacity="0"/></linearGradient>
+        </defs>
+        <rect x="0" y="7.4" width="120" height="1.2" fill="url(#rsoL)"/><rect x="140" y="7.4" width="120" height="1.2" fill="url(#rsoR)"/>
+        <path d="M130 2l6 6-6 6-6-6z" fill="none" stroke="#E6C27A" stroke-width="1.2"/>
+      </svg>
+      <div class="rs-cta rs-rise rs-c" style="--rs-d:140ms">
+        <a class="fk-btn fk-btn--secondary fk-btn--md fk-btn--on-dark" href="/party">
+          <span>Plan a Celebration</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <LiveTicket variant="aside" />
+    </div>
+  </OrganicFrame>
+</section>

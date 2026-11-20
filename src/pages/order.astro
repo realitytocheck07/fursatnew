@@ -1,0 +1,265 @@
+---
+// order.astro - Order page. Pickup (preferred), Swiggy, Zomato as a sliding row, Ask Fursat widget, booking routes, full menu routes.
+// Links live in site.json -> order. Menu names and prices come only from food.json (chef picks via menu-featured.json).
+import Base from '../layouts/Base.astro';
+import '../styles/fk-tokens.css';
+import '../styles/order.css';
+import site from '../data/site.json';
+import food from '../data/food.json';
+import featured from '../data/menu-featured.json';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import MobileBar from '../components/MobileBar.astro';
+
+const order = site.order;
+const slug = (s: string) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const titleCase = (t: string) => (t === t.toUpperCase() ? t.toLowerCase().replace(/(^|[\s&(/-])([a-z])/g, (_m, a, b) => a + b.toUpperCase()) : t);
+
+// every food section, biggest first (the kids menu and extras stay in the full list on /menu)
+const sections = (food as { section: string; items: any[] }[])
+  .map((s) => ({ id: `s-${slug(s.section)}`, name: titleCase(s.section), count: s.items.length }))
+  .sort((a, b) => b.count - a.count);
+const dishCount = sections.reduce((n, s) => n + s.count, 0);
+
+// chef picks: exact-name lookup in food.json, so name and price are never typed here
+const flat = (food as { section: string; items: any[] }[]).flatMap((s) => s.items);
+const picks = (featured.chefPicks as { name: string; role: string }[])
+  .map((c) => flat.find((i) => i.name === c.name))
+  .filter(Boolean) as any[];
+
+const wa = (text: string) => `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
+// Pickup opens the Fursat DotPe store (site.json order.dotpe): DotPe does the menu, phone OTP and payment.
+// If order.dotpe is ever empty, the button falls back to WhatsApp. (order.pickup is the unused in-site pickup block.)
+const dotpe = order.dotpe;
+const pickupHref = dotpe || wa('Hi Fursat, I would like to place a pickup order.');
+const pickupLabel = dotpe ? 'Order for pickup' : 'Pickup on WhatsApp';
+
+// WhatsApp glyph for the pickup button (hidden once real pickup ordering is live)
+const waIcon = '<svg class="od-wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 19Z"/><path d="M9 9c0 3 3 6 6 6l1.2-1.4-2-1-1 .7c-.9-.4-1.6-1.1-2-2l.7-1-1-2Z"/></svg>';
+const askChips = ['I’m hungry', 'Something spicy under 400', 'Biryani for two', 'Coffee and dessert'];
+
+const routes = [
+  { href: '/reserve', t: 'Reserve a table', p: 'Lunch, dinner or a night out', icon: 'M3.5 10h17M8 3v4M16 3v4M5.5 5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z', main: true },
+  { href: '/party', t: 'Parties & events', p: 'Birthdays, kitty parties, bar bashes', icon: 'M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6Z' },
+  { href: '/banquet', t: 'Banquet hall', p: '50–350 guests, AV and live stage', icon: 'M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6' },
+  { href: '/catering', t: 'Outdoor catering', p: 'Fursat food at your venue', icon: 'M3 14h18a9 9 0 0 0-18 0ZM2 18h20M12 5V3' },
+];
+const menuTiles = [
+  { href: '/menu', t: 'Food menu', p: `${dishCount} dishes, ${sections.length} sections` },
+  { href: '/menu?tab=craft', t: 'Craft your plate', p: 'Build your feast step by step' },
+  { href: '/restaurant-bar#cocktails', t: 'Bar & mixology', p: 'Cocktails, malts and beers (21+)' },
+  { href: '/menu?menu=cafe', t: 'Café & coffee', p: 'Brews, shakes and bakes' },
+];
+---
+<Base
+  title="Order Online — Pickup, Swiggy & Zomato | Fursat Kitchen | Bar | Madhapur"
+  description="Order Fursat Kitchen | Bar your way: pick up at Capital Park, Madhapur, or get it delivered on Swiggy or Zomato. Browse the full menu or reserve a table."
+  canonical="https://fursatind.in/order/"
+  ogImage="https://fursatind.in/assets/order/order-hero-1200.webp"
+  ogImageAlt="Fursat Kitchen | Bar — Order online in Madhapur"
+>
+  <SiteHeader active="order" variant="plaster" />
+
+  <main class="od-page" id="main">
+    <!-- the scene: round-table photo fades into a cream-gold floor; sidebar + 3 cards + menu strip all sit on it -->
+    <div class="od-scene" id="choose">
+      <picture class="od-hero-pic">
+        <source media="(max-width:760px)" srcset="/assets/order/order-hero-phone-720.webp 720w, /assets/order/order-hero-phone-1112.webp 1112w" sizes="100vw" />
+        <img class="od-hero-bg" src="/assets/order/order-hero-1600.webp" srcset="/assets/order/order-hero-768.webp 768w, /assets/order/order-hero-1200.webp 1200w, /assets/order/order-hero-1600.webp 1600w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async" />
+      </picture>
+
+      <div class="od-hero-in">
+        <p class="od-k"><span>Order online</span></p>
+        <h1 class="od-h" id="od-h1">Choose how you want to <em>order</em></h1>
+        <p class="od-sub">Pick your preferred way to enjoy Fursat.</p>
+        <div class="od-dishes" aria-hidden="true">
+          <img src="/assets/dishes/new/iced-latte-480.webp" alt="" width="92" height="92" loading="lazy" decoding="async" />
+          <img src="/assets/menu/table/biscoff-cheesecake-480.webp" alt="" width="92" height="92" loading="lazy" decoding="async" />
+        </div>
+      </div>
+
+      <div class="od-grid">
+        <aside class="od-rail" aria-label="Order steps">
+          <img class="od-rail-logo" src="/assets/c86f49db5a.webp" alt="Fursat Kitchen | Bar" width="118" height="88" decoding="async" />
+          <p class="od-rail-k"><span>3 simple steps</span></p>
+          <ol class="od-steps" id="od-steps">
+            <li><a href="#choose" data-step="1" aria-current="step"><b>1</b><span>Choose how</span></a></li>
+            <li><a href="#menu" data-step="2"><b>2</b><span>Browse the menu</span></a></li>
+            <li><a href="#book" data-step="3"><b>3</b><span>Book or celebrate</span></a></li>
+          </ol>
+          <img class="od-rail-wm" src="/assets/brand/fursat-elephant.webp" alt="" width="160" height="160" aria-hidden="true" loading="lazy" />
+        </aside>
+
+        <div class="od-cards">
+          <div class="od-row" id="od-row" role="list" tabindex="-1">
+
+            <article class="od-card od-card--pick" role="listitem" aria-labelledby="od-t-pick">
+              <span class="od-tag">★ Most preferred ★</span>
+              {/* TODO(client): replace this green panel with the Fursat takeaway-bag photo */}
+              <span class="od-pimg" aria-hidden="true"><img src="/assets/brand/fursat-elephant.webp" alt="" width="120" height="120" decoding="async" /></span>
+              <span class="od-badge od-badge--bag" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12l1 12H5Z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg></span>
+              <h2 class="od-ct" id="od-t-pick">Pickup from <span class="g">Fursat</span></h2>
+              <p class="od-cs">Skip the wait, collect it fresh</p>
+              <ul class="od-feat"><li>Pick your own time</li><li>Capital Park, Madhapur</li></ul>
+              <a class="od-btn od-btn--wa" href={pickupHref} target="_blank" rel="noopener">
+                <Fragment set:html={dotpe ? '' : waIcon} /><span>{pickupLabel}<span class="od-vh"> (opens in a new tab)</span></span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </article>
+
+            <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-sw">
+              <span class="od-brand" aria-hidden="true"><img src="/assets/brand/swiggy-mark.svg" alt="" width="64" height="64" decoding="async" /><b class="od-brand-sw">Swiggy</b></span>
+              <h2 class="od-ct" id="od-t-sw">Order on <span class="r">Swiggy</span></h2>
+              <p class="od-cs">Fast &amp; reliable delivery</p>
+              <ul class="od-feat"><li>Home delivery</li><li>Live order tracking</li></ul>
+              <a class="od-btn od-btn--out" href={order.swiggy} target="_blank" rel="noopener">
+                <img src="/assets/brand/swiggy-mark.svg" alt="" width="22" height="22" /><span>Order on Swiggy<span class="od-vh"> (opens in a new tab)</span></span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </article>
+
+            <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-zo">
+              <span class="od-brand" aria-hidden="true"><img class="od-brand-zo" src="/assets/brand/zomato-logo.svg" alt="" width="160" height="64" decoding="async" /></span>
+              <h2 class="od-ct" id="od-t-zo">Order on <span class="r">Zomato</span></h2>
+              <p class="od-cs">Great food, great service</p>
+              <ul class="od-feat"><li>Easy reorders</li><li>Easy payments</li></ul>
+              <a class="od-btn od-btn--out" href={order.zomato} target="_blank" rel="noopener">
+                <b class="od-zsq" aria-hidden="true">Z</b><span>Order on Zomato<span class="od-vh"> (opens in a new tab)</span></span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </article>
+
+          </div>
+          <div class="od-dots" id="od-dots" aria-label="Order options" role="group">
+            <button type="button" aria-label="Pickup from Fursat" aria-current="true"></button>
+            <button type="button" aria-label="Order on Swiggy"></button>
+            <button type="button" aria-label="Order on Zomato"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="od-strip">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 36h36M10 36a14 14 0 0 1 28 0M24 14v-3M21 11h6"/></svg>
+        <p>Delicious food. Now just a click away.</p>
+        <a class="od-btn od-btn--gold" href="/menu"><span>Explore menu</span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <p class="od-note">Delivery prices and offers are set on each app.</p>
+    </div>
+
+    <div class="od-below">
+      <div class="od-body">
+        <!-- Ask Fursat, on the page -->
+          <aside class="od-ask" aria-labelledby="od-ask-t">
+            <img class="od-ask-img" src="/assets/ask-mascot-sm.webp" alt="" width="64" height="64" loading="lazy" decoding="async" />
+            <div class="od-ask-b">
+              <h2 class="od-ask-t" id="od-ask-t"><span translate="no">Ask Fursat</span> what to order</h2>
+              <p class="od-ask-p">Tell us your mood. We’ll find dishes that fit.</p>
+              <form class="od-ask-f" action="/ask" method="get" role="search">
+                <label class="od-vh" for="od-q">What are you in the mood for?</label>
+                <input id="od-q" name="q" type="search" maxlength="80" placeholder="Something spicy under 400…" autocomplete="off" enterkeyhint="search" />
+                <button class="od-btn od-btn--sm" type="submit"><span>Ask</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+              </form>
+              <div class="od-chips" role="group" aria-label="Quick questions">
+                {askChips.map((c) => <a class="od-chip" href={`/ask?q=${encodeURIComponent(c)}`}>{c}</a>)}
+              </div>
+            </div>
+          </aside>
+        {order.pickup && (
+          <section class="od-sec" id="pickup" aria-label="Pickup order">
+            {/* TODO(Rista): pickup + online payment block. Build it when the Rista POS is enabled; order.pickup is already true here. */}
+          </section>
+        )}
+
+        <!-- STEP 2: the menu, in full -->
+        <section class="od-sec" id="menu" aria-labelledby="od-h2">
+          <h2 class="od-h od-h--2" id="od-h2">The full <em>menu</em>, one tap away</h2>
+          <p class="od-sub">Browse every dish before you order, then pick up or get it delivered.</p>
+
+          <div class="od-tiles">
+            {menuTiles.map((m) => (
+              <a class="od-tile" href={m.href}>
+                <span class="od-tile-t">{m.t}</span>
+                <span class="od-tile-p">{m.p}</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            ))}
+          </div>
+
+          {picks.length > 0 && (
+            <div class="od-picks">
+              <h3 class="od-h3">Chef’s picks</h3>
+              <ul>
+                {picks.map((d) => (
+                  <li><a href="/menu"><span class="od-pk-n">{titleCase(d.name)}</span><b class="od-pk-p">₹{d.price}</b></a></li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <h3 class="od-h3">Jump to a section</h3>
+          <div class="od-cats" role="list">
+            {sections.map((s) => (
+              <a class="od-cat" role="listitem" href={`/menu#${s.id}`}>{s.name}<small>{s.count}</small></a>
+            ))}
+          </div>
+        </section>
+
+        <!-- STEP 3: booking points -->
+        <section class="od-sec" id="book" aria-labelledby="od-h3">
+          <h2 class="od-h od-h--2" id="od-h3">Dining in? <em>Book</em> your Fursat</h2>
+          <p class="od-sub">Tables, parties, banquets and catering, all in one place.</p>
+          <div class="od-routes">
+            {routes.map((r) => (
+              <a class:list={['od-route', { 'od-route--main': r.main }]} href={r.href}>
+                <span class="od-route-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={r.icon}/></svg></span>
+                <span class="od-route-b"><b>{r.t}</b><small>{r.p}</small></span>
+                <svg class="od-route-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            ))}
+          </div>
+          <div class="od-contact">
+            <a class="od-btn od-btn--ghost" href={`tel:+${site.phonePlain}`}><span>Call {site.phone}</span></a>
+            <a class="od-btn od-btn--ghost" href={wa('Hi Fursat, I would like to make a booking.')} target="_blank" rel="noopener"><span>WhatsApp us</span></a>
+            <span class="od-hours">{site.hours.display}</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <SiteFooter />
+  <MobileBar active="" />
+  <script is:inline src="/js/motion-kit.js"></script>
+  <script is:inline>
+  (function () {
+    var row = document.getElementById('od-row'), dots = [].slice.call(document.querySelectorAll('#od-dots button'));
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // dots follow the slide, and tapping a dot slides to its card (phone / tablet row only)
+    if (row && dots.length) {
+      var cards = [].slice.call(row.children);
+      var setDot = function (i) { dots.forEach(function (d, n) { if (n === i) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current'); }); };
+      var onScroll = function () {
+        var mid = row.scrollLeft + row.clientWidth / 2, best = 0, bd = 1e9;
+        cards.forEach(function (c, n) { var d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = n; } });
+        setDot(best);
+      };
+      var t = 0; row.addEventListener('scroll', function () { cancelAnimationFrame(t); t = requestAnimationFrame(onScroll); }, { passive: true });
+      dots.forEach(function (d, n) {
+        d.addEventListener('click', function () {
+          var c = cards[n]; row.scrollTo({ left: c.offsetLeft - (row.clientWidth - c.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
+        });
+      });
+    }
+    // step rail + progress bar follow the section on screen
+    var links = [].slice.call(document.querySelectorAll('#od-steps a')), bar = document.getElementById('od-bar');
+    var go = function (n) {
+      links.forEach(function (a) { if (+a.dataset.step === n) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
+      if (bar) bar.style.transform = 'scaleX(' + (n / 3) + ')';
+    };
+    go(1);
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) go({ choose: 1, menu: 2, book: 3 }[e.target.id] || 1); });
+      }, { rootMargin: '-40% 0px -50% 0px' });
+      ['choose', 'menu', 'book'].forEach(function (id) { var s = document.getElementById(id); if (s) io.observe(s); });
+    }
+  })();
+  </script>
+</Base>

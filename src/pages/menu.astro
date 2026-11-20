@@ -1,0 +1,391 @@
+---
+import fs from 'node:fs';
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import site from '../data/site.json';
+import foodData from '../data/food.json';
+import drinksData from '../data/drinks.json';
+import featured from '../data/menu-featured.json';
+import dishPhotos from '../data/dish-photos.json';
+import tableData from '../data/menu-table.json';
+import barData from '../data/menu-bar.json';
+import { FOOD_GROUPS, DRINK_GROUPS, GROUP_ICONS, type Group } from '../components/menu/menuGroups';
+import { money } from '../components/menu/cart';
+import MenuDoors from '../components/menu/MenuDoors.astro';
+import DishRow from '../components/menu/DishRow.astro';
+import TableLanding from '../components/menu/TableLanding.astro';
+import DrinksIntro from '../components/menu/DrinksIntro.astro';
+import { fitStyle } from '../components/menu/photoFit';
+import FoodGroupHead from '../components/menu/FoodGroupHead.astro';
+import DrinksShowcase from '../components/menu/DrinksShowcase.astro';
+import '../styles/fk-tokens.css';
+import '../styles/menu-v2.css';
+import '../styles/menu-drinks.css';
+import '../styles/menu-food.css';
+import '../styles/menu-wow.css';
+
+// ── Types ────────────────────────────────────────────────────────────────────
+type Raw = {
+  name: string; section: string; description?: string; price: number | null;
+  veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string; alc?: boolean;
+  price30ml?: number; priceGlass?: number | null; priceBottle?: number; priceBucket?: number;
+  price500ml?: number; price330ml?: number; pricePitcher?: number; priceTower?: number;
+  note?: string;
+};
+type Item = Raw & { kind: 'food' | 'drink' };
+type Section = { section: string; items: Item[] };
+
+const food: Section[] = (foodData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'food' as const })) }));
+const drinks: Section[] = (drinksData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'drink' as const })) }));
+// real dish photos by exact menu name (dish-photos.json); the build fails on a missing file or name
+type DishPhoto = { src: string; sm: string; xs: string; w: number; h: number; todo?: string };
+const PHOTOS = dishPhotos.photos as Record<string, DishPhoto>;
+const allNames = new Set([...food, ...drinks].flatMap((s) => s.items.map((i) => i.name)));
+for (const [n, ph] of Object.entries(PHOTOS)) {
+  if (!allNames.has(n)) throw new Error(`dish-photos.json: "${n}" is not a menu item`);
+  for (const f of [ph.src, ph.sm, ph.xs]) if (!fs.existsSync(`${process.cwd()}/public${f}`)) throw new Error(`dish-photos.json: missing ${f}`);
+}
+[...food, ...drinks].forEach((s) => s.items.forEach((i) => { const ph = PHOTOS[i.name]; if (ph) i.image = ph.src; }));
+const byName = new Map<string, Section>();
+[...food, ...drinks].forEach((s) => byName.set(s.section, s));
+
+// Build gates: every section sits in exactly one group, every group section exists.
+for (const [list, groups] of [[food, FOOD_GROUPS], [drinks, DRINK_GROUPS]] as [Section[], Group[]][]) {
+  const used = groups.flatMap((g) => g.sections);
+  const missing = list.map((s) => s.section).filter((n) => !used.includes(n));
+  const ghost = used.filter((n) => !list.some((s) => s.section === n));
+  if (missing.length || ghost.length) throw new Error(`menu groups out of sync. unassigned: ${missing.join(', ')} unknown: ${ghost.join(', ')}`);
+}
+
+const all: Item[] = [...food, ...drinks].flatMap((s) => s.items);
+const totalItems = all.length;
+const foodCount = food.reduce((n, s) => n + s.items.length, 0);
+const drinkCount = totalItems - foodCount;
+
+const find = (name: string, kind: 'food' | 'drink') => {
+  const hit = all.find((i) => i.name === name && i.kind === kind);
+  if (!hit) throw new Error(`menu-featured.json: "${name}" not found in ${kind} data`);
+  return hit;
+};
+const drink = find(featured.featuredDrink.name, 'drink');
+const picks = featured.chefPicks.map((p) => find(p.name, 'food'));
+const moreShakes = (byName.get(drink.section)?.items ?? []).filter((i) => i.name !== drink.name && i.price != null).slice(0, 4);
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const titleCase = (s: string) => (s === s.toUpperCase() && /[A-Z]/.test(s) ? s.toLowerCase().replace(/(^|[\s(/&-])([a-z])/g, (_m, a, b) => a + b.toUpperCase()) : s);
+const slug = (s: string) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const VARIANTS: [keyof Raw, string][] = [['price30ml', '30 ml'], ['priceGlass', 'Glass'], ['price330ml', '330 ml'], ['price500ml', '500 ml'], ['pricePitcher', 'Pitcher'], ['priceBucket', 'Bucket'], ['priceTower', 'Tower'], ['priceBottle', 'Bottle']];
+const variants = (i: Item) => VARIANTS.filter(([k]) => typeof i[k] === 'number').map(([k, l]) => ({ label: l, value: i[k] as number }));
+const mainLabel = (i: Item) => (i.price != null ? variants(i).find((v) => v.value === i.price)?.label : undefined);
+const groupSections = (g: Group) => g.sections.map((n) => byName.get(n)!).filter(Boolean);
+const groupCount = (g: Group) => groupSections(g).reduce((n, s) => n + s.items.length, 0);
+const groupSub = (g: Group) => (g.sections.length > 1 ? `${g.sections[0]} & more` : `${groupCount(g)} items`);
+// "Jump to" tiles: one per real section, with the item count and its group's icon
+const jump = ([['food', FOOD_GROUPS], ['drinks', DRINK_GROUPS]] as ['food' | 'drinks', Group[]][]).map(([side, groups]) => ({
+  side,
+  tiles: groups.flatMap((g) => groupSections(g).map((sec) => ({ id: `s-${slug(sec.section)}`, name: titleCase(sec.section), count: sec.items.length, icon: GROUP_ICONS[g.id] }))),
+}));
+// Food group openers: real photos of that group (never ask/dishes, never repeats), else sample dish names for a banner
+const groupHead = (g: Group) => {
+  const its = groupSections(g).flatMap((s) => s.items);
+  const seen = new Set<string>();
+  const photos = its.filter((i) => PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/') && !seen.has(PHOTOS[i.name].sm) && seen.add(PHOTOS[i.name].sm))
+    .slice(0, 3).map((i) => ({ name: titleCase(i.name).replace(/\s*\((Veg|Egg|Chicken|Mix)\)$/, ''), sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), price: i.price != null ? money(i.price) : '' }));
+  return { photos, sample: its.slice(0, 3).map((i) => titleCase(i.name)) };
+};
+const addAttrs = (i: Item) => {
+  const lab = mainLabel(i);
+  return {
+    'data-add': '', 'data-n': titleCase(i.name) + (lab ? ` (${lab})` : ''), 'data-p': String(i.price ?? ''),
+    'data-c': i.section, 'data-k': i.kind, 'data-v': i.veg ? 'v' : 'n', ...(i.alc ? { 'data-a': '1' } : {}),
+  };
+};
+// Drinks showcase: every bar item that has a real photo (dish-photos.json), in menu order
+const showcase = drinks.flatMap((s) => s.items).filter((i) => PHOTOS[i.name]).map((i) => ({
+  name: titleCase(i.name), section: i.section, price: i.price, icon: GROUP_ICONS[(DRINK_GROUPS.find((g) => g.sections.includes(i.section)) ?? DRINK_GROUPS[0]).id], sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), attrs: addAttrs(i),
+}));
+// rotating table (menu-table.json): every dish must exist and have a real photo
+const tableDishes = tableData.dishes.map((d) => {
+  const it = all.find((i) => i.name === d.name);
+  const ph = PHOTOS[d.name];
+  if (!it || !ph) throw new Error(`menu-table.json: "${d.name}" needs a menu item and a photo`);
+  const a = addAttrs(it);
+  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: a['data-n'], sm: ph.sm, clip: (d as { clip?: string }).clip ?? '' };
+});
+const vegMark = (veg?: boolean) => (veg ? 'mv-vm mv-vm--v' : 'mv-vm mv-vm--n');
+
+// ── SEO: Menu / MenuSection / MenuItem schema (same text and prices as the visible list) ──
+// TODO(client): Peri Peri Cottage Cheese Sandwich (395 vs 240) and Sriracha Paneer Tikka Burger prices are untouched.
+const SITE = 'https://fursatind.in';
+const itemLd = (i: Item) => {
+  const vs = variants(i);
+  const offers = vs.length > 1
+    ? vs.map((v) => ({ '@type': 'Offer', name: v.label, price: v.value, priceCurrency: 'INR' }))
+    : i.price != null ? { '@type': 'Offer', price: i.price, priceCurrency: 'INR' } : undefined;
+  return {
+    '@type': 'MenuItem', name: titleCase(i.name),
+    ...(i.description ? { description: i.description } : {}),
+    ...(offers ? { offers } : {}),
+    ...(i.veg ? { suitableForDiet: 'https://schema.org/VegetarianDiet' } : {}),
+    ...(i.image ? { image: SITE + i.image } : {}),
+  };
+};
+const menuLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { name: 'Fursat Kitchen Menu', list: food, id: 'food' },
+    { name: 'Fursat Bar Menu', list: drinks, id: 'drinks' },
+  ].map(({ name, list, id }) => ({
+    '@type': 'Menu', '@id': `${SITE}/menu/#${id}`, name, url: `${SITE}/menu/#mv-${id}`, inLanguage: 'en-IN',
+    provider: { '@id': `${SITE}/#restaurant` },
+    hasMenuSection: list.map((sec) => ({ '@type': 'MenuSection', name: sec.section, hasMenuItem: sec.items.map(itemLd) })),
+  })),
+};
+const ldItems = menuLd['@graph'].reduce((n, m) => n + m.hasMenuSection.reduce((k, sec) => k + sec.hasMenuItem.length, 0), 0);
+if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} != ${totalItems}`);
+---
+
+<Base
+  title="Menu | Fursat Kitchen | Bar, Madhapur, Hyderabad"
+  description={`The Fursat menu: ${foodCount} kitchen dishes and ${drinkCount} bar drinks, cocktails, whisky, wine, mocktails, shakes and coffee. Build your picks and send them on WhatsApp.`}
+  canonical="https://fursatind.in/menu/"
+  ogImage="https://fursatind.in/assets/fursat_space_07.webp"
+  ogImageAlt="Fursat Kitchen | Bar dining room"
+  preloadImages={[
+    { href: '/assets/menu/hero-bar-1400.webp', media: '(min-width: 721px)' },
+  ]}
+>
+  <a class="skip" href="#main" style="min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box">Skip to main content</a>
+  <SiteHeader active="menu" variant="plaster" />
+
+  <main class="mv" id="main" tabindex="-1" data-side="drinks" data-food-theme="forest">
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute"><defs><clipPath id="fk-wave-s" clipPathUnits="objectBoundingBox"><path d="M0,0.1371C0,0.0617 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0617 1,0.1371L1,0.8903C1,0.9657 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8457 0,0.7703Z"/></clipPath><clipPath id="fk-wave-w" clipPathUnits="objectBoundingBox"><path d="M0,0.2133C0,0.096 0.054,0 0.12,0L0.88,0C0.946,0 1,0.096 1,0.2133L1,0.8293C1,0.9467 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8267 0,0.7093Z"/></clipPath><clipPath id="fk-wave-t" clipPathUnits="objectBoundingBox"><path d="M0,0.096C0,0.0432 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0432 1,0.096L1,0.9232C1,0.976 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.856 0,0.8032Z"/></clipPath><clipPath id="fk-wave-q" clipPathUnits="objectBoundingBox"><path d="M0,0.12C0,0.054 0.054,0 0.12,0L0.88,0C0.946,0 1,0.054 1,0.12L1,0.904C1,0.97 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.85 0,0.784Z"/></clipPath></defs></svg>
+    <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData} />
+    <TableLanding dishes={tableDishes} count={foodCount} />
+    <DrinksIntro />
+
+    <section class="mv-stage" aria-label="Menu overview">
+      <!-- Featured drink + chef's picks (the one filter bar is the sticky bar at the top of the full list) -->
+      <div class="mv-grid">
+        <section class="mv-card mv-feat" aria-labelledby="mv-feat-name">
+          <div class="mv-feat-ph">
+            <img src={featured.featuredDrink.image} alt={featured.featuredDrink.imageAlt} width="1082" height="1600" loading="lazy" decoding="async" />
+          </div>
+          <div class="mv-feat-txt">
+            <span class="mv-lab">Featured drink</span>
+            <h2 class="mv-nm" id="mv-feat-name">{titleCase(drink.name)}</h2>
+            <p class="mv-meta"><span class={vegMark(drink.veg)} role="img" aria-label={drink.veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{drink.section}</p>
+            <div class="mv-chef-row">
+              <p class="mv-price num">{money(drink.price!)}</p>
+              <button class="mv-btn mv-btn--cream" type="button" {...addAttrs(drink)} data-img={featured.featuredDrink.image}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+            <div class="mv-more">
+              <div class="mv-more-top"><span class="mv-more-h">More from {drink.section}</span><button class="mv-link" type="button" data-go="d-shakes" data-side-of="drinks">See all →</button></div>
+              <ul>
+                {moreShakes.map((s) => (
+                  <li><span>{titleCase(s.name)}</span><b class="num">{money(s.price!)}</b></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="mv-card mv-chef" aria-label="Chef's picks">
+          <div class="mv-chef-main">
+            <span class="mv-ghost" aria-hidden="true">{picks[0].name[0]}</span>
+            <span class="mv-lab">Chef's pick</span>
+            <h2 class="mv-nm">{titleCase(picks[0].name)}</h2>
+            <p class="mv-meta">
+              <span class={vegMark(picks[0].veg)} role="img" aria-label={picks[0].veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{picks[0].veg ? 'Vegetarian' : 'Non-vegetarian'}
+              {picks[0].spicy && <span class="mv-spice">Spicy</span>}
+              <span class="mv-sec-name">{picks[0].section}</span>
+            </p>
+            <div class="mv-chef-row">
+              <p class="mv-price num">{money(picks[0].price!)}</p>
+              <button class="mv-btn" type="button" {...addAttrs(picks[0])}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+          <div class="mv-chef-second">
+            <span class="mv-orn" aria-hidden="true"><b></b></span>
+            <div class="mv-chef-2in">
+              <div>
+                <span class="mv-lab">Also a chef's pick</span>
+                <h3 class="mv-nm2">{titleCase(picks[1].name)}</h3>
+                <p class="mv-meta">
+                  <span class={vegMark(picks[1].veg)} role="img" aria-label={picks[1].veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{picks[1].veg ? 'Vegetarian' : 'Non-vegetarian'}
+                  {picks[1].spicy && <span class="mv-spice">Spicy</span>}
+                  <span class="mv-sec-name">{picks[1].section}</span>
+                </p>
+              </div>
+              <div class="mv-chef-row">
+                <p class="mv-price mv-price--sm num">{money(picks[1].price!)}</p>
+                <button class="mv-btn mv-btn--sm" type="button" {...addAttrs(picks[1])}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Picks pill (fixed at the bottom; opens the list, sends it on WhatsApp) -->
+        <div class="mv-picks" id="mv-picks" data-count="0">
+          <div class="mv-picks-bar" id="mv-picks-bar">
+            <button class="mv-picks-btn" type="button" id="mv-picks-toggle" aria-expanded="false" aria-controls="mv-picks-panel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" id="mv-bag"><path d="M5 8h14l-1 12H6L5 8zM9 8a3 3 0 0 1 6 0"/></svg>
+              <span class="mv-picks-lbl">Your Picks (<b class="num" id="mv-cnt">0</b>)</span>
+            </button>
+            <span class="mv-sep" aria-hidden="true"></span>
+            <a class="mv-wa" id="mv-wa" href="#" aria-disabled="true" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z"/></svg>
+              <span class="mv-wa-txt"><span class="mv-wa-long">Send on </span>WhatsApp</span><span class="mv-wa-arr" aria-hidden="true">→</span>
+            </a>
+          </div>
+          <!-- Collapsed form while the page scrolls: bag + count. Pointer-only; the bar above holds the real controls. -->
+          <span class="mv-picks-mini" id="mv-picks-mini" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" id="mv-bag-mini"><path d="M5 8h14l-1 12H6L5 8zM9 8a3 3 0 0 1 6 0"/></svg>
+            <b class="num" id="mv-cnt-mini">0</b>
+          </span>
+          <div class="mv-picks-panel" id="mv-picks-panel" hidden>
+            <ul id="mv-picks-list"></ul>
+            <div class="mv-picks-foot"><span>Subtotal <b class="num" id="mv-sub">₹0</b> <small>taxes extra</small></span><button type="button" class="mv-link" id="mv-clear">Clear all</button></div>
+          </div>
+        </div>
+    </section>
+
+    <!-- Full menu: every item server-rendered (works without JS) -->
+    <section class="mv-list" aria-label="Full menu" id="mv-list">
+      <!-- ORDER-STRIP (session ORDER): one slim "Order online" strip -->
+      <div class="mv-order">
+        <span class="mv-order-t">Order to your home:</span>
+        <a class="fk-pill mv-order-a" href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a>
+        <a class="fk-pill mv-order-a" href={site.order.zomato} target="_blank" rel="noopener">Zomato</a>
+      </div>
+      <style>
+        .mv-order{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:10px 16px;background:rgb(240 216 184 / .6);border-bottom:1px solid rgb(168 115 28 / .22)}
+        .mv-order-t{font:600 .875rem/1.2 var(--fk-sans);color:#2b2416}
+        .mv-order-a{background:#14301c;border:1px solid #14301c;color:#fbf5e6;font:600 .875rem/1 var(--fk-sans);text-decoration:none}
+        .mv-order-a:focus-visible{outline:3px solid #14301c;outline-offset:3px}
+      </style>
+      <!-- /ORDER-STRIP -->
+      <!-- The one filter bar: Food | Drinks, live count, category chips, search, Veg / Non-veg -->
+      <div class="mv-sticky" id="mv-sticky" data-fab-avoid>
+        <div class="mv-sticky-in">
+          <div class="mv-seg fk-seg" role="group" aria-label="Food or drinks">
+            <button class="is-on" type="button" data-side-go="food" data-seg="food" aria-pressed="true">Food</button>
+            <button type="button" data-side-go="drinks" data-seg="drinks" aria-pressed="false">Drinks</button>
+          </div>
+          <p class="mv-count num" id="mv-count" role="status" aria-live="polite">{foodCount} dishes</p>
+          {[{ side: 'food', groups: FOOD_GROUPS, label: 'Food categories' }, { side: 'drinks', groups: DRINK_GROUPS, label: 'Drink categories' }].map(({ side, groups, label }) => (
+            <div class="mv-schips fk-rail" data-schips={side} role="group" aria-label={label} hidden={side !== 'food'}>
+              {groups.map((g) => (<button class="mv-schip fk-pill" type="button" data-go={g.id} data-side-of={side} aria-pressed="false">{g.label}</button>))}
+            </div>
+          ))}
+          <label class="mv-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="mv-q" type="search" placeholder="Search menu" autocomplete="off" enterkeyhint="search" aria-label="Search the menu" />
+          </label>
+          <button class="fk-pill mv-cats" type="button" id="mv-cats" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
+            <span class="mv-cats-t">Categories</span>
+          </button>
+          <div class="mv-diet" role="group" aria-label="Dietary filters">
+            <button class="fk-pill" type="button" data-diet="veg" aria-pressed="false"><i class="mv-dot mv-dot--v"></i>Veg</button>
+            <button class="fk-pill" type="button" data-diet="nonveg" aria-pressed="false"><i class="mv-dot mv-dot--n"></i>Non-veg</button>
+          </div>
+        </div>
+      </div>
+      <div class="mv-list-in">
+      <nav class="mv-jump" id="mv-jump" aria-labelledby="mv-jump-h">
+        <h3 class="mv-jump-h" id="mv-jump-h">Jump to</h3>
+        {jump.map(({ side, tiles }) => (
+          <ul class="mv-jump-grid" data-jump={side} hidden={side !== 'food'}>
+            {tiles.map((t) => (
+              <li><a class="mv-tile" href={`#${t.id}`} data-jump-to={t.id} data-side-of={side}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={t.icon} /></svg>
+                <span class="mv-tile-n">{t.name}</span>
+                <span class="mv-tile-c num">{t.count} {t.count === 1 ? 'item' : 'items'}</span>
+              </a></li>
+            ))}
+          </ul>
+        ))}
+      </nav>
+        {[{ side: 'food', title: 'The Table', blurb: `${foodCount} dishes`, groups: FOOD_GROUPS }, { side: 'drinks', title: 'The Bar', blurb: `${drinkCount} drinks`, groups: DRINK_GROUPS }].map(({ side, title, blurb, groups }) => (
+          <div class="mv-side" id={`mv-${side}`} data-side-block={side}>
+            <header class="mv-side-h"><h2>{title}</h2><span>{blurb}</span></header>
+            {side === 'drinks' && <DrinksShowcase photos={showcase} count={drinkCount} sections={drinks.length} bar={{ image: barData.image, alt: barData.alt }} />}
+            {groups.map((g) => (
+              <div class="mv-grp" id={`g-${g.id}`} data-group={g.id}>
+                <h3 class="mv-grp-h">{g.label}<span class="num" data-one={groupCount(g) === 1 ? '' : undefined}>{groupCount(g)}</span></h3>
+                {side === 'food' && <FoodGroupHead icon={GROUP_ICONS[g.id]} count={groupCount(g)} {...groupHead(g)} />}
+                {groupSections(g).map((sec) => (
+                  <section class="mv-sec" id={`s-${slug(sec.section)}`}>
+                    {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
+                    <ul class="mv-items">
+                      {sec.items.map((i) => {
+                        const ph = PHOTOS[i.name];
+                        return <DishRow i={i} name={titleCase(i.name)} vs={variants(i)} attrs={addAttrs(i)} photo={ph ? { src: ph.sm, w: Math.round(640 * ph.w / ph.h), h: 640 } : undefined} />;
+                      })}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+        <p class="mv-empty" id="mv-empty" hidden>No dish found. Try “biryani”, or clear the filters.</p>
+        <p class="mv-fine">Prices in ₹, taxes extra.</p>
+      </div>
+    </section>
+
+    <!-- Dish detail sheet (phones). Native dialog: focus trap, Esc and inert background come with it. -->
+    <dialog class="mv-sheet" id="mv-sheet" aria-labelledby="mv-sheet-name" aria-describedby="mv-sheet-desc">
+      <div class="mv-sheet-panel" id="mv-sheet-panel">
+        <div class="mv-sheet-drag" id="mv-sheet-drag">
+          <span class="mv-sheet-grab" aria-hidden="true"></span>
+          <div class="mv-sheet-ph" id="mv-sheet-ph"></div>
+        </div>
+        <button class="mv-sheet-x" type="button" id="mv-sheet-x" aria-label="Close dish details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div class="mv-sheet-scroll">
+          <p class="mv-lab" id="mv-sheet-sec"></p>
+          <h2 class="mv-nm" id="mv-sheet-name"></h2>
+          <p class="mv-meta" id="mv-sheet-tags"></p>
+          <p class="mv-sheet-desc" id="mv-sheet-desc"></p>
+          <p class="mv-note" id="mv-sheet-note"></p>
+          <p class="mv-sheet-price num" id="mv-sheet-price"></p>
+        </div>
+        <div class="mv-sheet-foot">
+          <button class="mv-btn" type="button" id="mv-sheet-add" data-add data-nofly>
+            <span class="mv-ic" aria-hidden="true">
+              <svg class="mv-ic-a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+              <svg class="mv-ic-b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+            </span>
+            <span>Add to Picks</span>
+          </button>
+          <p class="mv-sheet-status" id="mv-sheet-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </dialog>
+  </main>
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(menuLd)}></script>
+
+  <!-- 21+ notice (shown once, before the bar menu) -->
+  <dialog class="mv-dialog" id="mv-age" aria-labelledby="mv-age-t">
+    <form method="dialog">
+      <h2 id="mv-age-t">The bar menu is for guests 21 and over</h2>
+      <p>Alcohol is served only to guests aged 21 or older, with valid ID on request. Please drink responsibly.</p>
+      <div class="mv-dialog-act">
+        <button class="mv-btn" value="yes" id="mv-age-yes">I'm 21 or older</button>
+        <button class="mv-btn mv-btn--ghost" value="no" id="mv-age-no">Show me food</button>
+      </div>
+    </form>
+  </dialog>
+
+  <SiteFooter />
+</Base>
+
+<script>
+  import '../components/menu/menu-v2';
+  import '../scripts/fk-motion';
+  import '../components/menu/menu-wow';
+</script>

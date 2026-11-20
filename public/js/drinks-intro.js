@@ -1,0 +1,149 @@
+/* Drinks video intro: plays once per visit, the first time the Drinks side is opened on /menu.
+   Delegated listener (capture) so it never blocks the original click. The <video> is created only when triggered. */
+(function () {
+  var KEY = 'fk-drinks-intro', BASE = '/assets/menu/drinks-intro/', START_MS = 1500, FADE_MS = 600;
+  var TRIGGER = '[data-open-side="drinks"],[data-side-go="drinks"],.mb-spot';
+  var active = false;
+  var MUSIC = '/assets/audio/drinks-intro-music.mp3', MUSIC_VOL = 0.7;
+
+  // DRINKS-SOUND: the drinks music has its own on/off (button on the video). It starts from the tap that opens Drinks
+  // and is NOT tied to the home-page Sound / Mood buttons. Off only if the guest switched it off this visit.
+  var SKEY = 'fk-drinks-sound';
+  function musicWanted() { try { return sessionStorage.getItem(SKEY) !== '0'; } catch (e) { return true; } }
+  function setWanted(v) { try { sessionStorage.setItem(SKEY, v ? '1' : '0'); } catch (e) {} }
+
+  function seen() { try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function mark() { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
+  function blocked() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return !!(c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || '')));
+  }
+
+  function play(origin) {
+    active = true;
+    var phone = matchMedia('(max-width: 820px), (orientation: portrait)').matches;
+    var root = document.documentElement, body = document.body;
+    var prev = { r: root.style.overflow, b: body.style.overflow };
+    var shown = false, closing = false, timer, au = null, fadeT = 0;
+
+    var ov = document.createElement('div');
+    ov.className = 'di'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Drinks intro video');
+    var v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.autoplay = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+    v.poster = BASE + (phone ? 'drinks-intro-phone-end.webp' : 'drinks-intro-end.webp');
+    if (phone) {
+      v.src = BASE + 'drinks-intro-phone.mp4';
+    } else {
+      var w = document.createElement('source'); w.src = BASE + 'drinks-intro-1280.webm'; w.type = 'video/webm';
+      var m = document.createElement('source'); m.src = BASE + 'drinks-intro-1280.mp4'; m.type = 'video/mp4';
+      v.append(w, m);
+    }
+    var skip = document.createElement('button');
+    skip.type = 'button'; skip.className = 'di-skip'; skip.textContent = 'Skip ✕'; skip.setAttribute('aria-label', 'Skip the drinks intro');
+    var snd = document.createElement('button');
+    snd.type = 'button'; snd.className = 'di-snd';
+    snd.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></svg><span></span>';
+    ov.append(v, skip, snd);
+
+    // music: created only now (never preloaded), plays with the video, fades out over FADE_MS, never restarts
+    function musicStop(ms) {
+      if (!au) return; var a = au; au = null; window.removeEventListener('fk:music', onMusic);
+      clearInterval(fadeT);
+      if (!ms) { a.pause(); return; }
+      var t0 = Date.now(), v0 = a.volume;
+      fadeT = setInterval(function () {
+        var k = Math.min(1, (Date.now() - t0) / ms); a.volume = v0 * (1 - k);
+        if (k >= 1) { clearInterval(fadeT); a.pause(); }
+      }, 40);
+    }
+    function sndUi() {
+      var want = musicWanted() && !!au;
+      snd.setAttribute('aria-pressed', want ? 'true' : 'false');
+      snd.setAttribute('aria-label', want ? 'Turn drinks music off' : 'Turn drinks music on');
+      snd.lastChild.textContent = want ? 'Sound on' : 'Sound off';
+    }
+    function onMusic(e) { if (e.detail && e.detail.id !== 'drinks') { musicStop(0); sndUi(); } }
+    // prime: runs inside the tap that opened Drinks (browsers only allow sound from a tap). Starts muted, unmuted when the video plays.
+    function musicPrime() {
+      if (au || !musicWanted()) return;
+      var a = new Audio(MUSIC); a.loop = false; a.volume = MUSIC_VOL; a.muted = true; au = a;
+      window.addEventListener('fk:music', onMusic);
+      var p = a.play();
+      if (p && p.catch) p.catch(function () { if (au === a) { musicStop(0); sndUi(); } });
+    }
+    function musicStart() {
+      if (!au || !musicWanted()) { sndUi(); return; }
+      try { au.currentTime = Math.min(v.currentTime || 0, au.duration || 1e9); } catch (e) {}
+      au.volume = MUSIC_VOL; au.muted = false;
+      var p = au.play(); if (p && p.catch) p.catch(function () {});
+      window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } }));
+      sndUi();
+    }
+    function toggleSound(e) {
+      e.stopPropagation(); // never closes the video
+      if (musicWanted() && au) { setWanted(false); au.pause(); sndUi(); return; }
+      setWanted(true);
+      if (!au) { musicPrime(); }
+      if (au) { try { au.currentTime = Math.min(v.currentTime || 0, au.duration || 1e9); } catch (er) {} au.muted = false; au.volume = MUSIC_VOL; var p = au.play(); if (p && p.catch) p.catch(function () {}); window.dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'drinks' } })); }
+      sndUi();
+    }
+    snd.addEventListener('click', toggleSound);
+    function unlock() { root.style.overflow = prev.r; body.style.overflow = prev.b; }
+    function cleanup() {
+      document.removeEventListener('keydown', onKey, true);
+      clearTimeout(timer); if (au) musicStop(0);
+      try { v.pause(); } catch (e) {}
+      v.removeAttribute('src'); v.querySelectorAll('source').forEach(function (s) { s.remove(); }); try { v.load(); } catch (e) {}
+      ov.remove(); unlock(); active = false;
+    }
+    function close() {
+      if (closing) return; closing = true;
+      musicStop(FADE_MS);
+      if (!shown) { cleanup(); return; } // never started: no intro at all
+      ov.classList.add('is-out'); ov.classList.remove('is-on');
+      var done = false, fin = function () {
+        if (done) return; done = true; cleanup();
+        // back to what was clicked; a tapped half (not focusable) falls back to its keyboard opener
+        var f = origin && origin.isConnected && origin.matches('button,a,[tabindex]') ? origin : document.querySelector('[data-open-side="drinks"]');
+        if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
+      };
+      ov.addEventListener('transitionend', fin, { once: true });
+      setTimeout(fin, FADE_MS + 80);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); close(); }
+      else if (e.key === 'Tab') { e.preventDefault(); (document.activeElement === skip ? snd : skip).focus(); } // two controls: Skip and the sound button
+    }
+    function start() {
+      if (shown || closing) return; shown = true; clearTimeout(timer);
+      root.style.overflow = 'hidden'; body.style.overflow = 'hidden';
+      requestAnimationFrame(function () { ov.classList.add('is-on'); });
+      skip.focus({ preventScroll: true });
+      musicStart();
+    }
+
+    ov.addEventListener('click', close); // Skip, or a tap anywhere on the video
+    v.addEventListener('playing', start);
+    v.addEventListener('ended', close);
+    v.addEventListener('error', close, true);
+    document.addEventListener('keydown', onKey, true);
+    document.body.append(ov);
+    timer = setTimeout(function () { if (!shown) close(); }, START_MS); // not started in 1.5s: open normally
+    musicPrime(); sndUi();
+    var p = v.play(); if (p && p.catch) p.catch(function () { close(); });
+  }
+
+  document.addEventListener('click', function (e) {
+    if (active || seen() || !e.target || !e.target.closest) return;
+    var hit = e.target.closest(TRIGGER);
+    if (!hit && !e.target.closest('#md-x')) { // a tap on the closed Drinks half itself also opens the side (MenuDoors)
+      var door = e.target.closest('[data-door="drinks"]'), md = door && door.closest('.md');
+      if (door && md && md.dataset.open !== 'drinks') hit = door;
+    }
+    if (!hit || blocked()) return;
+    mark();
+    play(hit); // the original click is untouched: the side opens underneath
+  }, true);
+})();

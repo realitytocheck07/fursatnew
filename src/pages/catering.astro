@@ -1,0 +1,363 @@
+---
+// catering.astro - Outdoor Catering by Fursat
+// TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500), "weddings", "bar service", delivery area and the "Catering Director" role are unconfirmed. Kept as the owner decided.
+import InstaFollow from '../components/InstaFollow.astro';
+import Base from '../layouts/Base.astro';
+import '../styles/fk-tokens.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import MobileBar from '../components/MobileBar.astro';
+import MascotOfferModal from '../components/MascotOfferModal.astro';
+import InstaFeed from '../components/InstaFeed.astro';
+---
+<Base
+  title="Catering & Buffets — Fursat Kitchen | Bar | Hyderabad"
+  description="Fursat off-site catering for weddings, corporate lunches and private parties. Full buffet setups, live counters, bar service. Hyderabad-wide delivery."
+  canonical="https://fursatind.in/catering/"
+  ogImage="https://fursatind.in/assets/fursat_space_14.webp"
+  ogImageAlt="Fursat catering — buffet and live counter service"
+>
+  <SiteHeader active="celebrate" variant="plaster" />
+
+  <main class="ct-page" id="main">
+    <!-- Hero Section -->
+    <section class="ct-hero">
+      <div class="ct-hero-wrap">
+        <span class="fk-ty-label ct-kicker">GOURMET EXPERIENCES AT YOUR VENUE</span>
+        <h1 class="fk-ty-hero ct-title mot-headline">Fursat Outdoor Catering</h1>
+        <p class="ct-sub">
+          Bring the flavors and hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
+        </p>
+        <div class="ct-hero-btns">
+          <a href="#quote" class="fk-btn fk-btn--primary">Request a quote</a>
+          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary">Call us: +91 90596 70033</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODO(client): 4 live-counter cards (tandoor, biryani handis, mixology bar, chaat & dessert) removed until the client confirms them; restore from git history (v5.17) if confirmed. -->
+    <!-- Service Scale Section -->
+    <section class="ct-scale">
+      <div class="ct-container">
+        <div class="ct-sec-head text-center">
+          <span class="fk-ty-label ct-kicker">OUR CATERING SCALE</span>
+          <h2 class="fk-ty-h2 ct-sec-title">From Intimate Dinners to Grand Weddings</h2>
+        </div>
+        <div class="ct-scale-grid fk-rail fk-rail--cards fk-rail--m" data-dots>
+          <div class="fk-card fk-card--glass ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">30–80</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Intimate Gatherings</p>
+            </div>
+          </div>
+          <div class="fk-card fk-card--glass ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">80–300</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Corporate &amp; Social Events</p>
+            </div>
+          </div>
+          <div class="fk-card fk-card--glass ct-stat-card">
+            <div class="fk-card__b">
+              <p class="fk-ty-h2 ct-stat-number">300–1500</p>
+              <p class="fk-ty-label ct-stat-unit">Guests</p>
+              <p class="fk-ty-body ct-stat-label">Grand Weddings &amp; Conventions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery strip: dishes from our kitchen (real photos; no outdoor catering photos exist yet: TODO(client)) -->
+    <section class="ct-gallery-strip" aria-label="From our kitchen at Capital Park">
+      <div class="ct-gallery-scroll">
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/nalli-gosht-biryani-half-720.webp" srcset="/assets/dishes/new/nalli-gosht-biryani-half-480.webp 480w, /assets/dishes/new/nalli-gosht-biryani-half-720.webp 720w, /assets/dishes/new/nalli-gosht-biryani-half.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalli gosht biryani" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/chicken-tikka-angara-720.webp" srcset="/assets/dishes/new/chicken-tikka-angara-480.webp 480w, /assets/dishes/new/chicken-tikka-angara-720.webp 720w, /assets/dishes/new/chicken-tikka-angara.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Chicken tikka angara" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
+        <figure class="ct-gallery-item">
+          <img src="/assets/dishes/new/nalla-karam-kodi-vepudu-720.webp" srcset="/assets/dishes/new/nalla-karam-kodi-vepudu-480.webp 480w, /assets/dishes/new/nalla-karam-kodi-vepudu-720.webp 720w, /assets/dishes/new/nalla-karam-kodi-vepudu.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalla karam kodi vepudu" width="1067" height="1600" loading="lazy" decoding="async" />
+        </figure>
+      </div>
+      <p class="ct-gallery-cap">From our kitchen at Capital Park</p>
+    </section>
+
+    <!-- Catering Quote Form -->
+    <section class="ct-quote" id="quote">
+      <div class="ct-container ct-quote-wrap">
+        <div class="ct-form-card">
+          <div class="ct-fc-head">
+            <span class="fk-ty-label ct-kicker">GET AN ESTIMATE</span>
+            <h2 class="fk-ty-h2">Book Fursat Outdoor Catering</h2>
+            <p>Provide your event details below. Our Catering Director will connect with a curated sample menu and per-head pricing.</p>
+          </div>
+
+          <form class="ct-form" action="https://wa.me/919059670033" target="_blank" data-wa-form data-wa-intro="Hi Fursat! 👋 I would like a catering quote:" novalidate>
+            <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+            <p class="ct-req">Fields marked * are required.</p>
+            <div class="ct-row">
+              <div class="ct-field">
+                <label for="ct-f1">Host name <span aria-hidden="true">*</span></label>
+                <input type="text" id="ct-f1" name="name" autocomplete="name" maxlength="40" data-l="Name" data-v="text" aria-required="true" aria-describedby="ct-f1-e" data-msg="Please enter your name." placeholder="e.g. Dr. S. Rao" />
+                <p class="ct-err" id="ct-f1-e" role="alert"></p>
+              </div>
+              <div class="ct-field">
+                <label for="ct-f2">Contact number <span aria-hidden="true">*</span></label>
+                <input type="tel" id="ct-f2" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="ct-f2-e" placeholder="Your phone number" />
+                <p class="ct-err" id="ct-f2-e" role="alert"></p>
+              </div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-field">
+                <label for="ct-f3">Event area in Hyderabad <span aria-hidden="true">*</span></label>
+                <input type="text" id="ct-f3" name="area" maxlength="80" data-l="Area" data-v="text" aria-required="true" aria-describedby="ct-f3-e" data-msg="Please enter the event area." placeholder="e.g. Moinabad Farmhouse / Jubilee Hills" />
+                <p class="ct-err" id="ct-f3-e" role="alert"></p>
+              </div>
+              <div class="ct-field">
+                <label for="ct-f4">Guest count (minimum 30) <span aria-hidden="true">*</span></label>
+                <input type="number" id="ct-f4" name="guests" inputmode="numeric" min="30" max="1500" data-l="Guests" data-v="count" aria-required="true" aria-describedby="ct-f4-e" placeholder="e.g. 75" />
+                <p class="ct-err" id="ct-f4-e" role="alert"></p>
+              </div>
+            </div>
+            <div class="ct-row">
+              <div class="ct-field">
+                <label for="ct-f5">Event date <span aria-hidden="true">*</span></label>
+                <input type="date" id="ct-f5" name="date" data-l="Date" data-v="date" aria-required="true" aria-describedby="ct-f5-e" />
+                <p class="ct-err" id="ct-f5-e" role="alert"></p>
+              </div>
+              <div class="ct-field">
+                <label for="ct-f6">Preferred cuisine mix (optional)</label>
+                <select id="ct-f6" name="cuisine" data-l="Cuisine" data-fk-sheet>
+                  <option value="North Indian + Royal Hyderabadi">North Indian + Royal Hyderabadi</option>
+                  <option value="Pan-Asian + Continental">Pan-Asian + Continental</option>
+                  <option value="Pure Vegetarian Feast">Pure Vegetarian Feast</option>
+                  <option value="Barbecue & Kebabs Special">Barbecue & Kebabs Special</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="fk-btn fk-btn--primary">
+              <span>Request a proposal</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<div class="igf-page"><InstaFeed handle="fursat_bitesandbuffet" /></div>
+<InstaFollow handle="fursat_bitesandbuffet" />
+  <MascotOfferModal />
+  <SiteFooter />
+<MobileBar active="celebrate" />
+<script is:inline src="/js/motion-kit.js"></script>
+<script>
+  const form = document.querySelector('form[data-wa-form]');
+  if (form) {
+    const fields = Array.from(form.querySelectorAll('input:not([name=botcheck]), select'));
+    const digits = (v) => { let x = v.replace(/\D/g, ''); if (x.length > 10 && x.startsWith('91')) x = x.slice(2); if (x.length === 11 && x[0] === '0') x = x.slice(1); return x; };
+    const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+    const errOf = (el) => document.getElementById(el.getAttribute('aria-describedby') || '');
+    const check = (el) => {
+      const v = el.value.trim(), t = el.dataset.v;
+      if (t === 'text') return v.length < 2 ? el.dataset.msg : '';
+      if (t === 'phone') return /^[6-9]\d{9}$/.test(digits(v)) ? '' : 'Please enter a valid 10-digit mobile number.';
+      if (t === 'count') { const n = Number(v), lo = Number(el.min), hi = Number(el.max); return n >= lo && n <= hi ? '' : 'Please enter ' + lo + ' to ' + hi + ' guests.'; }
+      if (t === 'date') return v && v >= today() ? '' : 'Please choose today or a later date.';
+      return '';
+    };
+    const show = (el, msg) => { const e = errOf(el); if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid'); if (e) e.textContent = msg; };
+    const dateEl = form.querySelector('input[type="date"]');
+    if (dateEl) dateEl.min = today();
+    fields.forEach((el) => {
+      if (!el.dataset.v) return;
+      el.addEventListener('input', () => { if (el.hasAttribute('aria-invalid')) show(el, ''); });
+      el.addEventListener('change', () => { if (el.hasAttribute('aria-invalid')) show(el, ''); });
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let first = null;
+      fields.forEach((el) => { if (!el.dataset.v) return; const m = check(el); show(el, m); if (m && !first) first = el; });
+      if (first) { first.focus(); return; }
+      const lines = [form.dataset.waIntro], sent = {};
+      fields.forEach((el) => {
+        const t = el.dataset.v; let v = el.value.trim();
+        if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
+        else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+        else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();
+        lines.push('\u2022 ' + el.dataset.l + ': ' + v);
+        sent[el.dataset.l] = v;
+      });
+      window.fkForm?.send('events', 'Catering enquiry', sent, form.querySelector('[name=botcheck]'));
+      window.open('https://wa.me/919059670033?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+    });
+  }
+</script>
+</Base>
+
+<style is:global>
+  .ct-page {
+    background: transparent;
+    color: #1f2a1a;
+    font-family:var(--fk-sans)}
+  .ct-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 40px)}
+  .ct-hero {
+    position: relative;
+    background: url('/assets/interior/fursat_space_14.webp') center/cover no-repeat;
+    padding: clamp(60px, 8vw, 100px) 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,154,67,0.40)}
+  .ct-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(238,212,178,.82) 0%, rgba(238,212,178,.95) 100%)}
+  .ct-hero-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1}
+  
+  
+  .ct-sub {
+    font-size: 1.05rem;
+    color: #4a4232;
+    line-height: 1.6;
+    margin: 0 0 32px}
+  .ct-hero-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px}
+  
+  
+
+  
+
+  /* Quote Form */
+  .ct-quote {
+    padding: clamp(60px, 8vw, 100px) 0;
+    background: #efd8b8}
+  .ct-quote-wrap {
+    max-width: 820px}
+  .ct-form-card {
+    background: transparent;
+    border: 2px solid rgba(201,154,67,0.60);
+    border-radius: 28px;
+    padding: clamp(28px, 5vw, 48px)}
+  .ct-fc-head {
+    margin-bottom: 28px}
+  
+  .ct-fc-head p {
+    font-size: 0.95rem;
+    color: #4a4232;
+    margin: 0}
+  .ct-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px}
+  .ct-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px}
+  @media (min-width: 640px) {
+    .ct-row { grid-template-columns: 1fr 1fr}
+  }
+  .ct-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px}
+  .ct-field label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #74501a}
+  .ct-field input, .ct-field select {
+    background: #e9cfab;
+    border: 1px solid rgba(201,154,67,0.50);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #1f2a1a;
+    font-family:var(--fk-sans);
+    font-size: 0.9375rem}
+  .ct-field input:focus, .ct-field select:focus {
+    outline: none;
+    border-color: #d6aa5a}
+  
+  
+
+  /* Scale / Stats Section */
+  .ct-scale {
+    padding: clamp(50px, 7vw, 90px) 0;
+    background: #efd8b8;
+    border-top: 1px solid rgba(201,154,67,0.35);
+    border-bottom: 1px solid rgba(201,154,67,0.35)}
+  .ct-sec-head {
+    margin-bottom: 40px}
+  
+  
+  
+  
+  
+
+  /* Gallery Strip */
+  .ct-gallery-strip {
+    padding: clamp(40px, 6vw, 70px) 0;
+    overflow: hidden}
+  .ct-gallery-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 0 clamp(16px, 4vw, 40px) 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201,154,67,.5) transparent}
+  .ct-gallery-scroll::-webkit-scrollbar {
+    height: 4px}
+  .ct-gallery-scroll::-webkit-scrollbar-thumb {
+    background: rgba(214,170,90,0.35);
+    border-radius: 999px}
+  .ct-gallery-item {
+    margin: 0;
+    flex: 0 0 clamp(260px, 30vw, 420px);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    border-radius: 64px 8px 64px 8px;
+    box-shadow: 0 12px 40px rgba(90,60,20,0.20)}
+  .ct-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease}
+  .ct-gallery-item:hover img {
+    transform: scale(1.06)}
+
+  .ct-req { margin: 0 0 4px; font-size: 0.8125rem; color: #74501a}
+  .ct-field input, .ct-field select { min-height: 48px; font-size: 1rem}
+  .ct-field input:focus-visible, .ct-field select:focus-visible { outline: 3px solid #12803C; outline-offset: 2px}
+  .ct-field [aria-invalid="true"] { border-color: #C4161C; box-shadow: 0 0 0 3px rgba(196,22,28,0.14)}
+  .ct-err { margin: 0; min-height: 0; font-size: 0.8125rem; font-weight: 700; line-height: 1.4; color: #A8141A}
+  
+/* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn, cards = fk-card. */
+  .ct-kicker { display: block; margin-bottom: 10px; color: #74501a }
+  .ct-title { margin: 0 0 16px; color: #1f2a1a }
+  .ct-sec-title { margin: 0 0 40px; color: #1f2a1a }
+  .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
+  .ct-form .fk-btn { width: 100% }
+  .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
+  .ct-scale-grid.fk-rail--m { display: flex; grid-template-columns: none; gap: 12px}
+  @media (min-width: 768px) {
+    .ct-scale-grid.fk-rail--m { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px}
+  }
+  .ct-stat-card .fk-card__b { align-items: center; text-align: center; gap: 6px; margin: 0; padding: 40px 28px 32px }
+  .ct-stat-number { color: #74501a }
+  .ct-stat-unit { color: #4a4232 }
+  .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }
+  .ct-gallery-cap { margin: 8px 0 0; padding: 0 clamp(16px, 4vw, 40px); font-size: 0.875rem; color: #4a4232 }
+  .ct-field select { text-overflow: ellipsis }
+</style>

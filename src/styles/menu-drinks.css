@@ -1,0 +1,78 @@
+/* /menu list v6: drinks side in elephant red, photo showcase, neat menu rows; food cards tidied. Loaded after menu-v2.css.
+   Motion: transform/opacity only, one-shot; press .96; all off under reduced motion. */
+.mv{--dk-red:#c02a1a;--dk-red-deep:#8f1d12;--dk-wine:#2a0a07;--dk-wine-2:#531209;--dk-cream:#fbf3e6;--dk-gold:#e6c27a}
+
+/* ── Drinks hero ── */
+.dk{margin:0 calc(-1 * clamp(16px,2.5vw,40px)) 8px}
+.dk-hero{position:relative;overflow:hidden;min-height:clamp(260px,38vw,380px);display:flex;align-items:flex-end;background:var(--dk-wine);box-shadow:inset 0 -1px 0 rgb(230 194 122 / .5)}
+.dk-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 52%;opacity:.55}
+.dk-veil{position:absolute;inset:0;background:radial-gradient(70% 90% at 12% 100%,rgb(192 42 26 / .55),transparent 70%),linear-gradient(180deg,rgb(42 10 7 / .35),var(--dk-wine) 96%)}
+.dk-copy{position:relative;z-index:1;width:100%;max-width:1200px;margin:0 auto;padding:28px clamp(16px,2.5vw,40px) 30px;color:var(--dk-cream)}
+.dk-el{width:clamp(52px,7vw,76px);height:auto;margin-bottom:10px;color:var(--dk-red);fill:currentColor;filter:drop-shadow(0 6px 16px rgb(0 0 0 / .45))}
+.dk-el .dk-cut{fill:var(--dk-cream);stroke:var(--dk-cream)}
+.dk-kicker{font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.2em;text-transform:uppercase;color:var(--dk-gold)}
+.dk-h{margin:4px 0 8px;font:600 clamp(2.4rem,1.2rem + 5vw,4.25rem)/1 var(--fk-serif);letter-spacing:-.02em;color:var(--dk-cream)}
+.dk-sub{max-width:34em;font:400 clamp(.9375rem,.9rem + .2vw,1.0625rem)/1.55 var(--fk-sans);color:rgb(251 243 230 / .9);text-wrap:pretty}
+
+/* ── Photo rail ── */
+.dk-rail-wrap{padding:22px clamp(16px,2.5vw,40px) 0;background:linear-gradient(180deg,var(--dk-wine),var(--dk-wine-2))}
+.dk-rail-h{margin:0 0 12px;font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.16em;text-transform:uppercase;color:var(--dk-gold)}
+.dk-rail{display:flex;gap:14px;margin:0;padding:2px 0 26px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:2px;overscroll-behavior-x:contain;scrollbar-width:none}
+.dk-rail::-webkit-scrollbar{display:none}
+.dk-card{flex:0 0 min(72vw,232px);scroll-snap-align:start;border-radius:22px;overflow:hidden;background:#fffaf3;box-shadow:0 0 0 1px rgb(230 194 122 / .7),0 18px 34px -16px rgb(0 0 0 / .65)}
+.dk-ph{aspect-ratio:4/5;overflow:hidden;background:#f3e2c6}
+.dk-ph img{width:100%;height:100%;object-fit:cover;outline:1px solid oklch(0 0 0 / .1);outline-offset:-1px}
+.dk-card-b{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px}
+.dk-card-s{font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--dk-red-deep)}
+.dk-card-n{font:600 1.0625rem/1.2 var(--fk-serif);color:#2b2416;text-wrap:balance;overflow-wrap:anywhere}
+.dk-card-r{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.dk-price{font:700 1rem/1 var(--fk-sans);color:#2b2416}
+.dk-add{min-height:44px;min-width:76px;padding:0 16px;border:1px solid var(--dk-red);border-radius:999px;background:var(--dk-red);color:#fff;font:600 .8125rem/1 var(--fk-sans);cursor:pointer;touch-action:manipulation;transition:transform 150ms var(--fk-ease-out),background-color 200ms ease,color 200ms ease}
+.dk-add:active{transform:scale(.96)}
+.dk-add[aria-pressed="true"]{background:#fff;color:var(--dk-red)}
+@media(hover:hover) and (pointer:fine){.dk-add:not([aria-pressed="true"]):hover{background:var(--dk-red-deep)}.dk-card{transition:transform 200ms var(--fk-ease-out)}.dk-card:hover{transform:translateY(-3px)}}
+
+/* ── Category pills ── */
+.dk-cats{padding:12px clamp(16px,2.5vw,40px) 14px;background:var(--dk-wine-2);border-top:1px solid rgb(230 194 122 / .25)}
+.dk-cats-rail{display:flex;gap:8px;margin:0;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+.dk-cats-rail::-webkit-scrollbar{display:none}
+.dk-cat{flex:none;scroll-snap-align:start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px 0 12px;border:1px solid rgb(230 194 122 / .45);border-radius:999px;background:rgb(255 255 255 / .06);color:var(--dk-cream);font:500 .875rem/1 var(--fk-sans);white-space:nowrap;cursor:pointer;touch-action:manipulation;transition:transform 150ms var(--fk-ease-out),background-color 200ms ease}
+.dk-cat svg{width:20px;height:20px;color:var(--dk-gold)}
+.dk-cat:active{transform:scale(.96)}
+.dk-cat:focus-visible,.dk-add:focus-visible{outline:2px solid var(--dk-gold);outline-offset:2px}
+@media(hover:hover) and (pointer:fine){.dk-cat:hover{background:var(--dk-red);border-color:var(--dk-red)}}
+
+/* ── Red theme for the whole Drinks list (scoped by the block, so Food keeps its green) ── */
+.mv-side[data-side-block="drinks"]{--c-g:var(--dk-red-deep)}
+.mv-side[data-side-block="drinks"] .mv-side-h{display:none}
+.mv-side[data-side-block="drinks"] .mv-grp{padding-top:32px}
+.mv-side[data-side-block="drinks"] .mv-grp-h{position:relative;padding:0 0 10px 18px;color:var(--dk-red-deep);font-size:clamp(1.375rem,1.1rem + 1vw,1.75rem);border-bottom:1px solid rgb(192 42 26 / .25);margin-bottom:14px}
+.mv-side[data-side-block="drinks"] .mv-grp-h::before{content:"";position:absolute;left:0;top:.42em;width:9px;height:9px;transform:rotate(45deg);background:var(--dk-red)}
+.mv-side[data-side-block="drinks"] .mv-sec-h{display:inline-block;margin:6px 0 8px;padding:5px 12px;border-radius:999px;background:rgb(192 42 26 / .1);color:var(--dk-red-deep);font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.12em}
+.mv-side[data-side-block="drinks"] .mv-card{border-color:rgb(192 42 26 / .18)}
+.mv-side[data-side-block="drinks"] .mv-card .mv-item-name{color:#2b2416}
+.mv-side[data-side-block="drinks"] .mv-pp{background:#fff1ee;border-color:rgb(192 42 26 / .45);color:var(--dk-red-deep)}
+.mv-side[data-side-block="drinks"] .mv-card .mv-add{background:var(--dk-red);border-color:var(--dk-red);color:#fff;box-shadow:0 6px 14px -6px rgb(192 42 26 / .7)}
+.mv-side[data-side-block="drinks"] .mv-card .mv-add[aria-pressed="true"]{background:#fff;color:var(--dk-red)}
+.mv-side[data-side-block="drinks"] .mv-card :focus-visible{outline-color:var(--dk-red)}
+.mv-side[data-side-block="drinks"] .mv-grp-h .num{color:var(--dk-red-deep)}
+
+/* the filter bar turns red while the Drinks side is open */
+.mv[data-side="drinks"] .mv-sticky .fk-seg__thumb{background:var(--dk-red);box-shadow:0 6px 16px -6px rgb(192 42 26 / .6)}
+.mv[data-side="drinks"] .mv-sticky .fk-pill[aria-pressed="true"],.mv[data-side="drinks"] .mv-sticky .fk-pill.is-on{background:var(--dk-red);border-color:var(--dk-red);color:#fff;box-shadow:0 6px 16px -6px rgb(192 42 26 / .55)}
+
+/* ── Neat menu rows: no photo = no placeholder tile (Drinks and Food) ── */
+.mv-c-thumb:not(:has(img)){width:auto;height:auto;align-self:center}
+.mv-c-thumb:not(:has(img)) .mv-c-ph{display:none}
+.mv-c-thumb:not(:has(img)) .mv-add{position:static;translate:none;min-height:44px;min-width:76px}
+.mv-card:not(:has(.mv-c-thumb img)){padding:12px 14px;border-radius:18px}
+.mv-card:not(:has(.mv-c-thumb img)) .mv-c-info{gap:4px}
+.mv-card:has(.mv-c-thumb img){padding-bottom:26px}
+
+/* wider screens: three columns for the drinks list when there is room */
+@media(min-width:1500px){.mv-side[data-side-block="drinks"] .mv-items{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:768px){.dk-card{flex-basis:248px}.dk-copy{padding-bottom:38px}}
+
+@media(prefers-reduced-motion:reduce){
+  .dk-add,.dk-cat,.dk-card{transition:none}.dk-add:active,.dk-cat:active{transform:none}.dk-card:hover{transform:none}
+}

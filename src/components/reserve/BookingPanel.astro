@@ -1,0 +1,781 @@
+---
+// BookingPanel.astro — "Book Your Experience" (R3a: Quick · Concierge modes + live ticket; same booking object, same WhatsApp message).
+// R3a logic notes (guests stepper, 10–13 digit mobile check, shared booking object):
+// R3b: message gains "• Offer: N% off (8 PM slot)" only when that slot has a discount. R3a notes: (a) guests are a 1–12 stepper (13+ shows the /party link instead of a disabled button), (b) one added check: mobile must have 10–13 digits
+// (message text and wa.me target are unchanged), (c) date/time/zone/guests pickers write one `booking` object that Quick and Concierge share.
+// Owner-approved logic changes in this revision: (1) message gains a "• Seating:" line, (2) the "Coupon: FURSAT15" line is removed,
+// (3) the date is shown and sent as "Tue, 10 Nov" instead of the raw input value. Same wa.me/919059670033 target and field ids.
+// Stored request + staff alert are R4 and still need owner approval.
+import site from '../../data/site.json';
+import LiveTicket from './LiveTicket.astro';
+import OrganicFrame from '../fx/OrganicFrame.astro';
+import slotData from '../../data/slots.json';
+import ld from '../../data/ld.json';
+// R3d: success screen. Directions use the repo's existing Google Maps link (ld.json hasMap).
+const mapsUrl = (ld as any)[0].hasMap as string;
+import PanoramicViewer from '../PanoramicViewer.astro';
+import { ZONES, IMGS, smallImg } from '../tour/spaces.js';
+
+// Time slots + discount come from src/data/slots.json (owner edits that file, no code): [{ "time": "8 PM", "discount": 10 }, ...].
+// Hourly slots, same every day, each slot = 1 hour. discount > 0 shows "N% off" on the chip, the live ticket and the WhatsApp message; 0 shows nothing.
+// TODO(client): what the discount applies to + conditions (no terms text is shown yet). FURSAT15 stays hidden.
+const toMin = (t: string) => { const m = /^(\d{1,2})\s*(AM|PM)$/i.exec(t.trim()); const h = Number(m![1]) % 12 + (m![2].toUpperCase() === 'PM' ? 12 : 0); return h * 60; };
+const slots = (slotData as { time: string; discount: number }[]).map(s => ({ min: toMin(s.time), text: s.time, discount: Math.max(0, Number(s.discount) || 0) }));
+
+const zones = [
+  { v: 'The Bar', img: 'bar' }, { v: 'Dining', img: 'dining' }, { v: 'Lounge', img: 'lounge' }, { v: 'Café', img: 'cafe' },
+];
+const occasions = [
+  { v: 'Casual Dining', t: 'Casual dining' },
+  { v: 'Date Night', t: 'Date night' },
+  { v: 'Birthday', t: 'Birthday' },
+  { v: 'Anniversary', t: 'Anniversary' },
+  { v: 'Business Lunch', t: 'Business lunch' },
+];
+// TODO(client): booking conditions (minimum spend, time limit, deposit, offer terms). Empty = renders "No conditions".
+const conditions: string[] = [];
+---
+<OrganicFrame shape="blobBooking" class="rs-panel-frame" fill lip={16}>
+<section id="book" class="rs-panel fk-organic__body" tabindex="-1" aria-labelledby="rs-book-h">
+  <form class="rs-pform" id="res-form" novalidate onsubmit="return false;" aria-labelledby="rs-book-h">
+    <header class="rs-phead">
+      <span class="rs-hicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg></span>
+      <div class="rs-htxt">
+        <h1 id="rs-book-h" class="fk-ty-h3" tabindex="-1">Book Your Experience</h1>
+        <p class="rs-psub">We confirm on WhatsApp. <span class="rs-reqnote">* Required</span></p>
+      </div>
+      <i class="rs-hrule" aria-hidden="true"></i>
+    </header>
+
+    <div class="rs-modes" role="tablist" aria-label="Booking style" id="rs-modes">
+      <span class="rs-mpill" id="rs-mpill" aria-hidden="true"></span>
+      <button type="button" class="rs-mode" role="tab" id="rs-tab-quick" aria-selected="true" aria-controls="rs-p-quick">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3 5.5 13.5H11L10 21l8-10.5h-5.5z"/></svg><span>Quick</span>
+      </button>
+      <button type="button" class="rs-mode" role="tab" id="rs-tab-chat" aria-selected="false" aria-controls="rs-p-chat" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a2 2 0 0 1-2 2H8l-4 3.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg><span>Concierge</span>
+      </button>
+      <button type="button" class="rs-mode" role="tab" id="rs-tab-pick" aria-selected="false" aria-controls="rs-p-pick" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Pick <span class="rs-long">your </span>spot</span>
+      </button>
+    </div>
+
+    <!-- ───── Quick ───── -->
+    <div class="rs-mpanel" id="rs-p-quick" role="tabpanel" aria-labelledby="rs-tab-quick">
+      <div class="rs-qgrid">
+        <div class="rs-q" id="f-date">
+          <p class="rs-ql" id="rs-ql-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Select Date</p>
+          <div class="rs-chips rs-dates fk-rail fk-rail--m" id="rs-dates" role="radiogroup" aria-labelledby="rs-ql-date">
+            <label class="rs-chip fk-pill rs-cal" id="rs-cal">
+              <span class="rs-cw" id="rs-cal-t">More</span>
+              <span class="rs-cd"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span id="rs-cal-d"></span></span>
+              <input type="date" id="res-date" class="rs-calinp" aria-label="More dates: pick another date" />
+            </label>
+          </div>
+        </div>
+
+        <div class="rs-q" id="f-time">
+          <p class="rs-ql" id="rs-ql-time"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Select Time<span class="rs-req" aria-hidden="true"> *</span></p>
+          <div class="rs-chips rs-times fk-rail fk-rail--m" id="rs-times" role="radiogroup" aria-labelledby="rs-ql-time" aria-required="true" aria-describedby="rs-time-err">
+            {slots.map(s => (
+              <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="false" tabindex="-1" data-m={s.min} data-t={s.text} data-d={s.discount}>
+                <span class="rs-tm">{s.text}</span>{s.discount > 0 && <span class="rs-off">{s.discount}% off</span>}
+              </button>
+            ))}
+          </div>
+          <p class="rs-hint" id="rs-noslot" hidden>No more slots today. Please pick another date.</p>
+          <p class="rs-ferr" id="rs-time-err" role="alert"></p>
+        </div>
+
+        <div class="rs-q rs-q-3" id="f-guests">
+          <p class="rs-ql" id="rs-ql-guests"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3.2 2.4-5.5 5.5-5.5s5.5 2.3 5.5 5.5M16 6a2.8 2.8 0 0 1 0 5.4M17.5 14c2 .6 3 2.4 3 5"/></svg>Guests<span class="rs-pre">Pre-filled</span></p>
+          <div class="rs-step" role="group" aria-labelledby="rs-ql-guests">
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md rs-sbtn" id="rs-g-minus" aria-label="Fewer guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+            <div class="rs-sval">
+              <b id="rs-g-n" role="status" aria-live="polite">4 guests</b>
+              <span class="rs-dots" aria-hidden="true">{Array.from({ length: 12 }, () => <i></i>)}</span>
+            </div>
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md rs-sbtn" id="rs-g-plus" aria-label="More guests"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
+          </div>
+        </div>
+
+        <div class="rs-q rs-q-3" id="f-occasion">
+          <label class="rs-ql" for="res-occasion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.4 5 5.4.7-4 3.8 1 5.4-4.8-2.7-4.8 2.7 1-5.4-4-3.8 5.4-.7z"/></svg>Occasion<span class="rs-sr"> (optional)</span><span class="rs-long" aria-hidden="true"> (optional)</span><span class="rs-pre">Pre-filled</span></label>
+          <div class="rs-box">
+            <select id="res-occasion" data-fk-sheet="Occasion">
+              {occasions.map(o => <option value={o.v}>{o.t}</option>)}
+            </select>
+          </div>
+        </div>
+        <p class="rs-hint rs-q" id="rs-party" hidden>Booking for 13 or more? <a href="/party">See party packages</a> or <a href="/banquet">the banquet hall</a>.</p>
+
+        <div class="rs-q" id="f-zone">
+          <p class="rs-ql" id="rs-ql-zone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M4 12.5a2 2 0 0 1 2-1.5 2 2 0 0 1 2 2V15h8v-2a2 2 0 0 1 2-2 2 2 0 0 1 2 1.5V17a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM6.5 18v2M17.5 18v2"/></svg>Seating<span class="rs-long"> Preference</span></p>
+          <div class="rs-chips rs-zones fk-rail fk-rail--m" id="rs-zones" role="radiogroup" aria-labelledby="rs-ql-zone">
+            <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="true" data-v=""><span>No preference</span></button>
+            {zones.map(z => (
+              <button type="button" class="rs-chip fk-pill" role="radio" aria-checked="false" tabindex="-1" data-v={z.v}>
+                <img class="rs-zt rs-ph" src={`/assets/reserve/zone-${z.img}.webp`} alt="" width="72" height="72" loading="lazy" decoding="async" /><span>{z.v}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p class="rs-q rs-plan-open"><button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-plan-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><rect x="13" y="13" width="5" height="3" rx="1"/></svg><span>Pick an exact table (floor plan)</span></button></p>
+        <dialog class="rs-plan" id="rs-plan" aria-labelledby="rs-plan-h">
+          <div class="rs-plan-in">
+            <div class="rs-plan-hd"><h3 id="rs-plan-h">Choose your table</h3><button type="button" class="fk-btn fk-btn--primary fk-btn--md" id="rs-plan-done">Done</button></div>
+            <div id="rs-plan-host" class="rs-plan-host"></div>
+          </div>
+        </dialog>
+        <div class="rs-q rs-tbl" id="f-table" hidden>
+          <p class="rs-tl"><b>Table:</b> <span id="rs-tbl-t"></span> <button type="button" class="rs-link" id="rs-tbl-x">Remove</button></p>
+          <p class="rs-hint" id="rs-tbl-h" role="status" hidden></p>
+          <input type="hidden" id="res-table" name="table" value="" />
+        </div>
+
+        <div class="rs-q rs-q-3" id="f-name">
+          <label class="rs-ql" for="res-name"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/></svg>Your Name<span class="rs-req" aria-hidden="true"> *</span></label>
+          <div class="rs-box"><input type="text" id="res-name" autocomplete="name" placeholder="Full name" required aria-required="true" aria-describedby="res-name-err" /></div>
+          <p class="rs-ferr" id="res-name-err" role="alert"></p>
+        </div>
+        <div class="rs-q rs-q-3" id="f-phone">
+          <label class="rs-ql" for="res-phone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.6 4-2 1.3a11 11 0 0 0 5.1 5.1l1.3-2 4 1.6v3a2 2 0 0 1-2.2 2A15.5 15.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2z"/></svg>Mobile<span class="rs-long"> Number</span><span class="rs-req" aria-hidden="true"> *</span></label>
+          <div class="rs-box"><input type="tel" id="res-phone" autocomplete="tel" inputmode="tel" placeholder="10-digit number" required aria-required="true" aria-describedby="res-phone-hint res-phone-err" /></div>
+          <span class="rs-sr" id="res-phone-hint">Enter a 10-digit mobile number.</span>
+          <p class="rs-ferr" id="res-phone-err" role="alert"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───── Concierge ───── -->
+    <div class="rs-mpanel rs-chat" id="rs-p-chat" role="tabpanel" aria-labelledby="rs-tab-chat" hidden>
+      <div class="rs-log" id="rs-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="Table request chat" tabindex="0"></div>
+      <div class="rs-tray" id="rs-tray"></div>
+    </div>
+
+    <!-- ───── Pick your spot (R3c): the home panorama engine, loaded only when this tab opens ───── -->
+    <div class="rs-mpanel rs-pick" id="rs-p-pick" role="tabpanel" aria-labelledby="rs-tab-pick" hidden>
+      <div class="rs-pickview" id="rs-pickview"><PanoramicViewer embed /></div>
+      <div class="rs-pickbar" id="rs-pickbar">
+        <p class="rs-pk-t" id="rs-pk-t" aria-live="polite">Tap a spot in the room</p>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-pk-book" disabled>Book here</button>
+      </div>
+      <p class="rs-hint rs-pk-note" id="rs-pk-note">Seating is a preference, not a guaranteed table. <button type="button" class="rs-link" id="rs-pk-photos">Show photos instead</button></p>
+      <div class="rs-spots" id="rs-spots" hidden>
+        <p class="rs-hint" id="rs-spots-note">Choose where you would like to sit. Seating is a preference, not a guaranteed table.</p>
+        <div class="rs-spotgrid">
+          {ZONES.map(z => (
+            <figure class="rs-spot">
+              <img class="rs-ph" src={smallImg(IMGS[z.pin])} alt={`${z.name} at Fursat`} width="540" height="720" loading="lazy" decoding="async" />
+              <figcaption><b>{z.name}</b><span>{z.line}</span></figcaption>
+              <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" data-spot={z.name}>Book here</button>
+            </figure>
+          ))}
+        </div>
+        <button type="button" class="rs-link" id="rs-pk-3d" hidden>Look around in 360° instead</button>
+      </div>
+    </div>
+
+    <LiveTicket variant="inline" />
+
+    <div class="rs-foot" id="rs-foot">
+      <p class="rs-err" id="rs-err" role="alert" aria-live="assertive">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.1"/></svg>
+        <span id="rs-err-t"></span>
+      </p>
+      <p class="rs-cond" role="note">A request, not a confirmed booking. Not confirmed until we reply on WhatsApp.<br />{conditions.length ? conditions.join(' · ') + ' · ' : ''}Seating is a preference.</p>
+      <input type="checkbox" name="botcheck" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+      <button type="button" id="res-submit-btn" class="fk-btn fk-btn--book rs-submit">
+        <svg class="rs-cta-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg>
+        <span>Request a Table</span>
+        <svg class="rs-cta-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <p class="rs-fine" id="rs-fine">Opens WhatsApp with your details.</p>
+      <noscript><p class="rs-fine"><a href="https://wa.me/919059670033?text=Hi%20Fursat!%20I%20would%20like%20to%20reserve%20a%20table." target="_blank" rel="noopener">No JavaScript? Request a table on WhatsApp.</a></p></noscript>
+    </div>
+
+    <!-- ───── Request sent (R3d) ───── -->
+    <div class="rs-done" id="rs-done" hidden>
+      <h3 class="fk-ty-h3 rs-stamp" id="rs-done-h" tabindex="-1">Request sent</h3>
+      <dl class="rs-sum rs-done-sum" id="rs-done-sum"></dl>
+      <p class="rs-done-note">We’ll confirm on WhatsApp. Didn’t open? <a id="rs-resend" href="https://wa.me/919059670033" target="_blank" rel="noopener">Send again</a></p>
+      <div class="rs-done-actions">
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-ics"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4M10 15h4"/></svg>Add to calendar</button>
+        <a class="fk-btn fk-btn--secondary fk-btn--md" id="rs-dir" href={mapsUrl} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Get directions<span class="rs-sr"> (opens Google Maps in a new tab)</span></a>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-story"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M12 8v6M9.5 11.5 12 8l2.5 3.5"/></svg>Share to Story</button>
+        <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>Make another booking</button>
+      </div>
+      <p class="rs-done-s" id="rs-done-s" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+
+  <aside class="rs-perks" aria-label="At Fursat">
+    <div class="rs-perk">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17.5h17M5 17.5a7 7 0 0 1 14 0M12 8.5v-2M10.5 6.5h3M2.5 20h19"/></svg>
+      <span>The<br />Kitchen</span>
+    </div>
+    <div class="rs-perk">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 4h8L10.2 11a2.7 2.7 0 0 1-5.4 0zM7.5 13.5V20M4.5 20h6M14.5 8.5h6l-.9 5.3a2.2 2.2 0 0 1-4.2 0zM17.5 16V20M14.5 20h6"/></svg>
+      <span>The<br />Bar</span>
+    </div>
+    <div class="rs-hours"><b>Open</b>{site.hours.schedule.map(h => <span>{h.days}<br />{h.open} – {h.close}</span>)}</div>
+  </aside>
+</section>
+</OrganicFrame>
+
+<script is:inline>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const qs = (s, r) => (r || document).querySelector(s);
+  const qsa = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const page = qs('.rs-page'), panel = $('book');
+  const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const EASE = 'cubic-bezier(0.16,1,0.3,1)';
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  /* ───────── dates (client time) ───────── */
+  const pad = (n) => (n < 10 ? '0' : '') + n;
+  const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const todayStr = () => ymd(new Date());
+  const parse = (v) => { const p = (v || '').split('-'); return p.length === 3 ? new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])) : null; };
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  /* "2026-11-10" -> "Tue, 10 Nov" (year added only when it is not the current year) */
+  function friendly(v) {
+    const d = parse(v); if (!d) return '';
+    const s = DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+    return d.getFullYear() === new Date().getFullYear() ? s : s + ' ' + d.getFullYear();
+  }
+  const phoneOk = (v) => { const n = String(v || '').replace(/\D/g, '').length; return n >= 10 && n <= 13; };
+
+  /* ───────── one booking object, shared by Quick and Concierge ───────── */
+  const booking = { date: todayStr(), time: '', timeMin: -1, guests: 4, zone: '', occasion: 'Casual Dining', name: '', phone: '' };
+  /* optional table picked in the 3D room (src/components/booking3d) arrives as "fk:table" { id, seats, line } or null. The form works without it. */
+  booking.table = ''; booking.tableSeats = 0;
+  function renderTable() {
+    const el = $('f-table'); el.hidden = !booking.table;
+    $('rs-tbl-t').textContent = booking.table; $('res-table').value = booking.table;
+    const big = booking.table && booking.guests > booking.tableSeats, h = $('rs-tbl-h'); h.hidden = !big;
+    if (big) h.textContent = booking.table.split(' ')[0] + ' seats ' + booking.tableSeats + '; we’ll find you a bigger one.';
+  }
+  window.addEventListener('fk:table', (e) => { const d = e.detail; booking.table = d ? d.line : ''; booking.tableSeats = d ? d.seats : 0; renderTable(); });
+  $('rs-tbl-x').addEventListener('click', () => { window.dispatchEvent(new CustomEvent('fk:table-clear')); booking.table = ''; booking.tableSeats = 0; renderTable(); });
+  const slots = qsa('#rs-times .rs-chip').map((el) => ({ el, m: Number(el.dataset.m), t: el.dataset.t, d: Number(el.dataset.d) || 0 }));
+  const slotOf = () => slots.find((s) => s.m === booking.timeMin);
+  const offerOf = () => { const s = slotOf(); return s && s.d > 0 ? s.d + '% off (' + s.t + ' slot)' : ''; };
+  const nowMin = () => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); };
+  const availFor = (date) => slots.filter((s) => !(date === todayStr() && s.m < nowMin()));
+  function setDefaultTime() {
+    const a = availFor(booking.date);
+    if (a.some((s) => s.m === booking.timeMin)) return;
+    booking.time = a[0] ? a[0].t : ''; booking.timeMin = a[0] ? a[0].m : -1;
+  }
+  if (!availFor(booking.date).length) booking.date = ymd(addDays(new Date(), 1));
+  setDefaultTime();
+  let mode = 'quick';
+  const chat = { started: false, step: '', answered: {}, editing: false, timeStale: false };
+
+  /* ───────── small motion helpers (WAAPI = off the main thread) ───────── */
+  function fadeIn(el) {
+    if (!el || !el.animate) return;
+    el.animate(RM.matches ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 150, easing: EASE });
+  }
+  function pop(el) {
+    if (!el || !el.animate) return;
+    el.animate(RM.matches ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: EASE });
+  }
+
+  /* ───────── chip groups: roving tabindex + arrow keys (selection = .fk-pill / aria-checked) ───────── */
+  function setChecked(chip, on) { chip.setAttribute('aria-checked', on ? 'true' : 'false'); chip.tabIndex = on ? 0 : -1; }
+  function roving(box) { /* make sure one radio per group is tabbable */
+    const radios = qsa('[role="radio"]', box).filter((r) => !r.disabled);
+    if (!radios.length || radios.some((r) => r.tabIndex === 0)) return;
+    radios[0].tabIndex = 0;
+  }
+  function arrows(container, sel, activate) {
+    container.addEventListener('keydown', (e) => {
+      const k = e.key; if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].indexOf(k) < 0) return;
+      const items = qsa(sel, container).filter((x) => !x.disabled); if (!items.length) return;
+      let i = items.indexOf(document.activeElement); if (i < 0) return;
+      if (k === 'Home') i = 0; else if (k === 'End') i = items.length - 1; else i = (i + (k === 'ArrowRight' || k === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      e.preventDefault(); items[i].focus(); activate(items[i]);
+    });
+  }
+
+  /* ───────── date chips ───────── */
+  const datesEl = $('rs-dates'), calChip = $('rs-cal'), calInput = $('res-date');
+  const dateChips = [];
+  for (let i = 0; i < 6; i++) {
+    const d = addDays(new Date(), i), v = ymd(d);
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'rs-chip fk-pill'; b.setAttribute('role', 'radio'); b.dataset.d = v;
+    const top = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : DAYS[d.getDay()];
+    b.setAttribute('aria-label', (i < 2 ? top + ', ' : '') + friendly(v));
+    b.innerHTML = '<span class="rs-cw"></span><span class="rs-cd"></span>';
+    b.firstChild.textContent = top; b.lastChild.textContent = d.getDate() + ' ' + MONTHS[d.getMonth()];
+    datesEl.insertBefore(b, calChip); dateChips.push(b);
+    b.addEventListener('click', () => setDate(v));
+  }
+  calInput.min = todayStr();
+  calInput.addEventListener('click', () => { try { if (calInput.showPicker) calInput.showPicker(); } catch (e) {} });
+  calInput.addEventListener('change', () => setDate(calInput.value));
+  arrows(datesEl, '[role="radio"]', (c) => setDate(c.dataset.d));
+
+  function setDate(v) {
+    if (!v) return; if (v < todayStr()) v = todayStr();
+    const prev = booking.timeMin; booking.date = v; setDefaultTime();
+    chat.timeStale = !availFor(v).some((s) => s.m === prev);
+    renderAll();
+  }
+
+  /* ───────── time chips (hourly, from slots.json) ───────── */
+  const timeBox = $('rs-times');
+  slots.forEach((s) => s.el.addEventListener('click', () => { booking.time = s.t; booking.timeMin = s.m; renderAll(); }));
+  arrows(timeBox, '[role="radio"]', (c) => c.click());
+  arrows($('rs-zones'), '[role="radio"]', (c) => c.click());
+
+  /* ───────── guests stepper ───────── */
+  const gn = $('rs-g-n'), dots = qsa('.rs-dots i'), gMinus = $('rs-g-minus'), gPlus = $('rs-g-plus');
+  function setGuests(n) { if (n < 1 || n > 12) { if (n > 12) $('rs-party').hidden = false; return; } booking.guests = n; fadeIn(gn); renderAll(); }
+  gMinus.addEventListener('click', () => setGuests(booking.guests - 1));
+  gPlus.addEventListener('click', () => setGuests(booking.guests + 1));
+
+  /* ───────── zone + occasion + name + phone ───────── */
+  const zoneChips = qsa('#rs-zones .rs-chip');
+  zoneChips.forEach((c) => c.addEventListener('click', () => { booking.zone = c.dataset.v; renderAll(); }));
+  const occEl = $('res-occasion'), nameEl = $('res-name'), phoneEl = $('res-phone');
+  const occText = () => { const o = qsa('option', occEl).find((x) => x.value === booking.occasion); return o ? o.textContent : booking.occasion; };
+  occEl.addEventListener('change', () => { booking.occasion = occEl.value; $('f-occasion').classList.remove('is-prefilled'); renderAll(); });
+  nameEl.addEventListener('input', () => { booking.name = nameEl.value; clearErr(['f-name']); updateTicket(); });
+  phoneEl.addEventListener('input', () => { booking.phone = phoneEl.value; clearErr(['f-phone']); updateTicket(); });
+  const syncInputs = () => { nameEl.value = booking.name; phoneEl.value = booking.phone; occEl.value = booking.occasion; };
+
+  /* ───────── render: Quick DOM from the booking object ───────── */
+  function renderQuick() {
+    let matched = false;
+    dateChips.forEach((c) => { const on = c.dataset.d === booking.date; matched = matched || on; setChecked(c, on); c.disabled = c.dataset.d === todayStr() && !availFor(c.dataset.d).length; });
+    calChip.classList.toggle('is-on', !matched);
+    const cd = parse(booking.date);
+    $('rs-cal-t').textContent = matched ? 'More' : DAYS[cd.getDay()];
+    $('rs-cal-d').textContent = matched ? '' : cd.getDate() + ' ' + MONTHS[cd.getMonth()];
+    calInput.value = booking.date;
+    calInput.setAttribute('aria-label', matched ? 'More dates: pick another date' : DAYS[cd.getDay()] + ' ' + cd.getDate() + ' ' + MONTHS[cd.getMonth()] + ', change date');
+    roving(datesEl);
+
+    const avail = availFor(booking.date), aset = new Set(avail);
+    slots.forEach((s) => { s.el.disabled = !aset.has(s); setChecked(s.el, s.m === booking.timeMin); });
+    roving(timeBox);
+    $('rs-noslot').hidden = avail.length > 0;
+
+    gn.textContent = booking.guests + (booking.guests === 1 ? ' guest' : ' guests');
+    dots.forEach((d, i) => d.classList.toggle('on', i < booking.guests));
+    gMinus.setAttribute('aria-disabled', booking.guests <= 1 ? 'true' : 'false');
+    gPlus.setAttribute('aria-disabled', booking.guests >= 12 ? 'true' : 'false');
+    $('rs-party').hidden = booking.guests < 12;
+
+    zoneChips.forEach((c) => setChecked(c, c.dataset.v === booking.zone));
+    roving($('rs-zones'));
+  }
+
+  /* ───────── live ticket (both copies) ───────── */
+  const tix = qsa('[data-ticket]');
+  function setRow(k, text, on) {
+    tix.forEach((t) => {
+      const r = qs('[data-row="' + k + '"]', t), v = qs('.rs-tk-v', r), changed = v.textContent !== text;
+      v.textContent = text; v.title = text.length > 24 ? text : ''; r.classList.toggle('is-set', !!on);
+      if (changed && r._init) fadeIn(v); r._init = true;
+    });
+  }
+  function updateTicket() {
+    const vis = (k) => mode !== 'chat' || !!chat.answered[k === 'offer' ? 'time' : k];
+    const show = (k, text, filled) => setRow(k, vis(k) && text ? text : '—', vis(k) && filled);
+    show('date', friendly(booking.date), true);
+    show('time', booking.time, !!booking.time);
+    show('guests', booking.guests + (booking.guests === 1 ? ' guest' : ' guests'), true);
+    show('zone', booking.zone || 'No preference', true);
+    show('occasion', occText(), true);
+    show('offer', offerOf(), true);
+    tix.forEach((t) => { const r = qs('[data-row="offer"]', t), on = vis('offer') && !!offerOf(); r.hidden = !on; });
+    show('name', booking.name.trim(), booking.name.trim().length > 0);
+    show('phone', booking.phone.trim(), phoneOk(booking.phone));
+  }
+  /* foil shimmer follows a real pointer only */
+  tix.forEach((t) => {
+    const foil = qs('.rs-foil', t); let raf = 0;
+    t.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || RM.matches) return;
+      const r = t.getBoundingClientRect(), p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+      cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { foil.style.transform = 'translateX(' + (p * 160 - 80) + '%)'; t.classList.add('is-foil'); });
+    });
+    t.addEventListener('pointerleave', () => { t.classList.remove('is-foil'); });
+  });
+
+  function updateFoot() { $('rs-foot').hidden = (mode === 'chat' && chat.step !== 'summary') || mode === 'pick'; }
+  function renderAll() { renderQuick(); updateTicket(); updateFoot(); renderTable(); }
+
+  /* ───────── mode switch: sliding pill (transform) + 150ms opacity cross-fade ───────── */
+  const modeTabs = qsa('#rs-modes .rs-mode'), mpill = $('rs-mpill'), pQuick = $('rs-p-quick'), pChat = $('rs-p-chat'), pPick = $('rs-p-pick');
+  const MODES = ['quick', 'chat', 'pick'], panels = { quick: pQuick, chat: pChat, pick: pPick };
+  let modeTok = 0, kbd = false;
+  panel.addEventListener('keydown', () => { kbd = true; }, true);
+  panel.addEventListener('pointerdown', () => { kbd = false; }, true);
+  function setMode(m) {
+    if (m === mode) return;
+    const from = panels[mode], to = panels[m], my = ++modeTok;
+    mode = m;
+    modeTabs.forEach((t, i) => { const on = MODES[i] === m; t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1; if (on) mpill.style.transform = 'translateX(' + i * 100 + '%)'; });
+    from.classList.add('is-out');
+    setTimeout(() => {
+      if (my !== modeTok) return;
+      from.hidden = true; from.classList.remove('is-out');
+      to.hidden = false; to.classList.add('is-out');
+      if (m === 'quick') syncInputs();
+      if (m === 'chat' && !chat.started) { chat.started = true; ask('date'); }
+      if (m === 'pick') openPick();
+      renderAll();
+      requestAnimationFrame(() => requestAnimationFrame(() => to.classList.remove('is-out')));
+    }, 150);
+  }
+  modeTabs.forEach((t, i) => t.addEventListener('click', () => setMode(MODES[i])));
+  arrows($('rs-modes'), '.rs-mode', (t) => setMode(MODES[modeTabs.indexOf(t)]));
+  mpill.style.transform = 'translateX(0)';
+
+  /* ───────── Concierge: one question at a time ───────── */
+  const log = $('rs-log'), tray = $('rs-tray'); let tok = 0;
+  const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const toBottom = () => log.scrollTo({ top: log.scrollHeight, behavior: RM.matches ? 'auto' : 'smooth' });
+  function me(text) { const b = mk('div', 'rs-b rs-b-me', text); log.appendChild(b); pop(b); toBottom(); }
+  function say(content, cb) {
+    const my = tok; tray.replaceChildren();
+    const b = mk('div', 'rs-b rs-b-bot rs-typing'); b.innerHTML = '<i></i><i></i><i></i>'; log.appendChild(b); pop(b); toBottom();
+    setTimeout(() => {
+      if (my !== tok) return;
+      b.classList.remove('rs-typing'); b.replaceChildren(typeof content === 'string' ? document.createTextNode(content) : content); pop(b); toBottom();
+      if (cb) cb();
+    }, RM.matches ? 250 : 500);
+  }
+  function qr(label, fn, cls, aria) {
+    const b = mk('button', 'rs-qr' + (cls ? ' ' + cls : ''), label); b.type = 'button'; if (aria) b.setAttribute('aria-label', aria);
+    b.addEventListener('click', () => fn(b)); return b;
+  }
+  function showTray(nodes, focusAlways) {
+    tray.replaceChildren.apply(tray, nodes); fadeIn(tray);
+    const first = qs('button, input', tray); if (first && (kbd || focusAlways)) first.focus({ preventScroll: true });
+    requestAnimationFrame(toBottom);
+  }
+  function calReply(label) { /* "Pick another date" chip with a transparent native date input on top */
+    const l = mk('label', 'rs-qr rs-qr-cal'); l.appendChild(document.createTextNode(label));
+    const i = mk('input'); i.type = 'date'; i.min = todayStr(); i.setAttribute('aria-label', label); l.appendChild(i);
+    i.addEventListener('click', () => { try { if (i.showPicker) i.showPicker(); } catch (e) {} });
+    i.addEventListener('change', () => { if (!i.value) return; me(friendly(i.value)); pickDate(i.value); });
+    return l;
+  }
+  function pickDate(v) { setDate(v); done('date'); }
+
+  const Q = {
+    date: 'When would you like to come?', guests: 'How many of you?', time: 'Which time suits you?',
+    zone: 'Where would you like to sit? It is a preference, so we cannot promise a spot.', occasion: 'Is it a special occasion?',
+    name: 'What name should we put it under?', phone: 'And your mobile number, so we can confirm on WhatsApp?',
+  };
+  const order = ['date', 'guests', 'time', 'zone', 'occasion', 'name', 'phone', 'summary'];
+
+  function done(key) { chat.answered[key] = true; updateTicket(); advance(key); }
+  function advance(from) {
+    if (chat.editing) {
+      if (from === 'date' && chat.timeStale) { chat.timeStale = false; booking.time = ''; booking.timeMin = -1; chat.answered.time = false; updateTicket(); return ask('time'); }
+      chat.editing = false; return ask('summary');
+    }
+    if (from === 'date') chat.timeStale = false;
+    let i = order.indexOf(from) + 1;
+    ask(order[i]);
+  }
+  function ask(step) {
+    chat.step = step; updateFoot();
+    const greet = !log.childNodes.length;
+    if (step === 'date') {
+      say(greet ? 'Hi! Let us put your table request together. Fursat’s team confirms it on WhatsApp. ' + Q.date : Q.date, () => {
+        const now = new Date(), c = [];
+        if (availFor(todayStr()).length) c.push([now, 'Today']);
+        c.push([addDays(now, 1), 'Tomorrow']);
+        [6, 0].forEach((dow) => { for (let i = 2; i <= 8; i++) { const d = addDays(now, i); if (d.getDay() === dow) { c.push([d, DAYS[dow] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()]]); break; } } });
+        c.sort((a, b) => a[0] - b[0]);
+        showTray(c.map((x) => qr(x[1], () => { me(x[1]); pickDate(ymd(x[0])); })).concat([calReply('Another date')]));
+      });
+    } else if (step === 'guests') {
+      say(Q.guests, () => {
+        const n = []; for (let g = 1; g <= 12; g++) n.push(qr(String(g), () => { me(g + (g === 1 ? ' guest' : ' guests')); booking.guests = g; done('guests'); }, 'rs-qr-n'));
+        n.push(qr('13 or more', () => {
+          me('13 or more');
+          const w = mk('span'); w.append('That is a big group! Our team plans those properly: ');
+          const a = mk('a', null, 'party packages'); a.href = '/party'; const b = mk('a', null, 'the banquet hall'); b.href = '/banquet';
+          w.append(a, ' or ', b, '.');
+          say(w, () => showTray([qr('Choose fewer guests', () => { me('Fewer guests'); ask('guests'); })]));
+        }));
+        showTray(n);
+      });
+    } else if (step === 'time') {
+      say(Q.time, () => {
+        const nodes = availFor(booking.date).map((s) => qr(s.t + (s.d > 0 ? ' · ' + s.d + '% off' : ''), () => { me(s.t); booking.time = s.t; booking.timeMin = s.m; done('time'); }, null, s.t + (s.d > 0 ? ', ' + s.d + ' percent off' : '')));
+        showTray(nodes);
+      });
+    } else if (step === 'zone') {
+      say(Q.zone, () => showTray(['The Bar', 'Dining', 'Lounge', 'Café', 'No preference'].map((z) => qr(z, () => { me(z); booking.zone = z === 'No preference' ? '' : z; done('zone'); }))));
+    } else if (step === 'occasion') {
+      say(Q.occasion, () => {
+        const n = qsa('option', occEl).map((o) => qr(o.textContent, () => { me(o.textContent); booking.occasion = o.value; occEl.value = o.value; done('occasion'); }));
+        n.push(qr('Skip', () => { me('Skip'); done('occasion'); }));
+        showTray(n);
+      });
+    } else if (step === 'name' || step === 'phone') {
+      say(Q[step], () => {
+        const wrap = mk('div', 'rs-compw'), row = mk('div', 'rs-comp'), err = mk('p', 'rs-comp-err'); err.setAttribute('role', 'alert'); err.id = 'rs-comp-err';
+        const inp = mk('input'); const isP = step === 'phone';
+        inp.type = isP ? 'tel' : 'text'; inp.autocomplete = isP ? 'tel' : 'name'; if (isP) inp.inputMode = 'tel'; inp.enterKeyHint = 'send'; inp.setAttribute('aria-describedby', 'rs-comp-err'); inp.setAttribute('aria-required', 'true');
+        inp.placeholder = isP ? '10-digit number' : 'Full name'; inp.setAttribute('aria-label', isP ? 'Your mobile number' : 'Your name'); inp.value = isP ? booking.phone : booking.name;
+        const send = mk('button', 'rs-send'); send.type = 'button'; send.setAttribute('aria-label', 'Send');
+        send.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+        const go = () => {
+          const v = inp.value.trim();
+          if (!isP && !v) { err.textContent = 'Please enter your name.'; inp.setAttribute('aria-invalid', 'true'); inp.focus(); return; }
+          if (isP && !phoneOk(v)) { err.textContent = 'Please enter a 10-digit mobile number.'; inp.setAttribute('aria-invalid', 'true'); inp.focus(); return; }
+          err.textContent = ''; inp.removeAttribute('aria-invalid'); if (isP) booking.phone = v; else booking.name = v; me(v); done(step);
+        };
+        send.addEventListener('click', go); inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+        row.append(inp, send); wrap.append(row, err); showTray([wrap], true);
+      });
+    } else if (step === 'summary') {
+      const box = mk('div', 'rs-sumw'); box.appendChild(mk('p', null, 'Here is your request. Check it, then press Request a Table below.'));
+      const dl = mk('dl', 'rs-sum');
+      [['Date', friendly(booking.date)], ['Time', booking.time], ['Guests', booking.guests + (booking.guests === 1 ? ' guest' : ' guests')], ['Seating', booking.zone || 'No preference'], ['Occasion', occText()]].concat(offerOf() ? [['Offer', offerOf()]] : [], [['Name', booking.name], ['Mobile', booking.phone]])
+        .forEach((r) => { dl.append(mk('dt', null, r[0]), mk('dd', null, r[1])); });
+      box.appendChild(dl);
+      say(box, () => {
+        const edit = (label, st) => qr(label, () => { me('Change ' + label.toLowerCase()); chat.editing = true; ask(st); }, 'rs-qr-ed');
+        showTray([edit('Date', 'date'), edit('Time', 'time'), edit('Guests', 'guests'), edit('Seating', 'zone'), edit('Occasion', 'occasion'), edit('Name', 'name'), edit('Mobile', 'phone'),
+          qr('Start over', () => { tok++; log.replaceChildren(); chat.answered = {}; chat.editing = false; booking.name = ''; booking.phone = ''; syncInputs(); updateTicket(); ask('date'); }, 'rs-qr-ed')]);
+      });
+      updateFoot();
+    }
+  }
+
+  /* ───────── Pick your spot: lazy 360° (existing tour engine) or four real zone photos ───────── */
+  const ZN = ['The Bar', 'Dining', 'Lounge', 'Café'], pickView = $('rs-pickview'), pickBar = $('rs-pickbar'), pkBook = $('rs-pk-book'), pkT = $('rs-pk-t'), spots = $('rs-spots');
+  let pickState = '', pickZone = '', watching = false;
+  const webglOK = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } };
+  function showSpots(calm) {
+    pickState = 'photos'; pickView.hidden = true; pickBar.hidden = true; $('rs-pk-note').hidden = true; spots.hidden = false;
+    $('rs-pk-3d').hidden = !(calm && webglOK());
+  }
+  function showPanorama() {
+    pickState = 'loading'; spots.hidden = true; pickView.hidden = false; pickBar.hidden = false; $('rs-pk-note').hidden = false;
+    let tries = 0;
+    (function wait() {
+      if (window.__pvLoad) { Promise.resolve().then(() => window.__pvLoad()).then(watch).catch(() => showSpots(false)); }
+      else if (tries++ < 50) setTimeout(wait, 100); else showSpots(false);
+    })();
+  }
+  function openPick() {
+    if (pickState) return;
+    const sd = navigator.connection && navigator.connection.saveData;
+    if (!webglOK()) return showSpots(false);
+    if (RM.matches || sd) return showSpots(true);
+    showPanorama();
+  }
+  /* One source of truth: the highlighted zone button in the viewer. The label, the Book here button and the booking all read it. */
+  const zoneNow = () => { const a = qs('#tour .pv-zones .pv-zone.is-active'), k = a ? Number(a.dataset.z) : -1; return k >= 0 ? ZN[k] : ''; };
+  let pickLock = false;
+  function updatePick() {
+    if (pickLock) return; const z = zoneNow(); pickZone = z; const t = z ? 'Looking at: ' + z : 'Tap a spot in the room';
+    if (pkT.textContent !== t) pkT.textContent = t;
+    pkBook.disabled = !z; pkBook.setAttribute('aria-label', z ? 'Book here: ' + z : 'Book here');
+  }
+  let pickTimer = 0;
+  function watch() {
+    if (watching) return; watching = true;
+    const zs = qs('#tour .pv-zones');
+    if (zs) new MutationObserver(updatePick).observe(zs, { attributes: true, subtree: true, attributeFilter: ['class', 'aria-current'] });
+    new MutationObserver(() => { if ($('tour').classList.contains('is-nogl')) showSpots(false); }).observe($('tour'), { attributes: true, attributeFilter: ['class'] });
+    ['click', 'pointerup', 'keyup'].forEach((ev) => $('tour').addEventListener(ev, () => requestAnimationFrame(updatePick)));
+    pickTimer = setInterval(() => { if (mode === 'pick' && !document.hidden) updatePick(); }, 250); /* safety net: the label can never stay stale */
+    updatePick();
+  }
+  function bookZone(name) {
+    if (!name) return; booking.zone = name; renderAll();
+    pkT.textContent = 'Seating set: ' + name;
+    pickLock = true; setTimeout(() => { setMode('quick'); setTimeout(() => { pickLock = false; }, 400); }, RM.matches ? 250 : 650);
+  }
+  pkBook.addEventListener('click', () => bookZone(zoneNow())); /* read the highlight at click time: label, button and booking always agree */
+  qsa('[data-spot]').forEach((b) => b.addEventListener('click', () => bookZone(b.dataset.spot)));
+  $('rs-pk-photos').addEventListener('click', () => showSpots(false));
+  $('rs-pk-3d').addEventListener('click', showPanorama);
+
+  /* ───────── experience cards: prefill + scroll ───────── */
+  const presets = { 'date-night': { guests: 2, occasion: 'Date Night' }, 'birthday': { occasion: 'Birthday' }, 'groups': { guests: 6, occasion: 'Casual Dining' } };
+  const mark = (id) => { const f = $(id); if (f) f.classList.add('is-prefilled'); };
+  ['f-guests', 'f-occasion'].forEach((id) => { const f = $(id); if (f) f.addEventListener('change', () => f.classList.remove('is-prefilled')); });
+  gMinus.addEventListener('click', () => $('f-guests').classList.remove('is-prefilled'));
+  gPlus.addEventListener('click', () => $('f-guests').classList.remove('is-prefilled'));
+  qsa('[data-xp]').forEach((btn) => btn.addEventListener('click', () => {
+    const p = presets[btn.getAttribute('data-xp')]; if (!p) return;
+    if (mode !== 'quick') setMode('quick');
+    if (p.guests) { booking.guests = p.guests; mark('f-guests'); }
+    if (p.occasion) { booking.occasion = p.occasion; occEl.value = p.occasion; mark('f-occasion'); }
+    renderAll();
+    panel.scrollIntoView({ block: 'start' }); panel.focus({ preventScroll: true });
+  }));
+
+  /* ───────── submit: wa.me/919059670033 with the message (format unchanged) ───────── */
+  const submit = $('res-submit-btn');
+  /* field errors: text sits under its field (aria-describedby), role=alert announces it; chat/pick modes keep the single message above the button */
+  const FE = { 'f-name': ['res-name', 'res-name-err'], 'f-phone': ['res-phone', 'res-phone-err'], 'f-time': ['rs-times', 'rs-time-err'] };
+  function clearErr(ids) {
+    (ids || Object.keys(FE)).forEach((id) => { const e = FE[id]; $(e[1]).textContent = ''; $(e[0]).removeAttribute('aria-invalid'); $(id).classList.remove('is-bad'); });
+    if (!ids) $('rs-err').classList.remove('on');
+  }
+  function showErr(items) {
+    clearErr();
+    if (mode === 'quick') items.forEach((it) => { const e = FE[it[0]]; $(e[1]).textContent = it[1]; $(e[0]).setAttribute('aria-invalid', 'true'); $(it[0]).classList.add('is-bad'); });
+    else { $('rs-err-t').textContent = items.map((it) => it[1]).join(' '); $('rs-err').classList.add('on'); }
+  }
+  timeBox.addEventListener('click', () => clearErr(['f-time']));
+  submit.addEventListener('click', () => {
+    const name = booking.name.trim(), phone = booking.phone.trim();
+    const bad = [];
+    if (!booking.time) bad.push(['f-time', 'Please choose a time.']);
+    if (!name) bad.push(['f-name', 'Please enter your name.']);
+    if (!phone) bad.push(['f-phone', 'Please enter your mobile number.']);
+    else if (!phoneOk(phone)) bad.push(['f-phone', 'Please enter a 10-digit mobile number.']);
+    if (bad.length) {
+      showErr(bad);
+      if (mode === 'quick') { const f = bad[0][0], t = f === 'f-time' ? qs('#rs-times .rs-chip[aria-checked="true"]:not(:disabled)') || qs('#rs-times .rs-chip:not(:disabled)') : $(FE[f][0]); if (t) t.focus(); } else submit.focus();
+      return;
+    }
+    clearErr();
+    const date = friendly(booking.date), seating = booking.zone || 'No preference', occasion = booking.occasion || 'Dining';
+    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (booking.table ? '\n• Table: ' + booking.table : '') + (offerOf() ? '\n• Offer: ' + offerOf() : '');
+    const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
+    window.fkForm?.send('restaurant', 'Table booking', { name, phone, guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
+    const w = window.open(url, '_blank');
+    const fine = $('rs-fine');
+    fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';
+    showDone(url); // WhatsApp stays exactly as before; the panel now switches to "Request sent"
+  });
+
+  /* ───────── R3d: Request sent screen ───────── */
+  const doneEl = $('rs-done'), doneH = $('rs-done-h'), doneS = $('rs-done-s'); let sent = null;
+  const day = (v) => friendly(v).replace(',', ''); /* "Wed, 11 Nov" -> "Wed 11 Nov" */
+  const guestsTxt = (n) => n + (n === 1 ? ' guest' : ' guests');
+  function showDone(url) {
+    sent = { date: booking.date, time: booking.time, timeMin: booking.timeMin, guests: booking.guests, zone: booking.zone, occasion: booking.occasion, offer: offerOf(), occText: occText() };
+    $('rs-resend').href = url;
+    const dl = $('rs-done-sum'); dl.replaceChildren();
+    [['Date', friendly(sent.date)], ['Time', sent.time], ['Guests', guestsTxt(sent.guests)], ['Seating', sent.zone || 'No preference'], ['Occasion', sent.occText]].concat(sent.offer ? [['Offer', sent.offer]] : [])
+      .forEach((r) => { dl.append(mk('dt', null, r[0]), mk('dd', null, r[1])); });
+    doneS.textContent = '';
+    panel.classList.add('is-done'); doneEl.hidden = false;
+    doneH.classList.remove('is-stamped'); void doneH.offsetWidth; doneH.classList.add('is-stamped');
+    if (panel.getBoundingClientRect().top < 0) panel.scrollIntoView({ block: 'start' });
+    doneH.focus({ preventScroll: true });
+    confetti();
+  }
+  function confetti() { /* <1s gold/ember burst; skipped under reduced motion */
+    if (RM.matches) return;
+    const cv = mk('canvas', 'rs-confetti'); cv.setAttribute('aria-hidden', 'true'); panel.appendChild(cv);
+    const pr = panel.getBoundingClientRect(), hr = doneH.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = pr.width * dpr; cv.height = pr.height * dpr; const c = cv.getContext('2d'); c.scale(dpr, dpr);
+    const ox = hr.left - pr.left + hr.width / 2, oy = hr.top - pr.top + hr.height / 2, cols = ['#f3c56b', '#e0a63c', '#ffe2a6', '#e8581a', '#c2431a'];
+    const ps = Array.from({ length: 70 }, () => { const a = Math.random() * Math.PI * 2, v = 160 + Math.random() * 360; return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 220, r: Math.random() * 6, vr: (Math.random() - .5) * 14, w: 5 + Math.random() * 6, h: 3 + Math.random() * 4, c: cols[(Math.random() * cols.length) | 0] }; });
+    const T = 900, t0 = performance.now();
+    (function f(now) {
+      const t = now - t0, dt = 1 / 60; c.clearRect(0, 0, pr.width, pr.height);
+      if (t >= T) { cv.remove(); return; }
+      ps.forEach((p) => { p.vy += 900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .985; p.r += p.vr * dt; c.save(); c.globalAlpha = t > T * .6 ? 1 - (t - T * .6) / (T * .4) : 1; c.translate(p.x, p.y); c.rotate(p.r); c.fillStyle = p.c; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); c.restore(); });
+      requestAnimationFrame(f);
+    })(t0);
+  }
+  /* Add to calendar (.ics). Hyderabad is IST (UTC+5:30, no daylight saving), so the time is right on any device clock. */
+  function icsText() {
+    const [y, m, d] = sent.date.split('-').map(Number), start = Date.UTC(y, m - 1, d, 0, sent.timeMin, 0) - 330 * 60000, end = start + 3600000;
+    const z = (ms) => { const t = new Date(ms); return t.getUTCFullYear() + pad(t.getUTCMonth() + 1) + pad(t.getUTCDate()) + 'T' + pad(t.getUTCHours()) + pad(t.getUTCMinutes()) + '00Z'; };
+    const esc = (t) => String(t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+    const fold = (l) => { let o = '', r = l; while (r.length > 60) { o += r.slice(0, 60) + '\r\n '; r = r.slice(60); } return o + r; };
+    const desc = ['Not confirmed until Fursat replies on WhatsApp.', 'Guests: ' + sent.guests, 'Seating preference: ' + (sent.zone || 'No preference')].concat(sent.offer ? ['Offer: ' + sent.offer] : []).join('\n');
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Fursat Kitchen | Bar//Table request//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+      'UID:fursat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '@fursatind.in', 'DTSTAMP:' + z(Date.now()), 'DTSTART:' + z(start), 'DTEND:' + z(end),
+      'SUMMARY:Fursat table request (pending)', 'LOCATION:' + esc('Fursat Kitchen | Bar, Capital Park, Madhapur, Hyderabad'), 'DESCRIPTION:' + esc(desc), 'STATUS:TENTATIVE', 'END:VEVENT', 'END:VCALENDAR'].map(fold).join('\r\n') + '\r\n';
+  }
+  function save(blob, name) { const a = mk('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  $('rs-ics').addEventListener('click', () => { if (!sent) return; save(new Blob([icsText()], { type: 'text/calendar;charset=utf-8' }), 'fursat-table-request.ics'); doneS.textContent = 'Calendar file downloaded. It is marked pending.'; });
+  /* Share to Story: 1080x1920 canvas, a real Fursat photo + the logo + the booking line. No name or phone. */
+  const photoFor = { 'The Bar': 'bar', 'Dining': 'dining', 'Lounge': 'lounge', 'Café': 'garden-window' };
+  const loadImg = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+  async function storyBlob() {
+    try { await Promise.all([document.fonts.load('700 80px "Playfair Display"'), document.fonts.load('500 44px Poppins')]); } catch (e) {}
+    const [ph, logo] = await Promise.all([loadImg('/assets/tour/img/' + (photoFor[sent.zone] || 'entrance') + '.webp'), loadImg('/assets/c86f49db5a.webp')]);
+    const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d');
+    const k = Math.max(W / ph.width, H / ph.height); c.drawImage(ph, (W - ph.width * k) / 2, (H - ph.height * k) / 2, ph.width * k, ph.height * k);
+    let g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(5,12,0,.55)'); g.addColorStop(.28, 'rgba(5,12,0,.05)'); g.addColorStop(.55, 'rgba(5,12,0,.25)'); g.addColorStop(1, 'rgba(5,12,0,.92)'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    const pw = 440, ph2 = 340, px = (W - pw) / 2, py = 150, rr = 36; /* cream plate so the green wordmark reads */
+    c.beginPath(); c.roundRect(px, py, pw, ph2, rr); c.fillStyle = '#f6efdd'; c.fill(); c.lineWidth = 5; c.strokeStyle = '#e0a63c'; c.stroke();
+    const lk = Math.min((pw - 70) / logo.width, (ph2 - 60) / logo.height); c.drawImage(logo, px + (pw - logo.width * lk) / 2, py + (ph2 - logo.height * lk) / 2, logo.width * lk, logo.height * lk);
+    const line1 = 'Table for ' + sent.guests + ' · ' + day(sent.date) + ' · ' + sent.time; let fs = 84; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    do { c.font = '700 ' + fs + 'px "Playfair Display", Georgia, serif'; fs -= 2; } while (c.measureText(line1).width > 940 && fs > 40);
+    c.fillStyle = '#fff2d4'; c.shadowColor = 'rgba(0,0,0,.55)'; c.shadowBlur = 24; c.fillText(line1, W / 2, 1560); c.shadowBlur = 0;
+    c.fillStyle = '#e0a63c'; c.fillRect(W / 2 - 70, 1614, 140, 4);
+    c.font = '500 44px Poppins, system-ui, sans-serif'; c.fillStyle = '#f3c56b'; if ('letterSpacing' in c) c.letterSpacing = '3px'; c.fillText('Fursat Kitchen | Bar, Madhapur', W / 2, 1690);
+    return await new Promise((ok) => cv.toBlob(ok, 'image/png'));
+  }
+  $('rs-story').addEventListener('click', async () => {
+    if (!sent) return; const b = $('rs-story'); b.disabled = true; doneS.textContent = 'Making your Story image…';
+    try {
+      const blob = await storyBlob(), file = new File([blob], 'fursat-story.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); doneS.textContent = 'Story image ready to share.'; } catch (e) { doneS.textContent = e && e.name === 'AbortError' ? '' : 'Could not open sharing. Downloading instead.'; if (!e || e.name !== 'AbortError') save(blob, 'fursat-story.png'); } }
+      else { save(blob, 'fursat-story.png'); doneS.textContent = 'Story image downloaded (1080 × 1920).'; }
+    } catch (e) { doneS.textContent = 'Sorry, the Story image could not be made.'; }
+    b.disabled = false;
+  });
+  function resetAll() {
+    tok++; log.replaceChildren(); tray.replaceChildren(); chat.started = false; chat.answered = {}; chat.editing = false; chat.step = ''; chat.timeStale = false;
+    booking.date = todayStr(); if (!availFor(booking.date).length) booking.date = ymd(addDays(new Date(), 1)); booking.timeMin = -1; booking.time = ''; setDefaultTime();
+    booking.guests = 4; booking.zone = ''; booking.occasion = 'Casual Dining'; booking.name = ''; booking.phone = ''; pickZone = ''; if (watching) updatePick();
+    ['f-guests', 'f-occasion'].forEach((id) => $(id).classList.remove('is-prefilled')); clearErr(); $('rs-fine').textContent = 'Opens WhatsApp with your details.'; syncInputs();
+  }
+  $('rs-again').addEventListener('click', () => {
+    panel.classList.remove('is-done'); doneEl.hidden = true; sent = null; resetAll();
+    if (mode !== 'quick') setMode('quick'); else renderAll();
+    $('rs-book-h').focus({ preventScroll: true });
+  });
+
+  /* ───────── keep past slots honest while the page stays open ───────── */
+  function tick() { if (document.hidden) return; const before = booking.timeMin; setDefaultTime(); if (before !== booking.timeMin || mode === 'quick') renderAll(); }
+  setInterval(tick, 60000); document.addEventListener('visibilitychange', tick);
+
+  /* ───────── reveal on view (composite-only; CSS decides the motion). Deferred: later sections are parsed after this script ───────── */
+  function reveal() {
+    if (page) page.classList.add('rs-anim');
+    const els = qsa('.rs-rise, .rs-card-in');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      els.forEach((el) => io.observe(el));
+    } else { els.forEach((el) => el.classList.add('is-in')); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveal); else reveal();
+
+  syncInputs(); renderAll();
+})();
+</script>
+
+<style is:global>
+  /* R1 a11y: 44px targets, field errors, required marks. Colours are existing tokens only. */
+  .rs-page .rs-hy .fk-btn.rs-sbtn{width:45px;height:45px;min-height:0}
+  .rs-page .rs-hy .fk-btn,.rs-page .rs-hy .rs-mode{min-height:45px}
+  .rs-page .rs-hy .rs-link{display:block;min-height:44px;text-align:left}
+  /* the desktop fit-zoom scales the panel; --rs-z (set by reserve.astro) lifts targets so they still render at 45px */
+  .rs-page .rs-hy .rs-panel :is(.fk-btn,.rs-mode,.rs-chip,.rs-qr,.rs-link,.rs-send,.rs-box,.rs-box input,.rs-box select,.rs-comp input){min-height:calc(45px / var(--rs-z, 1))}
+  .rs-page .rs-hy .rs-panel .fk-btn.rs-sbtn{width:calc(45px / var(--rs-z, 1));height:calc(45px / var(--rs-z, 1));min-height:0}
+  .rs-reqnote{white-space:nowrap}
+  .rs-ferr{margin:6px 4px 0;font-size:.84rem;line-height:1.4;color:var(--rs-danger)}
+  .rs-ferr:empty{display:none}
+  .is-bad .rs-times{border-radius:18px;box-shadow:0 0 0 2px var(--rs-danger)}
+  @media (max-width:767px){ .rs-page .rs-box input,.rs-page .rs-box select,.rs-page .rs-comp input,.rs-page .rs-calinp{font-size:16px} }
+</style>

@@ -1,0 +1,82 @@
+(function(){
+  var q=document.getElementById("af-q"),send=document.getElementById("af-send"),out=document.getElementById("as-results");
+  if(!q||!send||!out)return;
+  var mode="food",calm=matchMedia("(prefers-reduced-motion: reduce)").matches,items=[],ok=null,st=document.getElementById("as-status"),
+    ready=fetch("/data/menu.json").then(function(r){return r.json()}).then(function(j){
+      try{ok=JSON.parse(document.getElementById("ask-ok").textContent)}catch(e){ok=null}
+      /* only items whose name and price match food.json / drinks.json are shown, under that name */
+      items=ok?j.filter(function(it){return ok.hasOwnProperty(it.n+"|"+it.p)}).map(function(it){var c={};for(var k in it)c[k]=it[k];c.n=ok[it.n+"|"+it.p];return c}):[]}).catch(function(){items=[]});
+  var STOP=/^(i|im|i'm|am|a|an|the|and|or|for|with|me|my|to|of|in|it|its|it's|is|some|something|want|feel|like|looking|need|give|show|find|something|under|below|than|less|rs|inr|please|veg|vegetarian|nonveg|non|spicy|spice|hot|want|something|dish|food|eat|eating|good|best)$/;
+  var MOODS=[
+    {re:/hungry|starving|full meal|heavy|filling|lunch|dinner|big appetite/,cats:["Biryani & rice","Mains","South Indian","Regional specials"],w:3,why:"Filling"},
+    {re:/rain|monsoon|cold weather|winter|cosy|cozy|comfort/,cats:["Soups","Hot coffee","Tea","Quick bites","Regional specials"],kw:/pakodi|soup|chai|paya|hot chocolate|masala tea|ginger/i,w:3,why:"Warm and comforting"},
+    {re:/spic(y|e)|fiery|kick|\bhot\b|karam/,spicy:1,w:4,why:"Spicy"},
+    {re:/birthday|party|friends|group|sharing|share|celebrat|gang|get.?together/,cats:["Starters","Pizza","Quick bites","Desserts","Finger bites","Mocktails"],w:2,why:"Good to share"},
+    {re:/sweet|dessert|cake|chocolate|treat/,cats:["Desserts","Cookies","Milk shakes"],w:4,why:"Sweet"},
+    {re:/coffee|latte|caffeine|espresso|wake up/,cats:["Hot coffee","Cold coffee & frappes","Iced coffee"],w:4,why:"Coffee"},
+    {re:/\btea\b|chai/,cats:["Tea"],w:4,why:"Tea"},
+    {re:/drink|thirsty|refresh|cool|summer|mocktail|juice|shake|smoothie/,cats:["Mocktails","Soft drinks","Smoothies","Milk shakes"],w:4,why:"Refreshing"},
+    {re:/light|healthy|diet|salad|fit\b/,cats:["Salads","Healthy bowls","Soups"],w:4,why:"Light"},
+    {re:/breakfast|morning|brunch/,cats:["All day breakfast","Finger bites","Cookies"],w:4,why:"Breakfast"},
+    {re:/\bkids?\b|child|little one/,cats:["Kids menu","Pizza","Cookies"],w:4,why:"Kid friendly"},
+    {re:/snack|starter|appetizer|appetiser|finger|munch/,cats:["Starters","Quick bites","Finger bites"],w:3,why:"Snack"},
+    {re:/romantic|date night|anniversary/,cats:["Desserts","Mocktails","Pasta","Pizza"],w:2,why:"Date night"}
+  ];
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  var HI={food:"Something spicy under 400",drinks:"Something cold and refreshing",sree:"Filter Sreemukhi\u2019s menu"};
+  function inMode(it){return mode==="food"?it.k==="food":mode==="drinks"?(it.k==="drink"&&!it.a):it.k==="sree"}
+  function run(text){
+    var t=text.toLowerCase().replace(/[\u2019']/g,"'"),max=null,m=t.match(/(?:under|below|less than|within|upto|up to|max|budget|\u20b9|rs\.?)\s*(?:rs\.?|\u20b9)?\s*(\d{2,4})/);
+    if(m)max=+m[1];
+    var nonveg=/non[- ]?veg|chicken|mutton|prawn|fish|egg|lamb|meat|kodi/.test(t),veg=!nonveg&&/\bveg(etarian)?\b|paneer|mushroom|pure veg/.test(t);
+    var rules=MOODS.filter(function(r){return r.re.test(t)});
+    var toks=t.replace(/\d+/g," ").split(/[^a-z']+/).filter(function(w){return w.length>2&&!STOP.test(w)});
+    var res=items.map(function(it,idx){
+      if(!inMode(it))return null;
+      if(max&&it.p>max)return null;
+      var v=it.v||"";if(veg&&v!=="veg"&&v!=="opt")return null;if(nonveg&&v!=="nonveg"&&v!=="opt")return null;
+      var s=0,why=[],hay=(it.n+" "+(it.d||"")+" "+(it.t||"")+" "+it.c).toLowerCase();
+      rules.forEach(function(r){var ci=r.cats?r.cats.indexOf(it.c):-1,hit=ci>-1||(r.spicy&&it.s)||(r.kw&&r.kw.test(it.n));if(hit){s+=r.w+(ci>-1?(r.cats.length-ci)*.3:0);if(why.indexOf(r.why)<0)why.push(r.why)}});
+      toks.forEach(function(w){if(hay.indexOf(w)>-1)s+=5});
+      if(max&&s>0)why.push("Under \u20b9"+max);
+      return s>0?{it:it,s:s,why:why,i:idx}:null}).filter(Boolean);
+    if(mode==="sree"&&!res.length)res=items.map(function(it,idx){return inMode(it)?{it:it,s:1,why:[],i:idx}:null}).filter(Boolean);
+    res.sort(function(a,b){return b.s-a.s||a.i-b.i});
+    if(mode==="sree")return res;
+    var per={},top=[];res.forEach(function(r){per[r.it.c]=(per[r.it.c]||0)+1;if(per[r.it.c]<=2&&top.length<6)top.push(r)});
+    return top}
+  function render(text,top,quiet){
+    var sree=mode==="sree",anyAlc=top.some(function(r){return r.it.a});
+    var wa="https://wa.me/919059670033?text="+encodeURIComponent("Hi Fursat! I would like to reserve a table.");
+    var ttl=sree?"Sreemukhi\u2019s Special Menu":top.length?(mode==="drinks"?"My drinks for \u201c":"My picks for \u201c")+esc(text)+"\u201d":"Hmm, nothing matched \u201c"+esc(text)+"\u201d";
+    var h='<h2 class="fk-ty-h2 rs-h" id="as-rh" tabindex="-1"><span>'+ttl+"</span></h2>";
+    if(top.length){h+='<ol class="rs-list">'+top.map(function(r,k){var it=r.it,
+          tags=[it.c,it.a?"Contains alcohol, 21+":""].filter(Boolean).join(" \u00b7 "),
+          vg=it.v==="veg"?'<span class="ar-vg is-veg" role="img" aria-label="Veg"></span>':it.v==="nonveg"?'<span class="ar-vg is-nv" role="img" aria-label="Non-veg"></span>':"",
+          ic=it.v==="veg"?"i-leaf":it.s?"i-chilli":"i-sprig";/* gold tile icon: leaf = veg, chilli = spicy, sprig = the rest */
+      return '<li class="fk-card ar" style="--k:'+k+'"><div class="fk-card__b"><span class="ar-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#'+ic+'"/></svg></span><h3 class="fk-ty-h4 fk-card__t" translate="no">'+vg+'<a href="/menu/#dish='+encodeURIComponent(it.n)+'"><span>'+esc(it.n)+'</span></a></h3><p class="fk-card__p">'+esc(tags)+'</p><div class="fk-card__foot"><span class="fk-card__price">'+(it.f?'<small>from</small>':'')+'\u20b9'+it.p+'</span><span class="fk-card__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></div></li>'}).join("")+"</ol>"}
+    else h+='<p class="rs-none">Try \u201csomething spicy under 400\u201d, \u201cdessert\u201d or \u201cchicken biryani\u201d.</p><a class="fk-btn fk-btn--md fk-btn--secondary fk-btn--on-dark rs-menu" href="/menu/">See the full menu</a>';
+    h+='<a class="fk-btn fk-btn--md fk-btn--primary fk-btn--on-dark rs-wa" href="'+wa+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.47 15.04L2 22l5.1-1.34A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.2 15.02l-.3-.18-3 .79.8-2.92-.2-.31A8.1 8.1 0 0 1 12.04 3.8zM8.6 7.4c-.2 0-.5.07-.75.35-.26.28-1 .97-1 2.37s1.03 2.75 1.17 2.94c.14.19 2 3.17 4.9 4.32 2.4.95 2.9.76 3.42.71.52-.05 1.68-.69 1.92-1.35.24-.66.24-1.23.17-1.35-.07-.12-.26-.19-.54-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.1-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.28-1.4-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.12-.57.13-.13.28-.33.43-.5.14-.16.19-.28.28-.47.1-.19.05-.35-.02-.5-.07-.14-.62-1.55-.86-2.1-.22-.5-.45-.5-.64-.51z"/></svg><span>Reserve a table on WhatsApp</span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></a>'
+      +'<p class="rs-fine">Prices from the <span class="brand-t">Fursat</span> printed menu. Taxes extra.'+(anyAlc?" Alcohol is served to guests aged 21 and above only.":"")+"</p>";
+    out.innerHTML=h;out.hidden=false;if(quiet)return;
+    if(st)st.textContent=sree?top.length+(top.length===1?" item":" items")+" in Sreemukhi\u2019s special menu":top.length?top.length+(top.length===1?" result":" results")+" for "+text+". Press Tab to move through them.":"No results for "+text+".";var hd=document.getElementById("as-rh"),pn=document.getElementById("ah-ans")||out,R=pn.getBoundingClientRect(),top0=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sh-h"))||80;if(R.top<top0||R.bottom>innerHeight+40)pn.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});hd.focus({preventScroll:true})}
+  function go(){var text=q.value.trim();if(!text&&mode!=="sree"){if(st)st.textContent="Type what you feel like eating, then press Enter.";q.focus();return}
+    if(st)st.textContent="";out.hidden=false;out.innerHTML=calm?"":'<div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div><div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div>';
+    ready.then(function(){render(text,run(text))})}
+  function setMode(m){mode=m;document.querySelectorAll("[data-tab]").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.tab===m?"true":"false")});
+    document.querySelectorAll("[data-for]").forEach(function(c){c.hidden=c.dataset.for!==m});q.placeholder=HI[m];q.value="";out.hidden=true;out.innerHTML="";if(st)st.textContent="";
+    if(m==="sree")ready.then(function(){render("",run(""))})}
+  document.querySelectorAll("[data-tab]").forEach(function(b){b.addEventListener("click",function(){setMode(b.dataset.tab)})});
+  send.addEventListener("click",go);
+  q.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();go()}});
+  document.querySelectorAll("[data-mood]").forEach(function(b){b.addEventListener("click",function(){q.value=b.dataset.mood;go()})});
+  /* page-aware start: /ask?q=coffee%20and%20desserts (from the Ask Fursat button on other pages) */
+  var pq=new URLSearchParams(location.search).get("q");if(pq){q.value=pq.slice(0,80);go()}
+  var mic=document.getElementById("af-mic"),SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(mic&&SR){mic.hidden=false;var rec=null;mic.addEventListener("click",function(){
+    if(rec){rec.stop();return}
+    rec=new SR();rec.lang="en-IN";rec.interimResults=false;rec.maxAlternatives=1;mic.setAttribute("aria-pressed","true");
+    rec.onresult=function(e){q.value=e.results[0][0].transcript;go()};
+    rec.onend=rec.onerror=function(){rec=null;mic.setAttribute("aria-pressed","false")};
+    try{rec.start()}catch(x){rec=null;mic.setAttribute("aria-pressed","false")}})}
+})();

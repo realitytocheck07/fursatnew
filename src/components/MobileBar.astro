@@ -1,0 +1,176 @@
+---
+import site from '../data/site.json';
+import StickyBar from './StickyBar.astro';
+// MobileBar.astro — Fixed bottom navigation bar for mobile screens
+// Shows on screens < 768px only. Icons: Home | Menu | Ask | Reserve | WhatsApp
+// Floating glass pill (UI2): inset 12px, 64px tall. Current page = aria-current="page" (filled inner pill). Targets >= 48px, labels 12px.
+// Also renders the floating Book bar above it, except where Home / Reserve / Ask / utility pages handle booking themselves.
+interface Props {
+  active?: string;
+}
+const { active = '' } = Astro.props;
+const showBook = !['home', 'reserve', 'ask', ''].includes(active); // Home already includes <StickyBar />
+---
+{showBook && <StickyBar always />}
+<nav class="mb-bar" aria-label="Mobile quick navigation">
+  <a href="/" class="mb-item" aria-label="Home" aria-current={active === "home" ? "page" : undefined}>
+    <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/>
+    </svg>
+    <span>Home</span>
+  </a>
+
+  <a href="/menu" class="mb-item" aria-label="Menu" aria-current={active === "menu" ? "page" : undefined}>
+    <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 4v8a3 3 0 0 0 3 3v5M8 4v6M11 4v8a3 3 0 0 1-3 3M17 20V4c-2 1.5-3 4-3 7h3"/>
+    </svg>
+    <span>Menu</span>
+  </a>
+
+  <a href="/ask" class="mb-item" aria-label="Ask Fursat" aria-current={active === "ask" ? "page" : undefined}>
+    <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>Ask</span>
+  </a>
+
+  <a href="/reserve" class="mb-item" aria-label="Reserve a Table" aria-current={active === "reserve" ? "page" : undefined}>
+    <svg class="mb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <path d="M16 2v4M8 2v4M3 10h18"/>
+    </svg>
+    <span>Reserve</span>
+  </a>
+
+  <a href={`https://wa.me/${site.whatsapp}?text=Hi%20Fursat!%20I%20have%20a%20question.&utm_source=website&utm_medium=mobile_bar&utm_campaign=whatsapp`} target="_blank" rel="noopener" class="mb-item" aria-label="WhatsApp Fursat" data-wa-agent>
+    <svg class="mb-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.37c1.45.78 3.08 1.2 4.74 1.2 5.46 0 9.91-4.45 9.91-9.91C21.95 6.78 17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.39-4.19-1.14l-.3-.18-3.12.82.83-3.04-.2-.31C4.24 14.99 3.8 13.47 3.8 11.91c0-4.54 3.69-8.24 8.24-8.24 2.2 0 4.26.86 5.82 2.42a8.19 8.19 0 0 1 2.4 5.82c0 4.55-3.7 8.24-8.22 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.69-.8-.23-.08-.39-.12-.56.12-.17.25-.64.8-.79.96-.14.17-.29.19-.54.07-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.6.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.48-.29z"/>
+    </svg>
+    <span>WhatsApp</span>
+  </a>
+</nav>
+
+<script is:inline>
+  /* Phones: the WhatsApp tab opens the chat agent (same as the desktop button). No agent on the page -> normal WhatsApp link. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-wa-agent]');
+    if (!a) return;
+    var fab = document.querySelector('.waf-fab');
+    if (!fab) return;
+    e.preventDefault();
+    fab.click();
+  });
+</script>
+
+<style is:global>
+  /* Phone nav: floating glass pill, visible on phones only */
+  .mb-bar {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --mb-h: 64px;
+      --mb-gap: 12px;
+      --mb-bottom: calc(var(--mb-gap) + env(safe-area-inset-bottom, 0px));
+      --mb-clear: calc(var(--mb-h) + var(--mb-bottom)); /* space the nav occupies from the screen bottom */
+    }
+
+    .mb-bar {
+      display: flex;
+      position: fixed;
+      bottom: var(--mb-bottom);
+      left: max(12px, env(safe-area-inset-left, 0px));
+      right: max(12px, env(safe-area-inset-right, 0px));
+      height: var(--mb-h);
+      z-index: 9000;
+      view-transition-name: mobile-bar;
+      background: rgba(22, 48, 26, 0.82);
+      backdrop-filter: blur(18px) saturate(1.3);
+      -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(217, 179, 106, 0.55);
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(10, 20, 10, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      padding: 6px;
+      gap: 2px;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    /* Content-sized columns: "WhatsApp" at 12px is wider than a fifth of a 320px screen. */
+    .mb-item {
+      flex: 1 1 auto;
+      min-width: 48px;
+      height: 100%;
+      min-height: 48px;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      text-decoration: none;
+      color: rgba(244, 236, 218, 0.82);
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.2;
+      font-family: var(--sans, "Poppins", system-ui, sans-serif);
+      white-space: nowrap;
+      padding: 0 6px;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s, transform 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mb-item:active {
+      transform: scale(0.96);
+    }
+
+    .mb-item:focus-visible {
+      outline: 2px solid #F4ECDA;
+      outline-offset: -2px;
+    }
+
+    .mb-icon {
+      width: 22px;
+      height: 22px;
+      flex: none;
+    }
+
+    /* Current page: filled inner pill (not colour alone: heavier icon too) */
+    .mb-item[aria-current="page"] {
+      color: #16301a;
+      background: linear-gradient(180deg, #F3D48A 0%, #E0A63C 100%);
+      box-shadow: 0 4px 14px rgba(224, 166, 60, 0.45);
+    }
+
+    .mb-item[aria-current="page"] .mb-icon {
+      stroke-width: 2.3;
+    }
+
+    /* Keep the last content visible above the pill (and above the Book bar when it is shown).
+       Pages needing this: every page with <MobileBar> (Home, Party, Banquet, Catering, Story, Café/Bar, Reserve, Ask, Order, Terms, 404). */
+    body {
+      padding-bottom: calc(var(--mb-clear) + 12px) !important;
+    }
+
+    body:has(.fk-bookbar:not([hidden])) {
+      padding-bottom: calc(var(--mb-clear) + 12px + 60px) !important;
+    }
+
+    /* Shared page hero (CornerHero: Party, Banquet, Café, Bar): on a 390x844 phone the 2nd CTA ("See Packages")
+       sits higher on the first screen: shorter art. Buttons keep wrapping (one-row forcing clipped long labels like "Book a Café Booth"). */
+    .ch .ch-art {
+      aspect-ratio: 2 / 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mb-item {
+      transition: none;
+    }
+
+    .mb-item:active {
+      transform: none;
+    }
+  }
+</style>

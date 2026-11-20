@@ -1,5 +1,28 @@
-node_modules
-dist
-.astro
+node_modules/
+dist/
+.astro/
+raw_assets/
+.env
+.env.*
+!.env.example
+review/photo-map.html
+
+# Large video files in public (block uncompressed raw, allow tracked production assets)
+public/**/*.mp4
+*.mov
+*.mp4.raw
+!public/assets/hero-master-v2.mp4
+!public/assets/hero-master-v2-sm.mp4
+!public/assets/f56e73c9e7.mp4
+!public/assets/reels/reel-*.mp4
+!public/assets/tour/clips/*.mp4
+
+# System & logs
+.DS_Store
+*.log
+
+review/lh-*.json
 *.zip
-fursat/hero-t*.png
+*.zip
+!public/assets/menu/drinks-intro/*.mp4
+!public/assets/home/*.mp4

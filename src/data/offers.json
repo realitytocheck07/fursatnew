@@ -1,0 +1,37 @@
+{
+  "_TODO": "ALL values below are SUGGESTIONS only. Must be confirmed by client before launch.",
+  "primary": {
+    "code": "FURSAT15",
+    "label": "Flat 15% Off",
+    "discountPercent": 15,
+    "scope": "Terms apply, confirm on WhatsApp",
+    "_scopeNote": "TODO(client): Confirm – food only, food+soft drinks, or whole bill? Alcohol excluded until confirmed.",
+    "validFrom": "12:00",
+    "validTo": "Terms apply, confirm on WhatsApp",
+    "_timingNote": "TODO(client): Confirm window. Opening at 12 PM was confirmed; end time 4 PM is a suggestion.",
+    "slotCapPerDay": "Terms apply, confirm on WhatsApp",
+    "_slotNote": "TODO(client): Confirm cap. 30 is a placeholder.",
+    "minimumGuests": 1,
+    "minimumBill": 0,
+    "daysApplicable": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "_weekendNote": "TODO(client): Is there a separate Fri–Sun offer? If yes, fill weekendOffer below.",
+    "weekendOffer": null,
+    "alcoholIncluded": false,
+    "_alcoholNote": "TODO(client): Do not include alcohol until client confirms local excise rules.",
+    "terms": "Terms apply, confirm on WhatsApp",
+    "scratchCard": {
+      "type": "Terms apply, confirm on WhatsApp",
+      "_typeNote": "TODO(client): Digital (on website) or physical (at restaurant)?",
+      "enabled": true
+    }
+  },
+  "_slotsNote": "Legacy per-slot list removed: hourly slots and per-slot discount now live in src/data/slots.json. This whole file is the hidden FURSAT15 offer (OFFER_ENABLED=false)."
+}

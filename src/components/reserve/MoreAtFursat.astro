@@ -1,0 +1,18 @@
+---
+// MoreAtFursat.astro: one line of links to the real pages (was 4 photo cards that repeated the footer and the Party/Banquet/Catering/Cafe pages).
+// TODO(client): confirm any live music / screening / buffet before adding event links.
+const links = [
+  { t: 'Party packages', href: '/party' },
+  { t: 'Banquet hall', href: '/banquet' },
+  { t: 'Catering', href: '/catering' },
+  { t: 'Fursat Café', href: '/cafe' },
+];
+---
+<nav aria-labelledby="rs-m-h" class="rs-more">
+  <h2 id="rs-m-h" class="rs-more-t fk-ty-h4">More at Fursat</h2>
+  <ul class="rs-more-l">
+    {links.map((l) => (
+      <li><a class="fk-btn fk-btn--ghost fk-btn--md" href={l.href}>{l.t}</a></li>
+    ))}
+  </ul>
+</nav>

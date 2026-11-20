@@ -1,0 +1,60 @@
+---
+import site from '../data/site.json';
+// Home legal dialog. Legal facts only from site.json.
+// Registered office, firm type and FSSAI licence details come from the client's GST and FSSAI certificates (site.json legal).
+// TODO(client): "Prices ... may include applicable taxes" below is not from the client either; confirm or reword it.
+---
+<dialog class="fx-ldlg" id="fxlegal" aria-labelledby="fxlegal-h"><button class="fx-ldlg-x" type="button" id="fxlegal-x" aria-label="Close legal information">&times;</button>
+ <h2 class="ld-h" id="fxlegal-h">Legal information</h2>
+ <dl>
+  <div><dt>Operated by</dt><dd>{site.legal.name} ({site.legal.type.toLowerCase()})</dd></div>
+  <div><dt>Brand</dt><dd>{site.name}</dd></div>
+  <div><dt>Registered office</dt><dd>{site.legal.registeredOffice}</dd></div>
+  <div><dt>GSTIN</dt><dd>{site.legal.gstin}</dd></div>
+  <div><dt>FSSAI licence no.</dt><dd>{site.legal.fssai} &middot; {site.legal.fssaiNote}</dd></div>
+  <div><dt>Contact</dt><dd><a href={`tel:+${site.phonePlain}`}>{site.phone}</a> &middot; <a href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener">WhatsApp</a></dd></div>
+ </dl>
+ <p class="ld-l"><a href="/terms">Terms of use</a><a href="/terms#privacy">Privacy policy</a><a href="/terms#refund">Refund &amp; cancellation</a></p>
+ <p class="ld-c">Prices are in Indian rupees and may include applicable taxes; menu and prices can change. Website designed &amp; being developed by <a href="https://bjnexusai.com" target="_blank" rel="noopener">BJNexus AI</a>.</p>
+</dialog>
+
+<style is:global>
+/* Session E: text >= 12px, contrast >= 4.5:1, 44px targets. Selectors are one step above the 07.css rules they replace. */
+.fx-ldlg .ld-h{margin:0 0 16px;padding-right:48px;font:600 12px/1.2 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#A41F18}
+.fx-ldlg dl dt{opacity:1;color:#5B4F22}
+.fx-ldlg .ld-c{opacity:1;color:#4A4222;font-size:12px}
+.fx-ldlg .fx-ldlg-x{width:44px;height:44px;right:10px;top:8px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0}
+.fx-ldlg .fx-ldlg-x:focus-visible,.fx-ldlg a:focus-visible{outline:2px solid #C94716;outline-offset:2px}
+.fx-ldlg dl a{display:inline-flex;align-items:center;min-height:44px}
+.fx-ldlg .ld-c a{display:inline;min-height:0;text-decoration:underline;text-underline-offset:.2em}
+.ld-l a{display:inline-flex;align-items:center;min-height:44px;color:#1A1608;font-weight:600;text-decoration:underline;text-underline-offset:.2em;text-decoration-thickness:from-font}
+.ld-l a:focus-visible{outline:2px solid #C94716;outline-offset:2px}
+</style>
+
+<script is:inline>
+/* Legal dialog access (the open/close clicks live in /js/10.js).
+   showModal() already makes the page behind inert and closes on Esc; this adds what it does not guarantee:
+   Tab stays inside the dialog (wraps first <-> last), Esc also closes the non-modal fallback, and focus goes back to the button that opened it. */
+(function () {
+  var d = document.getElementById('fxlegal'), o = document.getElementById('lbopen');
+  if (!d || !o) return;
+  var modal = typeof d.showModal === 'function';
+  var SEL = 'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
+  function items() { return [].filter.call(d.querySelectorAll(SEL), function (e) { return e.offsetParent !== null; }); }
+  function back() { o.focus(); }
+  function shut() { if (d.close) d.close(); else d.removeAttribute('open'); back(); }
+  o.addEventListener('click', function () {
+    setTimeout(function () { if (d.hasAttribute('open') && !d.contains(document.activeElement)) { var f = items(); if (f[0]) f[0].focus(); } }, 0);
+  });
+  d.addEventListener('close', back);
+  document.addEventListener('keydown', function (e) {
+    if (!d.hasAttribute('open')) return;
+    if (e.key === 'Escape' && !modal) { e.preventDefault(); shut(); return; }
+    if (e.key !== 'Tab') return;
+    var f = items(); if (!f.length) return;
+    var a = document.activeElement, first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (a === first || !d.contains(a))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (a === last || !d.contains(a))) { e.preventDefault(); first.focus(); }
+  });
+})();
+</script>

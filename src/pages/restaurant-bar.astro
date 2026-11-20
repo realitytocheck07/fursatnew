@@ -1,0 +1,60 @@
+---
+import site from '../data/site.json';
+// restaurant-bar.astro — Fursat Bar & Kitchen (P6 restyle: shared ExperienceLayout on the baked plaster stage).
+// Content is the page's existing copy, cocktails, prices and dish photos. Removed per handoff §4: the weekly
+// live-music section (not confirmed) and "reserve instantly" (bookings are requests confirmed on WhatsApp).
+// TODO(client): confirm cocktail descriptions, 'Vegetarian & Jain' wording, kitchen/marinade/charcoal claims. Cocktail names + prices come from drinks.json only.
+import Base from '../layouts/Base.astro';
+import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
+---
+<Base
+  title="Restaurant & Bar — Fursat Kitchen | Bar | Madhapur"
+  description="Fursat's signature restaurant and craft bar. Modern Indian cuisine, handcrafted cocktails and curated spirits in a warm, vibrant setting in Madhapur, Hyderabad."
+  canonical="https://fursatind.in/restaurant-bar/"
+  ogImage="https://fursatind.in/assets/fursat_space_03.webp"
+  ogImageAlt="Fursat Restaurant & Bar — craft cocktails and Indian kitchen"
+>
+  <ExperienceLayout
+    insta="fursatsocialclub"
+    active="restaurant-bar"
+    kicker="Cocktails · Spirits · Kitchen"
+    h1a="The Bar & Kitchen"
+    h1b="at Fursat"
+    lead="Where slow afternoons melt into electric evenings. Cocktails, mocktails and spirits from the bar, and a full kitchen menu from tikkas to biryani."
+    ctas={[
+      { label: 'Reserve a Table', href: '/reserve', primary: true, book: true },
+      { label: 'Signature Cocktails', href: '#cocktails' },
+    ]}
+    hero={{ src: '/assets/interior/bar-front.webp', alt: 'The bar at Fursat Kitchen | Bar', w: 1200, h: 1600, pos: '50% 50%' }}
+    pillars={[
+      { icon: 'cocktail', title: 'Cocktails', line: '25 signature and classic cocktails. 21+.' },
+      { icon: 'flame', title: 'Appetizers', line: '22 starters, from tikkas to kebabs.' },
+      { icon: 'glass', title: 'Mocktails', line: '14 zero-proof mocktails.' },
+      { icon: 'menu', title: 'Biryani & Mains', line: '26 biryani and rice, 18 mains.' },
+      // TODO(client): confirm match screenings / music nights
+      { id: 'social', icon: 'glass', title: 'Social Club', line: 'Cricket on the big screen and music nights.' },
+    ]}
+    momentsA="From the"
+    momentsB="Kitchen"
+    momentsText="Tikkas, regional specials, biryani and mains. Order from the same menu at any table."
+    momentsCta={{ label: 'View Full Food Menu', href: '/menu' }}
+    big={{ src: '/assets/dishes/new/chicken-tikka-angara.webp', alt: 'Chicken Tikka', w: 1067, h: 1600 }}
+    top={{ src: '/assets/dishes/new/guntur-karam-wings.webp', alt: 'Guntur Karam Wings', w: 1138, h: 1600 }}
+    bottom={{ src: '/assets/dishes/new/nalla-karam-kodi-vepudu.webp', alt: 'Nalla Karam Kodi Vepudu', w: 1067, h: 1600 }}
+    cardsId="cocktails"
+    cardsKicker="Artisanal mixology (21+)"
+    cardsTitle="Signature Sips & Spirits"
+    cards={[
+      { tag: 'Silly Classic', name: 'Life Fursat Bhai', price: '₹629', text: 'Vodka, elderflower syrup, apple juice, citric.' },
+      { tag: 'Mocktail', name: 'Fursat Rahasyam', price: '₹299', text: 'Barman Specials. Zero-proof.', img: { src: '/assets/dishes/new/fursat-rahasyam.webp', alt: 'Fursat Rahasyam mocktail' } },
+      { tag: 'The Classic', name: 'Old Fashioned', price: '₹549', text: 'Bourbon whiskey, orange bitters, sugar cube.' },
+      { tag: 'Silly Classic', name: 'Gongura Muchatlu', price: '₹629', text: 'Sorrel leaf with green chilli and vodka.', img: { src: '/assets/dishes/new/gongura-muchatlu.webp', alt: 'Gongura Muchatlu cocktail' } },
+    ]}
+    faqTitle="Frequently Asked Questions"
+    faq={[
+      { q: 'What is the minimum age policy for the bar?', a: 'Alcoholic beverage service is strictly restricted to guests aged 21 and above, as per Telangana excise regulations. Valid government ID may be requested.' },
+      { q: 'Do you take table reservations in advance?', a: `Yes. We recommend requesting a table ahead, especially for weekend dinner slots (Friday to Sunday). We are open ${site.hours.display}. Send a request online or on WhatsApp and we confirm it on WhatsApp.` },
+      { q: 'Are vegetarian options available?', a: 'Yes. The menu has vegetarian dishes including Classic Paneer Tikka, Malai Cheese Broccoli, Dal Makhni and Veg Biryani.' },
+    ]}
+  />
+</Base>

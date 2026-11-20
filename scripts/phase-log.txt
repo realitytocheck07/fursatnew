@@ -1,0 +1,208 @@
+================================================================================
+FURSAT BUILD — PHASE 1 LOG: WOW LAYER
+Date: November 5, 2026
+Status: Phase 1 Completed & Verified
+================================================================================
+
+1. WHAT CHANGED & ARCHITECTURE:
+- src/lib/motion.ts:
+  * Central motion library exporting EASE, SPRING, prefersReducedMotion().
+  * Dynamic GSAP loader (initGSAP) loading ScrollTrigger & SplitText on demand.
+  * Helper functions: splitReveal(), leafWipe(), magneticButton(), cursorLitCard(), counterUp(), initScrollStory().
+  * Animates ONLY transform, opacity, and clip-path.
+
+- public/js/motion-kit.js:
+  * Vanilla IIFE motion script for non-React pages.
+  * Checks prefers-reduced-motion and fine-pointer media queries.
+  * Dynamically loads /js/gsap.min.js.
+  * Powers .mot-headline (SplitText reveal), .mot-reveal-img (leaf clipPath wipe),
+    .mot-magnetic, .mot-card-lit, .mot-counter, .mot-marquee, .mot-parallax-frame.
+
+- src/styles/motion.css:
+  * Micro-interactions: .mot-btn-press (100ms scale), .mot-skeleton (shimmer),
+    .mot-tab-indicator (sliding gold underline), .mot-confetti (5-color burst).
+  * Strict @media (prefers-reduced-motion: reduce) fallback killing transitions/animations.
+  * Linked in src/layouts/Base.astro.
+
+- src/components/SiteHeader.astro:
+  * Dynamic header behavior: shrinks on scroll (>60px), hides on scroll-down (+4px),
+    returns on scroll-up (-4px) and resets near top (<20px).
+  * Added view-transition-name: site-header for cross-page persistence.
+  * Mobile burger drawer and nav integrated.
+
+- src/components/MobileBar.astro:
+  * Fixed bottom mobile navigation (Menu, Ask, Reserve, WhatsApp).
+  * Added view-transition-name: mobile-bar for smooth page transitions.
+
+- src/components/MarqueeStrip.astro:
+  * Pure CSS infinite marquee strip (mq- prefix), pausing on hover and focus-within.
+  * Integrated into Home page (src/pages/index.astro).
+
+- src/components/ScrollStoryHome.astro:
+  * Pinned scroll storytelling table scene.
+  * Primary: CSS scroll-driven animations (animation-timeline: view()).
+  * Fallback: GSAP ScrollTrigger & instant render on prefers-reduced-motion.
+
+- Page Enhancements:
+  * src/pages/index.astro: added .mot-headline, .mot-reveal-img, .mot-card-lit, MarqueeStrip, motion-kit.js.
+  * src/pages/banquet.astro: added .mot-headline, .mot-reveal-img, motion-kit.js.
+  * src/pages/cafe.astro: added .mot-headline, .mot-reveal-img, motion-kit.js.
+  * src/pages/restaurant-bar.astro: added .mot-headline, .mot-reveal-img, motion-kit.js.
+
+- Quality & Audit Tools:
+  * scripts/overflow-check.mjs: Playwright automated overflow checker for 12 routes at
+    360px, 390px, 768px, 1024px, 1280px, 1536px.
+  * scripts/take-screenshots.mjs: Automated multi-viewport screenshot capturer.
+
+================================================================================
+2. FILES CREATED / MODIFIED:
+Created:
+- src/lib/motion.ts
+- public/js/motion-kit.js
+- src/styles/motion.css
+- src/components/MarqueeStrip.astro
+- src/components/ScrollStoryHome.astro
+- scripts/overflow-check.mjs
+- scripts/take-screenshots.mjs
+- scripts/phase-log.txt
+
+Modified:
+- src/layouts/Base.astro
+- src/components/SiteHeader.astro
+- src/components/MobileBar.astro
+- src/pages/index.astro
+- src/pages/banquet.astro
+- src/pages/cafe.astro
+- src/pages/restaurant-bar.astro
+
+================================================================================
+3. VERIFICATION:
+- Production Build: Verified passing (14 routes static output)
+- Overflow Check: Verified across 360, 390, 768, 1024, 1280, 1536
+- Screenshots: Generated at 360, 390, 768, 1280 in review/shots/
+================================================================================
+
+================================================================================
+4. PHASE 1 FOLLOW-UP (STEP 2 IN ORDER OF WORK):
+Date: November 5, 2026 | Status: All 8 Items Passed
+--------------------------------------------------------------------------------
+- Test 1 (JavaScript Off at 390px):
+  * Banquet: Passed (H1 visible, 6 H2s visible, 10 images visible).
+  * Home: Added .ms-chew, .ms-cheer { display: none !important; } in Base.astro noscript.
+    All 31 active images, H1, and 9 H2s verified visible.
+  * Shots saved to review/shots/home-390-nojs.png, banquet-390-nojs.png.
+
+- Test 2 (Keyboard Tab):
+  * Scrolled down 400px: Header reliably hides (.sh-hidden).
+  * Tabbing through triggers :focus-within & focusin, restoring header to view (opacity 1, translateY(0)).
+
+- Test 3 (View Transitions Navigation & #gate):
+  * #gate identified as the first-visit audio/video intro overlay ("Enter Fursat").
+    Dismissed when sessionStorage.fz_seen === '1' or when user clicks gate button.
+  * Navigated Home -> Banquet -> Cafe: headlines, cards, and persistent header re-initialised on astro:page-load.
+
+- Test 4 (Reduced Motion):
+  * In public/js/10.js, added check in play() to prevent hero video autoplay when prefers-reduced-motion is active.
+  * Marquee stopped (none), pinned scene disabled.
+
+- Test 5 (Mobile Bottom Bar Clearance):
+  * Bar height measured: 69px.
+  * In src/components/MobileBar.astro, updated body padding-bottom to calc(76px + env(safe-area-inset-bottom, 0px)) !important.
+  * Full clearance verified; sticky button hidden on mobile.
+
+- Test 6 (JS Transferred per Page):
+  * Home: 2.7 KB HTML + 208 KB modular scripts + 10.6 KB motion-kit. GSAP on demand.
+  * Banquet: 10.6 KB motion-kit.
+  * Menu: Static HTML menu rendered; 3D and GSAP isolated.
+
+- Test 7 (Core Web Vitals Snapshot):
+  * Home: CLS: 0, LCP: 404ms.
+  * Banquet: CLS: 0, LCP: 392ms.
+
+- Test 8 (Micro-interactions Usage & Overflow Check):
+  * .mot-tab-indicator applied to events.astro and menu.astro category tabs.
+  * .mot-skeleton & .mot-confetti applied to reserve.astro.
+  * .mot-headline & .mot-card-lit applied to menu.astro and ask.astro.
+  * Overflow check: 72/72 viewports (12 routes x 6 widths) passed with 0 overflow.
+================================================================================
+
+
+================================================================================
+5. PHASE 1 DETAILED AUDIT VERIFICATION (ALL 5 ASSIGNED TASKS):
+Date: November 5, 2026 | Status: Complete
+--------------------------------------------------------------------------------
+1. Real Lighthouse Mobile (v13.6.0 via Chrome Headless & Default Mobile Throttling):
+   - Home (/):
+     * Performance: 72 | Accessibility: 91 | Best Practices: 96 | SEO: 100
+     * LCP: 4.1s | CLS: 0 | TBT: 410ms | FCP: 1.6s | Speed Index: 5.1s
+   - Banquet (/banquet):
+     * Performance: 74 | Accessibility: 98 | Best Practices: 100 | SEO: 100
+     * LCP: 18.2s (uncompressed 596 KB hero image without art direction) | CLS: 0 | TBT: 110ms | FCP: 1.5s | Speed Index: 1.8s
+   - Output: review/lighthouse-home.json, review/lighthouse-banquet.json
+
+2. Gzipped JS Size Per Page vs 120 KB Budget:
+   - Banquet (/banquet): 30.19 KB gzip (PASS, under budget). Loads GSAP on-demand.
+   - Menu (/menu): 30.19 KB gzip (PASS, under budget). Loads GSAP on-demand.
+   - Cafe (/cafe): 30.19 KB gzip (PASS, under budget). Loads GSAP on-demand.
+   - Home (/): 153.40 KB gzip (FAIL, exceeds 120 KB by 33.4 KB due to modular legacy scripts 78.5 KB gz + TableSpread 44.8 KB gz).
+   - GSAP isolation verified: only loaded on pages containing .mot-headline or .mot-reveal-img.
+   - Output: review/js-budget-report.json
+
+3. Micro-interactions Usage & Enhancements:
+   - .mot-tab-indicator: events.astro, menu.astro, reserve.astro.
+   - .mot-confetti: reserve.astro (scratch card + wired to #res-submit-btn on booking success).
+   - .mot-skeleton: reserve.astro (date-change slot shimmer), parties.astro (package card placeholders), public/js/ask.js (search result placeholders).
+
+4. Overflow Check on All 14 Routes:
+   - 84 of 84 viewports passed (14 routes x 6 widths: 360, 390, 768, 1024, 1280, 1536px) with 0 overflow.
+   - Extra routes identified:
+     * /parties (legacy vanilla JS packages estimator with /data/packages.json)
+     * /party (modern 3D Three.js PartyStage canvas with src/data/party.json)
+   - Recommendation: Keep /party as canonical and 301 redirect /parties -> /party.
+
+5. #gate vs Mobile Bottom Bar & Non-Home Entry:
+   - #gate z-index is 80; mobile bottom bar (.mb-bar) z-index is 9000.
+   - elementFromPoint at (195, 810) touches .mb-item inside .mb-bar (hitInsideBar: true, hitInsideGate: false).
+   - #gate does not overlay or block mobile bar taps.
+   - #gate does not appear on non-Home entry pages (Banquet tested: gatePresent = false).
+   - Output: review/shots/gate-390-home.png, review/shots/gate-390-banquet.png, review/gate-check-results.json
+================================================================================
+
+
+================================================================================
+6. PHASE 1 FOLLOW-UP / STEP 3 RECOVERY AUDIT:
+Date: November 5, 2026 | Status: Verified & Committed
+--------------------------------------------------------------------------------
+1. Git & Workspace Reconciliation:
+   - Recovered uncommitted state after session interruption:
+     * 720w interior crops generated and linked via responsive srcset
+     * Hero and heli video preloading deferred on phone viewport
+     * Mascot offer modal thumbnail optimized with ask-mascot-sm.webp
+     * Mobile budget script updated to 14 routes
+   - Committed working increments cleanly to master.
+
+2. Build & Route Verification:
+   - npm.cmd run build executed: Exit Code 0, 14 routes built statically.
+   - Preview server verified running on port 4321.
+
+3. Home 390px JS On vs JS Off Screenshot Verification:
+   - JS ON: H1 visible ("Something Beautiful Is Taking Shape."), TableSpread visible (5 cards), 39 visible active images, 0 broken.
+   - JS OFF: H1 visible, TableSpread visible, 41 visible active images, 0 broken.
+   - Saved screenshots: review/shots/home-390-json-*.png, home-390-jsoff-*.png.
+
+4. Mobile Budget & Overflow on All 14 Routes:
+   - 14/14 routes passed mobile performance budget (all non-3D <= 35.6 KB gz; Home 108.8 KB gz).
+   - 84/84 viewports (14 routes x 6 widths) passed horizontal overflow check (0 overflows).
+
+5. Banquet Hero & LCP Audit:
+   - Hero Element: section.bq-hero picture img (fursat_space_18-m720.webp)
+   - Sizes: fursat_space_18-m480.webp (57.86 KB), fursat_space_18-m720.webp (104.16 KB), both 4:5 aspect ratio (under 150 KB target).
+   - Banquet LCP reduced from 18.2 s to 3.9 s.
+
+6. Lighthouse Mobile Comparison (Before vs After):
+   - Home: Performance 72 -> 54 | A11y 91 -> 96 (PASS) | Best Practices 96 | SEO 100 | LCP 4.1s -> 11.1s (1.5s observed) | CLS 0 -> 0.002 | TBT 410ms -> 520ms | JS 153 KB gz -> 108.78 KB gz (PASS)
+   - Banquet: Performance 74 -> 87 (+13) | A11y 98 -> 100 | Best Practices 100 | SEO 100 | LCP 18.2s -> 3.9s (-14.3s) | CLS 0 -> 0 | TBT 110ms -> 0ms | JS 30.19 KB gz (PASS)
+
+7. Step 2 Gate Status:
+   - Stays UNTICKED: Performance (87/54 vs 90+ target) and LCP (3.9s/11.1s vs < 2.5s target) require further reduction.
+================================================================================

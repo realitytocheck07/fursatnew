@@ -1,0 +1,60 @@
+---
+// /menu Phase 3: "The Table" (v5.39). Cut-out dishes fall from the top of the screen onto the new plate-free table scene, scrubbed by the pinned scroll.
+// Place it directly after <MenuDoors />. table-landing.ts drives it: one scroll-linked rAF loop, transform + opacity only.
+// Names and prices come from menu-table.json (the table ring, via food.json). No script or reduced motion: the dishes are already on the table.
+import '../../styles/table-landing.css';
+interface Dish { title: string; label: string; price: string; dn: string; sm: string; clip: string }
+interface Props { dishes: Dish[]; count?: number; max?: number }
+const { dishes, count, max = 5 } = Astro.props;
+
+// The 5 cut-outs (public/assets/menu/table/), left to right on desktop. Phones show 3: biryani, tikka angara, cheesecake (`phone`).
+const CUT: Record<string, { f: string; w: number; h: number; phone: boolean }> = {
+  'Ustad Special Nalli Gosht Biryani': { f: 'nalli-gosht-biryani-half', w: 900, h: 849, phone: true },
+  'Guntur Karam Wings': { f: 'guntur-karam-wings', w: 900, h: 639, phone: false },
+  'Angara Chicken Tikka': { f: 'chicken-tikka-angara', w: 900, h: 518, phone: true },
+  'Nalla Karam Kodi Vepudu': { f: 'nalla-karam-kodi-vepudu', w: 900, h: 484, phone: false },
+  'Biscoff Cheesecake': { f: 'biscoff-cheesecake', w: 900, h: 758, phone: true },
+};
+const list: Dish[] = Object.keys(CUT).map((t) => dishes.find((d) => d.title === t)).filter((d): d is Dish => !!d).slice(0, max);
+if (list.length < 3) throw new Error('TableLanding: needs the table dishes (food.json titles changed?)');
+const IMG = '/assets/menu/table/';
+---
+<section class="tl" id="tl" aria-labelledby="tl-title" data-fab-avoid>
+  <div class="tl-stage" id="tl-stage">
+    <div class="tl-bg" aria-hidden="true">
+      <picture>
+        <source media="(min-width: 821px)" srcset={`${IMG}table-bg-wide-1100.webp 1100w, ${IMG}table-bg-wide-1602.webp 1602w`} sizes="100vw" width="1602" height="981" />
+        <img src={`${IMG}table-bg-tall-640.webp`} srcset={`${IMG}table-bg-tall-640.webp 640w, ${IMG}table-bg-tall-941.webp 941w`} sizes="100vw" width="941" height="1671" alt="" loading="lazy" decoding="async" />
+      </picture>
+      <span class="tl-shade"></span>
+    </div>
+
+    <div class="tl-head">
+      <span class="tl-eyebrow">The Table</span>
+      <h2 class="tl-hl" id="tl-title">Pull up a chair. <span>Dinner’s landing.</span></h2>
+      {count ? <p class="tl-sub num">{count} dishes on the menu</p> : null}
+    </div>
+
+    <!-- the dishes: decorative here, the names live in the list below -->
+    <ul class="tl-spots" id="tl-spots" aria-hidden="true">
+      {list.map((d, i) => { const c = CUT[d.title]; return (
+        <li class="tl-spot" style={`--i:${i};--ar:${c.w / c.h}`} data-title={d.title} data-phone={c.phone ? '1' : '0'}>
+          <span class="tl-shadow"></span>
+          <span class="tl-plate"><img src={`${IMG}${c.f}-480.webp`} srcset={`${IMG}${c.f}-480.webp 480w, ${IMG}${c.f}-900.webp 900w`} sizes="(max-width: 820px) 40vw, 20vw" width={c.w} height={c.h} alt="" loading="lazy" decoding="async" draggable="false" /></span>
+          <span class="tl-label"><b>{d.title}</b><span class="num">{d.price} · {d.label}</span></span>
+        </li>
+      ); })}
+    </ul>
+    <ul class="tl-legend" aria-label="Dishes on the table">
+      {list.map((d) => (<li data-phone={CUT[d.title].phone ? '1' : '0'}><b>{d.title}</b> <span class="num">{d.price}</span></li>))}
+    </ul>
+
+    <div class="tl-cta">
+      <button class="tl-btn" type="button" data-side-go="food">Full food menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<script>
+  import './table-landing';
+</script>

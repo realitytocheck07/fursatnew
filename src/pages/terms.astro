@@ -1,0 +1,177 @@
+---
+// terms.astro - Fursat House Rules, Privacy & Cancellation Policy
+// TODO(client): confirm the grace period, the 2-hour reschedule notice, the 7-day refund window and the administrative fee. Kept as the owner decided.
+import Base from '../layouts/Base.astro';
+import '../styles/fk-tokens.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import MobileBar from '../components/MobileBar.astro';
+---
+<Base
+  title="Terms & Conditions — Fursat Kitchen | Bar"
+  description="Terms and conditions, privacy policy, FSSAI compliance, and booking policies for Fursat Kitchen | Bar, Madhapur, Hyderabad."
+  canonical="https://fursatind.in/terms/"
+>
+  <SiteHeader active="terms" variant="plaster" />
+
+  <main class="tr-page" id="main">
+    <div class="tr-container">
+      <div class="tr-doc-card">
+        <span class="tr-kicker">LEGAL & POLICIES</span>
+        <h1 class="fk-ty-h2 tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
+        <p class="tr-updated">Last Updated: November 2026</p>
+        <nav class="tr-jump" aria-label="On this page"><a href="#rules">House rules</a><a href="#privacy">Privacy</a><a href="#refund">Cancellation &amp; refunds</a></nav>
+
+        <!-- TODO(client): offer terms section (FURSAT15 / 15%) removed until the client confirms the offer; restore from git history (v5.17) if confirmed. -->
+        <!-- Section 2: House Rules -->
+        <section class="tr-section" id="rules">
+          <h2 class="fk-ty-h3">1. House Rules & Admission Policy</h2>
+          <ul>
+            <li>
+              <b>Age Policy for Bar:</b> Alcohol service is strictly restricted to guests aged 21 and above. Valid government-issued photo ID may be requested.
+            </li>
+            <li>
+              <b>Table Holding:</b> Reserved tables are held for a short grace period past the confirmed reservation time. <!-- TODO(client): confirm grace period (20 minutes was a placeholder) --> In case of delay, please inform our reception at +91 90596 70033.
+            </li>
+            <li>
+              <b>Dress Code:</b> Smart casual dining attire is encouraged. Management reserves the right of admission.
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 3: Privacy Policy -->
+        <section class="tr-section" id="privacy">
+          <h2 class="fk-ty-h3">2. Privacy Policy</h2>
+          <p>
+            At Fursat Kitchen | Bar (operated by Sriven Hospitality), we respect your privacy:
+          </p>
+          <ul>
+            <li>
+              <b>Information We Collect:</b> When you reserve a table or send a banquet, party or catering enquiry, we collect your name, phone number and preferences. <!-- TODO(client): confirm what is collected and kept -->
+            </li>
+            <li>
+              <b>How We Use It:</b> We use this data solely to confirm table reservations, communicate updates regarding your booking via SMS/WhatsApp, and coordinate event proposals.
+            </li>
+            <li>
+              <b>No Third-Party Sharing:</b> We never sell, rent, or trade your personal contact details to external marketing agencies or brokers.
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 4: Cancellation & Refund -->
+        <section class="tr-section" id="refund">
+          <h2 class="fk-ty-h3">3. Cancellation &amp; Refunds</h2>
+          <ul>
+            <li>
+              <b>A-la-carte Dining:</b> No cancellation fee is charged for regular table reservations. We kindly request at least 2 hours notice if you need to reschedule. <!-- TODO(client): confirm the 2-hour notice -->
+            </li>
+            <li>
+              <b>Banquet & Private Events:</b> Advance deposits for banquet dates are refundable up to 7 days prior to the scheduled event date, subject to an administrative fee. <!-- TODO(client): confirm refund window (7 days) and fee (10% was a placeholder) -->
+            </li>
+          </ul>
+        </section>
+
+        <!-- Contact Box -->
+        <div class="tr-contact-box">
+          <p>
+            For any clarifications regarding our terms or reservations, contact us at:
+            <br />
+            <b>Fursat Kitchen | Bar</b> · Capital Park, Madhapur, Hyderabad · <a href="mailto:hello@fursatind.in">hello@fursatind.in</a> · +91 90596 70033
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <SiteFooter />
+<MobileBar active="" />
+<script is:inline src="/js/motion-kit.js"></script>
+</Base>
+
+<style is:global>
+  .tr-page {
+    background: transparent;
+    color: #1f2a1a;
+    padding: clamp(50px, 7vw, 90px) 0;
+    font-family:var(--fk-sans)}
+  .tr-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 40px)}
+  .tr-doc-card {
+    background: #efd8b8;
+    border: 1.5px solid rgba(201,154,67,0.55);
+    border-radius: 28px;
+    padding: clamp(28px, 5vw, 56px);
+    box-shadow: 0 20px 60px rgba(90,60,20,0.22)}
+  .tr-kicker {
+    font-size: 0.8125rem;
+    font-weight:600;
+    letter-spacing: 0.16em;
+    color: #74501a;
+    display: block;
+    margin-bottom: 8px}
+  .tr-title {
+    color: #1f2a1a;
+    margin: 0 0 8px}
+  .tr-updated {
+    font-size: 0.85rem;
+    color: #4a4232;
+    margin: 0 0 36px;
+    border-bottom: 1px solid rgba(122,78,24,.18);
+    padding-bottom: 16px}
+  .tr-section {
+    margin-bottom: 36px}
+  .tr-section h2 {
+    color: #74501a;
+    margin: 0 0 14px}
+  .tr-section p {
+    font-size: 0.95rem;
+    color: #4a4232;
+    line-height: 1.6;
+    margin: 0 0 12px}
+  .tr-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px}
+  .tr-section li {
+    font-size: 0.9375rem;
+    color: #4a4232;
+    line-height: 1.55;
+    padding-left: 20px;
+    position: relative}
+  .tr-section li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: #74501a;
+    font-size: 0.8rem;
+    top: 2px}
+  .tr-section b {
+    color: #1f2a1a}
+  .tr-section code {
+    background: rgba(214,170,90,0.26);
+    color: #7a3a10;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700}
+  .tr-contact-box {
+    margin-top: 40px;
+    padding: 20px;
+    background: rgba(214,170,90,0.14);
+    border: 1px dashed rgba(201,154,67,0.60);
+    border-radius: 16px;
+    font-size: 0.9rem;
+    color: #4a4232;
+    line-height: 1.6}
+  .tr-contact-box a {
+    display: inline-block;
+    padding: 12px 0;
+    color: #74501a}
+  .tr-section { scroll-margin-top: calc(var(--sh-h, 78px) + 16px)}
+  .tr-jump { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: -20px 0 28px}
+  .tr-jump a { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.9rem; font-weight: 600; color: #74501a}
+</style>

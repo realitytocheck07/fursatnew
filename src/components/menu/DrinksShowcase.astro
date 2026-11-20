@@ -1,0 +1,54 @@
+---
+// Start of the Drinks side of /menu: red elephant mark, bar photo, swipe rail of real drink photos, category pills.
+// Rail cards are not [data-row], so the search and the live count ignore them; their Add buttons use the same [data-add] hooks.
+import { DRINK_GROUPS, GROUP_ICONS } from './menuGroups';
+import { money } from './cart';
+interface Photo { fit: string; icon: string; name: string; section: string; price: number | null; sm: string; w: number; h: number; attrs: Record<string, string> }
+interface Props { photos: Photo[]; count: number; sections: number; bar: { image: string; alt: string } }
+const { photos, count, sections, bar } = Astro.props as Props;
+---
+<section class="dk" aria-labelledby="dk-h">
+  <div class="dk-hero">
+    <img class="dk-bg" src={bar.image} alt="" width="1400" height="1074" loading="lazy" decoding="async" />
+    <div class="dk-veil" aria-hidden="true"></div>
+    <span class="dk-ghost" aria-hidden="true">BAR</span>
+    <div class="dk-copy fk-reveal">
+      <svg class="dk-el" viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="22" cy="58" rx="20" ry="26"/><ellipse cx="98" cy="58" rx="20" ry="26"/><circle cx="60" cy="62" r="34"/><path d="M60 74c0 16-2 26 8 32" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"/><path d="M38 36l7-16 8 10 7-14 7 14 8-10 7 16z"/><rect class="dk-cut" x="36" y="52" width="20" height="13" rx="6"/><rect class="dk-cut" x="64" y="52" width="20" height="13" rx="6"/><path class="dk-cut" d="M56 57h8" stroke-width="3"/></svg>
+      <p class="dk-kicker">Fursat Bar</p>
+      <h2 class="dk-h" id="dk-h">The Bar</h2>
+      <p class="dk-sub"><span class="num">{count}</span> drinks across <span class="num">{sections}</span> sections: cocktails, whisky, wine, mocktails, shakes and coffee.</p>
+    </div>
+  </div>
+
+  {photos.length > 0 && (
+    <div class="dk-rail-wrap">
+      <p class="dk-rail-h">From the bar <span aria-hidden="true">→</span></p>
+      <ul class="dk-rail fk-rail" role="list" aria-label="Drinks with photos">
+        {photos.map((p) => (
+          <li class="dk-card"><div class="dk-in">
+            <div class="dk-ph"><img class="fk-fit" src={p.sm} alt={p.name} width={Math.round(480 * p.w / p.h)} height="480" loading="lazy" decoding="async" style={p.fit} /><span class="dk-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={p.icon} /></svg></span></div>
+            <div class="dk-card-b">
+              <p class="dk-card-s">{p.section}</p>
+              <h3 class="dk-card-n">{p.name}</h3>
+              <div class="dk-card-r">
+                <span class="dk-price num">{p.price != null ? money(p.price) : ''}</span>
+                {p.price != null && <button class="dk-add mv-add" type="button" aria-pressed="false" aria-label={`Add ${p.name} to picks`} {...p.attrs} data-img={p.sm}><span class="mv-add-t" aria-hidden="true">+ Add</span></button>}
+              </div>
+            </div>
+          </div></li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  <nav class="dk-cats" aria-label="Drink categories">
+    <ul class="dk-cats-rail" role="list"><span class="dk-blob" aria-hidden="true"></span>
+      {DRINK_GROUPS.map((g) => (
+        <li><button class="dk-cat" type="button" data-go={g.id} data-side-of="drinks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={GROUP_ICONS[g.id]} /></svg>
+          <span>{g.label}</span>
+        </button></li>
+      ))}
+    </ul>
+  </nav>
+</section>

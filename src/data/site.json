@@ -1,0 +1,47 @@
+{
+  "name": "Fursat Kitchen | Bar",
+  "tagline": "Your Fursat, Served.",
+  "shortName": "Fursat",
+  "domain": "https://fursatind.in",
+  "phone": "+91 90596 70033",
+  "phonePlain": "919059670033",
+  "whatsapp": "919059670033",
+  "order": { "swiggy": "https://www.swiggy.com/menu/1127487", "zomato": "https://zomato.onelink.me/xqzv/tu94x96v", "dotpe": "https://fursat.dotpe.in/", "pickup": false },
+  "rista": { "live": false },
+  "forms": { "restaurant": "df9a716d-4f53-4f0c-8459-e0aa4899e20d", "events": "b44ccfa2-178a-4ae4-a1d3-949ede2d4daa" },
+  "email": "TODO(client)@fursatind.in",
+  "address": {
+    "line1": "TODO(client): Unit number, Capital Park",
+    "line2": "Madhapur, Hyderabad",
+    "state": "Telangana",
+    "pin": "500081",
+    "googleMaps": "https://maps.google.com/?q=Fursat+Kitchen+Bar+Madhapur+Hyderabad",
+    "embed": "TODO(client): Google Maps embed URL"
+  },
+  "hours": {
+    "open": "12:00",
+    "schedule": [
+      { "days": "Sun–Thu", "open": "12 PM", "close": "12 AM", "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "12:00", "closes": "24:00" },
+      { "days": "Fri–Sat", "open": "12 PM", "close": "1 AM", "dayOfWeek": ["Friday", "Saturday"], "opens": "12:00", "closes": "01:00" }
+    ],
+    "display": "Sun–Thu 12 PM – 12 AM · Fri–Sat 12 PM – 1 AM"
+  },
+  "legal": {
+    "name": "Sriven Hospitality",
+    "gstin": "36AEYFS6455D1ZE",
+    "fssai": "13623013000820",
+    "cin": "TODO(client): CIN if applicable",
+    "type": "Partnership firm",
+    "registeredOffice": "Shop No. G1, H.No. 1-98/4/1, Jain Sadguru Images Capital Park, Image Gardens Road, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081",
+    "fssaiNote": "State licence, valid up to 02 June 2027"
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/fursatind.in/",
+    "youtube": "TODO(client)"
+  },
+  "og": {
+    "image": "/og-home.jpg",
+    "width": 1200,
+    "height": 630
+  }
+}

@@ -1,0 +1,210 @@
+---
+// WaAgent: floating WhatsApp button on every page (hangs and sways gently) that opens a small chat "agent":
+// greets the guest, asks name + phone, then offers the main routes (Ask Fursat, table, party, banquet, catering, order, menu).
+// Bookings can open the page or send the details to Fursat on WhatsApp. No server: name/phone live in sessionStorage
+// for this visit only and are used only inside the WhatsApp message the guest chooses to send.
+// Motion: transform/opacity only, ease-out, under 300 ms, staggered 50 ms. Reduced motion: no sway, no slides.
+import site from '../data/site.json';
+const wa = site.whatsapp;
+---
+<div class="waf" data-waf data-wa={wa}>
+  <button class="waf-fab" type="button" aria-label="Chat with Fursat" aria-expanded="false" aria-controls="waf-panel">
+    <span class="waf-ic" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </span>
+    <span class="waf-dot" aria-hidden="true"></span>
+  </button>
+  <span class="waf-tease" aria-hidden="true">Hi 👋 Vibe with us</span>
+  <section class="waf-panel" id="waf-panel" role="dialog" aria-modal="false" aria-labelledby="waf-t" hidden>
+    <header class="waf-h">
+      <img class="waf-av" src="/assets/ask-mascot-sm.webp" alt="" width="44" height="44" decoding="async" loading="lazy" />
+      <div class="waf-hd">
+        <h2 id="waf-t">Fursat Kitchen | Bar</h2>
+        <p><i class="waf-on" aria-hidden="true"></i>Online · we reply on WhatsApp</p>
+      </div>
+      <button class="waf-x" type="button" aria-label="Close chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </header>
+    <div class="waf-log" aria-live="polite"></div>
+  </section>
+</div>
+
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-waf]');
+  if (!root) return;
+  const WA = root.dataset.wa;
+  const fab = root.querySelector('.waf-fab'), panel = root.querySelector('.waf-panel'), log = root.querySelector('.waf-log'), tease = root.querySelector('.waf-tease');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const IC = {
+    ask: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+    reserve: '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    party: '<path d="M4 20l5-12 7 7z"/><path d="M13 5l1-2M17 8l2-1M16 3.5v.01M20 11v.01"/>',
+    banquet: '<path d="M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6"/>',
+    catering: '<path d="M4 15a8 8 0 0116 0z"/><path d="M3 19h18M12 7V5"/>',
+    order: '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/>',
+    menu: '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 8h7M8 12h7"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+  };
+  const ico = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + IC[k] + '</svg>';
+  const ROUTES = [
+    { k: 'ask', t: 'Ask Fursat', s: 'What to eat or drink', href: '/ask' },
+    { k: 'reserve', t: 'Reserve a table', s: 'Dinner, drinks, brunch', href: '/reserve', wa: 'reserve a table', book: 1 },
+    { k: 'party', t: 'Plan a party', s: 'Birthdays, kitty, corporate', href: '/party', wa: 'plan a party', book: 1 },
+    { k: 'banquet', t: 'Banquet booking', s: 'Hall for events', href: '/banquet', wa: 'book the banquet', book: 1 },
+    { k: 'catering', t: 'Catering and buffet', s: 'Biryani for a group', href: '/catering', wa: 'plan catering', book: 1 },
+    { k: 'order', t: 'Order online', s: 'Swiggy and Zomato', href: '/order' },
+    { k: 'menu', t: 'See the menu', s: 'Food, bar and cafe', href: '/menu' }
+  ];
+  let lead = null; try { lead = JSON.parse(store('fk-wa-lead') || 'null'); } catch (e) {}
+  let n = 0, started = false, open = false, closeT = 0;
+
+  const link = (about) => {
+    const who = lead ? "I'm " + lead.name + ' (+91 ' + lead.phone + '). ' : '';
+    const msg = 'Hi Fursat! ' + who + (about ? "I'd like to " + about + '.' : 'I have a question.');
+    return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg) + '&utm_source=website&utm_medium=chat_widget&utm_campaign=whatsapp';
+  };
+  const add = (html, cls) => {
+    const d = document.createElement('div'); d.className = 'waf-m ' + cls; d.style.setProperty('--i', Math.min(n++, 8)); d.innerHTML = html; log.appendChild(d);
+    log.scrollTo({ top: log.scrollHeight, behavior: reduce.matches ? 'auto' : 'smooth' }); return d;
+  };
+  const bot = (t) => add(t, 'waf-b');
+  const me = (t) => add(esc(t), 'waf-u');
+  const waBtn = (about, label) => '<a class="waf-wa" href="' + link(about) + '" target="_blank" rel="noopener">' + label + '</a>';
+
+  const showMenu = () => {
+    const html = '<ul class="waf-menu">' + ROUTES.map((r, i) =>
+      '<li style="--j:' + i + '"><' + (r.book ? 'button type="button" data-k="' + r.k + '"' : 'a href="' + r.href + '"') + ' class="waf-opt">' +
+      '<span class="waf-oi">' + ico(r.k) + '</span><span class="waf-ot"><b>' + r.t + '</b><small>' + r.s + '</small></span><span class="waf-oa">' + ico('arrow') + '</span></' + (r.book ? 'button' : 'a') + '></li>').join('') + '</ul>' +
+      waBtn('', 'Chat on WhatsApp');
+    const d = add(html, 'waf-c');
+    d.querySelectorAll('button[data-k]').forEach((b) => b.addEventListener('click', () => {
+      const r = ROUTES.find((x) => x.k === b.dataset.k);
+      me(r.t);
+      setTimeout(() => {
+        bot('Lovely. I can open the page for you, or send your details to our team on WhatsApp so they confirm it personally.');
+        add('<a class="waf-pg" href="' + r.href + '">Open page ' + ico('arrow') + '</a>' + waBtn(r.wa, 'Send on WhatsApp'), 'waf-c waf-row');
+      }, reduce.matches ? 0 : 260);
+    }));
+  };
+  const askLead = () => {
+    const d = add('<form class="waf-form" novalidate><label>Your name<input name="n" type="text" autocomplete="name" maxlength="40" required></label>' +
+      '<label>Phone number<span class="waf-ph"><span class="waf-pre">+91</span><input name="p" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12" placeholder="10-digit mobile" required></span></label>' +
+      '<p class="waf-err" role="alert"></p><button class="waf-go" type="submit">Start chat</button><a class="waf-skip" href="' + link('') + '" target="_blank" rel="noopener">Skip, open WhatsApp</a>' +
+      '<p class="waf-note">Used only to message you on WhatsApp. Not saved on our servers.</p></form>', 'waf-c');
+    const f = d.querySelector('form'), err = f.querySelector('.waf-err');
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = f.elements.n.value.trim().replace(/\s+/g, ' ');
+      let ph = f.elements.p.value.replace(/\D/g, ''); if (ph.length === 12 && ph.startsWith('91')) ph = ph.slice(2); if (ph.length === 11 && ph[0] === '0') ph = ph.slice(1);
+      if (name.length < 2) { err.textContent = 'Please tell us your name.'; f.elements.n.focus(); return; }
+      if (!/^[6-9]\d{9}$/.test(ph)) { err.textContent = 'Please enter a 10-digit mobile number.'; f.elements.p.focus(); return; }
+      lead = { name, phone: ph }; store('fk-wa-lead', JSON.stringify(lead));
+      f.remove(); d.remove();
+      me("I'm " + name);
+      setTimeout(() => { bot('Nice to meet you, ' + esc(name) + ' 👋 What would you like to do?'); setTimeout(showMenu, reduce.matches ? 0 : 200); }, reduce.matches ? 0 : 260);
+    });
+    return f;
+  };
+  const start = () => {
+    if (started) return; started = true;
+    bot('Hi, welcome to <b>Fursat</b> 👋');
+    setTimeout(() => bot('Vibe with us. Tell us who you are and we will take care of the rest.'), reduce.matches ? 0 : 320);
+    if (lead) { setTimeout(() => { bot('Good to see you, ' + esc(lead.name) + '. What would you like to do?'); setTimeout(showMenu, reduce.matches ? 0 : 200); }, reduce.matches ? 0 : 640); }
+    else setTimeout(askLead, reduce.matches ? 0 : 640);
+  };
+
+  const setOpen = (v) => {
+    open = v; clearTimeout(closeT); fab.setAttribute('aria-expanded', v); root.classList.toggle('is-open', v);
+    if (v) {
+      panel.hidden = false; void panel.offsetWidth; panel.classList.add('is-on'); store('fk-wa-teased', '1'); tease.classList.remove('is-on'); start();
+      setTimeout(() => { const t = panel.querySelector('input,button.waf-opt,a.waf-opt,.waf-x'); if (t) t.focus({ preventScroll: true }); }, reduce.matches ? 0 : 260);
+    } else {
+      panel.classList.remove('is-on'); closeT = setTimeout(() => { panel.hidden = true; }, reduce.matches ? 0 : 220); fab.focus({ preventScroll: true });
+    }
+  };
+  fab.addEventListener('click', () => setOpen(!open));
+  panel.querySelector('.waf-x').addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { e.preventDefault(); setOpen(false); } });
+  // one small greeting per visit, a few seconds after the page settles (not on Home during the intro)
+  if (!store('fk-wa-teased') && !reduce.matches) setTimeout(() => { if (!open && !document.documentElement.classList.contains('lock')) { tease.classList.add('is-on'); setTimeout(() => tease.classList.remove('is-on'), 5200); } }, 6000);
+})();
+</script>
+
+<style is:global>
+.waf { --waf-g1: #1f4129; --waf-g2: #13301d; --waf-gold: #f3c56b; --waf-cream: #fcf7f0; --waf-ink: #2b2416; --waf-ease: cubic-bezier(.23, 1, .32, 1); }
+html.lock .waf { display: none; }
+.waf-fab { position: fixed; z-index: 8600; right: 12px; bottom: calc(142px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: #fff; background: linear-gradient(180deg, #22b45a 0%, #128c4a 100%); box-shadow: 0 14px 28px -12px rgb(10 60 30 / .7), inset 0 0 0 2px rgb(243 197 107 / .55); touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 160ms var(--waf-ease); }
+.waf-ic { display: grid; place-items: center; width: 28px; height: 28px; transform-origin: 50% 12%; animation: waf-sway 4.2s cubic-bezier(.77, 0, .175, 1) infinite; }
+.waf-ic svg { width: 28px; height: 28px; }
+.waf-fab:hover .waf-ic, .waf-fab:focus-visible .waf-ic, .waf.is-open .waf-ic { animation: none; }
+.waf-fab:active { transform: scale(.96); }
+.waf-fab:focus-visible { outline: 3px solid var(--waf-gold); outline-offset: 3px; }
+.waf-dot { position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: #c0291f; border: 2px solid #fff; }
+.waf.is-open .waf-dot { display: none; }
+@keyframes waf-sway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+.waf-tease { position: fixed; z-index: 8600; right: 72px; bottom: calc(150px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); padding: 9px 14px; border-radius: 14px 14px 4px 14px; background: var(--waf-cream); color: var(--waf-ink); font: 500 14px/1.3 Poppins, system-ui, sans-serif; box-shadow: 0 10px 24px -12px rgb(10 30 18 / .5), inset 0 0 0 1px rgb(201 154 67 / .55); opacity: 0; transform: translateX(10px); pointer-events: none; transition: opacity 200ms var(--waf-ease), transform 200ms var(--waf-ease); white-space: nowrap; }
+.waf-tease.is-on { opacity: 1; transform: none; }
+.waf-panel { position: fixed; z-index: 9200; right: 12px; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-height: min(78svh, 640px); display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: var(--waf-cream); color: var(--waf-ink); box-shadow: 0 30px 60px -20px rgb(10 30 18 / .6), 0 0 0 1px rgb(201 154 67 / .6); opacity: 0; transform: translateY(14px) scale(.98); transform-origin: 100% 100%; transition: opacity 220ms var(--waf-ease), transform 220ms var(--waf-ease); font: 400 15px/1.5 Poppins, system-ui, sans-serif; }
+.waf-panel[hidden] { display: none; }
+.waf-panel.is-on { opacity: 1; transform: none; }
+.waf-h { display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; background: linear-gradient(180deg, var(--waf-g1) 0%, var(--waf-g2) 100%); color: #f6ecd8; box-shadow: inset 0 -1px 0 rgb(243 197 107 / .45); }
+.waf-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #f6e4c9; box-shadow: 0 0 0 2px rgb(243 197 107 / .7); }
+.waf-hd { min-width: 0; flex: 1; }
+.waf-hd h2 { margin: 0; font: 500 1.15rem/1.2 "Playfair Display", Georgia, serif; letter-spacing: -.005em; color: #fff7e6; }
+.waf-hd p { margin: 2px 0 0; display: flex; align-items: center; gap: 6px; font: 400 .8125rem/1.3 Poppins, system-ui, sans-serif; color: #d9c9a6; }
+.waf-on { width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; flex: none; }
+.waf-x { width: 44px; height: 44px; margin: -6px -4px -6px 0; border: 0; border-radius: 50%; background: none; color: #f6ecd8; display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
+.waf-x svg { width: 20px; height: 20px; }
+.waf-x:hover { background: rgb(255 255 255 / .1); }
+.waf-x:focus-visible, .waf-opt:focus-visible, .waf-go:focus-visible, .waf-wa:focus-visible, .waf-pg:focus-visible, .waf-skip:focus-visible, .waf-form input:focus-visible { outline: 2px solid #c99a43; outline-offset: 2px; }
+.waf-log { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 14px 18px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+.waf-m { max-width: 92%; animation: waf-in 240ms var(--waf-ease) both; animation-delay: calc(var(--i, 0) * 50ms); }
+@keyframes waf-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.waf-b { align-self: flex-start; padding: 10px 14px; border-radius: 4px 18px 18px 18px; background: #fff; box-shadow: 0 6px 14px -10px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .35); text-wrap: pretty; }
+.waf-b b { font-weight: 600; color: #1b3a26; }
+.waf-u { align-self: flex-end; padding: 10px 14px; border-radius: 18px 18px 4px 18px; background: linear-gradient(180deg, var(--waf-g1), var(--waf-g2)); color: #fff7e6; }
+.waf-c { align-self: stretch; max-width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.waf-row { gap: 8px; }
+.waf-form { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 18px; background: #fff; box-shadow: 0 8px 18px -12px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .4); }
+.waf-form label { display: flex; flex-direction: column; gap: 6px; font: 500 .8125rem/1.3 Poppins, system-ui, sans-serif; color: #5b4b2c; }
+.waf-form input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid rgb(43 36 22 / .28); border-radius: 12px; background: #fffdf8; color: var(--waf-ink); font: 400 16px/1.2 Poppins, system-ui, sans-serif; box-sizing: border-box; }
+.waf-ph { display: flex; align-items: stretch; }
+.waf-pre { display: grid; place-items: center; padding: 0 12px; border: 1px solid rgb(43 36 22 / .28); border-right: 0; border-radius: 12px 0 0 12px; background: #f4e6cc; color: #5b4b2c; font: 500 15px/1 Poppins, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.waf-ph input { border-radius: 0 12px 12px 0; font-variant-numeric: tabular-nums; }
+.waf-err { margin: 0; min-height: 0; color: #b3261e; font: 500 .8125rem/1.3 Poppins, system-ui, sans-serif; }
+.waf-err:empty { display: none; }
+.waf-go, .waf-wa, .waf-pg { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; font: 600 15px/1 Poppins, system-ui, sans-serif; text-decoration: none; cursor: pointer; touch-action: manipulation; transition: transform 160ms var(--waf-ease), box-shadow 160ms var(--waf-ease); }
+.waf-go { background: linear-gradient(180deg, var(--waf-g1), var(--waf-g2)); color: #fff7e6; box-shadow: 0 10px 20px -12px rgb(10 30 18 / .8), inset 0 0 0 1px rgb(243 197 107 / .5); }
+.waf-wa { background: linear-gradient(180deg, #1a9a4a, #117a38); color: #fff; box-shadow: 0 10px 20px -12px rgb(10 60 30 / .7); }
+.waf-pg { background: #fff; color: #1b3a26; box-shadow: inset 0 0 0 1px rgb(201 154 67 / .7); }
+.waf-pg svg { width: 18px; height: 18px; }
+.waf-go:active, .waf-wa:active, .waf-pg:active, .waf-opt:active { transform: scale(.98); }
+.waf-skip { align-self: center; min-height: 44px; display: inline-flex; align-items: center; color: #1b3a26; font: 500 .875rem/1.2 Poppins, system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; }
+.waf-note { margin: 0; text-align: center; font: 400 .75rem/1.4 Poppins, system-ui, sans-serif; color: #6a5c45; }
+.waf-menu { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.waf-menu li { animation: waf-slide 240ms var(--waf-ease) both; animation-delay: calc(var(--j, 0) * 50ms); }
+@keyframes waf-slide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+.waf-opt { position: relative; overflow: hidden; width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 0; border-radius: 16px; background: #fff; color: var(--waf-ink); text-align: left; text-decoration: none; cursor: pointer; box-shadow: 0 6px 14px -10px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .45); font-family: Poppins, system-ui, sans-serif; touch-action: manipulation; transition: transform 160ms var(--waf-ease), box-shadow 160ms var(--waf-ease); }
+.waf-opt::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--waf-gold); transform: scaleX(0); transform-origin: 0 50%; transition: transform 200ms var(--waf-ease); }
+.waf-oi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(180deg, #f6e4c9, #ecd3a4); color: #1b3a26; }
+.waf-oi svg { width: 20px; height: 20px; }
+.waf-ot { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.waf-ot b { font: 600 .9375rem/1.2 Poppins, system-ui, sans-serif; color: #1b3a26; }
+.waf-ot small { font: 400 .8125rem/1.3 Poppins, system-ui, sans-serif; color: #6a5c45; }
+.waf-oa { flex: none; width: 20px; height: 20px; color: #9a6f2a; transition: transform 200ms var(--waf-ease); }
+.waf-oa svg { width: 20px; height: 20px; }
+@media (hover: hover) { .waf-opt:hover::before { transform: scaleX(1); } .waf-opt:hover .waf-oa { transform: translateX(4px); } .waf-opt:hover { box-shadow: 0 10px 20px -12px rgb(43 36 22 / .55), inset 0 0 0 1px rgb(201 154 67 / .8); } }
+@media (max-width: 767px) { .waf-fab, .waf-tease { display: none; } }
+@media (min-width: 768px) {
+  .waf-fab { right: 20px; bottom: calc(20px + var(--fab-lift, 0px)); width: 56px; height: 56px; }
+  .waf-tease { right: 88px; bottom: calc(32px + var(--fab-lift, 0px)); }
+  .waf-panel { left: auto; right: 20px; bottom: 88px; width: 380px; max-height: min(74vh, 660px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waf-ic { animation: none; }
+  .waf-m, .waf-menu li { animation: none; }
+  .waf-panel, .waf-tease, .waf-fab, .waf-opt, .waf-opt::before, .waf-oa, .waf-go, .waf-wa, .waf-pg { transition: none; }
+}
+</style>

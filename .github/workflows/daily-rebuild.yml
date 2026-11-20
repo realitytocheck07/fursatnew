@@ -1,0 +1,60 @@
+# Daily rebuild of the Fursat site (06:00 IST), so "What's new" cards whose
+# Start date has arrived go live without anyone pressing Publish.
+#
+# How it works: one POST to the Cloudflare Pages deploy hook stored in the
+# GitHub secret CF_DEPLOY_HOOK. Cloudflare then builds the branch the hook
+# was created for. Nothing is checked out and nothing is pushed.
+#
+# The hook URL is a password. It is never printed (GitHub also masks secrets in logs).
+# Setup and rotation steps: docs/cms/OWNER-SETUP.md
+
+name: Daily rebuild
+
+on:
+  schedule:
+    - cron: '30 0 * * *' # 00:30 UTC = 06:00 IST
+  workflow_dispatch: # the "Run workflow" button in the Actions tab
+
+permissions: {}
+
+concurrency:
+  group: daily-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: Trigger Cloudflare Pages rebuild
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: POST to the deploy hook
+        env:
+          CF_DEPLOY_HOOK: ${{ secrets.CF_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CF_DEPLOY_HOOK:-}" ]; then
+            echo "::error title=Secret CF_DEPLOY_HOOK is missing::Add it in GitHub: Settings > Secrets and variables > Actions > New repository secret. See docs/cms/OWNER-SETUP.md."
+            exit 1
+          fi
+
+          # No -v, no --show-error, stderr dropped: curl must never echo the URL.
+          code=0
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --request POST --max-time 30 --retry 2 --retry-delay 5 \
+            "${CF_DEPLOY_HOOK}" 2>/dev/null) || code=$?
+
+          if [ "${code}" -ne 0 ]; then
+            echo "::error title=Deploy hook not reached::curl exit code ${code}. Check the secret value and the network."
+            exit 1
+          fi
+
+          case "${status}" in
+            2??)
+              echo "Rebuild requested. Cloudflare answered HTTP ${status}."
+              ;;
+            *)
+              echo "::error title=Deploy hook refused::Cloudflare answered HTTP ${status}. The hook may be deleted or rotated. Create a new one and update the secret (docs/cms/OWNER-SETUP.md)."
+              exit 1
+              ;;
+          esac

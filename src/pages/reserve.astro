@@ -1,0 +1,149 @@
+---
+// reserve.astro — Fursat /reserve (P3 restyle: embossed cream, forest and gold). Logic unchanged: booking flow, slots.json, WhatsApp message, success screen.
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import MobileBar from '../components/MobileBar.astro';
+import HyWindows from '../components/hybrid/HyWindows.astro';
+// wide desktop hero: the plain middle of the cream panel is stretched so the whole booking form fits a laptop screen
+import rDesk from '../../scripts/bg-specs/reserve-deskw.out.json';
+import rPhone from '../../scripts/bg-specs/reserve-phone.out.json';
+import OrganicClip from '../components/fx/OrganicClip.astro';
+import ReserveHero from '../components/reserve/ReserveHero.astro';
+import ExperienceCards from '../components/reserve/ExperienceCards.astro';
+import BookingPanel from '../components/reserve/BookingPanel.astro';
+import MoreAtFursat from '../components/reserve/MoreAtFursat.astro';
+import '../styles/fk-tokens.css';
+import '../styles/reserve.css';
+const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fursat', w: 780, h: 1040, pos: '50% 60%', eager: true };
+---
+<Base
+  title="Reserve a Table — Fursat Kitchen | Bar, Madhapur"
+  description="Request a table at Fursat Kitchen | Bar, Capital Park, Madhapur. Date nights, groups and celebrations. We confirm on WhatsApp."
+  canonical="https://fursatind.in/reserve/"
+  ogImage="https://fursatind.in/assets/fursat_space_01.webp"
+  ogImageAlt="Reserve a table at Fursat Kitchen | Bar"
+  preloadImage={{ href: '/assets/tour/img/lounge.webp', type: 'image/webp' }}
+>
+  <SiteHeader active="reserve" variant="plaster" />
+  <OrganicClip />
+  <script is:inline>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('fx-pre'); setTimeout(function () { document.documentElement.classList.remove('fx-pre'); }, 3500); }</script>
+  <main class="rs-page" id="main">
+    <div class="hy rs-hy">
+      <section class="hy-flow rs-seg rs-seg--top">
+        <HyWindows data={rDesk} slice={0} photos={[heroPhoto]} view="d" />
+        <HyWindows data={rPhone} slice={0} photos={[heroPhoto]} view="m" />
+        <div class="rs-stage">
+          <ReserveHero />
+          <div class="bk3d-launch" id="bk3d-launch" hidden>
+            <button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="bk3d-launch-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 13l9 5 9-5"/></svg><span>Pick your table in 3D (optional)</span></button>
+          </div>
+          <BookingPanel />
+        </div>
+      </section>
+      <section class="hy-flow rs-seg rs-seg--mid">
+        <div class="rs-wrap">
+          <ExperienceCards />
+          <MoreAtFursat />
+        </div>
+      </section>
+      <div class="hy-flow rs-seg rs-seg--bot">
+        <p class="rs-close" data-fx-reveal>Good Food. <em>Great Company.</em></p>
+      </div>
+    </div>
+  </main>
+  <style is:global>
+    /* first section starts below the fixed header (--sh-h, set in fk-tokens.css) */
+    .rs-page { padding-top: var(--sh-h); }
+  </style>
+  <!-- phone only: shows the picked table and scrolls to the form -->
+  <div class="bk3d-sticky" id="bk3d-sticky" hidden>
+    <p class="bk3d-sticky-t" id="bk3d-sticky-t" aria-live="polite"></p>
+    <button type="button" class="fk-btn fk-btn--book fk-btn--md" id="bk3d-sticky-go"><span>Book</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></button>
+  </div>
+  <SiteFooter />
+  <MobileBar active="reserve" />
+  <script>import '../scripts/fk-motion';</script>
+  <script>
+    // "Pick your table": 2-3 s after load, once the 3D chunk has loaded AND drawn, the left photo cross-fades into the 3D room inside the SAME
+    // window (same size and place, nothing moves). WebGL missing, Save-Data, or any error: the photo simply stays. The form works without it.
+    import { mountBooking3D } from '../components/booking3d/mount';
+    (() => {
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const conn = (navigator as unknown as { connection?: { saveData?: boolean } }).connection;
+      if (conn?.saveData) return;
+      const visibleWin = () => [...document.querySelectorAll<HTMLElement>('.rs-hy .hy-win')].find((el) => el.getClientRects().length > 0);
+      let host: HTMLElement | null = null, mounted: { destroy(): void } | null = null, busy = false, failed = false;
+      const hero = document.querySelector<HTMLElement>('.rs-hero'), top = document.querySelector<HTMLElement>('.rs-seg--top');
+      // PHONE: the photo window is hidden on the phone layout, so the 3D room opens as its own card above the form, on tap (keeps the form on the first screen)
+      const phone = () => !visibleWin() && matchMedia('(max-width:899px)').matches;
+      const launch = document.getElementById('bk3d-launch')!, launchBtn = document.getElementById('bk3d-launch-btn')!;
+      const startPhone = async () => {
+        if (busy || host) return; busy = true;
+        launchBtn.setAttribute('aria-busy', 'true'); launchBtn.querySelector('span')!.textContent = 'Loading the room…';
+        const h = document.createElement('div'); h.className = 'bk3d-host bk3d-host--card'; h.id = 'bk3d-host'; launch.after(h); host = h;
+        try {
+          mounted = await mountBooking3D(h, { reduced, desktop: false, flyIn: !reduced });
+          h.classList.add('is-on'); launch.hidden = true; h.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+        } catch { failed = true; h.remove(); host = null; launchBtn.removeAttribute('aria-busy'); launchBtn.querySelector('span')!.textContent = '3D room isn’t available on this device'; launchBtn.setAttribute('disabled', ''); }
+        busy = false;
+      };
+      launchBtn.addEventListener('click', startPhone);
+      // FLOOR PLAN (2D): always available from the form, needs no WebGL. Same "fk:table" event as the 3D room.
+      const planDlg = document.getElementById('rs-plan') as HTMLDialogElement | null, planBtn = document.getElementById('rs-plan-btn');
+      if (planDlg && planBtn) {
+        let plan: { destroy(): void } | null = null;
+        planBtn.addEventListener('click', async () => {
+          if (!plan) { const { mountPlan } = await import('../components/booking3d/plan2d'); plan = mountPlan(document.getElementById('rs-plan-host')!); }
+          if (!planDlg.open) planDlg.showModal();
+        });
+        document.getElementById('rs-plan-done')?.addEventListener('click', () => planDlg.close());
+        planDlg.addEventListener('click', (e) => { if (e.target === planDlg) planDlg.close(); });
+      }
+      const start = async () => {
+        if (phone()) { if (!failed && !host) launch.hidden = false; return; }
+        launch.hidden = true;
+        const w = visibleWin(); if (!w || busy || failed || (host && host.parentElement === w)) return;
+        busy = true; mounted?.destroy(); mounted = null; host?.remove();
+        const h = document.createElement('div'); h.className = 'bk3d-host'; h.id = 'bk3d-host'; w.appendChild(h); host = h;
+        try {
+          mounted = await mountBooking3D(h, { reduced, desktop: matchMedia('(min-width:900px) and (pointer:fine)').matches });
+          h.classList.add('is-on'); hero?.classList.add('bk3d-on'); top?.classList.add('bk3d-grow');   // grows only on phone/tablet (CSS)
+        } catch { failed = true; h.remove(); host = null; hero?.classList.remove('bk3d-on'); top?.classList.remove('bk3d-grow'); }   // photo stays
+        busy = false;
+      };
+      const kick = () => { const go = () => setTimeout(start, 2500); 'requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 3000 }) : go(); };
+      document.readyState === 'complete' ? kick() : addEventListener('load', kick, { once: true });
+      matchMedia('(max-width:700px)').addEventListener('change', () => { if (host?.classList.contains('bk3d-host--card')) return; setTimeout(start, 300); });
+      // phone sticky bar: "T7 · Booths · 4 seats → Book" scrolls to the form
+      const bar = document.getElementById('bk3d-sticky')!, txt = document.getElementById('bk3d-sticky-t')!;
+      addEventListener('fk:table', (e) => { const d = (e as CustomEvent).detail; bar.hidden = !d; txt.textContent = d ? d.line : ''; });
+      addEventListener('fk:table-clear', () => { bar.hidden = true; });
+      document.getElementById('bk3d-sticky-go')!.addEventListener('click', () => {
+        const f = document.querySelector<HTMLElement>('.rs-hy .rs-panel'); f?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      });
+    })();
+  </script>
+  <script is:inline>
+    (function () {
+      // fit the live booking form inside the carved cream blob of the desktop art (zoom, never above 1)
+      // zoom the form INSIDE the positioned frame: zoom on the frame itself also scales its left/top and drifts it over the headline
+      var seg = document.querySelector('.rs-seg--top'), f = document.querySelector('.rs-hy .rs-panel-frame');
+      var p = f && f.querySelector('.rs-panel');
+      if (!seg || !p) return;
+      var fit = function () {
+        if (seg.clientWidth < 1180) { p.style.zoom = ''; p.style.removeProperty('--rs-z'); return; }
+        var avail = seg.clientWidth * 0.312;   // cream panel height below the header (wide art)
+        // zoom is measured with normal target sizes (same as before); --rs-z then lifts the targets so they still render at 45px
+        p.style.setProperty('--rs-z', '1');
+        var z = parseFloat(p.style.zoom) || 1;
+        var natural = p.getBoundingClientRect().height / z;
+        var nz = Math.min(1, avail / natural);
+        if (Math.abs(nz - z) > 0.005) p.style.zoom = nz.toFixed(3);
+        p.style.setProperty('--rs-z', (parseFloat(p.style.zoom) || 1).toFixed(3));
+      };
+      fit(); addEventListener('resize', fit);
+      if ('ResizeObserver' in window) new ResizeObserver(fit).observe(p);
+    })();
+  </script>
+</Base>

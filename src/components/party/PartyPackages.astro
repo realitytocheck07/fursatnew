@@ -1,0 +1,81 @@
+---
+// "Our Party Packages": four photo cards (like INSPO-2). A click picks the package group in the builder below (party.js).
+// Photos: real venue shots only. Text: party.json group blurbs (today's text). No prices here: they live in the builder.
+import data from '../../data/party.json';
+const groupOf = (id: string) => (data.groups as any[]).find((g) => g.id === id)!;
+const occ = [
+  { id: 'birthday', t: 'Birthdays', g: 'elite', base: '/assets/venue/interior/long-table-dining', ow: 1200, alt: 'A long table set for a group celebration at Fursat', icon: '<path d="M4 11h16v9H4z"/><path d="M4 15c2 1.4 3 1.4 4 0s2-1.4 4 0 3 1.4 4 0 2-1.4 4 0"/><path d="M12 11V8M12 8c-1-1-1-2 0-3 1 1 1 2 0 3z"/>' },
+  { id: 'corporate', t: 'Corporate', g: 'banquet', base: '/assets/venue/banquet/banquet-tables-03', ow: 1200, alt: 'The banquet hall in a U-shaped layout for a corporate meeting', icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>' },
+  { id: 'kitty', t: 'Kitty parties', g: 'elite', base: '/assets/venue/interior/mural-booths', ow: 1200, alt: 'Booths beside the Hyderabad mural wall at Fursat', icon: '<path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="3.2"/><path d="M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.3M15.5 4.9a3.2 3.2 0 0 1 0 6.2"/>' },
+  { id: 'barbash', t: 'Bar bashes', g: 'bar', base: '/assets/interior/fursat_space_08', ow: 1280, alt: 'The bar counter at Fursat', note: 'Alcohol is served to guests aged 21 and above only.', icon: '<path d="M4 4h16l-8 9z"/><path d="M12 13v7M8 20h8"/>' },
+];
+---
+<section class="pc" id="pa-packs" aria-labelledby="pa-packs-h">
+  <p class="fk-ty-label pc-kick">Parties &amp; events</p>
+  <h2 class="fk-ty-h2 pc-h" id="pa-packs-h" data-fx-reveal>Our Party <span class="pc-hl">Packages</span></h2>
+  <p class="pc-sub">Choose what you are celebrating. We open the package type that fits.</p>
+  <div class="pc-rail">
+    <ul class="pc-row" id="pc-row" aria-label="Occasions">
+      {occ.map((o, i) => (
+        <li class="pc-li" id={o.id} style={`--i:${i}`}>
+          <a class="pc-card" href="#pa-plan" data-occ={o.g} data-occasion={o.id}>
+            <img class="pc-img" src={`${o.base}-720.webp`} srcset={`${o.base}-480.webp 480w, ${o.base}-720.webp 720w, ${o.base}.webp ${o.ow}w`}
+              sizes="(max-width: 767px) 78vw, (max-width: 999px) 45vw, 290px" alt={o.alt} width="1200" height="1600" loading="lazy" decoding="async" />
+            <span class="pc-badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={o.icon} /></span>
+            <span class="pc-body">
+              <span class="pc-t">{o.t}</span>
+              <span class="pc-p">{groupOf(o.g).blurb}{o.note ? ' ' + o.note : ''}</span>
+              <span class="pc-go">See packages <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <div class="pc-dots" role="group" aria-label="Choose an occasion card">
+    {occ.map((o, i) => <button type="button" class="pc-dot" data-dot={i} aria-label={`Show ${o.t}`} aria-current={i === 0 ? 'true' : undefined}><i></i></button>)}
+  </div>
+</section>
+<style is:global>
+.pc{max-width:1240px;margin:0 auto;padding:clamp(28px,4vw,56px) clamp(16px,4vw,48px) clamp(20px,3vw,40px);scroll-margin-top:96px}
+.pc-kick{margin:0 0 6px;text-align:center;color:#8a5a22;letter-spacing:.14em;text-transform:uppercase}
+.pc-h{margin:0 0 8px;text-align:center;color:#18301f}
+.pc-hl{color:#c02a1a;font-style:italic}
+.pc-sub{margin:0 auto clamp(20px,3vw,32px);max-width:52ch;text-align:center;font:400 1rem/1.5 var(--fk-sans);color:#4d4434}
+.pc-row{list-style:none;margin:0;padding:0;display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:1000px){.pc-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}}
+.pc-li{display:block;scroll-margin-top:110px}
+.pc-card{position:relative;display:block;aspect-ratio:4/5;border-radius:22px;overflow:hidden;isolation:isolate;text-decoration:none;color:#fbf3e6;background:#10261a;box-shadow:0 0 0 1px rgba(201,154,67,.55),0 16px 30px -14px rgba(14,34,20,.55);-webkit-tap-highlight-color:transparent;transition:transform 300ms var(--fk-ease-out),box-shadow 300ms var(--fk-ease-out)}
+.pc-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1400ms var(--fk-ease-out)}
+.pc-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,#10261a 0%,rgba(16,38,26,.94) 30%,rgba(16,38,26,.62) 52%,rgba(16,38,26,0) 74%)}
+.pc-badge{position:absolute;top:14px;left:14px;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(16,38,26,.78);box-shadow:0 0 0 2px #c99a43,0 0 0 4px rgba(16,38,26,.35)}
+.pc-badge svg{width:24px;height:24px;fill:none;stroke:#e6c27a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.pc-body{position:absolute;left:0;right:0;bottom:0;display:grid;gap:6px;padding:18px 18px 18px}
+.pc-t{font:500 1.4rem/1.15 var(--fk-serif);color:#fbf3e6}
+.pc-p{font:400 .875rem/1.45 var(--fk-sans);color:#f1e6d0}
+.pc-go{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-top:2px;font:600 .875rem/1 var(--fk-sans);color:#e6c27a}
+.pc-go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform 200ms var(--fk-ease-out)}
+.pc-card:focus-visible{outline:3px solid #8a5a14;outline-offset:3px}
+.pc-card:active{transform:scale(.985)}
+.pc-dots{display:none}
+@media(hover:hover) and (pointer:fine){
+  .pc-card:hover{transform:translateY(-6px);box-shadow:0 0 0 1px #c99a43,0 24px 36px -14px rgba(14,34,20,.6)}
+  .pc-card:hover .pc-img{transform:scale(1.07)}
+  .pc-card:hover .pc-go svg{transform:translateX(4px)}
+}
+/* phone: swipe row, next card peeks, edge fades, dots */
+@media(max-width:767px){
+  .pc{padding-inline:0}
+  .pc-kick,.pc-h,.pc-sub{padding-inline:16px}
+  .pc-rail{position:relative}
+  .pc-row{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;padding:6px 16px 18px;scroll-padding-inline:16px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%)}
+  .pc-row::-webkit-scrollbar{display:none}
+  .pc-li{flex:0 0 76vw;max-width:320px;scroll-snap-align:start}
+  .pc-dots{display:flex;justify-content:center}
+  .pc-dot{width:44px;height:44px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .pc-dot i{display:block;width:8px;height:8px;border-radius:50%;background:rgba(138,90,34,.35);transition:width 250ms var(--fk-ease-out),background-color 250ms}
+  .pc-dot[aria-current="true"] i{width:24px;border-radius:999px;background:#c99a43}
+  .pc-dot:focus-visible{outline:2px solid #8a5a14;outline-offset:-4px;border-radius:12px}
+}
+@media(prefers-reduced-motion:reduce){.pc-card,.pc-img,.pc-go svg,.pc-dot i{transition:none!important}.pc-card:hover,.pc-card:hover .pc-img{transform:none}}
+</style>

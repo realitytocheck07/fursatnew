@@ -1,0 +1,212 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import MobileBar from '../components/MobileBar.astro';
+import SvgDefs from '../components/SvgDefs.astro';
+import Hero from '../components/Hero.astro';
+import HomeSeason from '../components/home/HomeSeason.astro';
+import HomeNews from '../components/home/HomeNews.astro';
+import HomeSpaces from '../components/home/HomeSpaces.astro';
+import HomeCelebrate from '../components/home/HomeCelebrate.astro';
+import HomeStory from '../components/home/HomeStory.astro';
+import HomeVisit from '../components/home/HomeVisit.astro';
+import HomeShared from '../components/home/HomeShared.astro';
+import MarqueeStrip from '../components/MarqueeStrip.astro';
+import PanoramicViewer from '../components/PanoramicViewer.astro';
+import Mascot from '../components/Mascot.astro';
+import MascotOfferModal from '../components/MascotOfferModal.astro';
+import Sparkles from '../components/Sparkles.astro';
+import BookingDialog from '../components/BookingDialog.astro';
+import StickyBar from '../components/StickyBar.astro';
+import PicksTray from '../components/PicksTray.astro';
+import LegalBar from '../components/LegalBar.astro';
+import LegalDialog from '../components/LegalDialog.astro';
+import IntroHeli from '../components/IntroHeli.astro';
+import IntroLogo from '../components/IntroLogo.astro';
+import IntroGate from '../components/IntroGate.astro';
+import IntroCaption from '../components/IntroCaption.astro';
+import Wizard from '../components/Wizard.astro';
+// TODO(client): 15% / FURSAT15 offer not confirmed; hidden until the client confirms.
+const OFFER_ENABLED = false;
+---
+<Base
+  title="Fursat Kitchen | Bar – Café, Bar & Banquet, Madhapur"
+  description="Fursat Kitchen | Bar in Madhapur, Hyderabad — a vibrant café, kitchen, bar and banquet space. Dine, drink & celebrate."
+  canonical="https://fursatind.in/"
+  ogImage="https://fursatind.in/assets/fursat_space_01.webp"
+  ogImageAlt="Fursat Kitchen | Bar interior — warm luxury dining in Madhapur"
+  preloadImage={{
+    href: '/assets/51db3af80d.webp',
+    type: 'image/webp'
+  }}
+>
+<a class="skip" href="#main">Skip to main content</a>
+<SiteHeader active="home" />
+<SvgDefs />
+<main id="main" tabindex="-1">
+<!-- First-screen fonts (intro caption + hero): fetch early so they do not swap in after first paint. -->
+<link rel="preload" href="/assets/7f74c1fdae.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/assets/2189d39dfb.woff" as="font" type="font/woff" crossorigin>
+<script is:inline>
+/* Same maths as fit() in 10.js, run before the hero is laid out, so the stage does not jump when 10.js loads. */
+(function(){var r=document.documentElement,w=r.clientWidth||innerWidth,h=innerHeight,u=.9,c=function(v,a,b){return Math.max(a,Math.min(b,v))};
+if(w>=900)u=c(Math.min(w/1536,(h-30)/1024),.4,1.5);
+var sp=h-30-1024*u;r.style.setProperty("--u",u.toFixed(4));r.style.setProperty("--ex",w>=900?Math.round(c(w/u-1536,0,520)):0);r.style.setProperty("--gap",(w>=900&&sp>140?Math.round(sp/2-15):0)+"px")})();
+</script>
+<Hero />
+
+<!-- ── Offer Strip ──────────────────────────────────────────────────── -->
+<div class="hm-offer-strip" hidden={!OFFER_ENABLED} style={OFFER_ENABLED ? undefined : "display:none"}>
+  <span class="hm-os-fire">🔥</span>
+  <span class="hm-os-text">Lunch Offer: <strong>Flat 15% OFF</strong></span>
+  <span class="hm-os-pill">Code: FURSAT15</span>
+  <span class="hm-os-time">Terms apply, confirm on WhatsApp</span>
+  <a href="/reserve" class="hm-os-cta">Reserve Now →</a>
+</div>
+
+<MarqueeStrip />
+
+<HomeSeason />
+<HomeNews />
+
+<PanoramicViewer />
+<HomeSpaces />
+<HomeCelebrate />
+<HomeStory />
+<HomeVisit />
+<HomeShared />
+<Mascot />
+</main>
+<MascotOfferModal />
+<SiteFooter />
+<Sparkles />
+<BookingDialog />
+<StickyBar />
+<PicksTray />
+<LegalBar />
+<LegalDialog />
+<IntroHeli />
+<IntroLogo />
+<IntroGate />
+<IntroCaption />
+<Wizard />
+<script is:inline defer src="/js/01.js"></script>
+<script is:inline defer src="/js/02.js"></script>
+<script is:inline defer src="/js/03.js"></script>
+<script is:inline defer src="/js/05.js"></script>
+<script is:inline defer src="/js/06.js"></script>
+<script is:inline defer src="/js/07.js"></script>
+<script is:inline defer src="/js/09.js"></script>
+<script is:inline defer id="fx-js" src="/js/10.js"></script>
+<script is:inline defer src="/js/11.js"></script>
+<script is:inline defer src="/js/13.js"></script>
+<script is:inline defer src="/js/14.js"></script>
+<script is:inline defer src="/js/15.js"></script>
+<script is:inline defer src="/js/17.js"></script>
+<script is:inline defer src="/js/19.js"></script>
+<script is:inline>
+/* 12.js (party packages) is not needed for the first screen: load them when the browser is idle,
+   or at the first touch / key / scroll, whichever comes first. They keep their order . */
+(function(){var done=0;function go(){if(done)return;done=1;["/js/12.js"].forEach(function(u){var s=document.createElement("script");s.src=u;s.async=false;document.body.appendChild(s)});["pointerdown","keydown","scroll","touchstart"].forEach(function(t){removeEventListener(t,go)})}
+["pointerdown","keydown","scroll","touchstart"].forEach(function(t){addEventListener(t,go,{passive:true})});
+function idle(){if(window.requestIdleCallback)requestIdleCallback(go,{timeout:2500});else setTimeout(go,1500)}
+if(document.readyState==="complete")idle();else addEventListener("load",idle)})();
+</script>
+<MobileBar active="home" />
+<script is:inline src="/js/motion-kit.js"></script>
+</Base>
+<style is:global>
+/* ── Hero: first screen only (dish cards now live in their own section) ── */
+.fx-p { font-size: calc(12.5px / var(--u)); line-height: 1.4; }
+.fxhero .fx-btns .fk-btn { white-space: nowrap; }
+@media (max-width: 899px) { .fx-p { font-size: 16px; } }
+
+/* ── Hero corner: music + video pause ── */
+.hx-ctl { position: absolute; top: calc(16px / var(--u)); right: calc(16px / var(--u)); z-index: 8; display: flex; align-items: center; gap: calc(8px / var(--u)); pointer-events: auto; }
+.hx-ctl .snd, .hx-ctl .vz, .hx-ctl .fx-pv { min-height: calc(44px / var(--u)); height: calc(44px / var(--u)); touch-action: manipulation; }
+.hx-ctl .snd { padding: 0 calc(18px / var(--u)) 0 calc(14px / var(--u)); font-size: calc(15px / var(--u)); gap: calc(8px / var(--u)); border-width: 1px; }
+.hx-ctl .snd .vz-eq { height: calc(18px / var(--u)); gap: calc(2.5px / var(--u)); }
+.hx-ctl .snd .vz-eq i { width: calc(3px / var(--u)); }
+.hx-ctl .vz, .hx-ctl .fx-pv { width: calc(44px / var(--u)); padding: 0; justify-content: center; display: inline-grid; place-items: center; border-radius: 50%; }
+.hx-ctl .vz .vz-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.hx-ctl .vz .vz-eq { height: calc(18px / var(--u)); }
+.hx-ctl .fx-pv { border: 1px solid var(--pv-line, rgba(42,37,20,.35)); background: var(--pv-bg, rgba(250,245,233,.92)); color: var(--pv-ink, #2A2514); cursor: pointer; }
+.hx-ctl .fx-pv svg { width: calc(18px / var(--u)); height: calc(18px / var(--u)); }
+.hx-ctl button:focus-visible { outline: 2px solid #C94716; outline-offset: 3px; }
+@media (max-width: 899px) {
+  .hx-ctl { top: 10px; right: 10px; gap: 8px; }
+  .hx-ctl .snd, .hx-ctl .vz, .hx-ctl .fx-pv { min-height: 44px; height: 44px; }
+  .hx-ctl .snd { padding: 0 14px 0 12px; font-size: 14px; gap: 8px; }
+  .hx-ctl .snd .vz-eq { height: 16px; gap: 2.5px; }
+  .hx-ctl .snd .vz-eq i { width: 3px; }
+  .hx-ctl .vz, .hx-ctl .fx-pv { width: 44px; }
+  .hx-ctl .vz .vz-eq { height: 16px; }
+  .hx-ctl .fx-pv svg { width: 18px; height: 18px; }
+}
+
+/* ── v5.9.1 H1: desktop hero, real-pixel sizes inside the scaled 1536x1024 canvas (--r = 1 screen px in canvas units) ── */
+/* Intro sound button: visible from the first second of the intro (html.lock), gone when the intro ends; the hero keeps #snd (music) + #fxpv (pause). */
+.fk-isnd { display: none; }
+html.lock .fk-isnd { position: fixed; left: 16px; top: calc(var(--sh-h, 104px) + 14px); z-index: 2147482999; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 14px 0 0; border-radius: 9999px; border: 1px solid rgba(42,37,20,.32); background: rgba(255,250,238,.9); color: #2A2514; box-shadow: 0 10px 24px -12px rgba(0,0,0,.45); }
+.fk-isnd-b { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 14px; border: 0; border-radius: 9999px; background: none; color: inherit; font: 600 14px/1 var(--fk-font-text, 'Poppins', system-ui, sans-serif); cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(.23,1,.32,1); }
+.fk-isnd-v { width: 84px; height: 44px; margin: 0; accent-color: #C94716; cursor: pointer; touch-action: manipulation; background: none; }
+.fk-isnd svg { width: 20px; height: 20px; flex: none; }
+.fk-isnd-b:active { transform: scale(.97); }
+.fk-isnd-b:focus-visible, .fk-isnd-v:focus-visible { outline: 2px solid #C94716; outline-offset: 3px; }
+@media (min-width: 900px) {
+  .fxhero { --r: calc(1 / var(--u)); height: calc(336px * var(--u) + 340px); }
+  .hx-ctl { top: calc(22px + 16px * var(--r)); }
+  .fxhero .fx-leaf { -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent); mask-image: linear-gradient(180deg, #000 55%, transparent); }
+  .fxhero .fx-p { font-size: calc(17px * var(--r)) !important; line-height: calc(26px * var(--r)) !important; }
+  .fxhero .fx-btns { left: 130px; top: calc(336px + 58px * var(--r)); width: max-content; height: calc(44px * var(--r)); display: flex; gap: calc(12px * var(--r)); }
+  .fxhero .fx-btns .fk-btn svg { width: calc(14px * var(--r)); height: calc(14px * var(--r)); }
+  .fxhero .fx-info { left: calc(130px + var(--ex, 0) * .14px); top: calc(336px + 118px * var(--r)); width: auto; max-width: none; padding: calc(8px * var(--r)) calc(18px * var(--r)) calc(8px * var(--r)) calc(14px * var(--r)); border-radius: calc(14px * var(--r)); gap: calc(12px * var(--r)); }
+  .fxhero .fi-d { width: calc(9px * var(--r)); height: calc(9px * var(--r)); }
+  .fxhero .fi-a { gap: calc(2px * var(--r)); }
+  .fxhero .fi-a b { font-size: calc(15px * var(--r)); line-height: calc(20px * var(--r)); }
+  .fxhero .fi-a small { font-size: calc(13px * var(--r)); line-height: calc(17px * var(--r)); }
+}
+
+@media (min-width: 900px) and (max-width: 1279px) { .fxhero .fx-olive-l { top: auto; bottom: 0; width: 64px; height: 96px; } }
+.ms{position:fixed;right:clamp(10px,2vw,28px);bottom:clamp(64px,9vh,96px);margin:0;padding:0;background:none;width:auto;z-index:40;--ms-size:clamp(120px,16vw,200px)}
+
+/* ── Offer Strip ── */
+.hm-offer-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 20px;
+  background: linear-gradient(135deg, #1A1200 0%, #2A1E00 100%);
+  border-top: 1px solid rgba(224,166,60,0.3);
+  border-bottom: 1px solid rgba(224,166,60,0.3);
+  padding: 14px clamp(16px,4vw,40px);
+  font-family: var(--sans,"Manrope",system-ui,sans-serif);
+}
+.hm-os-fire { font-size: 1.3rem; }
+.hm-os-text { color: #F4ECDA; font-size: 0.95rem; }
+.hm-os-text strong { color: #E0A63C; }
+.hm-os-pill {
+  background: rgba(224,166,60,0.15);
+  border: 1px solid #E0A63C;
+  color: #E0A63C;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.hm-os-time { color: rgba(244,236,218,0.65); font-size: 0.875rem; }
+.hm-os-cta {
+  background: #E0A63C;
+  color: #12190B;
+  padding: 7px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.hm-os-cta:hover { transform: translateY(-1px); }
+</style>

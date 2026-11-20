@@ -1,0 +1,64 @@
+{
+ "cafe": {
+  "sets": 3,
+  "w": 1672,
+  "h": 941,
+  "windows": [
+   [
+    74.52,
+    9.99,
+    98.03,
+    72.05
+   ]
+  ],
+  "lqip": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAABwAwCdASoYAA4APu1mq04ppaQiMAgBMB2JQBOj+AFBbzDhGYAA/vkVSy9rSCjSdO8Rdf/1lL3dJ+qA+H8xgr3GTd3lodCGRW8XnBoVXliF2Di3OX4x0KcRRnAAAA=="
+ },
+ "bar": {
+  "sets": 3,
+  "w": 1672,
+  "h": 941,
+  "windows": [
+   [
+    62.92,
+    22.53,
+    94.32,
+    80.23
+   ]
+  ],
+  "lqip": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABQBACdASoYAA4APu1orU2ppqSiMAgBMB2JZACdMoR4GCnJ34CUIu+CzjagAP7nKF9dlh6ZgMDUmzyjry3Nhlxw25Qaowa6QwrrawCovaVXv7mICbO/feMyrNKimA6eWZQcJjUkkyjQ2AiyuXuMqrTnur1oUiC6L2dJgTmOnmgAAA=="
+ },
+ "party": {
+  "sets": 2,
+  "w": 1672,
+  "h": 941,
+  "windows": [
+   [
+    68.72,
+    19.45,
+    100.0,
+    63.02
+   ],
+   [
+    55.26,
+    39.32,
+    83.01,
+    69.82
+   ]
+  ],
+  "lqip": "data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAADwAwCdASoYAA4ALrV2u12jqampiYC0SzAE6ZQANT7e/gUu+t3pa+IAAP7yBRbcgEpY2T0w9KEKi/w6SHMRpTs9SllIJuNr2i/sAtOq25NmYgc2PKSy5vm+s5zmK53yLFkQQwBE+AAAAA=="
+ },
+ "banquet": {
+  "sets": 3,
+  "w": 1672,
+  "h": 941,
+  "windows": [
+   [
+    0.0,
+    14.56,
+    36.66,
+    79.38
+   ]
+  ],
+  "lqip": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAACQAwCdASoYAA4APu1iqU2ppaOiMAgBMB2JYgCsACF51sRcPKgAAOJoVzIc9syBz2Iuy3/H3cbrexJ9KYWTxGCdbPiPSp7W2L+/UNnhBPnvUvCPOJKP9SUw9AAAAA=="
+ }
+}

@@ -1,0 +1,286 @@
+---
+import site from '../data/site.json';
+// SiteFooter.astro - Fursat Luxury Hospitality Footer
+// Legal Name, Address, FSSAI, Hours, Socials & Quick Links
+// TODO(client): the unit number / floor of the address is unconfirmed (legal info says Shop G1, the old footer said 'Level 3'). Only the confirmed part is shown.
+// TODO(client): a second phone number is unconfirmed. Only the main phone from site.json is shown.
+// One legal line only: the copyright line below. Legal name, GSTIN and FSSAI come from site.json.
+---
+<footer class="sf-footer" id="visit">
+  <div class="sf-container">
+    <!-- Top Row: Brand & Tagline -->
+    <div class="sf-top">
+      <div class="sf-brand-col">
+        <a href="/" class="sf-logo">
+          <img src="/assets/c86f49db5a.webp" alt="Fursat Kitchen | Bar" width="130" height="97" loading="lazy" decoding="async" />
+        </a>
+        <p class="sf-tagline">
+          Good Food · Great Drinks · Better Days.<br />
+          The luxury of unhurried time at Capital Park, Madhapur.
+        </p>
+      </div>
+
+      <!-- Quick Nav Links -->
+      <div class="sf-links-grid">
+        <div class="sf-link-group">
+          <h2 class="sf-group-title">Dining & Drinks</h2>
+          <a href="/">Home</a>
+          <a href="/reserve">Reserve a Table</a>
+          <a href="/menu">Full Menu</a>
+          <a href="/restaurant-bar">Restaurant & Bar (21+)</a>
+          <a href="/cafe">Fursat Café</a>
+          <a href="/order">Order Online</a>
+          <p class="sf-order-line">Order on <a href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a> · <a href={site.order.zomato} target="_blank" rel="noopener">Zomato</a></p>
+          <a href="/ask">Ask Fursat (Mood Search)</a>
+          <a href="/story">Our Story</a>
+        </div>
+
+        <div class="sf-link-group">
+          <h2 class="sf-group-title">Celebrations</h2>
+          <a href="/party">Parties &amp; Events</a>
+          <a href="/banquet">The Banquet Hall</a>
+          <a href="/party#birthday">Birthdays & Anniversaries</a>
+          <a href="/party#corporate">Corporate Gatherings</a>
+          <a href="/party#kitty">Kitty Parties & Socials</a>
+          <a href="/catering">Outdoor Catering</a>
+        </div>
+
+        <div class="sf-link-group">
+          <h2 class="sf-group-title">Visit Us</h2>
+          <p class="sf-info-p">
+            <b>Location:</b><br />
+            {/* TODO(client): add the unit number and floor once the client confirms them ("Level 3" removed: unconfirmed). */}
+            Capital Park, {site.address.line2} {site.address.pin}
+          </p>
+          <p class="sf-info-p">
+            <b>Hours:</b><br />
+            {site.hours.display}
+          </p>
+          <p class="sf-info-p">
+            <b>Reservations:</b><br />
+            {/* TODO(client): second phone number unconfirmed, not shown. */}
+            <a href={`tel:+${site.phonePlain}`}>{site.phone}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instagram Feeds Row -->
+    <div class="sf-social-strip">
+      <span class="sf-ss-title">Follow along on Instagram:</span>
+      <div class="sf-ss-links">
+        <a href="https://www.instagram.com/fursatind.in" target="_blank" rel="noopener">@fursatind.in (Kitchen | Bar)</a>
+        <a href="https://www.instagram.com/fursat_bitesandbuffet" target="_blank" rel="noopener">@fursat_bitesandbuffet</a>
+        <a href="https://www.instagram.com/fursatbanquets" target="_blank" rel="noopener">@fursatbanquets</a>
+        <a href="https://www.instagram.com/fursatsocialclub" target="_blank" rel="noopener">@fursatsocialclub</a>
+      </div>
+    </div>
+
+    <!-- Bottom Legal Bar -->
+    <div class="sf-bottom">
+      <p class="sf-copy">
+        © {new Date().getFullYear()} Fursat Kitchen | Bar · {site.legal.name} · GSTIN {site.legal.gstin} · FSSAI {site.legal.fssai}
+      </p>
+      <div class="sf-legal-links">
+        <a href="/terms">Terms</a>
+        <a href="/terms#privacy">Privacy Policy</a>
+        <a href="/terms#refund">Refund Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style is:global>
+  .sf-footer {
+    background: #0D1308;
+    color: #F4ECDA;
+    border-top: 1px solid rgba(224, 166, 60, 0.25);
+    padding: clamp(50px, 7vw, 84px) 0 32px;
+    font-family: var(--sans, "Poppins", system-ui, sans-serif);
+  }
+  .sf-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 40px);
+  }
+  .sf-top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+  @media (min-width: 960px) {
+    .sf-top {
+      grid-template-columns: 360px 1fr;
+    }
+  }
+  .sf-brand-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  /* the logo is dark green: it sits on a cream chip so it reads on the green footer */
+  .sf-logo {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    background: var(--fk-plaster, #F6E4C9);
+    padding: 8px 14px;
+    border-radius: 14px;
+  }
+  .sf-logo img {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
+  }
+  .sf-tagline {
+    font-size: 0.9375rem;
+    color: rgba(244, 236, 218, 0.75);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .sf-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px;
+  }
+  .sf-link-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .sf-group-title {
+    font-family: var(--serif, "Playfair Display", Georgia, serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #E0A63C;
+    margin: 0 0 6px;
+  }
+  .sf-link-group a {
+    color: rgba(244, 236, 218, 0.8);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    transition: color 0.16s ease;
+  }
+  .sf-link-group a:hover {
+    color: #E0A63C;
+  }
+  .sf-info-p {
+    font-size: 0.875rem;
+    color: rgba(244, 236, 218, 0.7);
+    margin: 0;
+    line-height: 1.45;
+  }
+  .sf-info-p b {
+    color: #F4ECDA;
+  }
+  .sf-info-p a {
+    color: #E0A63C;
+    text-decoration: none;
+  }
+  .sf-social-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 0;
+    border-top: 1px solid rgba(244, 236, 218, 0.1);
+    border-bottom: 1px solid rgba(244, 236, 218, 0.1);
+    margin-bottom: 24px;
+  }
+  @media (min-width: 768px) {
+    .sf-social-strip {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .sf-ss-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #E0A63C;
+  }
+  .sf-ss-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .sf-ss-links a {
+    color: rgba(244, 236, 218, 0.75);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .sf-ss-links a:hover {
+    color: #F4ECDA;
+  }
+  .sf-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    color: rgba(244, 236, 218, 0.85);
+  }
+  @media (min-width: 640px) {
+    .sf-bottom {
+      flex-direction: row;
+    }
+  }
+  .sf-copy {
+    margin: 0;
+  }
+  .sf-legal-links {
+    display: flex;
+    gap: 16px;
+  }
+  .sf-legal-links a {
+    color: rgba(244, 236, 218, 0.85);
+    text-decoration: none;
+  }
+  .sf-legal-links a:hover {
+    color: #E0A63C;
+  }
+
+  /* v4.6: footer in the brand system — forest green, gold hairline, serif group titles, one sans */
+  .sf-order-line { margin: 2px 0 0; font-size: .875rem; color: rgba(241,230,210,.8); display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px }
+  .sf-link-group .sf-order-line a { display: inline-flex; width: auto; padding: 0; min-height: 32px; align-items: center }
+  .sf-footer { position: relative; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); color: #f1e6d2; font-family: var(--fk-sans); border-top: 0; }
+  .sf-footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, #d9b36a 20%, #e8c886 50%, #d9b36a 80%, transparent); }
+  .sf-group-title { font-family: var(--fk-serif); font-weight: 500; font-size: 1.15rem; letter-spacing: 0; text-transform: none; color: #e8c886; }
+  .sf-link-group a { color: rgba(241, 230, 210, .86); font-size: .9375rem; }
+  .sf-tagline, .sf-info-p { color: rgba(241, 230, 210, .78); }
+  @media (hover: hover) { .sf-link-group a:hover { color: #e8c886; } }
+  /* Session E: phone tap targets >= 44px, text >= 12px, contrast >= 4.5:1 (measured). */
+  .sf-link-group a, .sf-ss-links a, .sf-legal-links a, .sf-info-p a { -webkit-tap-highlight-color: transparent; }
+  .sf-link-group a:focus-visible, .sf-ss-links a:focus-visible, .sf-legal-links a:focus-visible, .sf-info-p a:focus-visible, .sf-logo:focus-visible { outline: 2px solid #e8c886; outline-offset: 2px; border-radius: 4px; }
+  .sf-info-p a { color: #e8c886; text-decoration: underline; text-underline-offset: .2em; text-decoration-thickness: from-font; }
+  @media (prefers-reduced-motion: reduce) { .sf-link-group a, .sf-ss-links a { transition: none; } }
+  /* tap targets: every footer link is at least 44px tall (--fk-tap) at every width */
+  .sf-link-group { gap: 0; }
+  .sf-link-group a { display: flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-info-p { margin: 0 0 8px; }
+  .sf-info-p a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-logo { min-height: var(--fk-tap, 44px); }
+  .sf-ss-links { gap: 0 16px; }
+  .sf-ss-links a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
+  .sf-legal-links { flex-wrap: wrap; gap: 0 12px; }
+  .sf-legal-links a { display: inline-flex; align-items: center; justify-content: center; min-width: var(--fk-tap, 44px); min-height: var(--fk-tap, 44px); padding: 0 4px; }
+  @media (max-width: 767px) {
+    .sf-group-title { margin: 0 0 4px; }
+    .sf-bottom { align-items: flex-start; }
+  }
+
+  /* v5.40 one footer on every page: same width, alignment and spacing. Page CSS cannot change it:
+     it is full width, one container (--sf-w) centred with the same side padding, a fixed grid, the same background. */
+  .sf-footer, .sf-footer *, .sf-footer *::before, .sf-footer *::after { box-sizing: border-box; }
+  footer.sf-footer { display: block; width: 100%; max-width: none; min-width: 0; margin: 0; overflow-x: clip; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); }
+  footer.sf-footer .sf-container { --sf-w: 1300px; width: 100%; max-width: var(--sf-w); margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+  footer.sf-footer .sf-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; margin-bottom: 48px; }
+  footer.sf-footer .sf-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; min-width: 0; }
+  @media (min-width: 768px) { footer.sf-footer .sf-links-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 960px) { footer.sf-footer .sf-top { grid-template-columns: 300px minmax(0, 1fr); gap: 48px; } }
+  footer.sf-footer .sf-social-strip, footer.sf-footer .sf-bottom { width: 100%; }
+  /* Swiggy / Zomato links: 44px tap height like every other footer link (was 32px) */
+  footer.sf-footer .sf-link-group .sf-order-line a { min-height: var(--fk-tap, 44px); padding: 0 4px; }
+</style>

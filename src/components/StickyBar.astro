@@ -1,0 +1,113 @@
+---
+import slots from '../data/slots.json';
+// StickyBar.astro — floating Book pill (phones/tablets). Opens the same booking flow as before (data-open="book").
+// Home toggles `.on` from 10.js (slides in); other pages pass `always`: it slides in once the guest scrolls past half a screen.
+// The "10% off" line shows only while slots.json has a discount above 0.
+interface Props {
+  always?: boolean;
+}
+const { always = false } = Astro.props;
+const hasOffer = slots.some((s) => Number(s.discount) > 0);
+---
+<div class="fx-sticky fk-bookbar" id="fxsticky" data-always={always ? '' : undefined}>
+  <span class="fkb-txt">
+    <strong>Book a table</strong>
+    {hasOffer && <small>10% off selected times</small>}
+  </span>
+  <button type="button" class="fk-btn fk-btn--book fkb-btn" data-open="book">Book</button>
+</div>
+
+<style is:global>
+  @media (max-width: 899px) {
+    .fx-sticky.fk-bookbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      left: max(12px, env(safe-area-inset-left, 0px));
+      right: max(12px, env(safe-area-inset-right, 0px));
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      height: 56px;
+      padding: 0 6px 0 18px;
+      border-radius: 999px;
+      background: rgba(253, 235, 207, 0.86);
+      backdrop-filter: blur(18px) saturate(1.3);
+      -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(217, 179, 106, 0.7);
+      box-shadow: 0 10px 28px rgba(10, 20, 10, 0.28);
+      box-sizing: border-box;
+      z-index: 8990; /* just under the phone nav (9000) */
+    }
+    /* Hidden until the guest scrolls past the hero, so it never covers the hero buttons.
+       Home: 10.js toggles .on. Other pages ([data-always]): the small script below toggles .on. */
+    .fx-sticky.fk-bookbar {
+      position: fixed;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+    }
+    .fx-sticky.fk-bookbar:not(.on) {
+      transform: translateY(calc(100% + 140px));
+      opacity: 0;
+      pointer-events: none;
+    }
+    .fk-bookbar .fkb-txt {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      font-family: var(--sans, "Poppins", system-ui, sans-serif);
+      color: #16301a;
+      line-height: 1.25;
+    }
+    .fk-bookbar strong {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .fk-bookbar small {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b4a12;
+    }
+    .fx-sticky.fk-bookbar button.fkb-btn {
+      height: 44px;
+      min-width: 88px;
+      padding: 0 22px;
+      border-radius: 999px;
+      flex: none;
+    }
+    /* Banquet builder has its own bottom dock: don't stack two bars on it */
+    body:has(#pb-dock:not([hidden])) .fk-bookbar {
+      display: none;
+    }
+  }
+  /* Phone: sit above the nav pill (nav = 64px + 12px gap + 8px space) */
+  @media (max-width: 767px) {
+    .fx-sticky.fk-bookbar {
+      display: flex !important; /* beats MobileBar's old hide rule on cached pages */
+      bottom: calc(var(--mb-clear, 76px) + 8px);
+    }
+    body:has(#pb-dock:not([hidden])) .fx-sticky.fk-bookbar {
+      display: none !important;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var bar = document.querySelector('.fk-bookbar[data-always]');
+    if (!bar) return;
+    var tick = false;
+    function check() {
+      tick = false;
+      var on = window.scrollY > window.innerHeight * 0.45;
+      if (on !== bar.classList.contains('on')) {
+        bar.classList.toggle('on', on);
+        // let the floating Instagram/Ask buttons re-measure so they lift above the bar
+        window.dispatchEvent(new Event('resize'));
+      }
+    }
+    addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(check); } }, { passive: true });
+    check();
+  })();
+</script>
+<style is:global>
+  @media (prefers-reduced-motion: reduce) { .fx-sticky.fk-bookbar { transition: none; } }
+</style>

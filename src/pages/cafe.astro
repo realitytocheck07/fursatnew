@@ -1,0 +1,58 @@
+---
+import site from '../data/site.json';
+// cafe.astro — Fursat Café (P6 restyle: shared ExperienceLayout on the baked plaster stage, mock "Café + Restaurant + Bar").
+// Content is the page's existing copy, items, prices and photos; only the design changed.
+// Wi-Fi: confirmed by the client. TODO(client): confirm Café featured items and the power-plug claim (moments text + FAQ). Pillars use menu counts only.
+import Base from '../layouts/Base.astro';
+import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
+---
+<Base
+  title="Café Lounge — Fursat Kitchen | Bar | Madhapur"
+  description="Fursat Café Lounge in Madhapur, Hyderabad — coffees, teas, milk shakes, desserts and all-day breakfast. Work, unwind or catch up with friends."
+  canonical="https://fursatind.in/cafe/"
+  ogImage="https://fursatind.in/assets/fursat_space_09.webp"
+  ogImageAlt="Fursat Café Lounge interior — cosy seating and warm lighting"
+>
+  <ExperienceLayout
+    insta="fursatind.in"
+    active="cafe"
+    kicker="Slow mornings · Coffee & shakes"
+    h1a="Coffee, Shakes &"
+    h1b="Slow Mornings"
+    lead="Coffees, teas, milk shakes, desserts and all-day breakfast, ordered from the same menu as the rest of Fursat."
+    ctas={[
+      { label: 'Explore Café Menu', href: '/menu?menu=cafe', primary: true },
+      { label: 'Book a Café Booth', href: '/reserve', book: true },
+    ]}
+    hero={{ src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino at Fursat Café', w: 1067, h: 1600, pos: '50% 50%' }}
+    pillars={[
+      { icon: 'coffee', title: 'Coffee', line: '27 coffees on the menu.' },
+      { icon: 'leaf', title: 'Tea', line: '10 teas, from chai to green tea.' },
+      { icon: 'bake', title: 'Desserts & Cookies', line: 'Cheesecakes, tiramisu, cookies.' },
+      { icon: 'shake', title: 'Shakes & Smoothies', line: '8 milk shakes, 4 smoothies.' },
+    ]}
+    momentsA="Spaces Designed"
+    momentsB="to Unwind"
+    momentsText="Quiet lunch breaks, afternoon meetings and evening desserts. Café booths and high tables with power plugs and free Wi-Fi."
+    momentsCta={{ label: 'Book a Café Booth', href: '/reserve', book: true }}
+    big={{ src: '/assets/interior/fursat_space_05.webp', alt: 'Café interior with natural light', w: 1920, h: 2560 }}
+    top={{ src: '/assets/interior/fursat_space_15.webp', alt: 'Artisan coffee bar counter', w: 1920, h: 2560 }}
+    bottom={{ src: '/assets/interior/fursat_space_06.webp', alt: 'Cosy seating corner', w: 1920, h: 2560 }}
+    cardsId="cafe-menu"
+    cardsKicker="The café selection"
+    cardsTitle="Favorites from the Counter"
+    cards={[
+      { tag: 'Coffee', name: 'Cafe Mocha', price: '₹239', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cafe-mocha.webp', alt: 'Cafe Mocha' } },
+      { tag: 'Coffee', name: 'Cappuccino', price: '₹219', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/cappuccino.webp', alt: 'Cappuccino' } },
+      { tag: 'Coffee', name: 'Iced Latte', price: '₹249', text: 'From our coffee menu.', img: { src: '/assets/dishes/new/iced-latte.webp', alt: 'Iced Latte' } },
+      { tag: 'All day breakfast', name: 'OG French Toast', price: '₹329', text: 'Vegetarian. From our all day breakfast menu.', img: { src: '/assets/dishes/new/og-french-toast.webp', alt: 'OG French Toast' } },
+    ]}
+    cardsLink={{ label: 'See the full café menu', href: '/menu?menu=cafe' }}
+    faqTitle="Café FAQs"
+    faq={[
+      { q: 'What are the café opening hours?', a: `Our café is open ${site.hours.display}. Perfect for quiet lunch breaks, afternoon meetings, and evening desserts.` },
+      { q: 'Is Wi-Fi and power available for remote working?', a: 'Yes, our café booths and high-table areas are equipped with convenient power plugs and free Wi-Fi for remote work or meetings.' },
+      { q: 'Can I order café items along with the main restaurant menu?', a: 'Yes, all café beverages, shakes, and desserts can be ordered from any table across Fursat.' },
+    ]}
+  />
+</Base>
