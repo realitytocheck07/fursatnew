@@ -5,6 +5,7 @@
      data-snap="Label"   snap point (the label shows on its side dot)
      data-snap-nodot     snap point without a side dot (it shares the previous dot)
      data-snap-min="768" only a snap point when the viewport is at least that wide
+     data-snap-fit       never scrolls freely: one gesture goes straight to the next section (for a landing hero a bit taller than a small phone)
      data-snap-last      last snap point: tall content scrolls freely, then the page scrolls normally
    Script tag option: data-block="css selector" = extra "something is open" selector that pauses snapping.
    A section taller than the screen scrolls freely once its top is reached; snapping resumes at its edges.
@@ -59,7 +60,7 @@
       var off = i === 0 && tops[0] < 40 ? 0 : H;
       var end = i < els.length - 1 ? tops[i + 1] : e.getBoundingClientRect().bottom + y;
       var target = Math.max(0, tops[i] - off), avail = vh - off;
-      var tall = end - tops[i] - avail > Math.min(.18 * vh, 120);
+      var tall = !e.hasAttribute('data-snap-fit') && end - tops[i] - avail > Math.min(.18 * vh, 120);   /* data-snap-fit: one gesture always goes to the next section, even if this one is a little taller than the screen */
       return { el: e, target: target, tall: tall, limit: tall ? Math.max(target, end - vh) : target, last: i === els.length - 1, nodot: e.hasAttribute('data-snap-nodot'), label: e.getAttribute('data-snap') };
     });
   }

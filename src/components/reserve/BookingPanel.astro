@@ -121,6 +121,13 @@ const conditions: string[] = [];
           </div>
         </div>
 
+        <p class="rs-q rs-plan-open"><button type="button" class="fk-btn fk-btn--secondary fk-btn--md" id="rs-plan-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><rect x="13" y="13" width="5" height="3" rx="1"/></svg><span>Pick an exact table (floor plan)</span></button></p>
+        <dialog class="rs-plan" id="rs-plan" aria-labelledby="rs-plan-h">
+          <div class="rs-plan-in">
+            <div class="rs-plan-hd"><h3 id="rs-plan-h">Choose your table</h3><button type="button" class="fk-btn fk-btn--primary fk-btn--md" id="rs-plan-done">Done</button></div>
+            <div id="rs-plan-host" class="rs-plan-host"></div>
+          </div>
+        </dialog>
         <div class="rs-q rs-tbl" id="f-table" hidden>
           <p class="rs-tl"><b>Table:</b> <span id="rs-tbl-t"></span> <button type="button" class="rs-link" id="rs-tbl-x">Remove</button></p>
           <p class="rs-hint" id="rs-tbl-h" role="status" hidden></p>

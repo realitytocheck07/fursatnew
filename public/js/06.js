@@ -44,6 +44,8 @@ function ui(){var v=M.on,t=v?"Sound off":"Sound on",l=v?"Turn sound off":"Turn s
  if(sb){sb.removeAttribute("aria-pressed");sb.lastElementChild.textContent=t;sb.setAttribute("aria-label",l);if(v)sb.classList.remove("nudge")}
  if(fkb){fkb.removeAttribute("aria-pressed");fkb.lastElementChild.textContent=t;fkb.setAttribute("aria-label",l)}}
 function hook(a){if(ac||!/^https?:/.test(location.protocol))return;try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(a);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
+/* v5.58b: where the intro song is now (seconds), 0 if it is not playing. 10.js starts the reel from this second, so the song CONTINUES: no repeat, no overlap. */
+window.__fzSongPos=function(){return(M.on&&!viaReel&&!M.a.paused&&!M.a.ended)?M.a.currentTime:0};
 var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
 /* sync: during the intro the song jumps to the helicopter's elapsed time. play() is called straight from the tap (Safari / iPhone need that). */
 var inIntro=function(){return document.documentElement.classList.contains("lock")};
@@ -77,7 +79,7 @@ addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="m
 if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&reelUsable()){
   /* v5.58: coming back from the mp3 (the reel was paused by scroll / tab switch while the song kept playing): put the picture where the song is */
   try{var tt=M.a.currentTime;if(tt>.3&&Math.abs(rf.currentTime-tt)>.4)rf.currentTime=tt}catch(x){}
-  viaReel=true;fade(M,0,200,function(){M.a.pause()});reelSound(true,true)}});
+  viaReel=true;fade(M,0,120,function(){M.a.pause()});reelSound(true,true)}});
  /* v5.58 FIX "music stops before the end": the reel is paused when the hero scrolls off screen or the tab hides (10.js). Its audio is the song, so the
     song died with it. Now, whenever the reel pauses by itself (not the guest's own pause button, not the end), the mp3 carries on from the same second. */
  rf.addEventListener("pause",function(){if(!M.on||!viaReel||rf.ended||document.documentElement.classList.contains("lock"))return;
@@ -95,13 +97,24 @@ addEventListener("fz:introend",onEnd);
 var bq=0,sbv=true;
 function wake(){if(M.on&&!bq&&!document.hidden)bq=requestAnimationFrame(beat)}
 if(sb&&"IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
-var R=document.documentElement,dir=1,wasOn=false;
-/* v5.58: the beat is also published on <html> as --fk-beat (0..1, eased down smoothly) and --fk-bdir (+1/-1, flips every beat), so Ask Fursat can dance to it.
-   It runs whenever the sound is on, not only while the Sound button is on screen. */
-function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);R.style.setProperty("--fk-beat",0);if(wasOn){wasOn=false;R.classList.remove("fk-music")}return}
+var R=document.documentElement,dir=1,wasOn=false,LV=[0,0,0,0,0],PK=[.1,.1,.1,.1,.1],MN=[.3,.3,.3,.3,.3],BN=[[1,2],[3,5],[6,10],[11,20],[21,40]],rfHooked=false,vib=[0,0,0,0,0];
+/* v5.60: the music is published on <html> for Ask Fursat's dance: --fk-beat (0..1 kick, eased down), --fk-bdir (+1/-1 per beat) and
+   --fk-b0..--fk-b4 (0..1 live level of five frequency bands, bass first). Runs whenever the sound is on. It reads the song's own audio (analyser),
+   also while the reel's audio carries it; if the browser gives no analyser it falls back to a steady 120 bpm pulse. */
+function hookReel(){if(rfHooked||!rf||!window.AudioContext&&!window.webkitAudioContext)return;
+ try{if(!ac)hook(M.a);if(!ac||!an)return;
+  ac.resume&&ac.resume().then(function(){if(rfHooked||ac.state!=="running")return;rfHooked=true;var s=ac.createMediaElementSource(rf);s.connect(an)}).catch(function(){})}catch(e){}}
+function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);R.style.setProperty("--fk-beat",0);for(var z=0;z<5;z++){LV[z]=0;R.style.setProperty("--fk-b"+z,0)}if(wasOn){wasOn=false;R.classList.remove("fk-music")}return}
  if(document.hidden)return;t=t||performance.now();if(!wasOn){wasOn=true;R.classList.add("fk-music")}
- if(an&&!viaReel){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}}else if(t-last>504){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}
- B*=.92;if(B<.01)B=0;if(sb&&sbv)sb.style.setProperty("--b",B.toFixed(3));R.style.setProperty("--fk-beat",B.toFixed(3));bq=requestAnimationFrame(beat)}
+ if(viaReel&&!rfHooked)hookReel();
+ var live=an&&(!viaReel||rfHooked);
+ if(live){an.getByteFrequencyData(fd);var e=(fd[1]+fd[2]+fd[3]+fd[4])/1020;avg=avg*.96+e*.04;if(e>avg*1.22+.07&&t-last>250){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}
+  for(var i=0;i<5;i++){var lo=BN[i][0],hi=BN[i][1],sum=0;for(var k=lo;k<=hi;k++)sum+=fd[k];var x=sum/((hi-lo+1)*255);MN[i]+=(x-MN[i])*.03;var dv=x-MN[i];PK[i]=Math.max(dv,PK[i]*.9985);var v=Math.max(0,Math.min(1,.3+.7*dv/Math.max(PK[i],.035)));LV[i]=v>LV[i]?v:LV[i]*.8}}
+ else{if(t-last>504){B=1;last=t;dir=-dir;R.style.setProperty("--fk-bdir",dir)}
+  var ph=(t-last)/504;for(var j=0;j<5;j++){var w=Math.max(0,1-ph*(1.1+j*.25))*(.55+.45*Math.abs(Math.sin(t/(210+j*70)+j)));LV[j]=Math.max(w,LV[j]*.78)}}
+ B*=.92;if(B<.01)B=0;if(sb&&sbv)sb.style.setProperty("--b",B.toFixed(3));R.style.setProperty("--fk-beat",B.toFixed(3));
+ for(var q=0;q<5;q++)R.style.setProperty("--fk-b"+q,LV[q].toFixed(3));
+ bq=requestAnimationFrame(beat)}
 document.addEventListener("visibilitychange",function(){if(viaReel){wake();return}if(document.hidden&&M.on){M.a.pause()}else if(M.on&&!M.a.ended){M.a.play().catch(function(){});wake()}});
 var af=document.querySelector(".askwrap .af");if(af){if("IntersectionObserver"in window){new IntersectionObserver(function(e,o){if(e[0].isIntersecting){af.classList.add("in");o.disconnect()}},{threshold:.12}).observe(af)}else af.classList.add("in")}
 })();

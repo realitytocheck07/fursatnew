@@ -368,7 +368,9 @@ window.FursatConcierge={open:openIt,route:route};
     raf=requestAnimationFrame(tick)}
   function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){var q=bg.play();if(q&&q.catch)q.catch(function(){})}if(!raf)raf=requestAnimationFrame(tick)}
   function halt(){fg.pause();if(bg)bg.pause()}
-  function begin(){if(st!=="idle")return;st="play";load();hero.classList.add("reel-on");m.pause();if(!paused())run()}
+  function resume(){var T=window.__fzSongPos?window.__fzSongPos():0;if(T<.5)return;  /* the intro song is playing: the reel carries the same song, so start the reel at the same second */
+    [fg,bg].forEach(function(x){if(!x)return;var go=function(){try{x.currentTime=Math.min(T,(x.duration||60)-.5)}catch(e){}};x.readyState>=1?go():x.addEventListener("loadedmetadata",go,{once:true})})}
+  function begin(){if(st!=="idle")return;st="play";load();resume();hero.classList.add("reel-on");m.pause();if(!paused())run()}
   function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);hero.classList.remove("reel-on");
     m.classList.add("zin");rv.classList.add("out");
     try{m.currentTime=2.45}catch(e){}

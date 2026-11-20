@@ -29,6 +29,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 {show && (
   <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined} data-page-key={PAGE_KEY[path] || 'any'} data-bubbles={JSON.stringify(BUBBLES)}>
     <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" data-cheer="/assets/ask-mascot-cheer-sm.webp" />
+    <span class="afab-eq" aria-hidden="true"><i style="--a:-72deg;--b:var(--fk-b3,0)"></i><i style="--a:-60deg;--b:var(--fk-b1,0)"></i><i style="--a:-48deg;--b:var(--fk-b0,0)"></i><i style="--a:-36deg;--b:var(--fk-b2,0)"></i><i style="--a:-24deg;--b:var(--fk-b4,0)"></i><i style="--a:24deg;--b:var(--fk-b4,0)"></i><i style="--a:36deg;--b:var(--fk-b2,0)"></i><i style="--a:48deg;--b:var(--fk-b0,0)"></i><i style="--a:60deg;--b:var(--fk-b1,0)"></i><i style="--a:72deg;--b:var(--fk-b3,0)"></i></span>
     <span class="afab-t"><b>Ask</b> <span translate="no">Fursat</span></span>
     {q && <span class="afab-q">{q}</span>}
     <span class="afab-coin" aria-hidden="true"></span><span class="afab-coin c2" aria-hidden="true"></span><span class="afab-coin c3" aria-hidden="true"></span>
@@ -222,7 +223,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
         const show = !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
         if (!show) { if (!ear.hidden) { ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
         if (ear.hidden) ear.hidden = false;
-        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.right - w - 8, top = r.top - ear.offsetHeight + 7;
+        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.right - w - 8, top = r.top - ear.offsetHeight + 7 - (document.documentElement.classList.contains('fk-music') ? 30 : 0);   // rises above the dancing bars while music plays
         const key = left.toFixed(0) + ',' + top.toFixed(0);
         if (key !== lastKey) { lastKey = key; ear.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0)`; }
         if (open) { card.style.left = phone() ? 'auto' : Math.max(12, r.left) + 'px'; card.style.right = phone() ? '12px' : 'auto'; card.style.bottom = (innerHeight - r.top + ear.offsetHeight + 4) + 'px'; }
@@ -369,15 +370,23 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 @media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
 @media print { .afab { display: none !important; } }
-/* ---- Dance (v5.58): the beat from the mood music (--fk-beat 0..1, eased, and --fk-bdir +/-1 flipping each beat) drives the mascot. Individual transform
-   properties (translate / rotate / scale) so it stacks with the hops and the roaming. A slow sway runs underneath so it never freezes between beats. ---- */
-:global(html.fk-music) .afab:not(.is-intro) .afab-img { translate: 0 calc(var(--fk-beat, 0) * -10px); rotate: calc(var(--fk-bdir, 1) * var(--fk-beat, 0) * 9deg); scale: calc(1 + var(--fk-beat, 0) * .1) calc(1 - var(--fk-beat, 0) * .07); animation: afab-sway 1.3s ease-in-out infinite alternate; }
-@keyframes afab-sway { from { transform: rotate(-5deg) translateX(-1.5px); } to { transform: rotate(5deg) translateX(1.5px); } }
-:global(html.fk-music) .afab:not(.is-intro)::after { content: '♪'; position: absolute; right: 8px; top: -10px; color: #f3c56b; font: 700 15px/1 Poppins, system-ui, sans-serif; opacity: calc(.35 + var(--fk-beat, 0) * .65); translate: 0 calc(var(--fk-beat, 0) * -6px); pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { :global(html.fk-music) .afab .afab-img { translate: none; rotate: none; scale: none; animation: none; } :global(html.fk-music) .afab::after { display: none; } }
+/* ---- Dance (v5.60): the mood music vibrates Ask Fursat like a music visualizer. html.fk-music is set by 06.js while sound is on; --fk-beat (kick, 0..1) and
+   --fk-b0..--fk-b4 (live level of five frequency bands, bass first) come from the song's own audio. She shakes on the bass, glows on the kick, and pixel bars fan out
+   of her like wings, each bar riding its own band. Transform / opacity only; static under reduced motion. ---- */
+.afab-eq { position: absolute; left: 6px; top: 50%; width: 44px; height: 44px; translate: 0 -50%; pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 2; }
+@media (max-width: 767px) { .afab-eq { left: 2px; } }
+@media (min-width: 768px) and (max-width: 1023px) { .afab-eq { left: 4px; } }
+.afab-eq i { position: absolute; left: 50%; bottom: 50%; width: 6px; height: 18px; margin-left: -3px; border-radius: 1.5px; background: linear-gradient(#fffaf0, #f3c56b); box-shadow: 0 0 0 1px #13301d, 0 0 calc(2px + var(--b, 0) * 9px) rgb(243 197 107 / .85); transform-origin: 50% 100%; transform: rotate(var(--a)) translateY(-27px) scaleY(calc(.16 + var(--b, 0) * 1.35)); }
+:global(html.fk-music) .afab:not(.is-intro) .afab-eq { opacity: 1; }
+:global(html.fk-music) .afab:not(.is-intro) .afab-img { animation: afab-vib .1s linear infinite alternate; scale: calc(1 + var(--fk-beat, 0) * .09); box-shadow: 0 0 calc(var(--fk-beat, 0) * 16px) calc(var(--fk-beat, 0) * 3px) rgb(243 197 107 / .9); }
+@keyframes afab-vib {
+  from { transform: translate(calc(var(--fk-b0, 0) * -2.6px), calc(var(--fk-b0, 0) * 1.6px)) rotate(calc(var(--fk-b0, 0) * -5deg)); }
+  to   { transform: translate(calc(var(--fk-b0, 0) * 2.6px), calc(var(--fk-b0, 0) * -1.6px)) rotate(calc(var(--fk-b0, 0) * 5deg)); }
+}
+@media (prefers-reduced-motion: reduce) { :global(html.fk-music) .afab .afab-img { animation: none; scale: none; box-shadow: none; } .afab-eq { display: none; } }
 
 /* ---- Offers ear: a small gold tab on the Ask pill + a real-offers card ---- */
-.afab-ear { position: fixed; left: 0; top: 0; z-index: 8499; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.afab-ear { position: fixed; left: 0; top: 0; z-index: 8501; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .afab-ear[hidden], .afab-offers[hidden] { display: none; }
 .afab-ear:active { scale: .96; }
 .afab-ear:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }

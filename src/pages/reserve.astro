@@ -89,6 +89,17 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
         busy = false;
       };
       launchBtn.addEventListener('click', startPhone);
+      // FLOOR PLAN (2D): always available from the form, needs no WebGL. Same "fk:table" event as the 3D room.
+      const planDlg = document.getElementById('rs-plan') as HTMLDialogElement | null, planBtn = document.getElementById('rs-plan-btn');
+      if (planDlg && planBtn) {
+        let plan: { destroy(): void } | null = null;
+        planBtn.addEventListener('click', async () => {
+          if (!plan) { const { mountPlan } = await import('../components/booking3d/plan2d'); plan = mountPlan(document.getElementById('rs-plan-host')!); }
+          if (!planDlg.open) planDlg.showModal();
+        });
+        document.getElementById('rs-plan-done')?.addEventListener('click', () => planDlg.close());
+        planDlg.addEventListener('click', (e) => { if (e.target === planDlg) planDlg.close(); });
+      }
       const start = async () => {
         if (phone()) { if (!failed && !host) launch.hidden = false; return; }
         launch.hidden = true;
