@@ -25,14 +25,14 @@
   "z": 1.3
  },
  "Biscoff Cheesecake": {
-  "cx": 0.5,
+  "cx": 0.52,
   "cy": 0.68,
-  "z": 1.3
+  "z": 1.38
  },
  "Tres Leches": {
   "cx": 0.5,
   "cy": 0.66,
-  "z": 1.3
+  "z": 1.38
  },
  "OG French Toast": {
   "cx": 0.5,
@@ -60,9 +60,9 @@
   "z": 1.15
  },
  "Chicken Tikka (Angara/ Malai/ Hariyali)": {
-  "cx": 0.5,
-  "cy": 0.7,
-  "z": 1.1
+  "cx": 0.52,
+  "cy": 0.74,
+  "z": 1.28
  },
  "Classic Paneer Tikka": {
   "cx": 0.5,
@@ -80,29 +80,29 @@
   "z": 1.0
  },
  "Rice / Noodles (Veg)": {
-  "cx": 0.5,
-  "cy": 0.78,
-  "z": 1.15
+  "cx": 0.56,
+  "cy": 0.8,
+  "z": 1.32
  },
  "Rice / Noodles (Egg)": {
-  "cx": 0.5,
-  "cy": 0.78,
-  "z": 1.15
+  "cx": 0.56,
+  "cy": 0.8,
+  "z": 1.32
  },
  "Rice / Noodles (Chicken)": {
-  "cx": 0.5,
-  "cy": 0.78,
-  "z": 1.15
+  "cx": 0.56,
+  "cy": 0.8,
+  "z": 1.32
  },
  "Rice / Noodles (Mix)": {
-  "cx": 0.5,
-  "cy": 0.78,
-  "z": 1.15
+  "cx": 0.56,
+  "cy": 0.8,
+  "z": 1.32
  },
  "Mexican Grilled Veggie Fried Burger": {
-  "cx": 0.45,
-  "cy": 0.62,
-  "z": 1.1
+  "cx": 0.5,
+  "cy": 0.64,
+  "z": 1.3
  },
  "CREAMY BISCOFF SHAKE": {
   "cx": 0.45,
