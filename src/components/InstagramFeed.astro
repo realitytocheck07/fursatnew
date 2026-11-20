@@ -128,6 +128,8 @@ const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
   .igfeed-lb[open] { display: grid; place-items: center; }
   .igfeed-lb-card { position: relative; display: grid; grid-template-columns: 1fr; width: min(94vw, 460px); max-height: 92dvh; overflow: auto; overscroll-behavior: contain; border-radius: 22px; background: #17200f; box-shadow: 0 0 0 1px #e6b85c, 0 30px 70px -20px rgb(0 0 0 / .75); }
   .igfeed-lb-media { position: relative; aspect-ratio: 1; background: #0d1308; overflow: hidden; border-radius: 22px 22px 0 0; transform-origin: 0 0; }
+  .igfeed-lb-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; background: #0d1308; }
+  .igfeed-lb-media video[hidden], .igfeed-lb-media img[hidden] { display: none; }
   .igfeed-lb-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
   .igfeed-lb-body { display: grid; gap: 14px; align-content: start; padding: 18px 20px 22px; }
   .igfeed-lb-meta { margin: 0; font: 600 .75rem/1.2 var(--fk-sans, Poppins, system-ui, sans-serif); color: #e6b85c; }

@@ -109,7 +109,7 @@ function reveal(grid: HTMLElement) {
 }
 
 /* ---------- lightbox (native <dialog>: focus trap + Escape; FLIP grows out of the tapped tile) ---------- */
-let lb: { dlg: HTMLDialogElement; media: HTMLElement; img: HTMLImageElement; meta: HTMLElement; cap: HTMLElement; go: HTMLAnchorElement; x: HTMLButtonElement } | null = null;
+let lb: { dlg: HTMLDialogElement; media: HTMLElement; img: HTMLImageElement; vid: HTMLVideoElement; meta: HTMLElement; cap: HTMLElement; go: HTMLAnchorElement; x: HTMLButtonElement } | null = null;
 let lastTile: HTMLElement | null = null;
 let closing = false;
 
@@ -118,6 +118,7 @@ function buildLightbox() {
   const card = document.createElement('div'); card.className = 'igfeed-lb-card';
   const media = document.createElement('div'); media.className = 'igfeed-lb-media';
   const img = document.createElement('img'); img.alt = ''; img.referrerPolicy = 'no-referrer'; img.decoding = 'async'; media.appendChild(img);
+  const vid = document.createElement('video'); vid.controls = true; vid.playsInline = true; vid.preload = 'metadata'; vid.hidden = true; vid.setAttribute('controlslist', 'nodownload'); media.appendChild(vid);
   const x = document.createElement('button'); x.type = 'button'; x.className = 'igfeed-lb-x'; x.setAttribute('aria-label', 'Close');
   const xs = document.createElementNS(svgNS, 'svg'); xs.setAttribute('viewBox', '0 0 24 24'); xs.setAttribute('aria-hidden', 'true');
   const xp = document.createElementNS(svgNS, 'path'); xp.setAttribute('d', 'M5 5l14 14M19 5L5 19'); xs.appendChild(xp); x.appendChild(xs);
@@ -130,8 +131,14 @@ function buildLightbox() {
   dlg.addEventListener('click', (e) => { if (e.target === dlg) closeLightbox(); });          // backdrop click
   dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeLightbox(); });            // Escape: animate out, then close
   x.addEventListener('click', closeLightbox);
-  dlg.addEventListener('close', () => { document.documentElement.classList.remove('igfeed-lock'); document.documentElement.style.removeProperty('padding-right'); });
-  lb = { dlg, media, img, meta, cap, go, x };
+  dlg.addEventListener('close', () => { stopVideo(); document.documentElement.classList.remove('igfeed-lock'); document.documentElement.style.removeProperty('padding-right'); });
+  lb = { dlg, media, img, vid, meta, cap, go, x };
+}
+
+function stopVideo() {
+  if (!lb) return;
+  lb.vid.pause(); lb.vid.hidden = true; lb.vid.removeAttribute('src'); lb.vid.removeAttribute('poster'); lb.vid.load(); // release the stream
+  lb.img.hidden = false;
 }
 
 function flipFrom(el: HTMLElement, rect: DOMRect, ms: number, reverse = false) {
@@ -148,6 +155,12 @@ function openLightbox(p: Tagged, tileBtn: HTMLElement, tileImg: HTMLImageElement
   L.img.src = tileImg.currentSrc || p.image;           // the tile's already-loaded pixels first, so the grow is instant
   if (p.image !== L.img.src) { const hi = new Image(); hi.referrerPolicy = 'no-referrer'; hi.onload = () => { if (L.dlg.open && L.img.dataset.id === p.id) L.img.src = p.image; }; hi.src = p.image; }
   L.img.dataset.id = p.id; L.img.alt = altOf(p);
+  stopVideo();
+  const canPlay = p.type === 'VIDEO' && !!p.video && /^https:\/\//i.test(p.video);
+  if (canPlay) {
+    L.vid.poster = p.image; L.vid.src = p.video!; L.vid.hidden = false; L.img.hidden = true;
+    L.vid.onerror = () => { if (L.dlg.open) { L.vid.hidden = true; L.img.hidden = false; } }; // expired or blocked file: fall back to the still + the Instagram link
+  }
   L.meta.textContent = [IG_ACCOUNTS[p.acct].label, fmtDate(p)].filter(Boolean).join(' · ');
   L.cap.textContent = p.caption || ''; L.cap.hidden = !p.caption;
   L.go.href = /^https:\/\/(www\.)?instagram\.com\//i.test(p.permalink) ? p.permalink : IG_ACCOUNTS[p.acct].url; // never trust a link we did not expect
@@ -156,6 +169,7 @@ function openLightbox(p: Tagged, tileBtn: HTMLElement, tileImg: HTMLImageElement
   const rect = tileBtn.getBoundingClientRect();
   L.dlg.showModal();
   L.x.focus({ preventScroll: true });
+  if (canPlay) L.vid.play().catch(() => { /* autoplay refused: the player controls are right there */ });
   if (!reduced()) {
     flipFrom(L.media, rect, 380);
     (L.dlg.querySelector('.igfeed-lb-body') as HTMLElement).animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 320, delay: 140, easing: EASE, fill: 'backwards' });

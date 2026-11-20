@@ -21,6 +21,7 @@ export type IgPost = {
   type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
   caption?: string;
   image: string;
+  video?: string | null; // playable file URL from the Worker (signed, expires); null/absent for photos and some reels
   permalink: string;
   timestamp: string;
 };
