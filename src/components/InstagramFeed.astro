@@ -1,0 +1,145 @@
+---
+// InstagramFeed: live Instagram posts from the fursat-feed Worker, fetched in the browser at view time (image URLs expire in days).
+// Props: account all|main|bites|banquets, limit (default 12), title, tone light|dark, layout inline|page.
+// "all" = merged newest-first feed of the three accounts with filter chips; a single account shows only its own posts.
+// Any error, empty list or timeout falls back to "Follow us on Instagram" buttons. No error text is ever shown.
+// Brand: embossed cream tiles, thin gold edge, soft shadow. Motion: transform and opacity only (see the script for wave, lift, FLIP lightbox, reveal).
+import { IG_ACCOUNTS, IG_ACCT_KEYS, IG_MAX_TILES, type IgAcct } from '../lib/instagram-config';
+
+interface Props { account?: 'all' | IgAcct; limit?: number; title?: string; tone?: 'light' | 'dark'; layout?: 'inline' | 'page' }
+const { account = 'all', limit = IG_MAX_TILES, title = 'From our Instagram', tone = 'light', layout = 'inline' } = Astro.props;
+const isAll = account === 'all';
+const targets = isAll ? IG_ACCT_KEYS : [account as IgAcct];
+const uid = `igfeed-${account}`;
+const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
+---
+<section class={`igfeed igfeed--${tone} igfeed--${layout}`} data-igfeed data-account={account} data-limit={n} data-state="idle" aria-labelledby={`${uid}-h`}>
+  <div class="igfeed-head">
+    <h3 class="igfeed-t" id={`${uid}-h`}>{title}</h3>
+    {isAll && (
+      <div class="igfeed-chips" role="group" aria-label="Show posts from" hidden>
+        <button type="button" class="igfeed-chip" data-chip="all" aria-pressed="true">All</button>
+        {IG_ACCT_KEYS.map((k) => <button type="button" class="igfeed-chip" data-chip={k} aria-pressed="false">{IG_ACCOUNTS[k].label}</button>)}
+      </div>
+    )}
+  </div>
+
+  <ul class="igfeed-grid" aria-busy="true" hidden>
+    {Array.from({ length: n }, () => <li class="igfeed-li igfeed-sk" aria-hidden="true"><span class="igfeed-sq"></span></li>)}
+  </ul>
+
+  <div class="igfeed-fb">
+    {isAll && <p class="igfeed-fb-t">Follow us on Instagram</p>}
+    <div class="igfeed-fb-row">
+      {targets.map((k) => (
+        <a class="igfeed-btn" href={IG_ACCOUNTS[k].url} target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" class="igfeed-dot"/></svg>
+          <span>{isAll ? IG_ACCOUNTS[k].label : 'Follow us on Instagram'}<span class="igfeed-sr"> @{IG_ACCOUNTS[k].handle} (opens in a new tab)</span></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initInstagramFeeds } from '../scripts/instagram-feed';
+  initInstagramFeeds();
+</script>
+
+<style is:global>
+  /* ---- layout ---- */
+  .igfeed { --ig-ink: var(--fk-ink, #2b2416); --ig-gold: var(--fk-edge, #d6aa5a); --ig-cream: var(--fk-cream-50, #fcf7f0); --ig-green: #14301c; --ig-ease: var(--fk-ease, cubic-bezier(.16, 1, .3, 1)); min-width: 0; margin-top: clamp(28px, 4vw, 48px); }
+  .igfeed--page { max-width: 1300px; margin: clamp(24px, 3.5vw, 40px) auto 0; padding: 0 clamp(16px, 4vw, 40px); }
+  .igfeed--dark { --ig-ink: #f6ecd8; --ig-cream: rgb(246 236 216 / .08); --ig-gold: #e6b85c; }
+  .igfeed-head { display: grid; gap: 14px; justify-items: center; text-align: center; margin-bottom: clamp(18px, 2.6vw, 28px); }
+  .igfeed-t { margin: 0; font: var(--fk-t-h3, 500 1.3rem/1.2 'Playfair Display', Georgia, serif); font-size: clamp(1.35rem, 1rem + 1.2vw, 1.9rem); color: var(--ig-ink); text-wrap: balance; }
+  .igfeed--light .igfeed-t { color: #18301f; }
+
+  /* ---- chips ---- */
+  .igfeed-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .igfeed-chips[hidden] { display: none; }
+  .igfeed-chip { min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer; touch-action: manipulation; font: 600 .875rem/1 var(--fk-sans, Poppins, system-ui, sans-serif); color: var(--ig-ink); background: var(--ig-cream); box-shadow: inset 0 0 0 1px var(--ig-gold); transition: transform 120ms var(--ig-ease), background-color 150ms, color 150ms; }
+  .igfeed-chip[hidden] { display: none; }
+  .igfeed-chip:active { transform: scale(.97); }
+  .igfeed-chip[aria-pressed="true"] { background: var(--fk-selected-bg, linear-gradient(180deg, #f4d38c 0%, #e3ab4a 100%)); color: var(--fk-selected-fg, #2a1d0c); box-shadow: var(--fk-selected-shadow, 0 0 0 1px #a8731c, 0 4px 10px -4px rgb(122 78 24 / .45), inset 0 1px 0 rgb(255 250 235 / .7)); }
+  .igfeed-chip:focus-visible, .igfeed-tile:focus-visible, .igfeed-btn:focus-visible, .igfeed-lb-x:focus-visible, .igfeed-lb-go:focus-visible { outline: 3px solid var(--fk-focus, #8a5a14); outline-offset: 3px; }
+  .igfeed--dark :is(.igfeed-chip, .igfeed-tile):focus-visible { outline-color: #e6b85c; }
+
+  /* ---- states: idle (no JS) shows only the fallback; loading shows the skeleton; ready shows posts; fallback shows buttons ---- */
+  .igfeed[data-state="idle"] .igfeed-grid, .igfeed[data-state="loading"] .igfeed-fb, .igfeed[data-state="ready"] .igfeed-fb { display: none; }
+  .igfeed[data-state="fallback"] .igfeed-grid, .igfeed[data-state="fallback"] .igfeed-chips { display: none; }
+
+  /* ---- grid: 2 columns on phones, 3 on tablet, 4 on desktop; tiles are 1:1 before the image loads (no layout shift) ---- */
+  .igfeed-grid { list-style: none; margin: 0; padding: 6px 0 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(10px, 2vw, 20px); }
+  @media (min-width: 640px) { .igfeed-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .igfeed-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .igfeed-li { min-width: 0; }
+  .igfeed-wave { display: block; }
+  .igfeed-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; overflow: hidden; border-radius: 18px; cursor: pointer; touch-action: manipulation; background: #e3d3b6; color: inherit; isolation: isolate;
+    box-shadow: 0 0 0 1px var(--ig-gold), 0 10px 22px -14px rgb(60 40 10 / .55), inset 0 1px 0 rgb(255 244 214 / .55); transition: transform 150ms var(--ig-ease), box-shadow 200ms var(--ig-ease); }
+  .igfeed--dark .igfeed-tile { background: #1b2a1c; box-shadow: 0 0 0 1px var(--ig-gold), 0 12px 24px -14px rgb(0 0 0 / .8); }
+  .igfeed-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 260ms var(--ig-ease); }
+  .igfeed-tile img.is-loaded { opacity: 1; }
+  .igfeed-tile:active { transform: scale(1.04); box-shadow: 0 0 0 1px var(--ig-gold), 0 18px 30px -12px rgb(60 40 10 / .6); }
+  .igfeed-tag { position: absolute; left: 8px; bottom: 8px; z-index: 2; max-width: calc(100% - 16px); padding: 5px 10px; border-radius: 999px; font: 600 .6875rem/1 var(--fk-sans, Poppins, system-ui, sans-serif); color: #fbf3e6; background: rgb(14 34 20 / .78); box-shadow: inset 0 0 0 1px rgb(230 184 92 / .55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .igfeed-kind { position: absolute; right: 8px; top: 8px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: #fbf3e6; background: rgb(14 34 20 / .78); box-shadow: inset 0 0 0 1px rgb(230 184 92 / .55); }
+  .igfeed-kind svg { width: 14px; height: 14px; fill: currentColor; }
+
+  /* ---- skeleton ---- */
+  .igfeed-sk .igfeed-sq { display: block; aspect-ratio: 1; border-radius: 18px; background: #e8dac0; box-shadow: 0 0 0 1px rgb(214 170 90 / .6); animation: igfeed-pulse 1.4s ease-in-out infinite; }
+  .igfeed--dark .igfeed-sk .igfeed-sq { background: #1b2a1c; }
+  @keyframes igfeed-pulse { 50% { opacity: .55; } }
+
+  /* ---- fallback ---- */
+  .igfeed-fb { display: grid; gap: 14px; justify-items: center; text-align: center; padding: clamp(8px, 2vw, 16px) 0; }
+  .igfeed-fb-t { margin: 0; font: 500 1.05rem/1.3 var(--fk-serif, 'Playfair Display', Georgia, serif); color: var(--ig-ink); }
+  .igfeed-fb-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .igfeed-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; text-decoration: none; font: 600 .9375rem/1 var(--fk-sans, Poppins, system-ui, sans-serif); color: var(--fk-action-fg, #fbf3e6); background: var(--fk-action-bg, linear-gradient(180deg, #24502f 0%, #14321e 100%)); box-shadow: var(--fk-action-shadow, 0 0 0 1px rgb(217 179 106 / .85), 0 10px 24px -10px rgb(14 34 20 / .55), inset 0 1px 0 rgb(255 236 190 / .28)); transition: transform 120ms var(--ig-ease), box-shadow 200ms var(--ig-ease); touch-action: manipulation; }
+  .igfeed-btn svg { width: 20px; height: 20px; flex: none; fill: none; stroke: #e6b85c; stroke-width: 1.8; }
+  .igfeed-dot { fill: #e6b85c; stroke: none; }
+  .igfeed-btn:active { transform: scale(.97); }
+  .igfeed-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* ---- reveal: tiles start hidden only once JS has built them; opacity + transform only ---- */
+  .igfeed-li.is-pre { opacity: 0; transform: translateY(14px); }
+  .igfeed-li.is-pre.is-in { opacity: 1; transform: none; transition: opacity 420ms var(--ig-ease), transform 520ms var(--ig-ease); transition-delay: calc(var(--d, 0) * 55ms); }
+
+  /* ---- wave (only with motion allowed): each tile floats a few px and tilts ~1deg, phase offset by grid position so a wave passes across ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    .igfeed-li.is-in .igfeed-wave { animation: igfeed-float 6.5s ease-in-out infinite; animation-delay: calc(var(--ph, 0) * -.7s); will-change: transform; }
+  }
+  @keyframes igfeed-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
+  @media (hover: hover) and (pointer: fine) {
+    .igfeed-li:hover .igfeed-wave { animation-play-state: paused; }
+    .igfeed-tile:hover { transform: scale(1.06); box-shadow: 0 0 0 1px var(--ig-gold), 0 22px 34px -14px rgb(60 40 10 / .62), 0 0 22px -8px rgb(232 200 134 / .6); z-index: 3; }
+    .igfeed-btn:hover { box-shadow: var(--fk-action-shadow-hover, 0 0 0 1px #e8c886, 0 14px 30px -10px rgb(14 34 20 / .6), 0 0 20px -6px rgb(232 200 134 / .55)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .igfeed-li.is-pre { transform: none; }
+    .igfeed-li.is-pre.is-in { transition: opacity 250ms linear; transition-delay: 0ms; }
+    .igfeed-tile, .igfeed-tile:hover, .igfeed-tile:active { transition: none; transform: none; }
+    .igfeed-sk .igfeed-sq { animation: none; }
+  }
+
+  /* ---- lightbox (native <dialog>: focus trap, Escape, inert page) ---- */
+  html.igfeed-lock { overflow: hidden; }
+  .igfeed-lb { padding: 0; border: 0; background: transparent; color: #f6ecd8; max-width: none; max-height: none; width: 100vw; height: 100dvh; margin: 0; overflow: hidden; }
+  .igfeed-lb::backdrop { background: rgb(13 19 8 / .86); }
+  .igfeed-lb[open] { display: grid; place-items: center; }
+  .igfeed-lb-card { position: relative; display: grid; grid-template-columns: 1fr; width: min(94vw, 460px); max-height: 92dvh; overflow: auto; overscroll-behavior: contain; border-radius: 22px; background: #17200f; box-shadow: 0 0 0 1px #e6b85c, 0 30px 70px -20px rgb(0 0 0 / .75); }
+  .igfeed-lb-media { position: relative; aspect-ratio: 1; background: #0d1308; overflow: hidden; border-radius: 22px 22px 0 0; transform-origin: 0 0; }
+  .igfeed-lb-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+  .igfeed-lb-body { display: grid; gap: 14px; align-content: start; padding: 18px 20px 22px; }
+  .igfeed-lb-meta { margin: 0; font: 600 .75rem/1.2 var(--fk-sans, Poppins, system-ui, sans-serif); color: #e6b85c; }
+  .igfeed-lb-cap { margin: 0; font: 400 .9375rem/1.55 var(--fk-sans, Poppins, system-ui, sans-serif); color: #f4ecda; white-space: pre-line; overflow-wrap: anywhere; }
+  .igfeed-lb-go { justify-self: start; display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 999px; text-decoration: none; font: 600 .9375rem/1 var(--fk-sans, Poppins, system-ui, sans-serif); color: #1a1608; background: #e0a63c; box-shadow: 0 0 0 1px #f0c36a, 0 10px 22px -10px rgb(0 0 0 / .6); touch-action: manipulation; }
+  .igfeed-lb-go:active { transform: scale(.97); }
+  .igfeed-lb-x { position: absolute; right: 10px; top: 10px; z-index: 3; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; color: #fbf3e6; background: rgb(13 19 8 / .72); box-shadow: inset 0 0 0 1px rgb(230 184 92 / .6); touch-action: manipulation; }
+  .igfeed-lb-x svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .igfeed-lb-x:active { transform: scale(.94); }
+  @media (min-width: 820px) {
+    .igfeed-lb-card { grid-template-columns: minmax(0, min(78dvh, 560px)) minmax(260px, 340px); width: auto; }
+    .igfeed-lb-media { border-radius: 22px 0 0 22px; width: min(78dvh, 560px); }
+    .igfeed-lb-body { padding: 56px 24px 24px; }
+  }
+</style>

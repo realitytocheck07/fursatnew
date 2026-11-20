@@ -57,6 +57,9 @@ const cardSizes = (src: string) => { const k = VAR[src.replace(/\.webp$/, '')]?.
 // Google FAQ rich results, from the same questions shown on the page
 const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
 import InstaFeed from '../InstaFeed.astro';
+import InstagramFeed from '../InstagramFeed.astro';
+// Instagram handle -> Worker account. Social Club has no Worker feed yet, so it keeps the placeholder strip.
+const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'main', fursat_bitesandbuffet: 'bites', fursatbanquets: 'banquets' };
 ---
 
 <SiteHeader active={p.active} variant="plaster" />
@@ -133,7 +136,9 @@ import InstaFeed from '../InstaFeed.astro';
         <details class="xp-faq-item"><summary>{f.q}</summary><p>{f.a}</p></details>
       ))}
     </div>
-    {p.insta && <div class="igf-page"><InstaFeed handle={p.insta} tone="dark" /></div>}
+    {p.insta && LIVE[p.insta]
+      ? <InstagramFeed account={LIVE[p.insta]} layout="page" tone="dark" title="Latest from our Instagram" />
+      : p.insta && <div class="igf-page"><InstaFeed handle={p.insta} tone="dark" /></div>}
     {p.insta && <InstaFollow handle={p.insta} tone="dark" />}
   </section>
 </main>

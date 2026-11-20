@@ -56,7 +56,7 @@ const values = [
 ];
 const plateD = [{ x: 142, y: 1075 }, { x: 378, y: 1075 }, { x: 620, y: 1075 }, { x: 860, y: 1075 }];
 const plateM = [{ x: 303, y: 2083 }, { x: 703, y: 2083 }, { x: 303, y: 2378 }, { x: 703, y: 2378 }];
-import InstaFeed from '../components/InstaFeed.astro';
+import InstagramFeed from '../components/InstagramFeed.astro';
 ---
 
 <Base
@@ -127,7 +127,7 @@ import InstaFeed from '../components/InstaFeed.astro';
     </section>
   </main>
 
-<div class="igf-page"><InstaFeed handle="fursatind.in" /></div>
+<InstagramFeed account="main" layout="page" title="Latest from Fursat" />
 <InstaFollow handle="fursatind.in" />
   <MascotOfferModal />
   <SiteFooter />

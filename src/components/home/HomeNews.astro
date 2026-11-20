@@ -3,6 +3,7 @@
 // Design system classes: fk-card / fk-card--text, fk-btn, fk-ty-* (src/styles/DESIGN-SYSTEM.md).
 // Home loads fk-tokens.css (via HomeShared), so the fk-card, fk-btn and fk-ty rules come from there.
 import { getNews } from '../../lib/cms/news';
+import InstagramFeed from '../InstagramFeed.astro';
 import type { NewsItem } from '../../lib/cms/news';
 
 // getNews() (src/lib/cms/news.ts) returns items in the shape the old section used; map them to the card fields below.
@@ -45,12 +46,14 @@ const hasPin = pinIdx >= 0;
 const lq = (s?: string) => (!s ? '' : /^(data:|url\()/i.test(s) ? `background-image:url(${s.replace(/^url\(|\)$/g, '')});background-size:cover` : `background-color:${s}`);
 const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
 ---
-{(cards.length > 0 || data.wish) && (
-<section class="hn" id="whats-new" aria-labelledby="hn-h" data-source={data.source}>
+{(
+<section class="hn" id="whats-new" aria-labelledby={cards.length > 0 || data.wish ? "hn-h" : undefined} data-source={data.source}>
   <div class="hn-in">
+    {(cards.length > 0 || data.wish) && (
     <div class="hn-head" data-fk-reveal>
       <h2 id="hn-h" class="fk-ty-h2 hn-title">{data.heading}</h2>
     </div>
+    )}
     {data.wish && (
       <div class="hn-wish" data-ends={endIso(data.wish.endsAt)}>
         <svg class="hn-wish-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
@@ -99,6 +102,7 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
       })}
     </ul>
     )}
+    <InstagramFeed account="all" limit={12} title="From our Instagram" />
   </div>
   <script is:inline>
     // Hides a card (or the wish) the moment its end time passes, even before the next rebuild; removes the whole section when nothing is left.
@@ -115,7 +119,7 @@ const SIZES = '(max-width: 767px) 78vw, (max-width: 1023px) 50vw, 34vw';
         if (row) {
           if (left) { row.setAttribute('data-n', left); if (!row.querySelector('.hn-item--pin')) row.removeAttribute('data-pin'); } else row.remove();
         }
-        if (!left && !sec.querySelector('.hn-wish')) { sec.remove(); return; }
+        if (!left && !sec.querySelector('.hn-wish') && !sec.querySelector('.igfeed')) { sec.remove(); return; }
         clearTimeout(timer);
         if (next < Infinity) timer = setTimeout(run, Math.min(next - now + 50, 2147483647));
       }

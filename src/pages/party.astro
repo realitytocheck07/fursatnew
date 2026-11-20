@@ -23,7 +23,7 @@ const why = [
 ];
 const WA = '919059670033';
 const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I would like to plan a party.');
-import InstaFeed from '../components/InstaFeed.astro';
+import InstagramFeed from '../components/InstagramFeed.astro';
 ---
 <Base title="Parties & Events — Fursat Kitchen | Bar, Madhapur" description="Birthdays, corporate gatherings, kitty parties and bar bashes at Fursat, Madhapur. Bar party, elite buffet and banquet packages." canonical="https://fursatind.in/party/" preloadImages={[{ href: '/assets/heroes/party-768.webp', media: '(max-width: 820px)', type: 'image/webp' }, { href: '/assets/heroes/party-1536.webp', media: '(min-width: 821px)', type: 'image/webp' }]}>
 <a class="skip" href="#pk-main">Skip to main content</a>
@@ -79,7 +79,7 @@ import InstaFeed from '../components/InstaFeed.astro';
     </div>
   </div>
 </div>
-<div class="igf-page"><InstaFeed handle="fursatbanquets" /></div>
+<InstagramFeed account="banquets" layout="page" title="Latest from Fursat Banquets" />
 <InstaFollow handle="fursatbanquets" />
 <SiteFooter />
 <MobileBar active="celebrate" />
