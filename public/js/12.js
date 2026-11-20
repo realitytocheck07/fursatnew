@@ -72,7 +72,11 @@ bo.innerHTML=(l.length?'<div class="pk-g">'+l.map(function(p){return card(p)}).j
 foot(false);bo.scrollTop=0}
 function card(p,x,bd){var li=p.sec.map(function(s){return"<li>"+esc(s.t.replace(" \u00B7 "," "))+" \u2014 any "+s.n+"</li>"}).concat(p.fix.map(function(f){return"<li>"+esc(f[0])+": "+esc(f[1].join(", "))+"</li>"}));
 if(!p.sec.length)li=["<li>Bar service for "+p.serve+"</li>","<li>"+esc(p.dr[0])+"</li>"];
-return'<article class="pk-c" style="--c:'+p.c+'"><span class="pk-tg">'+(bd?"\u2605 "+bd+" \u00B7 ":"")+esc(p.tag)+'</span><h4>'+esc(p.t)+'</h4><div class="pk-pr">'+inr(p.price)+' <small>'+(p.k==="party"?"+ taxes ":"")+'/ person</small></div><ul class="pk-ul">'+li.join("")+"</ul>"+(p.dr.length&&p.sec.length?'<div class="pk-dr"><b>Drinks'+(p.serve?" \u00B7 serving "+p.serve:"")+"</b>"+esc(p.dr.join(" \u00B7 "))+"</div>":"")+(x?'<div class="pk-fx">'+x+"</div>":"")+'<div class="pk-bt"><button class="pk-b" type="button" data-a="plan" data-v="'+p.id+'">Plan this</button></div></article>'}
+var g={},o=[];p.sec.forEach(function(s){var w=/starter/i.test(s.t)?"Starters":/main/i.test(s.t)?"Main course":/rice|noodle|pasta/i.test(s.t)?"Rice / noodles / pasta":/dessert/i.test(s.t)?"Dessert":s.t.split(" ")[0];if(!(w in g)){g[w]=0;o.push(w)}g[w]+=s.n});
+var ch=o.map(function(w){return"<span class=\"pk-ch\"><b>"+g[w]+"</b> "+esc(w)+"</span>"}).join("");
+var dn=p.dr.length&&p.sec.length?'<div class="pk-dl"><b>Drinks'+(p.serve?" \u00B7 "+p.serve:"")+"</b>"+esc(p.dr.slice(0,3).join(" \u00B7 "))+(p.dr.length>3?" <i>+ more</i>":"")+"</div>":"";
+var full='<details class="pk-more"><summary>See everything included</summary><ul class="pk-ul">'+li.join("")+"</ul>"+(p.dr.length&&p.sec.length?'<div class="pk-dr"><b>Drinks'+(p.serve?" \u00B7 serving "+p.serve:"")+"</b>"+esc(p.dr.join(" \u00B7 "))+"</div>":"")+"</details>";
+return'<article class="pk-c" style="--c:'+p.c+'"><span class="pk-tg">'+(bd?"\u2605 "+bd+" \u00B7 ":"")+esc(p.tag)+'</span><h4>'+esc(p.t)+'</h4><div class="pk-pr">'+inr(p.price)+' <small>'+(p.k==="party"?"+ taxes ":"")+'/ person</small></div>'+(ch?'<div class="pk-chs">'+ch+"</div>":"")+dn+(ch?full:'<ul class="pk-ul">'+li.join("")+"</ul>")+(x?'<div class="pk-fx">'+x+"</div>":"")+'<div class="pk-bt"><button class="pk-b" type="button" data-a="plan" data-v="'+p.id+'">Plan this</button></div></article>'}
 function pbar(){return[["tab","plan","\u2728 Find my package",1],["tab","party","\uD83E\uDD42 Party + bar",0],["tab","buffet","\uD83C\uDF5B Buffet",0],["tab","menu","\uD83D\uDCD6 Party menu",0]].map(function(x){return pill(x[0],x[1],x[2],x[3])}).join("")}
 function opts(k,l){return l.map(function(o){return'<button type="button" class="pk-ch" data-a="pl" data-k="'+k+'" data-v="'+o[0]+'" aria-pressed="'+(String(st.pl[k])===String(o[0]))+'">'+o[1]+"</button>"}).join("")}
 function pview(){tt.innerHTML="Find your <em>perfect</em> package";tb.innerHTML=pbar();
@@ -158,5 +162,5 @@ fb.addEventListener("click",function(){var o=!fab.classList.contains("open");fab
 fab.addEventListener("click",function(e){var q=e.target.closest("[data-q]");if(!q)return;fabOpen(false);fb.setAttribute("aria-expanded","false");if(q.getAttribute("data-q")==="chat")window.openFursatChat?window.openFursatChat():window.open("https://wa.me/"+WA,"_blank","noopener");else open({tab:"party"})});
 document.addEventListener("pointerdown",function(e){if(fab.classList.contains("open")&&!fab.contains(e.target))fabOpen(false)});
 var iv=setInterval(function(){if($("intro")||$("gate"))return;clearInterval(iv);setTimeout(function(){fab.classList.add("on")},900)},300)}
-mount();mkFab();window.FursatPackages={open:open,packages:PK};
+mount();/* v5.62: the old quick-action WhatsApp button (mkFab) sat right under WaAgent's button = two buttons stacked; WaAgent is the only one now */window.FursatPackages={open:open,packages:PK};
 })();
