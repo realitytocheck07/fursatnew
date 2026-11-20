@@ -46,4 +46,48 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
 /* Music toggle: same type as every button (Poppins 600), pressed = the one green */
 .hx-ctl .snd { font-family: var(--fk-font-text); font-style: normal; font-weight: 600; letter-spacing: 0; border-color: var(--fk-btn-green); }
 .hx-ctl .snd[aria-pressed="true"] { background: var(--fk-btn-green); border-color: var(--fk-btn-green); color: var(--fk-btn-on-green); }
+
+/* ── v5.61 GOLDEN-HOUR FRAME (MotionSites craft pass) ─────────────────────────────────────────────
+   Signature: the reel sits in a real inset frame (36px radius, gold rim light) over a giant ghost "FURSAT" word.
+   Desktop no longer scales a 1536x1024 canvas down (tiny type on laptops): the hero fills the viewport under the header and the
+   type is sized in real px. Phone keeps its stack. Everything is transform/opacity, one-shot; reduced motion shows the final state.
+   Hooks kept: #top .go .reel-on, #fxstage #fxpl #fxrv #fxrvf #fxrvb #fxplv, .fx-h1 u, .rv, .hx-ctl. */
+.fxhero .fx-olive{display:none}
+@media (min-width: 900px) {
+  html .fxhero { --u: 1; --r: 1; --hh: clamp(500px, calc(100dvh - var(--sh-h, 104px) - 30px), 900px); --h1: clamp(52px, min(6.6vw, 10.6vh), 112px); height: var(--hh); margin-top: 0; }
+  html .fxhero .fx-stage { position: relative; left: auto; top: auto; width: 100%; max-width: 1760px; height: 100%; margin: 0 auto; transform: none;
+    padding: 0 clamp(32px, 6vw, 112px) 0 clamp(176px, 14vw, 270px); box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto;
+    align-content: center; column-gap: clamp(24px, 4vw, 80px); }
+  html .fxhero .txt, html .fxhero .fx-logo, html .fxhero .askdock { margin-left: 0; }
+  html .fxhero .txt { position: relative; left: auto; top: auto; width: auto; height: auto; grid-column: 1; grid-row: 1; align-self: end; padding-top: 34px; z-index: 5; }
+  html .fxhero .fx-h1 { position: relative; left: auto; top: auto; margin: 0; font: 700 var(--h1)/.94 var(--serif); letter-spacing: -.035em; white-space: nowrap; }
+  html .fxhero .fx-h1 b { padding-bottom: .06em; }
+  html .fxhero .fx-h1 .l2 u { font-size: 1.04em; }
+  html .fxhero .fx-h1[data-greet]::before { left: 4px; margin-bottom: 16px; font-size: 12.5px; letter-spacing: .22em; color: #7a6a38; }
+  html .fxhero .fx-p { position: relative; left: auto; top: auto; margin: 22px 0 0; max-width: 33rem; font: 400 clamp(15px, 1.3vw, 18px)/1.6 var(--fk-font-text, 'Poppins', system-ui, sans-serif) !important; letter-spacing: 0; color: rgba(26,22,8,.7); white-space: normal; }
+  html .fxhero .fx-btns { position: relative; left: auto; top: auto; width: auto; height: 48px; margin-top: 28px; gap: 12px; }
+  html .fxhero .fx-btns .fk-btn.fk-btn--md { font-size: 14.5px; padding: 0 24px; }
+  html .fxhero .fx-info { position: relative; left: auto; top: auto; grid-column: 1; grid-row: 2; align-self: start; justify-self: start; margin-top: 26px; width: auto; max-width: none; z-index: 5; }
+  html .fxhero .fx-pl { position: relative; right: auto; top: auto; grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: center; z-index: 2;
+    width: min(100%, calc((var(--hh) - 44px) * .9)); height: auto; aspect-ratio: 9 / 10; border-radius: 36px;
+    box-shadow: 0 0 0 1px rgba(214,160,64,.6), 0 2px 0 0 rgba(255,236,190,.6) inset, 0 44px 80px -34px rgba(60,32,8,.6), 0 0 120px -30px rgba(240,160,60,.5); }
+  html .fxhero .fx-pl { isolation: isolate; }
+  html .fxhero .fx-rv { border-radius: inherit; }
+  html .fxhero .fx-pl-rv { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+  html .fxhero .fx-rv, html .fxhero .fx-rv-f { --rv-x: 0px; }
+  html .fxhero .fx-rv-f { inset: 0; left: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none; object-position: 50% 14%; }
+  html .fxhero .hx-ctl { top: 16px; left: 16px; right: auto; gap: 8px; }
+  /* ghost word: architecture behind the frame (a grid item in the frame's cell, so it centres on it and peeks out both sides) */
+  html .fxhero .fx-stage::before { content: "FURSAT"; grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: center; z-index: 1; pointer-events: none; white-space: nowrap;
+    font: 800 min(16.5vw, 35vh)/.8 var(--serif); letter-spacing: -.06em; color: rgba(190,132,44,.15); }
+}
+@media (max-width: 899px) {
+  .fxhero .fx-pl { isolation: isolate; }
+  .fxhero .fx-rv { border-radius: inherit; }
+  .fxhero .fx-pl { border-radius: 28px; box-shadow: 0 0 0 1px rgba(214,160,64,.55), 0 28px 50px -26px rgba(60,32,8,.55); }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  html .fxhero .fx-stage::before { opacity: 0; transform: translate3d(0, 5%, 0); transition: opacity 1.6s cubic-bezier(.22,1,.36,1) .35s, transform 1.6s cubic-bezier(.22,1,.36,1) .35s; }
+  html .fxhero.go .fx-stage::before { opacity: 1; transform: none; }
+}
 </style>
