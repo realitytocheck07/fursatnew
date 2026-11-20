@@ -4,6 +4,7 @@ import {
   LIMITS,
   TYPE_LABELS,
   altRequired,
+  askQuestionRequired,
   buttonCheck,
   cardStatus,
   endAfterStart,
@@ -27,7 +28,7 @@ export default defineType({
       name: 'type',
       title: 'What kind of card is this?',
       type: 'string',
-      description: 'Offer, Event and News show as a card. Wish (for example a festival greeting) shows as a gold banner instead.',
+      description: 'Offer, Event and News show as a card. Ask Fursat is the card that types out a sample question. Wish (for example a festival greeting) shows as a gold banner instead.',
       options: {
         layout: 'radio',
         direction: 'horizontal',
@@ -35,6 +36,7 @@ export default defineType({
           { title: 'Offer', value: 'offer' },
           { title: 'Event', value: 'event' },
           { title: 'News', value: 'news' },
+          { title: 'Ask Fursat', value: 'ask' },
           { title: 'Wish', value: 'wish' },
         ],
       },
@@ -63,7 +65,7 @@ export default defineType({
       type: 'image',
       description: `A real photo of Fursat or our food, at least ${LIMITS.minPhotoWidth}px wide. Drag the dot in "Edit image" to choose what stays in the picture when it is cropped.`,
       options: { hotspot: true, accept: 'image/jpeg,image/png,image/webp' },
-      hidden: ({ document }) => document?.type === 'wish',
+      hidden: ({ document }) => document?.type === 'wish' || document?.type === 'ask',
       fields: [
         defineField({
           name: 'alt',
@@ -83,6 +85,100 @@ export default defineType({
       initialValue: false,
       hidden: ({ document }) => !hasPhoto({ document }),
       validation: (Rule) => Rule.custom((tick, context) => realPhotoTickRequired(tick, context.document)),
+    }),
+    defineField({
+      name: 'photoMode',
+      title: 'How the photo sits on the card',
+      type: 'string',
+      description: '"Behind the text" fills the card with the photo, darkened so the words stay easy to read. "At the top" shows it as a framed picture above the text.',
+      options: {
+        layout: 'radio',
+        direction: 'horizontal',
+        list: [
+          { title: 'Behind the text', value: 'background' },
+          { title: 'At the top', value: 'top' },
+        ],
+      },
+      initialValue: 'background',
+      hidden: ({ document }) => !hasPhoto({ document }),
+    }),
+    defineField({
+      name: 'askQuestion',
+      title: 'Sample question',
+      type: 'string',
+      description: `What the card types out, as if a guest had asked it (up to ${LIMITS.askQuestion} characters). For example: "Something spicy, not too heavy".`,
+      components: { input: withCharCount(LIMITS.askQuestion) },
+      hidden: ({ document }) => document?.type !== 'ask',
+      validation: (Rule) =>
+        Rule.max(LIMITS.askQuestion)
+          .error(`Sample question: up to ${LIMITS.askQuestion} characters.`)
+          .custom((q, context) => askQuestionRequired(q, context.document)),
+    }),
+    defineField({
+      name: 'askChips',
+      title: 'Dishes it suggests',
+      type: 'array',
+      of: [{ type: 'string' }],
+      description: `Up to 3 dish or drink names from our menu, shown after the question (up to ${LIMITS.askChip} characters each). Use the exact menu name.`,
+      hidden: ({ document }) => document?.type !== 'ask',
+      validation: (Rule) =>
+        Rule.custom((chips) => {
+          const list = chips || []
+          if (list.length > 3) return 'Up to 3 dishes.'
+          if (list.some((c) => String(c).length > LIMITS.askChip)) return `Each dish name: up to ${LIMITS.askChip} characters.`
+          return true
+        }),
+    }),
+    defineField({
+      name: 'stats',
+      title: 'Big number (optional)',
+      type: 'array',
+      description: 'A large number that counts up on the card, for example "₹925 per guest, from" or "10% off your table, up to". Add one, or two for a card with two prices. Leave empty for none.',
+      of: [
+        {
+          type: 'object',
+          name: 'stat',
+          title: 'Big number',
+          fields: [
+            defineField({ name: 'prefix', title: 'Before the number', type: 'string', description: 'For example ₹', validation: (Rule) => Rule.max(3) }),
+            defineField({ name: 'value', title: 'Number', type: 'number', description: 'Whole numbers look best, for example 925. Do not type commas.', validation: (Rule) => Rule.required().min(0).error('Enter the number (0 or more).') }),
+            defineField({ name: 'suffix', title: 'After the number', type: 'string', description: 'For example %', validation: (Rule) => Rule.max(3) }),
+            defineField({
+              name: 'caption',
+              title: 'Small line under the number',
+              type: 'string',
+              description: `For example "per guest, from" (up to ${LIMITS.statCaption} characters).`,
+              components: { input: withCharCount(LIMITS.statCaption) },
+              validation: (Rule) => Rule.max(LIMITS.statCaption).error(`Up to ${LIMITS.statCaption} characters.`),
+            }),
+          ],
+          preview: {
+            select: { prefix: 'prefix', value: 'value', suffix: 'suffix', caption: 'caption' },
+            prepare: ({ prefix, value, suffix, caption }) => ({ title: `${prefix || ''}${value ?? ''}${suffix || ''}`, subtitle: caption || '' }),
+          },
+        },
+      ],
+      hidden: ({ document }) => document?.type === 'wish',
+      validation: (Rule) => Rule.max(2).error('Up to 2 big numbers on one card.'),
+    }),
+    defineField({
+      name: 'look',
+      title: 'Card colour',
+      type: 'string',
+      description: 'Pick a ready-made look. Leave on "Automatic" and the site chooses by position (first card red, then gold, cream, glass).',
+      options: {
+        layout: 'radio',
+        direction: 'horizontal',
+        list: [
+          { title: 'Automatic', value: 'auto' },
+          { title: 'Red', value: 'red' },
+          { title: 'Gold', value: 'gold' },
+          { title: 'Cream', value: 'light' },
+          { title: 'Glass', value: 'glass' },
+        ],
+      },
+      initialValue: 'auto',
+      hidden: ({ document }) => document?.type === 'wish',
     }),
     defineField({
       name: 'terms',

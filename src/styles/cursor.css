@@ -1,0 +1,35 @@
+/* Fursat cursor: the cocktail glass replaces the pointer on desktop (mouse) only.
+   Sprite is 42x65 css px; hotspot (the click point) is the glass rim at 6.1 / 17.5. */
+:root{--fkc-w:42px;--fkc-h:65px;--fkc-hx:6.1px;--fkc-hy:17.5px;--fkc-gold:#c99a43;--fkc-ease:cubic-bezier(.23,1,.32,1)}
+
+/* hide the OS cursor only after the sprite is loaded and live; native zones (inputs, 360 viewer) opt out */
+html.fk-cur:not(.fk-cur-native),
+html.fk-cur:not(.fk-cur-native) *{cursor:none!important}
+
+.fk-c{position:fixed;inset:auto;left:0;top:0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;
+  pointer-events:none;z-index:2147483647;opacity:0;will-change:transform;contain:layout style}
+.fk-c.is-on{opacity:1;transition:opacity .12s linear}
+.fk-c.is-hid{opacity:0}
+
+.fk-c-in{position:absolute;left:calc(var(--fkc-hx) * -1);top:calc(var(--fkc-hy) * -1);width:var(--fkc-w);height:var(--fkc-h);
+  transform-origin:var(--fkc-hx) var(--fkc-hy);transition:transform .18s var(--fkc-ease)}
+.fk-c-tilt{position:absolute;inset:0;transform-origin:var(--fkc-hx) var(--fkc-hy)}
+.fk-c-tilt img{display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
+
+/* hover is seen tens of times a day, so it stays small: a 7deg tip plus a gold ring on the exact click point.
+   press snaps in (90ms), release settles slower (180ms) */
+.fk-c.is-link .fk-c-in{transform:rotate(-7deg)}
+.fk-c.is-down .fk-c-in{transform:scale(.92);transition-duration:.09s}
+.fk-c.is-link.is-down .fk-c-in{transform:rotate(-7deg) scale(.94)}
+.fk-c-pt,.fk-c-rip{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;box-sizing:border-box}
+.fk-c-pt{border:1.5px solid var(--fkc-gold);background:rgba(242,238,228,.4);opacity:0;transition:opacity .12s linear}
+.fk-c.is-link .fk-c-pt{opacity:1}
+.fk-c-rip{border:1px solid var(--fkc-gold);opacity:0}
+
+@media (prefers-reduced-motion:reduce){
+  .fk-c-in{transition:none}
+  .fk-c.is-link .fk-c-in,.fk-c.is-down .fk-c-in,.fk-c.is-link.is-down .fk-c-in{transform:none}
+  .fk-c-pt{transition:opacity .1s linear}
+  .fk-c-rip{display:none}
+}
+@media (forced-colors:active),(hover:none),(pointer:coarse){.fk-c{display:none!important}}

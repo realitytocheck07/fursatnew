@@ -68,7 +68,7 @@ const BADGE: Record<string, string> = {"drink": "<path d=\"M6 3h12l-1.5 7a4.5 4.
     <p>A few favorites, curated with intention.</p>
     <a class="fk-btn fk-btn--secondary fk-btn--md" href="/menu">View full menu</a>
   </div>
-  <div class="hs-cards fk-rail fk-rail--cards fk-rail--m" data-dots>
+  <div class="hs-cards fk-rail fk-rail--cards fk-rail--m" data-dots data-fk-stagger>
     {cards.map((c) => {
       const d0 = c.dishes[0];
       return (

@@ -400,11 +400,11 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   /* v5.33d brand: the elephant emblem lives on its own layer above the wordmark */
   .sh-logo { position: relative; }
   .sh-logo img.sh-lg-word { clip-path: inset(55% 0 0 0); transition: height .3s var(--fk-ease, ease), opacity .3s ease, transform .3s ease; }
-  .sh-logo img.sh-lg-el { position: absolute; left: 0; top: 0; clip-path: inset(0 0 45% 0); transform-origin: 50% 50%; transition: height .3s var(--fk-ease, ease), transform .45s cubic-bezier(.34,1.56,.64,1); animation: sh-nod 7s ease-in-out 2s infinite; }
+  .sh-logo img.sh-lg-el { position: absolute; left: 0; top: 0; clip-path: inset(0 0 45% 0); transform-origin: 50% 50%; transition: height .3s var(--fk-ease, ease), transform .45s cubic-bezier(.34,1.56,.64,1); animation: sh-nod 7s ease-in-out 2s 3; }
   .sh-logo::before { content: ""; position: absolute; left: 50%; top: 27%; width: 70%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(243,197,107,.55), rgba(243,197,107,0) 68%); opacity: 0; transform: scale(.6); transition: opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: -1; }
   .sh-logo::after { clip-path: inset(55% 0 0 0); }
   @keyframes sh-nod { 0%, 84%, 100% { transform: none; } 88% { transform: translateY(-2px) rotate(-5deg); } 92% { transform: translateY(0) rotate(2deg); } 96% { transform: rotate(-1deg); } }
-  html:not(.sh-seen) .sh-logo img.sh-lg-el { animation: sh-drop-el .8s cubic-bezier(.34,1.56,.64,1) both, sh-nod 7s ease-in-out 2.5s infinite; }
+  html:not(.sh-seen) .sh-logo img.sh-lg-el { animation: sh-drop-el .8s cubic-bezier(.34,1.56,.64,1) both, sh-nod 7s ease-in-out 2.5s 3; }
   html:not(.sh-seen) .sh-logo img.sh-lg-word { animation: sh-word-in .7s cubic-bezier(.23,1,.32,1) .25s both; }
   @keyframes sh-drop-el { from { opacity: 0; transform: translateY(-16px) scale(.85) rotate(-8deg); } }
   @keyframes sh-word-in { from { opacity: 0; transform: translateY(6px); } }

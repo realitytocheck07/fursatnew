@@ -47,18 +47,24 @@ Open the card, click the **...** menu, press **Delete**. This cannot be undone. 
 
 | Field | What to write | Limit |
 |---|---|---|
-| **Type** | Offer, Event, News or Wish | pick one |
+| **Type** | Offer, Event, News, Ask Fursat or Wish | pick one |
 | **Title** | The big words on the card | **60 characters** |
 | **Short text** | One or two simple lines | **160 characters** |
 | **Photo** | A real Fursat photo | optional for News and Event |
 | **Alt text** | One short sentence about the photo, for people who cannot see it | needed with every photo |
+| **How the photo sits** | "Behind the text" fills the card (darkened so words stay easy to read) or "At the top" shows a framed picture | pick one |
 | **Real-photo tick** | You promise: "This is a real photo of Fursat or our food, and we may use it" | needed with every photo |
 | **Button label** | The words on the button, for example "Order on WhatsApp" | **24 characters** |
 | **Button goes to** | A page on our site (pick from the list), WhatsApp with a message already written, or a link | pick one |
 | **Start date / End date** | When the card shows. End must come after Start | Offers and Wishes **must** have an End date |
 | **Offer terms** | One line of conditions. A "Terms apply" link is added for you | needed for Offers |
+| **Big number** | A large number that counts up, for example ₹ 925 with "per guest, from". Add a second one for a card with two prices | optional, up to 2 |
+| **Card colour** | Automatic, Red, Gold, Cream or Glass. Leave on Automatic unless you want a specific look | optional |
+| **Sample question / Dishes it suggests** | Ask Fursat cards only: the question the card types out, and up to 3 dish names from our menu | question needed |
 | **Pin to top** | Shows this card first and bigger | only 1 at a time |
 | **Order** | A number. Small numbers come first | optional |
+
+The first card (or the pinned one) is the large red card. Up to 6 cards show; the layout adjusts to however many are live.
 
 Studio counts your characters and shows a message if something is missing. Fix it, then Publish.
 

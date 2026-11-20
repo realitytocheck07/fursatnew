@@ -1,7 +1,7 @@
 // Validation logic kept as plain functions so scripts/check-schemas.mjs can run
 // the exact same code Studio runs. Each returns `true` (ok) or an error message.
 
-export const LIMITS = { title: 60, text: 160, buttonLabel: 24, terms: 120, minPhotoWidth: 1200, maxCards: 6 }
+export const LIMITS = { title: 60, text: 160, buttonLabel: 24, terms: 120, minPhotoWidth: 1200, maxCards: 6, statCaption: 40, askQuestion: 60, askChip: 30 }
 
 const isBlank = (v) => typeof v !== 'string' || v.trim() === ''
 const time = (v) => (v ? new Date(v).getTime() : NaN)
@@ -105,4 +105,12 @@ export function cardStatus(startAt, endAt, now = Date.now()) {
   return 'Active now'
 }
 
-export const TYPE_LABELS = { offer: 'Offer', event: 'Event', news: 'News', wish: 'Wish' }
+export const TYPE_LABELS = { offer: 'Offer', event: 'Event', news: 'News', ask: 'Ask Fursat', wish: 'Wish' }
+
+// The Ask Fursat card needs its sample question (the card types it out).
+export function askQuestionRequired(question, document) {
+  if (document?.type === 'ask' && isBlank(question)) {
+    return 'Write the sample question the card types out, for example "Something spicy, not too heavy".'
+  }
+  return true
+}

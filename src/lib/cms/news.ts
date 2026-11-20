@@ -1,13 +1,20 @@
 // getNews(): Home "What's new" data. Reads Sanity at build time, falls back to the built-in cards.
-// Never throws. Does not touch HomeNews.astro (C3 wires it).
+// Never throws. Rendered by src/components/home/WhatsNew.astro (via HomeNews.astro).
 import { sanityQuery } from './sanity.ts';
 import type { SanityResult } from './sanity.ts';
 import { imageSet } from './image.ts';
 import site from '../../data/site.json' with { type: 'json' };
 import type { ImageSet, SanityImage } from './image.ts';
 
-// Same shape HomeNews.astro uses today, plus optional CMS extras.
+export type NewsKind = 'offer' | 'event' | 'news' | 'ask';
+export type NewsLook = 'red' | 'gold' | 'light' | 'glass';
+/** A big animated number on a card, e.g. { prefix: '₹', value: 925, caption: 'per guest, from' }. */
+export type NewsStat = { prefix?: string; value: number; suffix?: string; caption?: string };
+/** Ask Fursat card: a sample question and the dishes it suggests (the card types it out). */
+export type NewsAsk = { question: string; chips: string[] };
+
 export type NewsItem = {
+  kind: NewsKind;
   tag: string;
   icon: string;
   title: string;
@@ -18,6 +25,10 @@ export type NewsItem = {
   end?: string; // YYYY-MM-DD (IST) so the page can show "Ends 30 Nov" and hide it later
   terms?: string; // offers only
   pinned?: boolean;
+  look?: NewsLook; // owner's colour choice; the page picks one by position when empty
+  stats?: NewsStat[]; // up to 2 big numbers
+  photoMode?: 'background' | 'top'; // how the photo sits on the card
+  ask?: NewsAsk; // kind 'ask' only
 };
 export type NewsWish = { text: string; from?: string; to?: string };
 export type NewsResult = {
@@ -40,6 +51,7 @@ export const NEWS_QUERY = `{
   "settings": *[_type == "homeNews"][0]{ enabled, kicker, heading, maxCards, "showBuiltIn": showBuiltInCards },
   "cards": *[_type == "announcement" && !(_id in path("drafts.**"))]{
     _id, type, title, "shortText": text, "start": startAt, "end": endAt, "offerTerms": terms, pinned, order, "realPhoto": photoIsReal,
+    look, photoMode, askQuestion, askChips, stats[]{ prefix, value, suffix, caption },
     button{ label, kind, page, "message": whatsappMessage, url },
     photo{ alt, hotspot, crop, asset->{ _id, metadata{ lqip, palette{ dominant{ background } } } } }
   }
@@ -47,8 +59,10 @@ export const NEWS_QUERY = `{
 
 const DEFAULTS = { kicker: 'Latest at Fursat', heading: "What's new", max: 4, hardMax: 6 };
 const IST_MS = 5.5 * 3600 * 1000;
-const TAG: Record<string, string> = { offer: 'Offer', event: 'Event', news: 'News' };
-const ICON: Record<string, string> = { offer: 'tag', event: 'spark', news: 'spark' };
+const TAG: Record<string, string> = { offer: 'Offer', event: 'Event', news: 'News', ask: 'New' };
+const ICON: Record<string, string> = { offer: 'tag', event: 'calendar', news: 'spark', ask: 'chat' };
+const KINDS: NewsKind[] = ['offer', 'event', 'news', 'ask'];
+const LOOKS: NewsLook[] = ['red', 'gold', 'light', 'glass'];
 
 /** YYYY-MM-DD for the given instant, in India time. */
 export function istDate(d: Date): string {
@@ -78,18 +92,46 @@ function isActive(c: any, now: Date): boolean {
 }
 
 function buttonOf(b: any): { href: string; cta: string } {
-  const cta = String(b?.label || '').trim() || 'Read more';
+  const cta = String(b?.label || '').trim();
+  if (!cta) return { href: '', cta: '' }; // button left empty in Studio = a card with no button
   if (b?.kind === 'whatsapp' && b.message) return { href: `https://wa.me/${String(site.whatsapp).replace(/\D/g, '')}?text=${encodeURIComponent(String(b.message))}`, cta };
   if (b?.kind === 'link' && /^https?:\/\//i.test(String(b.url || ''))) return { href: String(b.url), cta };
   if (b?.kind === 'page' && String(b.page || '').startsWith('/')) return { href: String(b.page), cta };
   return { href: '/', cta };
 }
 
+/** Up to 2 usable big numbers. A stat needs a finite, non-negative number; text parts are trimmed and capped. */
+export function cleanStats(v: unknown): NewsStat[] {
+  if (!Array.isArray(v)) return [];
+  const out: NewsStat[] = [];
+  for (const x of v) {
+    const n = Number((x as any)?.value);
+    if (!(x as any) || (x as any).value === null || (x as any).value === '' || !Number.isFinite(n) || n < 0) continue;
+    const part = (k: string, max: number) => String((x as any)[k] ?? '').trim().slice(0, max);
+    out.push({ prefix: part('prefix', 3), value: n, suffix: part('suffix', 3), caption: part('caption', 40) });
+    if (out.length === 2) break;
+  }
+  return out;
+}
+
+/** Ask card content; null when the sample question is empty. Up to 3 dish chips. */
+export function cleanAsk(question: unknown, chips: unknown): NewsAsk | null {
+  const q = String(question ?? '').trim().slice(0, 60);
+  if (!q) return null;
+  const list = Array.isArray(chips) ? chips.map((c) => String(c ?? '').trim().slice(0, 30)).filter(Boolean).slice(0, 3) : [];
+  return { question: q, chips: list };
+}
+
 function toItem(c: any): NewsItem {
-  const t = String(c.type || 'news').toLowerCase();
+  const raw = String(c.type || 'news').toLowerCase();
+  const t = (KINDS as string[]).includes(raw) ? raw : 'news';
+  const photoMode = c.photoMode === 'top' ? 'top' : 'background';
   const photo: SanityImage | null = c.photo?.asset ? { ...c.photo, alt: c.photo.alt || '' } : null;
-  const img = c.realPhoto === true && photo?.alt ? imageSet(photo, { aspect: 4 / 3 }) : null; // photo needs the real-photo tick and alt text
+  // photo needs the real-photo tick and alt text; 'top' is a 4:3 crop, 'background' keeps the photo's own shape (CSS covers the card)
+  const img = c.realPhoto === true && photo?.alt ? imageSet(photo, photoMode === 'top' ? { aspect: 4 / 3 } : {}) : null;
+  const ask = t === 'ask' ? cleanAsk(c.askQuestion, c.askChips) : null;
   return {
+    kind: t as NewsKind,
     tag: TAG[t] || 'News',
     icon: ICON[t] || 'spark',
     title: String(c.title || '').trim(),
@@ -99,6 +141,10 @@ function toItem(c: any): NewsItem {
     end: endDay(c.end),
     ...(t === 'offer' ? { terms: String(c.offerTerms || '').trim() } : {}),
     pinned: c.pinned === true,
+    ...((LOOKS as string[]).includes(c.look) ? { look: c.look as NewsLook } : {}),
+    ...(cleanStats(c.stats).length ? { stats: cleanStats(c.stats) } : {}),
+    photoMode,
+    ...(ask ? { ask } : {}),
   };
 }
 
@@ -114,6 +160,7 @@ export function buildFromSanity(payload: any, now: Date): { settings: any; items
     const t = String(c.type || '').toLowerCase();
     if ((t === 'offer' || t === 'wish') && !c.end) return false; // offers and wishes must end
     if (t === 'offer' && !String(c.offerTerms || '').trim()) return false;
+    if (t === 'ask' && !cleanAsk(c.askQuestion, c.askChips)) return false; // the Ask card needs its sample question
     return isActive(c, now);
   });
 
@@ -146,17 +193,17 @@ export function buildFromSanity(payload: any, now: Date): { settings: any; items
 
 /** Pure: the cards HomeNews shows today, from news.json, slots.json and party.json. */
 export function builtInNews(data: NewsData, now: Date): { items: NewsItem[]; wish: NewsWish | null } {
-  const inr = (n: number) => '₹' + n.toLocaleString('en-IN');
   const news = data.news || {};
   const maxOff = Math.max(0, ...(data.slots || []).map((s: any) => s.discount || 0));
   const pk: any[] = data.party?.packages || [];
   const from = (g: string) => Math.min(...pk.filter((p) => p.group === g).map((p) => p.price));
+  const stat = (n: number, extra: Omit<NewsStat, 'value'>): NewsStat[] => (Number.isFinite(n) && n > 0 ? [{ value: n, ...extra }] : []);
   const items: NewsItem[] = [
-    ...(news.announcements || []).map((a: any) => ({ tag: a.tag || 'News', icon: 'spark', title: a.title, line: a.line || '', href: a.href || '/', cta: a.cta || 'Read more' })),
-    ...(maxOff ? [{ tag: 'Offer', icon: 'tag', title: `Up to ${maxOff}% off your table`, line: 'Book your table online and pick a time slot with the offer.', href: '/reserve', cta: 'Book a table' }] : []),
-    { tag: 'New', icon: 'plate', title: 'Build your banquet menu', line: `Choose every dish course by course and send it on WhatsApp. From ${inr(from('banquet'))} per guest.`, href: '/banquet#packages', cta: 'Start building' },
-    { tag: 'Packages', icon: 'glass', title: 'Party packages', line: `Bar parties from ${inr(from('bar'))}, elite buffets from ${inr(from('elite'))} per guest.`, href: '/party', cta: 'See packages' },
-    { tag: 'New', icon: 'chat', title: 'Ask Fursat', line: 'Tell us what you feel like and see matching dishes and drinks from our menu.', href: '/ask', cta: 'Ask now' },
+    ...(news.announcements || []).map((a: any) => ({ kind: 'news' as NewsKind, tag: a.tag || 'News', icon: 'spark', title: a.title, line: a.line || '', href: a.href || '/', cta: a.cta || 'Read more' })),
+    ...(maxOff ? [{ kind: 'offer' as NewsKind, tag: 'Offer', icon: 'tag', title: `Up to ${maxOff}% off your table`, line: 'Book your table online and pick a time slot with the offer.', href: '/reserve', cta: 'Book a table', stats: stat(maxOff, { suffix: '%', caption: 'off your table, up to' }) }] : []),
+    { kind: 'news', tag: 'New', icon: 'list', title: 'Build your banquet menu', line: 'Choose every dish course by course and send it on WhatsApp.', href: '/banquet#packages', cta: 'Start building', stats: stat(from('banquet'), { prefix: '₹', caption: 'per guest, from' }) },
+    { kind: 'news', tag: 'Packages', icon: 'gift', title: 'Party packages', line: '', href: '/party', cta: 'See packages', stats: [...stat(from('bar'), { prefix: '₹', caption: 'bar parties, per guest from' }), ...stat(from('elite'), { prefix: '₹', caption: 'elite buffets, per guest from' })] },
+    { kind: 'ask', tag: 'New', icon: 'chat', title: 'Ask Fursat', line: 'Tell us what you feel like and see matching dishes and drinks from our menu.', href: '/ask', cta: 'Ask now', ask: { question: 'Something spicy, not too heavy', chips: ['Dynamite prawns', 'Nalli biryani'] } },
   ];
   const today = istDate(now);
   const w = (news.wishes || []).find((x: any) => x.text && (!x.from || x.from <= today) && (!x.to || today <= x.to));

@@ -29,8 +29,8 @@ async function runRule(rule, value, ctx) {
       const r = await arg(value, ctx)
       if (r !== true && r !== undefined && r !== null) out.push({ level: rule.level, message: typeof r === 'string' ? r : r.message })
     } else if (isEmpty(value)) continue
-    else if (kind === 'min') { const n = typeof value === 'string' ? value.length : value; if (n < arg) fail(`Must be at least ${arg}`) }
-    else if (kind === 'max') { const n = typeof value === 'string' ? value.length : value; if (n > arg) fail(`Must be at most ${arg}`) }
+    else if (kind === 'min') { const n = typeof value === 'string' || Array.isArray(value) ? value.length : value; if (n < arg) fail(`Must be at least ${arg}`) }
+    else if (kind === 'max') { const n = typeof value === 'string' || Array.isArray(value) ? value.length : value; if (n > arg) fail(`Must be at most ${arg}`) }
     else if (kind === 'integer') { if (!Number.isInteger(value)) fail('Must be a whole number') }
   }
   return out
@@ -46,6 +46,9 @@ async function validateFields(fields, value, document, getClient) {
       for (const p of await runRule(spec, v, ctx)) problems.push({ field: f.name, ...p })
     }
     if (f.fields && v !== undefined && v !== null) problems.push(...(await validateFields(f.fields, v, document, getClient)))
+    // array of objects: validate each member's fields too
+    const member = Array.isArray(f.of) ? f.of.find((m) => m.fields) : null
+    if (member && Array.isArray(v)) for (const item of v) problems.push(...(await validateFields(member.fields, item, document, getClient)))
   }
   return problems
 }
@@ -68,6 +71,12 @@ const wish = { ...news, _id: 'w1', type: 'wish', endAt: iso(3) }
 // [name, type, document, expected error text (string) or null for "no error", other pinned docs]
 const cases = [
   ['Good: minimal News card', 'announcement', news, null],
+  ['Good: Ask Fursat card with question and dishes', 'announcement', { ...news, type: 'ask', askQuestion: 'Something spicy', askChips: ['Dynamite prawns'] }, null],
+  ['Bad: Ask Fursat card without a question', 'announcement', { ...news, type: 'ask' }, 'sample question'],
+  ['Bad: Ask Fursat card with 4 dishes', 'announcement', { ...news, type: 'ask', askQuestion: 'Q', askChips: ['a', 'b', 'c', 'd'] }, 'Up to 3 dishes'],
+  ['Good: one big number', 'announcement', { ...news, stats: [{ _key: 'a', prefix: '₹', value: 925, caption: 'per guest, from' }] }, null],
+  ['Bad: three big numbers', 'announcement', { ...news, stats: [{ _key: 'a', value: 1 }, { _key: 'b', value: 2 }, { _key: 'c', value: 3 }] }, 'Up to 2 big numbers'],
+  ['Bad: big number caption of 41 characters', 'announcement', { ...news, stats: [{ _key: 'a', value: 1, caption: text(41) }] }, 'Up to 40 characters'],
   ['Good: full Offer with photo, alt, tick, terms, end, button', 'announcement', { ...offer, photo: photo(), photoIsReal: true, button: { label: 'Book a table', kind: 'page', page: '/reserve' } }, null],
   ['Good: Wish with an End date', 'announcement', wish, null],
   ['Good: News with no End date (stays until removed)', 'announcement', news, null],

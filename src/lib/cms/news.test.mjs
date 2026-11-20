@@ -123,5 +123,54 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   check('fallback = what HomeNews shows now (offer from slots, banquet, party, ask)', t.includes(`Up to ${maxOff}% off your table`) && t.includes('Build your banquet menu') && t.includes('Party packages') && t.at(-1) === 'Ask Fursat', t);
 }
 
+// 9. Big numbers, look, photo mode and the Ask card
+{
+  const r = run([
+    card({ title: 'Numbers', type: 'offer', offerTerms: 'Dine-in', look: 'gold', stats: [{ prefix: '₹', value: 925, caption: 'per guest, from' }, { value: 10, suffix: '%' }, { value: 5 }] }),
+    card({ title: 'Bad stats', stats: [{ value: 'abc' }, { value: -4 }, { value: null }, { value: '' }], look: 'neon' }),
+    card({ title: 'Ask', type: 'ask', askQuestion: 'Something spicy', askChips: ['Prawns', ' ', 'Biryani', 'Kebab', 'Extra'] }),
+    card({ title: 'Ask no question', type: 'ask' }),
+  ]);
+  const by = (t) => r.items.find((i) => i.title === t);
+  check('stats: kept in order, capped at 2', same(by('Numbers')?.stats?.map((s) => s.value), [925, 10]), by('Numbers')?.stats);
+  check('stats: prefix, suffix and caption carried', by('Numbers')?.stats?.[0]?.prefix === '₹' && by('Numbers')?.stats?.[0]?.caption === 'per guest, from');
+  check('stats: non-numbers, negatives and blanks are dropped (field omitted)', by('Bad stats') && !('stats' in by('Bad stats')), by('Bad stats'));
+  check('look: valid value kept, unknown value dropped', by('Numbers')?.look === 'gold' && !('look' in by('Bad stats')));
+  check('ask: question and up to 3 non-blank chips', same(by('Ask')?.ask, { question: 'Something spicy', chips: ['Prawns', 'Biryani', 'Kebab'] }), by('Ask')?.ask);
+  check('ask: kind and tag', by('Ask')?.kind === 'ask' && by('Ask')?.tag === 'New');
+  check('ask: no sample question -> card rejected', !by('Ask no question'));
+  check('kind: offer/news carried', by('Numbers')?.kind === 'offer' && by('Bad stats')?.kind === 'news');
+}
+
+// 10. Photo mode: background keeps the photo's shape, top is a 4:3 crop
+{
+  const photo = { alt: 'Platter', asset: { _ref: 'image-abc123-2000x3000-jpg', metadata: {} } };
+  const r = run([card({ title: 'Bg', photo, realPhoto: true }), card({ title: 'Top', photo, realPhoto: true, photoMode: 'top' })]);
+  const bg = r.items.find((i) => i.title === 'Bg'), top = r.items.find((i) => i.title === 'Top');
+  check('photo mode: default is background, no forced crop height', bg?.photoMode === 'background' && bg.image && !/[?&]h=/.test(bg.image.src), bg?.image?.src);
+  check('photo mode: top is a 4:3 crop', top?.photoMode === 'top' && top.image && /[?&]h=540/.test(top.image.src), top?.image?.src);
+}
+
+// 11. Built-in cards carry their numbers from slots.json and party.json
+{
+  const b = builtInNews(data, NOW).items;
+  const maxOff = Math.max(0, ...data.slots.map((x) => x.discount || 0));
+  const find = (t) => b.find((i) => i.title === t);
+  check('built-in: offer number = best slot discount', find(`Up to ${maxOff}% off your table`)?.stats?.[0]?.value === maxOff);
+  check('built-in: banquet card has one per-guest number, no price in the text', find('Build your banquet menu')?.stats?.length === 1 && !/₹/.test(find('Build your banquet menu').line));
+  check('built-in: party card has two numbers', find('Party packages')?.stats?.length === 2);
+  check('built-in: Ask card has a question and chips', find('Ask Fursat')?.kind === 'ask' && find('Ask Fursat').ask.chips.length > 0);
+  const none = builtInNews({ ...data, party: { packages: [] } }, NOW).items;
+  check('built-in: no packages -> no number (never "Infinity")', none.every((i) => !JSON.stringify(i.stats || []).includes('null') && (i.stats || []).every((s) => Number.isFinite(s.value))));
+}
+
+// 12. A card with no button has no button (no stray "Read more")
+{
+  const r = run([card({ title: 'No button' }), card({ title: 'With button', button: { label: 'Book', kind: 'page', page: '/reserve' } })]);
+  const nb = r.items.find((i) => i.title === 'No button'), wb = r.items.find((i) => i.title === 'With button');
+  check('button: none set -> empty label and link', nb?.cta === '' && nb?.href === '', nb);
+  check('button: page button keeps label and link', wb?.cta === 'Book' && wb?.href === '/reserve', wb);
+}
+
 console.log(fails ? `\n${fails} FAILED` : '\nALL PASSED');
 process.exit(fails ? 1 : 0);
