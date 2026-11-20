@@ -41,7 +41,8 @@ function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
 function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
 function fade(t,v,ms,cb){cancelAnimationFrame(t.f);var s=t.a.volume,t0=performance.now();(function f(n){var k=cl((n-t0)/ms,0,1);t.a.volume=s+(v-s)*k;if(k<1)t.f=requestAnimationFrame(f);else if(cb)cb()})(t0)}
 function ui(){var v=M.on,t=v?"Sound off":"Sound on",l=v?"Turn sound off":"Turn sound on";
- if(sb){sb.removeAttribute("aria-pressed");sb.lastElementChild.textContent=t;sb.setAttribute("aria-label",l);if(v)sb.classList.remove("nudge")}
+ /* v5.62: #snd is now the separate "Vibe with us" button (see VIBE below). #rsnd only exists to switch the reel's own sound off, and shows only while that sound plays. */
+ var rsb=$("rsnd");if(rsb){rsb.hidden=!v;rsb.setAttribute("aria-label","Turn reel sound off");rsb.lastElementChild.textContent="Reel sound off"}
  if(fkb){fkb.removeAttribute("aria-pressed");fkb.lastElementChild.textContent=t;fkb.setAttribute("aria-label",l)}}
 function hook(a){if(ac||!/^https?:/.test(location.protocol))return;try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(a);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
 /* v5.58b: where the intro song is now (seconds), 0 if it is not playing. 10.js starts the reel from this second, so the song CONTINUES: no repeat, no overlap. */
@@ -68,7 +69,28 @@ function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);ui();
 /* quiet: no fk:sound (another player took over); keep: leave the sound flag as it is */
 function stop(quiet,keep){if(!M.on)return;M.on=false;if(!keep)flag(false);ui();if(viaReel){viaReel=false;reelSound(false)}else fade(M,0,250,function(){if(!M.on)M.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
 function toggle(sync){M.on?stop():play(sync)}
-if(sb)sb.onclick=function(){toggle(false)};
+/* v5.62 VIBE WITH US: a separate track (611fb91032.mp3, from 27 s, looping) on its own button #snd.
+   The reel's own sound (the song carried by the hero video) has NO play button: it comes with the video after the Enter tap, and while it plays #rsnd offers to switch it off.
+   Vibe and reel sound never play together: starting one stops the other. To use another song, change VIBE_SRC. */
+var VIBE_SRC="/assets/611fb91032.mp3",VIBE_START=27,V={a:new Audio(VIBE_SRC),on:false,f:0};V.a.preload="none";V.a.loop=true;V.a.volume=0;
+function vui(){if(!sb)return;var v=V.on;sb.removeAttribute("aria-pressed");sb.lastElementChild.textContent=v?"Vibe off":"Vibe with us";sb.setAttribute("aria-label",v?"Turn vibe music off":"Play vibe music");if(v)sb.classList.remove("nudge")}
+function vfade(v,ms,cb){cancelAnimationFrame(V.f);var s=V.a.volume,t0=performance.now();(function f(n){var k=cl((n-t0)/ms,0,1);V.a.volume=s+(v-s)*k;if(k<1)V.f=requestAnimationFrame(f);else if(cb)cb()})(t0)}
+/* dance: route the vibe track through the same analyser the song and the reel use, so Ask Fursat dances to ANY music that is playing (needs http/https; without it the 120 bpm pulse takes over) */
+var vh=false;
+function vhook(){if(vh||!/^https?:/.test(location.protocol))return;try{if(!ac){hook(V.a);if(!ac||!an)return;ac.resume&&ac.resume()}else{ac.resume&&ac.resume();if(!an)return;ac.createMediaElementSource(V.a).connect(an)}vh=true}catch(e){}}
+function vstop(){if(!V.on)return;V.on=false;vui();vfade(0,250,function(){if(!V.on)V.a.pause()})}
+function vplay(){if(V.on)return;V.on=true;vui();
+ emit("fk:music",{id:"vibe"});/* the reel sound, the intro song and the other players (drinks, tour) stop */
+ var a=V.a;a.preload="auto";a.volume=0;vhook();
+ var seek=function(){try{if(a.currentTime<.5)a.currentTime=Math.min(VIBE_START,(a.duration||150)-1)}catch(x){}};
+ if(a.readyState>=1)seek();else a.addEventListener("loadedmetadata",seek,{once:true});
+ var p=a.play(),ok=function(){if(V.on){vfade(IV,600);wake()}};
+ if(p&&p.then)p.then(ok,function(){V.on=false;vui()});else ok()}
+if(sb)sb.onclick=function(){V.on?vstop():vplay()};
+var rsb0=$("rsnd");if(rsb0)rsb0.onclick=function(){stop()};
+addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="vibe"&&V.on){V.on=false;vui();vfade(0,200,function(){if(!V.on)V.a.pause()})}});
+document.addEventListener("visibilitychange",function(){if(!V.on)return;if(document.hidden)V.a.pause();else{V.a.play().catch(function(){});wake()}});
+vui();
 if(fkb)fkb.onclick=function(){toggle(true)};
 if(fkv)fkv.oninput=function(){IV=cl(fkv.value/100,0,1);if(M.on&&!viaReel){cancelAnimationFrame(M.f);M.a.volume=IV}};
 /* the song reached its end: back to "Sound on" */
@@ -95,7 +117,7 @@ window.__fzIntroSound=function(tap){if(tap)play(true)};
 function onEnd(){if(ended)return;ended=true;finish()}
 addEventListener("fz:introend",onEnd);
 var bq=0,sbv=true;
-function wake(){if(M.on&&!bq&&!document.hidden)bq=requestAnimationFrame(beat)}
+function wake(){if((M.on||V.on)&&!bq&&!document.hidden)bq=requestAnimationFrame(beat)}
 if(sb&&"IntersectionObserver"in window)new IntersectionObserver(function(e){sbv=e[0].isIntersecting;wake()}).observe(sb);
 var R=document.documentElement,dir=1,wasOn=false,LV=[0,0,0,0,0],PK=[.1,.1,.1,.1,.1],MN=[.3,.3,.3,.3,.3],BN=[[1,2],[3,5],[6,10],[11,20],[21,40]],rfHooked=false,vib=[0,0,0,0,0];
 /* v5.60: the music is published on <html> for Ask Fursat's dance: --fk-beat (0..1 kick, eased down), --fk-bdir (+1/-1 per beat) and
@@ -104,7 +126,7 @@ var R=document.documentElement,dir=1,wasOn=false,LV=[0,0,0,0,0],PK=[.1,.1,.1,.1,
 function hookReel(){if(rfHooked||!rf||!window.AudioContext&&!window.webkitAudioContext)return;
  try{if(!ac)hook(M.a);if(!ac||!an)return;
   ac.resume&&ac.resume().then(function(){if(rfHooked||ac.state!=="running")return;rfHooked=true;var s=ac.createMediaElementSource(rf);s.connect(an)}).catch(function(){})}catch(e){}}
-function beat(t){bq=0;if(!M.on){B=0;if(sb)sb.style.setProperty("--b",0);R.style.setProperty("--fk-beat",0);for(var z=0;z<5;z++){LV[z]=0;R.style.setProperty("--fk-b"+z,0)}if(wasOn){wasOn=false;R.classList.remove("fk-music")}return}
+function beat(t){bq=0;if(!M.on&&!V.on){B=0;if(sb)sb.style.setProperty("--b",0);R.style.setProperty("--fk-beat",0);for(var z=0;z<5;z++){LV[z]=0;R.style.setProperty("--fk-b"+z,0)}if(wasOn){wasOn=false;R.classList.remove("fk-music")}return}
  if(document.hidden)return;t=t||performance.now();if(!wasOn){wasOn=true;R.classList.add("fk-music")}
  if(viaReel&&!rfHooked)hookReel();
  var live=an&&(!viaReel||rfHooked);

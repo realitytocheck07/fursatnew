@@ -71,11 +71,23 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
   .mq-strip {
     width: 100%;
     overflow: hidden;
-    background: linear-gradient(135deg, #1A1200 0%, #2A1E00 100%);
-    border-top: 1px solid rgba(224, 166, 60, 0.2);
-    border-bottom: 1px solid rgba(224, 166, 60, 0.2);
-    padding: 14px 0;
+    /* Elephant red (same as the logo / Reserve buttons: --ui2-red #c02a1a, --ui2-red-hi #a82216) */
+    background: linear-gradient(135deg, var(--ui2-red, #c02a1a) 0%, var(--ui2-red-hi, #a82216) 100%);
+    border-top: 1px solid rgba(243, 201, 107, 0.45);
+    border-bottom: 1px solid rgba(243, 201, 107, 0.45);
+    padding: 11px 0;
     /* Pause on hover */
+  }
+  /* Landing page: the ribbon sits on the bottom edge of the first screen (inside .fxhero), not below the fold. */
+  :global(.fxhero) > .mq-strip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+  }
+  @media (max-width: 899px) {
+    :global(html .fxhero) { padding-bottom: 52px; }
   }
   .mq-strip:hover .mq-track,
   .mq-strip:focus-within .mq-track,
@@ -117,12 +129,12 @@ const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
     font-size: clamp(0.8125rem, 1.2vw, 1rem);
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: rgba(244, 236, 218, 0.82);
+    color: #fff7e6;
     text-transform: uppercase;
   }
 
   .mq-dot {
-    color: #E0A63C;
+    color: #f3c96b;
     font-size: 0.75rem;
     flex-shrink: 0;
     display: inline-flex;
