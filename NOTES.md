@@ -313,3 +313,23 @@ screenshots/reviews-390.png, screenshots/reviews-1366-hover.png (mid-sweep frame
 
 ## v5.78 cursor fix
 - The glass cursor showed as the normal arrow on the live site. Cause: Vite bundled cursor.css and replaced the 4 image-set() PNG URLs with unresolved __VITE_PUBLIC_ASSET__ placeholders (the 4 build warnings). Fix: the file now lives in public/css/fk-cursor-v2.css (served as-is) and Base.astro links it; the import is removed. Never import it into the bundle.
+
+
+## v5.79 Signature cocktails + hero v3 (kit 25)
+## Decisions made
+- Only Life Fursat Bhai + Cosmopolitan used from the named reel. Jabilli/Mayalokham/Picante never used (shot log: video-src/cocktails/SHOTLOG.md).
+- Card clips: crops 405x540 -> 540x720, ping-pong loop (LFB, Cosmo), dissolve loop (bar). @handle on Cosmo removed with delogo. Orange-peel garnish sits above the 3:4 crop, so the bar clip shows the ice pour + the finished glass; garnish hands only at the edge.
+- Cards show name + one line from drinks.json, no prices. Links: /menu/#dish=LIFE%20FURSAT%20BHAI, /menu/#dish=COSMOPOLITAN, bar card + button -> /menu/#g-d-cocktails (real group anchor).
+- menu-v2.ts: deep link #dish= used to open the drink card with NO 21+ check. Now it goes through need21(): age check first, card opens after "I'm 21 or older"; "Show me food" opens nothing.
+- ExperienceLayout has no slot, and it is not ours. On /restaurant-bar the strip is rendered after the layout and a tiny inline script moves it before `.xp-cards-sec` (the green "Signature Sips" band). No JS = it would sit after the footer. Cleaner follow-up: add `<slot name="after-pillars"/>` to ExperienceLayout and drop the `mount` prop.
+- Hero master v3 shifts the times in `public/js/14.js` (dish name labels). That file is not ours; the patch is in NOTES below / Part 3.
+## Done: steps 1-3. Next: step 4 QA (render, screenshots, console, widths).
+- Hero: hero-master-v3.mp4 (37.9s, 10.5 MB vs v2 9.4 MB, +12%) + -sm (4.1 MB). Segment 6.3s between Fursat Rahasyam and Iced Latte: layered pour, Life Fursat Bhai, Cosmopolitan; 0.6s dissolves in/out like the loop's own. Vertical shot centred over a blurred, darkened copy; light warm grade.
+- Quality guard: foreground is a 405x540 crop of a 576px reel scaled 1.42x, so it is a little softer than the rest at 100% (contact/hero-quality-v2-vs-v3.png). Not clearly softer at hero size, so no nococktail file; v2 is untouched in git if you want the old loop (revert the 2 data-src values in Hero.astro).
+- 14.js (dish labels) is keyed to master times and not ours: apply patches/14.js-clips-for-hero-master-v3.diff WITH this change, or the coffee labels run 4.1s early.
+
+- Merge changes: Bar page uses a new ExperienceLayout slot "before-cards" (no DOM-moving script). 14.js hero labels retimed for v3 (+ Life Fursat Bhai, Cosmopolitan). "See the drinks menu" uses /menu/#go=d-cocktails, which runs the 21+ check first (new #go= handler in menu-v2.ts).
+
+
+## v5.80 cursor on touchscreen laptops
+- Live check (Chrome 157, Windows touchscreen laptop): pointer:coarse, hover:none, any-pointer:fine false even with a touchpad, so fk-cursor.js never added html.fk-cur. Now the class is added at the first real mouse/touchpad pointermove (and at load when pointer:fine). The effects layer is no longer hidden by (hover:none)/(pointer:coarse). CSS renamed to fk-cursor-v3.css.

@@ -24,4 +24,4 @@ html.fk-cur :where(input:not([type=checkbox]):not([type=radio]):not([type=button
 .fk-cf s{width:14px;height:14px;border-radius:50%;box-sizing:border-box;border:1px solid var(--fkc-gold)}
 
 @media (prefers-reduced-motion:reduce){.fk-cf{display:none}}
-@media (forced-colors:active),(hover:none),(pointer:coarse){.fk-cf{display:none!important}}
+@media (forced-colors:active){.fk-cf{display:none!important}}

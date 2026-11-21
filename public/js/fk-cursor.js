@@ -9,7 +9,9 @@
   var mq = function (q) { return window.matchMedia(q); };
   var fine = mq('(hover: hover) and (pointer: fine)'), forced = mq('(forced-colors: active)'), rm = mq('(prefers-reduced-motion: reduce)');
   var contrast = mq('(prefers-contrast: more)');
-  if (!fine.matches || forced.matches || contrast.matches) return;
+  // v5.80: touchscreen laptops report pointer:coarse/hover:none even with a touchpad or mouse, so don't gate on media
+  // queries; the glass turns on at the first real mouse/touchpad move (a system cursor is never shown to touch anyway).
+  if (forced.matches || contrast.matches) return;
   // opt-out for people who rely on their OS pointer (low vision, large cursors): ?cursor=native, undo with ?cursor=glass
   try {
     var q = /[?&]cursor=(native|glass)\b/.exec(location.search);
@@ -20,7 +22,8 @@
   var fx = null, alive = 0, lastB = 0, lx = 0, ly = 0, lt = 0, bodyLink = false;
   var EASE = 'cubic-bezier(.23,1,.32,1)';
 
-  root.classList.add('fk-cur');
+  if (fine.matches) root.classList.add('fk-cur');
+  function mouseOn() { if (!root.classList.contains('fk-cur')) root.classList.add('fk-cur'); }
 
   function build() {
     if (fx || !d.body) return;
@@ -78,6 +81,7 @@
 
   function onMove(e) {
     if (e.pointerType && e.pointerType !== 'mouse') return;
+    mouseOn();
     if (!fx) { build(); lx = e.clientX; ly = e.clientY; lt = e.timeStamp; return; }
     var dt = e.timeStamp - lt;
     if (dt < 16) return;                                   // speed over ~1 frame of movement
@@ -93,8 +97,5 @@
 
   d.addEventListener('pointermove', onMove, { passive: true });
   d.addEventListener('pointerdown', onDown, { passive: true });
-  fine.addEventListener('change', function () {
-    if (fine.matches) return;
-    root.classList.remove('fk-cur', 'fk-cur-bl'); if (fx) fx.remove(); fx = null;
-  });
+  // a touch tap does not need the class removed: system cursors are only drawn for a mouse or touchpad
 })();
