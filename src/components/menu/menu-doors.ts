@@ -246,7 +246,7 @@ function init(md: HTMLElement) {
       const th = ((i * STEP - angle) * Math.PI) / 180;
       const depth = Math.cos(th); // 1 = front, -1 = back
       const k = (depth + 1) / 2;
-      const s = 0.4 + 0.6 * Math.pow(k, 1.6);
+      const s = Math.max(0.4 + 0.6 * Math.pow(k, 1.6), 44 / D); // rendered plate >= 44px (tap target)
       const x = cx + rx * Math.sin(th), y = cy + ry * depth;
       d.style.transform = `translate(${(x - D / 2).toFixed(1)}px,${(y - D / 2 - D * 0.18 * k).toFixed(1)}px) scale(${s.toFixed(3)})`;
       d.style.zIndex = String(Math.round(k * 100));

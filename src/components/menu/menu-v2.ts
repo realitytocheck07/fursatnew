@@ -327,8 +327,10 @@ function init(root: HTMLElement) {
     const noteEl = $('#mv-sheet-note')!, priceEl = $('#mv-sheet-price')!, statEl = $('#mv-sheet-status')!;
     const addBtn = $<HTMLButtonElement>('#mv-sheet-add')!, xBtn = $('#mv-sheet-x')!;
     const opens = $$<HTMLButtonElement>('.mv-open');
-    const syncInert = () => opens.forEach((b) => b.toggleAttribute('inert', !phone.matches));
-    syncInert();
+    // The row button only opens the sheet on phones. Elsewhere it stays in the accessibility tree (so the dish name is a real heading) but leaves the tab order.
+    const syncOpens = () => opens.forEach((b) => { if (phone.matches) { b.removeAttribute('tabindex'); b.setAttribute('aria-haspopup', 'dialog'); } else { b.tabIndex = -1; b.removeAttribute('aria-haspopup'); } });
+    syncOpens();
+    phone.addEventListener('change', syncOpens);
     let opener: HTMLElement | null = null, pushed = false, closing = false, flashing = false, flashT = 0, closeT = 0;
 
     const el = (tag: string, cls: string, text = '') => { const n = document.createElement(tag); n.className = cls; if (text) n.textContent = text; return n; };

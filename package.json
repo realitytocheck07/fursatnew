@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev --host",
-    "build": "astro build && node scripts/optimize-public-js.mjs",
+    "build": "node scripts/build-menu-json.mjs && astro build && node scripts/optimize-public-js.mjs",
     "build:raw": "astro build",
     "check:seo": "node scripts/seo-check.mjs",
     "preview": "astro preview --host",

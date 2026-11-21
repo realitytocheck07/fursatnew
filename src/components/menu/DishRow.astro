@@ -17,7 +17,7 @@ const desc = vs.length > 1 ? (i.description ?? '').replace(/\s*Half\s*₹?\s*[\d
 ---
 <li class="mv-item mv-card" {...row}>
   <div class="mv-c-info">
-    <h4 class="mv-item-name"><button class="mv-open" type="button" aria-haspopup="dialog" inert><span class="mv-iname">{name}</span></button></h4>
+    <h4 class="mv-item-name"><button class="mv-open" type="button" aria-haspopup="dialog"><span class="mv-iname">{name}</span></button></h4>
     {desc && <p class="mv-idesc">{desc}</p>}
     {i.note && <p class="mv-note">{i.note}</p>}
     <div class="fk-chips">

@@ -433,9 +433,16 @@ html:has(.mv){background:var(--fk-plaster-base)}
 .mv-link{position:relative}
 .mv-link::after{content:"";position:absolute;inset:-12px -8px}
 @media(max-width:720px){
-  .mv-open{position:relative}
-  .mv-open::after{content:"";position:absolute;inset:-12px -4px}
+  /* the whole dish row is the button: the name button stretches over the card (>= 44px tall); Add stays on top */
+  .mv-open{position:static;display:block;min-height:44px;width:100%;margin:-12px 0;padding:12px 0;box-sizing:border-box;text-align:left}
+  .mv-open::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit}
+  .mv-card .mv-add{z-index:4}
+  .mv-card:has(.mv-open:focus-visible){outline:2px solid var(--c-g,var(--mv-gold-hi));outline-offset:3px}
+  .mv-open:focus-visible{outline:0}
 }
+/* search field: the input itself is >= 44px (look unchanged) */
+.mv-search{height:44px}
+.mv-search input{min-height:44px}
 
 /* ── UI2 B1: filter bar on the shared .fk-seg / .fk-pill / .fk-rail ── */
 .mv-sticky-in{gap:8px 10px}

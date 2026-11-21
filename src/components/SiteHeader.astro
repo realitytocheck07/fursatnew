@@ -56,7 +56,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     </nav>
 
     <div class="sh-actions">
-      <a href="/reserve" class:list={["sh-reserve-btn", { "is-current": active === 'reserve' }]} data-open="book" aria-current={active === 'reserve' ? 'page' : undefined}>Reserve</a>
+      <a href="/reserve" class:list={["sh-reserve-btn", { "is-current": active === 'reserve' }]} data-open="book" aria-label="Reserve a table" aria-current={active === 'reserve' ? 'page' : undefined}>Reserve</a>
       <button class="sh-burger" id="sh-burger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sh-mobile-panel"><span></span><span></span><span></span></button>
     </div>
   </div>

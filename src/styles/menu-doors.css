@@ -28,7 +28,7 @@
 .mb-spot:nth-child(2) .mb-hex{animation-delay:-.6s}.mb-spot:nth-child(3) .mb-hex{animation-delay:-1.2s}.mb-spot:nth-child(4) .mb-hex{animation-delay:-1.8s}.mb-spot:nth-child(5) .mb-hex{animation-delay:-2.4s}
 @keyframes mb-pulse{0%,100%{opacity:.3}50%{opacity:.85}}
 .mb-lab{position:absolute;left:50%;top:100%;translate:-50% 6px;padding:7px 12px 6px;border-radius:999px;white-space:nowrap;pointer-events:none;
-  font:600 .74rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8);outline:1px solid rgb(255 226 166 / .9);
+  font:600 .75rem/1 var(--mv-sans);color:var(--mv-ink);background:linear-gradient(180deg,#fbf3e3,#ead8b8);outline:1px solid rgb(255 226 166 / .9);
   opacity:0;transition:opacity 250ms ease,translate 300ms var(--md-ease)}
 .md[data-open="drinks"] .mb-lab{opacity:1}
 .mb-spot:is(:hover,:focus-visible,.is-hot) .mb-hex{opacity:1;animation:none;scale:1.1;background-color:rgb(255 220 150 / .16)}
@@ -183,7 +183,7 @@
   /* the seam tag would sit on the captions here: keep it for screen readers only */
   .md-tag{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .md[data-open] .md-cap--food .md-btn{display:none}
-  .mb-lab{font-size:.68rem;padding:6px 10px 5px}
+  .mb-lab{font-size:.75rem;padding:6px 10px 5px}
   .md[data-open="food"] .md-cap--bar{bottom:calc(100% - var(--rest) + 8px)}
   .md[data-open="drinks"] .md-cap--food{top:calc(var(--rest) + 8px)}
   .md[data-open="drinks"] .mt{opacity:.5}
