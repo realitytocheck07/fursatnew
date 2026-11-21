@@ -2,7 +2,8 @@
 // HyWindows — real photos clipped into the dark frame holes of a prepped background slice
 // (scripts/prep-bg.py → scripts/bg-specs/<name>.out.json), plus the inner-shadow layer above them.
 // Positions come straight from the traced data, so photos sit exactly inside the carved gold lips.
-interface Photo { src: string; alt: string; pos?: string; w?: number; h?: number; eager?: boolean }
+interface Video { mp4: string; webm?: string; poster?: string; pos?: string; credit?: { label: string; href: string } }
+interface Photo { src: string; alt: string; pos?: string; w?: number; h?: number; eager?: boolean; video?: Video }  // video is optional: the photo stays as the first paint and the poster; story-hero.js plays the video on top after first paint
 interface Props {
   data: { name: string; h: number; slices: { file: string; kind: string; y0: number; h: number; shade: boolean; windows: { l: number; t: number; w: number; h: number; path: string }[] }[] };
   slice?: number;
@@ -28,9 +29,45 @@ const pos = (w: { l: number; t: number; w: number; h: number }) =>
     <img src={photos[k]!.src} alt={photos[k]!.alt} width={photos[k]!.w ?? 1200} height={photos[k]!.h ?? 1600}
       style={photos[k]!.pos ? `object-position:${photos[k]!.pos}` : undefined}
       loading={photos[k]!.eager ? 'eager' : 'lazy'} fetchpriority={photos[k]!.eager ? 'high' : undefined} decoding="async" data-fx-par onload="this.parentNode.classList.add('is-loaded')" />
+    {photos[k]!.video && (
+      <video class="hy-vid" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture
+        poster={photos[k]!.src} width={photos[k]!.w ?? 1200} height={photos[k]!.h ?? 1600}
+        style={(photos[k]!.video!.pos || photos[k]!.pos) ? `object-position:${photos[k]!.video!.pos || photos[k]!.pos}` : undefined}
+        data-fx-par data-hv data-mp4={photos[k]!.video!.mp4} data-webm={photos[k]!.video!.webm}></video>
+    )}
   </figure>
 ))}
 {s.shade && (
   <div class={`hy-shade hy-${view}`} aria-hidden="true"
     style={`${anchor === 'top' ? 'top:0' : 'bottom:0'};height:calc(${s.h} * var(--u));background-image:url(/assets/bg/${s.file}-shade.webp)`}></div>
 )}
+{s.windows.map((w, k) => photos[k]?.video && (
+  <div class={`hy-vctl hy-${view}`} style={pos(w)} data-hv-ctl>
+    <button class="hy-snd" type="button" aria-pressed="false" aria-label="Sound off" hidden>
+      <svg class="hy-snd-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <svg class="hy-snd-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    {photos[k]!.video!.credit && <a class="hy-cred" href={photos[k]!.video!.credit!.href} target="_blank" rel="noopener" aria-label={photos[k]!.video!.credit!.label.replace(/^Video: /, "Video by ")} hidden><span class="hy-cred-p">Video: </span>{photos[k]!.video!.credit!.label.replace(/^Video: /, "")}</a>}
+  </div>
+))}
+
+<style is:global>
+.hy-win video.hy-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .3s ease;filter:saturate(1.12) sepia(.14) contrast(1.05) brightness(.94);will-change:transform;background:transparent}
+.hy-win video.hy-vid.is-on{opacity:1}
+.hy-vctl{position:absolute;z-index:3;pointer-events:none}
+.hy-vctl[hidden]{display:none}
+.hy-vctl>*{pointer-events:auto}
+.hy-vctl .hy-snd,.hy-vctl .hy-cred{position:absolute}
+.hy-vctl .hy-snd[hidden],.hy-vctl .hy-cred[hidden]{display:none}
+.hy-vctl.hy-d .hy-cred{left:5%;top:15%}
+.hy-vctl.hy-d .hy-snd{left:5%;top:calc(15% + 52px)} /* v5.82 merge: top-left under the credit, clear of the WhatsApp button and the Vibe bubble */
+.hy-vctl.hy-m .hy-cred{left:5%;top:15%;padding:0 9px}
+.hy-vctl.hy-m .hy-snd{right:5%;bottom:16%}
+@media(max-width:359px){.hy-cred-p{display:none}}
+.hy-snd{width:44px;height:44px;padding:0;border:1px solid rgba(243,197,107,.7);border-radius:50%;background:rgba(20,26,14,.62);color:#f3c56b;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 16px -8px rgba(0,0,0,.6)}
+.hy-snd svg{width:22px;height:22px;grid-area:1/1}
+.hy-snd .hy-snd-off{display:block}.hy-snd .hy-snd-on{display:none}
+.hy-snd[aria-pressed="true"] .hy-snd-on{display:block}.hy-snd[aria-pressed="true"] .hy-snd-off{display:none}
+.hy-snd:focus-visible,.hy-cred:focus-visible{outline:2px solid #f3c56b;outline-offset:2px}
+.hy-cred{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:999px;background:rgba(20,26,14,.62);color:#fff4d6;font:500 12px/1 Poppins,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+</style>

@@ -1,6 +1,5 @@
 ---
 import InstaFollow from '../components/InstaFollow.astro';
-import LazyVideo from '../components/LazyVideo.astro';
 import site from '../data/site.json';
 // story.astro v4 — About / Our Story (mock-about.png). Hybrid: textless background art (public/assets/bg/about-*,
 // scripts/prep-bg.py) carries the carved plaster, frames, plates and green band; live HTML on top in stage units.
@@ -32,6 +31,11 @@ const legalRows = [
 // Red elephant silhouette traced from the real logo (/assets/c86f49db5a.webp), viewBox 0 0 140 176
 const elephant = 'M109.5 10.2 L108.2 10.8 L100.2 6.0 L94.5 5.0 L93.2 4.0 L81.5 4.0 L70.5 8.0 L64.0 13.2 L61.0 18.5 L60.0 24.2 L62.8 30.5 L66.5 33.8 L68.2 33.8 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L81.2 24.0 L79.5 24.0 L76.2 27.0 L73.5 27.0 L71.8 25.2 L71.8 22.5 L75.5 18.8 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L95.0 37.5 L88.2 44.0 L73.5 52.0 L68.2 56.0 L65.0 56.5 L64.5 58.0 L55.0 67.5 L54.0 71.2 L52.0 72.5 L51.0 74.5 L51.0 76.2 L48.0 83.5 L48.0 98.2 L50.8 104.2 L50.2 105.5 L52.0 106.2 L52.8 107.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L72.2 118.8 L73.5 119.8 L80.2 119.8 L81.5 118.8 L84.5 119.5 L85.5 117.8 L88.2 116.8 L91.8 113.2 L91.8 111.5 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L95.0 115.5 L95.0 117.2 L89.2 123.0 L85.5 124.0 L82.2 126.0 L66.5 126.0 L65.2 125.0 L62.5 125.0 L56.5 122.0 L55.5 120.2 L54.2 120.8 L50.2 118.0 L43.8 110.2 L40.2 102.0 L38.5 102.0 L29.5 107.0 L24.2 112.0 L20.2 114.2 L20.5 116.0 L14.0 123.5 L5.2 139.2 L7.2 140.8 L13.2 138.0 L14.0 138.5 L12.2 141.2 L13.0 142.5 L13.0 150.2 L12.0 151.5 L12.0 160.2 L13.0 161.5 L13.0 166.2 L12.2 167.5 L14.0 168.5 L14.5 170.8 L35.2 170.8 L35.8 163.5 L36.8 162.2 L36.8 160.5 L39.8 157.2 L41.5 157.5 L42.5 155.8 L48.2 155.8 L53.0 160.5 L52.2 162.5 L54.0 163.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L76.8 158.2 L78.2 157.0 L79.5 157.5 L80.5 155.8 L86.2 155.8 L90.0 158.2 L92.0 161.5 L92.5 170.8 L117.8 170.2 L117.8 168.5 L116.8 167.2 L116.8 159.5 L115.8 158.2 L115.8 142.5 L116.8 141.2 L116.8 133.5 L117.8 132.2 L117.8 127.5 L119.8 125.2 L119.2 122.8 L125.8 114.2 L128.8 108.2 L128.8 106.5 L130.8 103.2 L130.8 101.5 L133.8 94.2 L133.8 90.5 L135.5 89.5 L134.8 88.2 L134.8 84.5 L136.5 82.5 L135.8 81.2 L135.8 64.5 L136.5 63.2 L134.8 61.2 L134.8 57.5 L135.5 56.2 L133.8 55.2 L132.8 48.5 L128.8 39.2 L129.5 37.2 L127.8 36.2 L121.8 24.5Z';
 
+// "Inside Fursat" plays in the big hero window (index 1). The 16:9 file is a blurred pillarbox of this same vertical shot, so both views use the vertical file; pos keeps the Hyderabad mural sign and the glasses in frame.
+const heroVid = {
+  d: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 28%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+  m: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 30%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+};
 const P = {
   entrance: { src: '/assets/interior/tour-entrance.webp', alt: 'The Fursat entrance corridor: an elephant mural on the wall that reads Fursat, Aur Kuch Nahi, with potted plants along the glass', w: 1050, h: 1400, pos: '50% 62%', eager: true },
   dining: { src: '/assets/interior/fursat_space_07.webp', alt: 'The Fursat dining hall with dark wood tables, blue velvet chairs and patterned screens', w: 1920, h: 2560, pos: '50% 60%' },
@@ -72,8 +76,8 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
   <main class="st" id="main">
     <section class="hy st-stage" aria-labelledby="st-h1">
-      <HyWindows data={aDesk} photos={[P.dining, P.entrance, P.lounge]} view="d" />
-      <HyWindows data={aPhone} photos={[P.dining, P.entrance, P.lounge]} view="m" />
+      <HyWindows data={aDesk} photos={[P.dining, { ...P.entrance, video: heroVid.d }, P.lounge]} view="d" />
+      <HyWindows data={aPhone} photos={[P.dining, { ...P.entrance, video: heroVid.m }, P.lounge]} view="m" />
 
       <div class="st-hero" data-fx-hero>
         <p class="hy-kicker" data-fx-step>About Us</p>
@@ -88,6 +92,10 @@ import InstagramFeed from '../components/InstagramFeed.astro';
         <p class="hy-lead">A café, a kitchen, a bar and banquet spaces under one roof at Capital Park, Madhapur. Come for a coffee, stay for dinner, bring everyone for the celebration.</p>
         <svg class="hy-orn--draw st-rule" viewBox="0 0 260 24" aria-hidden="true" data-fx-draw><path d="M2 12 H120" /><path d="M128 12 C132 6 138 6 142 12 C138 18 132 18 128 12 Z" /></svg>
         <p class="st-tag">Fursat, aur kuch nahi!</p>
+        <div class="st-cta" data-fx-reveal>
+          <a class="fk-btn fk-btn--primary" href="/reserve/">Reserve a table</a>
+          <a class="fk-btn fk-btn--secondary" href="/menu/">See the menu</a>
+        </div>
       </div>
 
       <h2 class="fk-ty-h2 st-vh">Our Values</h2>
@@ -118,13 +126,16 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </ul>
     </section>
 
-    <section class="iv" aria-labelledby="iv-h">
-      <h2 class="fk-ty-h2 iv-h" id="iv-h" data-fx-reveal>Inside <em>Fursat</em></h2>
-      <div class="iv-frame">
-        <LazyVideo class="iv-v" src="/assets/video/inside-fursat-720.mp4" webm="/assets/video/inside-fursat-720.webm" poster="/assets/video/inside-fursat-poster.webp" width={720} height={1280} label="A short film walking through Fursat: the café, desserts, booths, the bar and the elephant mural" />
-        <LazyVideo class="iv-d" src="/assets/video/inside-fursat-16x9.mp4" webm="/assets/video/inside-fursat-16x9.webm" poster="/assets/video/inside-fursat-poster-16x9.webp" width={1280} height={720} label="A short film walking through Fursat: the café, desserts, booths, the bar and the elephant mural" />
-      </div>
-      <p class="iv-credit">Video: <a href="https://instagram.com/framesofhyd" target="_blank" rel="noopener">@framesofhyd</a></p>
+    <section class="st-go" aria-labelledby="st-go-h">
+      <h2 class="fk-ty-h2 st-go-h" id="st-go-h" data-fx-reveal>Your <em>Fursat</em> starts here</h2>
+      <ul class="st-go-list" role="list" data-fx-reveal>
+        <li><a class="st-go-card" href="/reserve/"><b>Reserve a table</b><span>Pick a date and time; we confirm on WhatsApp.</span></a></li>
+        <li><a class="st-go-card" href="/menu/"><b>Explore the menu</b><span>Kitchen, café and bar, with photos.</span></a></li>
+        <li><a class="st-go-card" href="/party/"><b>Plan a celebration</b><span>Birthdays, corporate, kitty and bar parties.</span></a></li>
+        <li><a class="st-go-card" href="/banquet/"><b>The banquet hall</b><span>Up to 350 guests, packages and date check.</span></a></li>
+        <li><a class="st-go-card" href="/order/"><b>Order online</b><span>Swiggy, Zomato or pick-up.</span></a></li>
+        <li><a class="st-go-card" href="/ask/"><b>Ask Fursat</b><span>Tell us your mood; we suggest dishes.</span></a></li>
+      </ul>
     </section>
 
     <section class="st-legal-wrap" aria-labelledby="st-lh">
@@ -143,6 +154,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   <SiteFooter />
   <MobileBar active="story" />
   <script>import '../scripts/fk-motion';</script>
+  <script is:inline src="/js/story-hero.js" defer></script>
 </Base>
 
 <style is:global>
@@ -189,16 +201,20 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .sw-tile { break-inside: avoid; margin: 0 0 clamp(10px, 1.6vw, 18px); border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(232, 194, 122, .45), 0 10px 22px rgba(0, 0, 0, .35); background: #1b3a26; }
   .sw-tile img { display: block; width: 100%; height: auto; }
   @media (max-width: 767px) { .sw { padding: 36px 16px 0; } .sw-grid { columns: 2; } .sw-tile { border-radius: 14px; } }
-  .iv { background: var(--fk-plaster, #f2eee4); padding: clamp(40px, 6vw, 88px) 6vw; text-align: center; }
-  .iv-h { color: #17200f; margin-bottom: clamp(20px, 3vw, 36px); }
-  .iv-h em { color: #2a5019; }
-  .iv-frame { max-width: 980px; margin: 0 auto; }
-  .iv-frame .iv-v { width: min(100%, 360px); margin: 0 auto; border-radius: 14px; }
-  .iv-frame .iv-d { display: none !important; width: 100%; border-radius: 18px; }
-  .iv-credit { margin: 14px 0 0; font: 400 .8125rem / 1.4 var(--fk-sans); color: #17200f; }
-  .iv-credit a { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 6px; text-decoration: underline; text-underline-offset: 3px; }
-  @media (min-width: 768px) { .iv-frame .iv-v { display: none !important; } .iv-frame .iv-d { display: block !important; } }
 
+  .st-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  .st-go { background: var(--fk-plaster, #f2eee4); padding: clamp(40px, 6vw, 88px) 6vw; text-align: center; }
+  .st-go-h { color: #17200f; margin: 0 0 clamp(20px, 3vw, 36px); }
+  .st-go-h em { color: var(--fk-red, #c0291f); }
+  .st-go-list { list-style: none; margin: 0 auto; padding: 0; max-width: 1080px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; text-align: left; }
+  .st-go-card { display: flex; flex-direction: column; gap: 6px; min-height: 44px; height: 100%; box-sizing: border-box; padding: 18px 20px; border-radius: 18px; background: #fffaf2; border: 1px solid rgba(201,154,67,.55); color: #17200f; text-decoration: none; box-shadow: 0 10px 24px -18px rgba(60,40,10,.5); transition: transform .15s ease-out, border-color .2s ease; }
+  .st-go-card b { font: 600 1.15rem/1.2 var(--serif, "Playfair Display", Georgia, serif); }
+  .st-go-card b::after { content: " \2192"; color: var(--fk-red, #c0291f); }
+  .st-go-card span { font-size: .95rem; line-height: 1.45; color: #4a4330; }
+  .st-go-card:active { transform: scale(.98); }
+  .st-go-card:focus-visible { outline: 2px solid #c99a43; outline-offset: 3px; }
+  @media (hover: hover) { .st-go-card:hover { border-color: #c99a43; transform: translateY(-2px); } }
+  @media (prefers-reduced-motion: reduce) { .st-go-card { transition: none; } }
   .st-legal-wrap { background: #10261a; padding: clamp(24px, 3vw, 40px) 6vw clamp(48px, 6vw, 88px); }
   .st-legal { margin: 0 auto; max-width: 44rem; border-radius: 24px; padding: 1.6rem 1.9rem 1.5rem; color: var(--fk-ink); background: #f8ead8; box-shadow: 0 0 0 1px rgba(214, 170, 90, .5), 0 0 0 6px #f1dfc3, 0 22px 40px rgba(0, 0, 0, .35), inset 0 2px 3px #fff; }
   .st-legal h2 { color: #1b3a26; margin-bottom: .8rem; }

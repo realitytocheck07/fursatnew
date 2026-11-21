@@ -337,3 +337,36 @@ screenshots/reviews-390.png, screenshots/reviews-1366-hover.png (mid-sweep frame
 
 ## v5.81 Cloudflare _routes.json (media seeking)
 - Live check: every asset answered a Range request with 200 (no 206), so <video>/<audio> had seekable [0,0]. The hero reel could not start at the intro song position (it restarted at 0 and the song repeated). Cause: functions/ exists and there was no _routes.json, so ALL requests ran through Pages Functions. Fix: public/_routes.json includes only /api/* (static files are served directly, with range support, and no function invocations).
+
+
+## v5.82 Story hero video + Fursat vibe music (kit 26)
+
+## Done
+- `HyWindows.astro`: a photo can carry an optional `video {mp4, webm, poster, pos, credit}`. Without it the markup is byte-identical (checked on /party and /banquet with the styles stripped). With it: the photo `<img>` stays as first paint, and a `<video muted loop playsinline preload="none">` (same clip, cover, `data-fx-par`, poster = the elephant photo) fades in on top. A small controls layer (sound button + credit) sits above the window. Only +1.6 KB of CSS is added to pages that use HyWindows.
+- `story.astro`: video on window index 1 (the big organic window, the elephant mural) for both desktop (`aDesk`) and phone (`aPhone`). The lower `.iv` section, its CSS, and the `LazyVideo` import are removed. Credit "Video: @framesofhyd" is now a corner label on the window.
+- `public/js/story-hero.js` (new, loaded with `defer` on Story only): video loading, pausing, and sound.
+
+## Decisions made
+- **Source file:** the 16:9 file is a blurred pillarbox around a vertical picture (the real picture is only the middle ~32%), so `cover` on it would show mostly blur. Both views use `inside-fursat-720` (webm first, mp4 fallback). Focus `object-position`: desktop `50% 28%`, phone `50% 30%` (keeps the Hyderabad mural sign and the glasses in frame at the start).
+- **Loading:** after the window `load` event + 1.5 s, in idle time. Only if the tab is visible and the window is >=25% on screen. Measured: video request starts about 1.5 s after load. `<source>` tags are added by JS, so nothing is fetched before that. Saves-Data, 2g/3g or reduced motion: poster only, no video, no sound, no controls (the credit and button only show once the video really plays).
+- **LCP/CLS:** LCP stays the photo. CLS 0 (measured at 390).
+- **Sound:** vibe track `/assets/611fb91032.mp3`, from 27 s, loop, 0.85 volume like the Vibe button, 600 ms fade-in. Audio is created only on first play (never preloaded). `fk-sound` flag: **missing = ON** (owner's choice, kit 19b not merged), `'0'` = off. If the browser blocks autoplay, the first pointerdown/keydown/touchend starts it. The flag is set to `'1'` and `fk:sound {on:true}` fired only when music actually starts. `fk:music {id:'story'}` on start; a foreign `fk:music` fades it out and it stays yielded until the guest taps the button. Pauses with the video (scroll away or tab hidden).
+- **Button:** 44px round, `aria-pressed` = sound on, `aria-label` "Sound on" / "Sound off". Credit link 44px tall, `target=_blank rel=noopener`. At <=359px the credit shortens to "@framesofhyd" (aria-label stays "Video by @framesofhyd") so it fits the small window.
+- Home's `06.js` treats a missing flag as OFF. Story treats it as ON. Merge with kit 19b to make them agree.
+- The reel's own audio is never used (the `<video>` is muted).
+
+## QA
+- **Real build NOT run:** `npm ci` crashed (no network), so no `astro` binary. Same for `npm run check:seo`. Please run both on merge. Pages were rendered with astro-lite (AskFab stubbed in the preview copy only).
+- Done: 8 widths (320 to 1920) no sideways scroll, controls inside the window, no overlap, 44px targets, text 12px. Video request after load, CLS 0, reduced motion = no video/audio requests. Sound tested in a browser harness: autoplay-allowed, autoplay-blocked then first tap, button off/on, `fk-sound=0` stays silent, foreign `fk:music`. Offline console: only `fkForms is not defined` (Base.astro, an astro-lite preview artifact, not from these files) and missing offline assets.
+- Not tested: actual audio heard, real iOS/Android, screen reader.
+
+## Files
+- changed: `src/components/hybrid/HyWindows.astro`, `src/pages/story.astro`
+- new: `public/js/story-hero.js`
+- `git rm` (now unused; check nothing else needs them): `public/assets/video/inside-fursat-16x9.mp4`, `inside-fursat-16x9.webm`, `inside-fursat-poster-16x9.webp`, `inside-fursat-poster.webp`
+
+## Screenshots
+story-d-poster / story-d-video (1366x634), story-m-poster / story-m-video (390x844), party-unchanged-1366
+
+- Merge: desktop sound button moved to the top-left of the window (it sat under the WhatsApp button and the Vibe bubble). Unused files removed: inside-fursat-16x9.mp4/.webm, inside-fursat-poster.webp, inside-fursat-poster-16x9.webp.
+- Added routes on Story: Reserve + Menu buttons under the story text, and a "Your Fursat starts here" section with 6 link cards (Reserve, Menu, Party, Banquet, Order, Ask) before Business information.
