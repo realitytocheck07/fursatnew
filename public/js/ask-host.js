@@ -44,12 +44,14 @@
 
   /* ---------- the desk answers ---------- */
   var WA="https://wa.me/"+D.whatsapp+"?text=";
+  var RV=(document.querySelector("[data-rate]")||{}).href||"";/* the Google review link comes from the desk link (site.json), never hard-coded here */
   var ICON={
     clock:'<path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>',
     pin:'<path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11ZM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>',
     cal:'<path d="M4 8h16M8 3v4M16 3v4M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
     gift:'<path d="M4 11h16v9H4zM3 7h18v4H3zM12 7v13M12 7c-1.5-3-5-3-5-1s3 1 5 1ZM12 7c1.5-3 5-3 5-1s-3 1-5 1Z"/>',
     phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>',
+    star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
     hi:'<path d="M12 21c-5-3.5-8-6.4-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 11c0 3.6-3 6.5-8 10Z"/>'
   };
   function ico(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+"</svg>"}
@@ -60,10 +62,14 @@
     where:function(){return{icon:"pin",title:"Find us",body:esc(D.address)+".",acts:btn(D.maps,"Open in Maps","",1)+btn("tel:+"+D.whatsapp,"Call us","ghost")}},
     party:function(){return{icon:"gift",title:"Parties and events",body:"Birthdays, corporate and kitty parties, bar parties, catering and the banquet hall. Plan it in three short steps right here, then we continue on WhatsApp.",acts:btn("#plan","Plan an event")+btn("/party","See party packages","ghost")}},
     call:function(){return{icon:"phone",title:"Call or WhatsApp",body:esc(D.phone)+". We reply on WhatsApp.",acts:btn("tel:+"+D.whatsapp,"Call us")+btn(WA+encodeURIComponent("Hi Fursat!"),"WhatsApp us","ghost",1)}},
+    review:function(){return{icon:"star",title:"Thank you",body:"A few words on Google helps other food lovers find us. It takes 30 seconds.",acts:RV?btn(RV,"Rate us on Google","",1):""}},
+    feedback:function(){return{icon:"hi",title:"Thank you for telling us",body:"We are sorry if something was not right. Please message the manager on WhatsApp, so the team can look into it."+(RV?" If you like, you can also share your experience on Google.":""),acts:btn(WA+encodeURIComponent("Hi Fursat! I would like to share some feedback with the manager."),"WhatsApp the manager","",1)+(RV?btn(RV,"Rate us on Google","ghost",1):"")}},
     hello:function(){return{icon:"hi",title:greet()+', welcome to <span class="brand-t">Fursat</span>',body:"Tell me what you feel like eating or drinking, or use the desk for a table, hours, directions or a party.",acts:""}}
   };
   var RULES=[
     ["hello",/^\s*(hi+|hello|hey+|namaste|good (morning|afternoon|evening))\W*$/],
+    ["feedback",/\b(complain\w*|feedback|unhappy|disappointed|not happy|bad experience|poor service)\b|\bsuggestion box\b|\bsuggestions? (for (you|the team|fursat|improvement)|to improve)|\b(have|give|share|leave) (a |some )?suggestions?\b(?! for)/],
+    ["review",/\b(reviews?|ratings?|rate (us|you|fursat|it|this|the (food|place|restaurant|service)))\b/],
     ["party",/(plan|host|organi[sz]e|arrange|book|hall|venue|package|packages).*(party|event|birthday|kitty|anniversary)|banquet|private (dining|event)|kitty party|corporate (event|lunch|party)/],
     ["reserve",/\b(reserve|reservation|book(ing)?|table for|booth)\b/],
     ["hours",/\b(hours?|timings?|opening|open (now|today|till|until|at)|is it open|are you open|clos(e|ing)|what time|till when|until when)\b/],

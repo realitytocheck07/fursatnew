@@ -129,7 +129,7 @@
   });
   var qg = new URLSearchParams(location.search).get('group');
   if (qg && D.groups.some(function (g) { return g.id === qg; })) { setGroup(qg, true); render(); addEventListener('load', toBuilder); }
-  /* hero buttons (#pa-plan, #pa-packs): fk-snap.js scrolls to them; without it the browser jumps there */
+  /* hero buttons (#pa-plan, #pa-packs): pa-stack.js scrolls to them (v5.76); without it the browser jumps there */
 
   /* card rail dots (phones) */
   var row = $('#pc-row'), dots = $$('.pc-dot');

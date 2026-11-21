@@ -1,0 +1,93 @@
+---
+// "Loved your Fursat?": an invitation to leave a Google review. No score, no count, no quotes, no offer (Google policy + honesty).
+// The link always comes from site.json -> address.review.
+import site from '../../data/site.json';
+
+const review = site.address.review;
+const star = 'M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.2 1.2-6.5L2.5 9.5l6.6-.9z';
+---
+<section class="hr" id="rate-us" aria-labelledby="hr-h" data-hr>
+  <figure class="hr-ele" data-fk-reveal>
+    <img src="/assets/home/elephant-cocktail-480.webp" srcset="/assets/home/elephant-cocktail-480.webp 480w, /assets/home/elephant-cocktail-640.webp 640w" sizes="(min-width: 900px) 190px, 120px" alt="" width="640" height="582" loading="lazy" decoding="async" />
+  </figure>
+  <div class="hr-body" data-fk-reveal>
+    <p class="hr-kick">Loved your Fursat?</p>
+    <h2 class="fk-ty-h2 hr-h" id="hr-h">Tell Hyderabad about <span class="hr-hl">your evening</span></h2>
+    <p class="hr-line">A few words on Google helps other food lovers find us. It takes 30 seconds.</p>
+    <a class="hr-stars" href={review} target="_blank" rel="noopener" aria-label="Rate Fursat on Google (opens in a new tab)">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg class="hr-st" style={`--i:${i}`} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path class="hr-st-b" d={star} />
+          <path class="hr-st-l" d={star} />
+        </svg>
+      ))}
+    </a>
+    <p class="hr-tap" aria-hidden="true">Tap a star</p>
+    <div class="hr-btns">
+      <a class="fk-btn fk-btn--primary" href={review} target="_blank" rel="noopener">
+        <svg class="hr-g" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12.2 10.2v3.9h5.5c-.2 1.4-1.7 4.1-5.5 4.1a6.2 6.2 0 010-12.4c2 0 3.3.9 4.1 1.6l2.7-2.6A9.8 9.8 0 0012.2 2a10 10 0 100 20c5.8 0 9.6-4 9.6-9.8 0-.7-.1-1.2-.2-2z"/></svg>
+        Rate us on Google<span class="hr-sr"> (opens in a new tab)</span>
+      </a>
+    </div>
+  </div>
+  <figure class="hr-qr" data-fk-reveal>
+    <div class="hr-qr-card">
+      <img src="/assets/brand/google-review-qr.png" alt="QR code that opens the Fursat review page on Google" width="132" height="132" loading="lazy" decoding="async" />
+    </div>
+    <figcaption>Scan with your phone</figcaption>
+  </figure>
+</section>
+
+<style is:global>
+.hr{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(40px,5.5vw,72px) clamp(12px,2vw,28px);display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(16px,3vw,48px);justify-items:center;text-align:center;border-top:1px solid rgba(201,154,67,.35)}
+.hr-ele{margin:0}
+.hr-ele img{display:block;width:clamp(110px,30vw,150px);height:auto;aspect-ratio:640/582;object-fit:cover;border-radius:22px;box-shadow:0 10px 24px -14px rgba(26,22,8,.45)}
+.hr-body{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0;max-width:34rem}
+.hr-kick{margin:0;font:600 12px/1.4 Poppins,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#74501a}
+.hr-h{color:#1b3a26}
+.hr-hl{font-style:italic;color:#2a5019;background:linear-gradient(transparent 68%,rgba(243,197,107,.55) 68%);padding:0 .1em}
+.hr-line{margin:0;font:400 16px/1.6 Poppins,system-ui,sans-serif;color:#3a341f;max-width:30rem}
+.hr-stars{position:relative;display:inline-flex;gap:clamp(2px,1vw,8px);padding:6px 10px;margin-top:6px;min-height:44px;border-radius:999px;overflow:hidden;-webkit-tap-highlight-color:transparent;text-decoration:none;isolation:isolate}
+.hr-stars:focus-visible{outline:2px solid #C94716;outline-offset:3px}
+.hr-st{display:block;width:clamp(44px,12vw,60px);height:clamp(44px,12vw,60px);overflow:visible;flex:none}
+.hr-st-b{fill:#f3e3b8;stroke:#c99a43;stroke-width:1.2;stroke-linejoin:round}
+.hr-st-l{fill:#f3c56b;stroke:#c99a43;stroke-width:1.2;stroke-linejoin:round;opacity:0;transform-origin:50% 55%;transform:scale(.82)}
+.hr-stars::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(255,244,205,.85) 50%,transparent 65%);transform:translateX(-110%);opacity:0}
+.hr.is-seen .hr-stars::after{animation:hr-shim 1.4s cubic-bezier(.23,1,.32,1) .5s 1 both}
+@keyframes hr-shim{0%{transform:translateX(-110%);opacity:1}100%{transform:translateX(110%);opacity:1}}
+.hr-stars:focus-visible .hr-st-l{opacity:1;transform:none;transition:opacity .22s ease-out calc(var(--i)*75ms),transform .22s ease-out calc(var(--i)*75ms)}
+@media(hover:hover){.hr-stars:hover .hr-st-l{opacity:1;transform:none;transition:opacity .22s ease-out calc(var(--i)*75ms),transform .22s ease-out calc(var(--i)*75ms)}}
+.hr-tap{margin:-4px 0 0;font:italic 500 1rem/1.2 'Playfair Display',serif;color:#74501a}
+.hr-btns{display:flex;justify-content:center;margin-top:6px}
+.hr-btns .fk-btn{gap:10px}
+.hr-g{width:18px;height:18px;flex:none}
+.hr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hr-qr{display:none;margin:0}
+@media(min-width:900px){
+  .hr{grid-template-columns:auto minmax(0,34rem) auto;justify-content:center;align-items:center;text-align:left}
+  .hr-ele img{width:190px}
+  .hr-body{align-items:flex-start}
+  .hr-tap{display:none}
+  .hr-qr{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .hr-qr-card{padding:14px;background:#fffaf0;border:2px solid #c99a43;border-radius:22px;box-shadow:0 0 0 5px rgba(243,197,107,.28),0 14px 30px -18px rgba(26,22,8,.55)}
+  .hr-qr-card img{display:block;width:176px;height:176px;image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:-moz-crisp-edges}
+  .hr-qr figcaption{font:600 12px/1.4 Poppins,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#74501a}
+}
+@media(prefers-reduced-motion:reduce){
+  .hr-st-l{opacity:1;transform:none}
+  .hr-stars::after{display:none}
+  .hr-stars .hr-st-l{transition:none!important}
+}
+</style>
+
+<script>
+// shimmer plays once when the section first scrolls into view (CSS handles reduced motion)
+const el = document.querySelector<HTMLElement>('[data-hr]');
+if (el) {
+  if (!('IntersectionObserver' in window)) el.classList.add('is-seen');
+  else {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { el.classList.add('is-seen'); io.disconnect(); } }, { threshold: 0.45 });
+    io.observe(el);
+  }
+}
+</script>

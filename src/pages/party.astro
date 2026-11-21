@@ -30,34 +30,37 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 <div class="pa">
   <SiteHeader active="celebrate" variant="plaster" />
   <script is:inline>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('fx-pre'); setTimeout(function () { document.documentElement.classList.remove('fx-pre'); }, 3500); }</script>
-  <div data-snap="Welcome" data-snap-fit>
-  <CornerHero page="party" id="pa-h1" kicker="Celebrate beautifully at FURSAT"
-    h1a="Every Occasion Deserves a Beautiful" h1b="Celebration" hlColor="#c02a1a"
-    sub="Make yours unforgettable." subHl="unforgettable"
-    lead="Pick a package, tell us how many are coming, and we will confirm the rest on WhatsApp."
-    labels={[['Birthdays', 'Corporate'], ['Kitty parties', 'Bar bashes']]}
-    alt="Two oval gold windows with photos of Fursat set for a party"
-    ctas={[{ label: 'Plan Your Party', href: '#pa-plan', primary: true }, { label: 'See Packages', href: '#pa-packs' }]} />
-  </div>
+  <!-- v5.72 stacked sticky sections: the 4 panels are SIBLINGS of one parent (.pa-stack) so position:sticky can layer them -->
+  <main id="pk-main" tabindex="-1" class="pa-stack">
+    <div class="pa-panel pa-panel--hero" data-pa-panel>
+      <CornerHero page="party" id="pa-h1" kicker="Celebrate beautifully at FURSAT"
+        h1a="Every Occasion Deserves a Beautiful" h1b="Celebration" hlColor="#c02a1a"
+        sub="Make yours unforgettable." subHl="unforgettable"
+        lead="Pick a package, tell us how many are coming, and we will confirm the rest on WhatsApp."
+        labels={[['Birthdays', 'Corporate'], ['Kitty parties', 'Bar bashes']]}
+        alt="Two oval gold windows with photos of Fursat set for a party"
+        ctas={[{ label: 'Plan Your Party', href: '#pa-plan', primary: true }, { label: 'See Packages', href: '#pa-packs' }]} />
+    </div>
+    <div class="pa-panel pa-panel--packs" data-pa-panel><PartyPackages /></div>
+    <div class="pa-panel pa-panel--feast" data-pa-panel>
+      <figure class="pa-feast" data-fx-reveal>
+        <img src="/assets/feast/feast-table-1200.webp"
+          srcset="/assets/feast/feast-table-768.webp 768w, /assets/feast/feast-table-1200.webp 1200w, /assets/feast/feast-table-1600.webp 1600w"
+          sizes="(max-width: 767px) 92vw, 1100px" width="1600" height="810"
+          alt="A round table filled with plates of food and desserts" loading="lazy" decoding="async" />
+        <figcaption>A table for the whole group.</figcaption>
+      </figure>
+    </div>
+    <div class="pa-panel pa-panel--plan" data-pa-panel data-pa-last><PartyBuilder /></div>
+  </main>
+
+  <!-- closing art (bottom slice + quote, plates, band) sits after the stack and scrolls normally -->
   <div class="hy pa-hy">
     <div class="hy-slice hy-mid" aria-hidden="true"></div><div class="hy-slice hy-bot" aria-hidden="true"></div>
     <HyWindows data={pDesk} slice={2} photos={[closePhoto]} view="d" anchor="bottom" />
+    <div class="hy-flow pa-flow" aria-hidden="true"></div>
 
-    <div class="hy-flow pa-flow">
-      <main id="pk-main" tabindex="-1" class="pa-main">
-        <div data-snap="Packages"><PartyPackages /></div>
-        <figure class="pa-feast" data-snap="Feast" data-snap-nodot data-fx-reveal>
-          <img src="/assets/feast/feast-table-1200.webp"
-            srcset="/assets/feast/feast-table-768.webp 768w, /assets/feast/feast-table-1200.webp 1200w, /assets/feast/feast-table-1600.webp 1600w"
-            sizes="(max-width: 767px) 92vw, 1100px" width="1600" height="810"
-            alt="A round table filled with plates of food and desserts" loading="lazy" decoding="async" />
-          <figcaption>A table for the whole group.</figcaption>
-        </figure>
-        <div data-snap="Plan" data-snap-last><PartyBuilder /></div>
-      </main>
-    </div>
-
-    <figure class="pa-quote" data-fx-reveal>
+<figure class="pa-quote" data-fx-reveal>
       <svg class="pa-qm" viewBox="0 0 40 32" aria-hidden="true"><path d="M0 32V18C0 8 6 2 16 0l2 5c-6 2-9 6-9 11h8v16zm22 0V18c0-10 6-16 16-18l2 5c-6 2-9 6-9 11h8v16z"/></svg>
       <blockquote>Good food, great company and unforgettable moments.</blockquote>
       <div class="hy-orn pa-q-orn" aria-hidden="true"><i></i><svg viewBox="0 0 140 176"><path d={elephant} /></svg><i></i></div>
@@ -85,17 +88,56 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 <MobileBar active="celebrate" />
 <script>import '../scripts/fk-motion';</script>
 <style is:global>
-/* v5.63: each section is one full "page": it fills the screen under the header, so the next one never peeks in below it */
-@media (min-width: 768px) {
-  [data-snap]:not([data-snap-fit]):not([data-snap="Feast"]) { min-height: calc(100svh - var(--sh-h, 104px) - 1px); display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
-  [data-snap="Feast"] { min-height: calc(100svh - var(--sh-h, 104px) - 1px); box-sizing: border-box; }
+/* v5.72 stacked sticky sections: Welcome -> Packages -> Feast -> Plan. Each panel is sticky under the header and covers the one before it. */
+.pa-stack{position:relative;isolation:isolate;display:block;background:#f6e6d1}
+.pa-panel{position:sticky;top:var(--pa-top,var(--sh-h,104px));z-index:var(--pa-z,1);box-sizing:border-box;min-height:calc(100svh - var(--sh-h,104px));background:var(--fk-plaster);box-shadow:0 -14px 34px -10px rgba(52,32,8,.34);transform-origin:50% 0}
+.pa-panel--hero{--pa-z:1;top:var(--pa-top,0px);min-height:0;background:#f6e4c9;box-shadow:none}
+.pa-panel--packs{--pa-z:2;padding-top:clamp(8px,1.5vw,24px)}
+.pa-panel--feast{--pa-z:3;display:flex;flex-direction:column;justify-content:center}
+.pa-panel--plan{--pa-z:4;position:relative;top:auto}
+@media (min-width:768px){
+  .pa-panel--packs,.pa-panel--plan{display:flex;flex-direction:column;justify-content:center}
+}
+/* time-of-day tint: it used to sit on the .hy stage; the stage now only holds the closing art, so it moves to the Packages panel */
+.pa-panel--packs::before{content:"";position:absolute;left:0;right:0;top:0;height:75vw;z-index:2;pointer-events:none;opacity:0;transition:opacity 1.2s ease;-webkit-mask-image:linear-gradient(180deg,#000 60%,transparent);mask-image:linear-gradient(180deg,#000 60%,transparent)}
+html[data-daypart="morning"] .pa-panel--packs::before{opacity:1;background:radial-gradient(120% 70% at 15% 0%,rgba(255,252,240,.22),transparent 60%);mix-blend-mode:screen}
+html[data-daypart="evening"] .pa-panel--packs::before{opacity:1;background:radial-gradient(130% 85% at 85% 0%,rgba(214,130,50,.26),transparent 62%),linear-gradient(180deg,rgba(130,70,20,.10),rgba(70,35,10,.06));mix-blend-mode:multiply}
+.pa-hy::before{display:none}
+/* phone: both hero buttons must sit above the fixed bottom nav bar at scroll 0 (bar = 64px + 12px offset = --pa-bar). The hero keeps its full-screen height (the free space sits below the buttons, behind the bar). Buttons share one row; the hero picture takes whatever height is left (never taller than its normal 16:9). */
+@media (max-width:767px){
+  .pa{--pa-bar:calc(76px + env(safe-area-inset-bottom,0px))}
+  .pa-panel--hero .ch{min-height:100svh;box-sizing:border-box}
+  .pa-panel--hero .ch-btns{flex-wrap:nowrap;gap:10px}
+  .pa-panel--hero .ch-btns .fk-btn{flex:1 1 0;min-width:0;padding-inline:10px;white-space:nowrap;justify-content:center}
+  .pa-panel--hero .ch-art{aspect-ratio:auto;height:clamp(88px,calc(100svh - var(--pa-hero-x,540px) - var(--pa-bar)),56.25vw)}
 }
 
+/* push-back: the panel that gets covered shrinks to .94 and dims (transform + opacity only). Driven by the NEXT panel's view timeline (CSS scroll-driven animations). */
+.pa-panel::after,.pa-dim{content:"";position:absolute;inset:0;z-index:30;background:#1d1306;opacity:0;pointer-events:none}
+.pa-dim{display:block}
+.pa-stack:not(.pa-fb) .pa-dim{display:none}
+.pa-fb .pa-panel::after{display:none}
+.pa-panel--plan::after{display:none}
+@keyframes pa-back{to{transform:scale(.94)}}
+@keyframes pa-dim{to{opacity:.4}}
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    .pa-stack{timeline-scope:--pa-t1,--pa-t2,--pa-t3}
+    .pa-panel--packs{view-timeline:--pa-t1 block}
+    .pa-panel--feast{view-timeline:--pa-t2 block}
+    .pa-panel--plan{view-timeline:--pa-t3 block}
+    .pa-panel--hero,.pa-panel--hero::after{animation-timeline:--pa-t1}
+    .pa-panel--packs,.pa-panel--packs::after{animation-timeline:--pa-t2}
+    .pa-panel--feast,.pa-panel--feast::after{animation-timeline:--pa-t3}
+    .pa-panel--hero,.pa-panel--packs,.pa-panel--feast{animation-name:pa-back;animation-timing-function:linear;animation-fill-mode:both;animation-duration:1ms;animation-range:cover 0px cover var(--pa-d,calc(100svh - var(--sh-h,104px)))}
+    .pa-panel--hero::after,.pa-panel--packs::after,.pa-panel--feast::after{animation-name:pa-dim;animation-timing-function:linear;animation-fill-mode:both;animation-duration:1ms;animation-range:cover 0px cover var(--pa-d,calc(100svh - var(--sh-h,104px)))}
+  }
+}
 /* hybrid stage: textless background art + the closing panel (quote, plates, band) laid over the bottom slice */
 .pa{flex:none;background:#f6e6d1;color:var(--fk-ink);font-family:var(--fk-sans)}
 .pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:500;background:#f6e6d1}
-.pa-flow{padding:clamp(8px,1.5vw,24px) 0 calc(520 * var(--u));z-index:3}
-.pa .pa-main{display:block;outline:0}
+.pa-flow{padding:0 0 calc(520 * var(--u));z-index:3}
+.pa .pa-stack{outline:0}
 /* feast banner: cropped real photo (no other-brand cushions), caption under it so it never covers the food */
 .pa-feast{margin:clamp(20px,3vw,44px) auto;max-width:1100px;padding:0 clamp(12px,4vw,24px)}
 .pa-feast img{display:block;width:100%;height:auto;border-radius:22px;box-shadow:0 0 0 1px rgba(214,170,90,.55),0 16px 34px rgba(60,40,10,.25)}
@@ -117,7 +159,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 .pa-close p{margin:0;font:400 clamp(12.5px,calc(15 * var(--u)),1.15rem)/1.55 var(--fk-sans);color:rgba(246,234,214,.86);max-width:44ch}
 @media(max-width:767px){
   .pa-hy{--mid:url(/assets/bg/party-phone-1.webp);--bot:url(/assets/bg/party-phone-2.webp);--th:2;--bh:878.7}
-  .pa-flow{padding:24px 0 calc(900 * var(--u))}
+  .pa-flow{padding:0 0 calc(900 * var(--u))}
   .pa-quote{left:calc(90 * var(--u));right:calc(90 * var(--u));width:auto;bottom:calc(612 * var(--u));justify-items:center;text-align:center;gap:2px}
   .pa-qm{display:none}
   .pa-quote blockquote{font-size:calc(43 * var(--u))}
@@ -146,5 +188,5 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 @media(max-width:767px){.pa{overflow-x:clip}}
 </style>
 <script is:inline src="/js/party.js"></script>
-<script is:inline src="/js/fk-snap.js" data-block="#pb-sheet:not([hidden])" defer></script>
+<script is:inline src="/js/pa-stack.js" defer></script>
 </Base>

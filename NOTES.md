@@ -211,3 +211,101 @@ Nothing to `git rm`.
 git add -f public/assets/tour/clips/entrance.mp4 public/assets/tour/clips/bar.mp4 public/assets/tour/clips/high-tables.mp4 public/assets/tour/clips/cafe.mp4 public/assets/tour/clips/table-for-two.mp4 public/assets/video/inside-fursat-720.mp4 public/assets/video/inside-fursat-16x9.mp4
 
 - Cache fix: tour clips renamed to *-v2.mp4 (assets are cached 1 year as immutable, so same names would keep the old clips for returning visitors). Old clip files removed with git rm.
+
+
+## v5.76 Celebrate stacked sections (kit 22 part 1)
+
+## Decisions made
+- Kit code.zip already contains the earlier perf/SEO work (build + check:seo exist). `photos-A/B` and `extra-assets` were not uploaded, so QA used a scratch copy with 16px placeholder images (never shipped). Real `npm ci` + `npm run build` were used (astro-lite in the kit is broken: needs a missing `al-inject.js`).
+- This file is named NOTES.md as the kit asks. The repo already has its own NOTES.md (Sanity notes): do NOT copy this one over it; read it, then file it as `docs/notes/NOTES-stack-clean.md`.
+
+## Step 1: what breaks sticky on /party (measured in Chromium at 1366x634)
+Scroller: the **window** (html is `overflow-x:hidden; overflow-y:auto`, body is `visible`, body.scrollHeight = clientHeight). The 07.css "body scrolls" rule does not apply on /party at 1366. pa-stack.js still detects the scroller at run time (same test as fk-snap.js) so both cases work.
+
+| Panel | Parent chain today |
+|---|---|
+| Welcome (hero) | `.pa > [data-snap]` (parent `div.pa`) |
+| Packages / Feast / Plan | `main#pk-main > div.hy-flow > div.hy.pa-hy > div.pa` |
+
+Blockers found:
+1. **Different parents**: hero is a child of `.pa`; the other three are inside `.hy > .hy-flow > main`. Sticky only stacks siblings of one parent. (the real cause)
+2. `.hy` has `overflow: clip` + `container-type: inline-size` (layout containment) + `isolation: isolate`. `overflow: clip` is not a scroll container (OK for sticky) but the `.hy` stage is the wrong parent anyway.
+3. `html` is the scroll container (`overflow-y:auto`); no ancestor of the panels has transform/filter/contain:paint/perspective (checked all four chains).
+4. `fk-snap.js` jumps (loaded at the bottom of party.astro) fight any stack: removed from /party only.
+5. `.ch` (hero) has `overflow:hidden` on itself: harmless for its own stickiness.
+6. Header is `position:fixed`, `--sh-h` = 104px at 1366: panels use `top: var(--sh-h)`, the hero (its own padding-top already covers the header) uses `top: 0`.
+7. Panels 2-3 use no `--u` / container units (only the quote/plates/close art does), so they can leave `.hy` safely.
+
+## Step 2 done: plain sticky stack (party.astro only, no JS yet)
+- `main#pk-main.pa-stack` now holds the 4 panels as siblings: `.pa-panel--hero / --packs / --feast / --plan`. Hero moved inside `main` (h1 in main is fine).
+- Panels: `position:sticky; top:var(--pa-top,var(--sh-h))`, z 1..4, opaque plaster, top shadow. Hero `top:0`. Plan `position:relative` (not sticky, scrolls to quote/Instagram/footer). `.pa-stack{isolation:isolate}`.
+- `.hy.pa-hy` kept for the closing art only (bottom slice, HyWindows, quote, plates, band), after the stack. Its mid slice is plain plaster, so each panel uses `var(--fk-plaster)` = no visual change.
+- `fk-snap.js` script tag removed from /party only (file untouched). Old `[data-snap]` min-height block replaced by `.pa-panel` rules; `data-snap` attributes removed.
+- Decisions: Feast panel is vertically centred (it was top-aligned in a full-height box; a full panel needs it). All panels get min-height `100svh - --sh-h` on phone too (else a short panel only half-covers the previous). Time-of-day tint (`.hy::before`) moved to the Packages panel; disabled on the closing stage.
+- party.js still has a stale comment about fk-snap (file not allowed, left).
+- Check: 1366x634 and 390x844, no console errors, no sideways scroll; Packages/Feast cover the previous panel. Scroller at 1366 = window.
+
+## Step 3 done: push-back, tall panels, hero buttons (party.astro + new public/js/pa-stack.js)
+- Push-back: CSS scroll-driven animations. Each panel's `view-timeline` (`--pa-t1..3`, `timeline-scope` on `.pa-stack`) drives the PREVIOUS panel: `transform: scale(1→.94)` + a black `::after` overlay opacity 0→.4 (= brightness ~.6). Range `cover 0px → cover var(--pa-d)` where `--pa-d` = viewport height − header (set by JS, CSS default `100svh - --sh-h`). Transform/opacity only. Works for window or body scroller (the browser picks the nearest scroller).
+- Fallback (no `animation-timeline`): pa-stack.js writes `transform` + overlay opacity from one rAF-throttled scroll handler (capture listener = window or body). Decision: GSAP ScrollTrigger is NOT used: `public/js/gsap.min.js` ships GSAP core only (no ScrollTrigger plugin) and no other file may be added; same math, no CSS variables per frame. Tested by forcing the fallback in Chromium.
+- Reduced motion: no scale/dim (CSS inside `prefers-reduced-motion:no-preference`, JS fallback skipped); sticky covering stays. No snap anywhere.
+- Tall panels: ResizeObserver sets `--pa-top = min(--sh-h, 100vh − panelHeight)` so the user scrolls through the panel before the next covers it (Feast at 1366x634 is 659px → top −25px; hero −10px). Plan is `position:relative` (not sticky).
+- Hero buttons ("Plan Your Party" `#pa-plan`, "See Packages" `#pa-packs`): delegated click → scrollTo the landed Y (panel natural top − header), smooth, on body or window; focus moved to the target (preventScroll). `#pa-plan` / `#pa-packs` in the URL also land correctly on load. Checked: Plan lands at top 104, Packages at top 104.
+- A11y: a fully covered panel gets `inert` (Tab/screen readers skip what is hidden); removed again when uncovered. DOM order = visual order.
+- No console errors at 1366 and 390. Not verified here: real iOS Safari (needs a device).
+
+## Step 5: QA (final)
+- `npm run build` + `npm run check:seo` pass (13 pages, OK). Photos-A/B were not uploaded: the build ran on a scratch copy with 77 16px placeholder webps (menu.astro fails on missing dish photos otherwise). The placeholders are NOT in this zip.
+- 8 widths (320, 375, 390, 768, 1024, 1366, 1440, 1920): no sideways scroll, 4 panels, no console errors.
+- Screenshots in `screenshots/`: `s3-<w>-1-hero, 2-packs-half, 3-packs-landed, 4-feast-covering, 5-plan` at 1366 and 390, plus `strip-1366.png` / `strip-390.png` (frame strips).
+- Part 2 (clean-up) skipped as instructed. Home/Menu/Story before/after not needed (no file outside party.astro / pa-stack.js changed).
+- File it as `docs/notes/NOTES-stack-clean.md` (repo NOTES.md is a different file). No files to `git rm`. Files: `src/pages/party.astro`, `public/js/pa-stack.js` (new).
+- Known: real iOS Safari / Android Chrome device check still needed (address-bar resize re-measures via ResizeObserver + resize). Firefox/Safari without scroll-driven animations use the JS fallback.
+
+## v2: phone touch test (390x844 and 390x760, mobile emulation, touch taps)
+Found and fixed:
+1. Hero `top:0` ignored `--pa-top` (hero never used the tall-panel rule). Now `top:var(--pa-top,0px)`.
+2. On phone the fixed nav bar (+ the Book-a-table bar) covered the bottom of every tall panel and the hero's "See Packages" button (it sat under the nav bar and, with the hero stuck, could never be reached). pa-stack.js now reserves the bars' height (constant, from heights not positions): tall panels and the hero stick later, so the user scrolls ~140px and the button clears the bar. Desktop reserve = 0.
+Results (both heights): "See Packages" and "Plan Your Party" taps land with the panel top at 76px (under the header); stepping the scroll through all 4 panels in 40px steps = 0 jumps; covering + push-back (scale .94, dim) work; address bar show/hide (844<->760 mid-scroll) keeps scrollY and returns to identical positions (no jump); no sideways scroll; no console errors. 1366x634 re-checked, unchanged. Build + check:seo pass.
+Note: at load (scrollY 0) on a phone "See Packages" is still under the nav bar (same as before this work, hero height is content-driven); one short scroll reveals it. Not changed (would change the hero look).
+Frame strip: screenshots/strip-390-scroll.png (8 scroll points).
+
+## v3: hero buttons above the bottom nav bar at scroll 0 (phone)
+- Problem: at 390x844 "See Packages" sat under the nav bar (bottom 809 vs bar top 768); padding below the hero cannot fix that, the content itself had to move up.
+- Fix (party.astro only, `@media (max-width:767px)`, the range where the nav bar exists; the hero's phone layout is <=820): hero keeps full screen height (`.ch{min-height:100svh}`: the free space sits below the buttons, behind the bar), the two buttons share one row, and the hero picture height = `clamp(88px, 100svh - 540px - --pa-bar, 16:9)` (`--pa-bar` = 76px + safe-area, same value pa-stack.js reserves: nav 64 + 12 offset). Taller phones keep the normal 16:9 picture. Desktop/tablet untouched.
+- Look change (needed): buttons side by side; picture shorter on short screens (844: unchanged 16:9 height not reached? art 219px; 760: 144px; 740@360: 124px).
+- Checked at scroll 0, touch: 390x844 buttons 701-749 (bar top 768), 390x760 626-674 (684), 360x740 604-652 (664). elementFromPoint at each button centre = the button. All taps still land on the right panel; 0 jumps; address-bar resize OK; 1366 unchanged; build + check:seo pass.
+- Not met: 375x667 (small iPhone) buttons 568-616 vs bar top 591: picture is already at its 88px minimum; would need smaller text. Left as is.
+- Screens: screenshots/hero0-390x844.png, hero0-390x760.png, hero0-360x740.png, strip-390-scroll.png (refreshed).
+
+
+## v5.77 Reviews section + Ask review intent (kit 24)
+
+## Done
+- `src/components/home/HomeReviews.astro` (new), inserted in `index.astro` between HomeCelebrate and HomeStory (1 import + 1 line).
+- `public/assets/brand/google-review-qr.png`: 132px, 1-bit, 897 bytes, shown at 176px with pixelated scaling. Decodes (OpenCV) to the Google review URL (with the same utm tags it came with).
+- `/ask` desk row: new "Rate us" link (gold star, new tab, `rel="noopener"`), href from `site.json`.
+- `public/js/ask-host.js`: two new answers. "review/rating/rate us" gives a thank-you + "Rate us on Google". "complaint/feedback/suggestion/unhappy" gives WhatsApp-the-manager first, Google second.
+
+## Decisions made
+- Review link: always `site.address.review`. `ask-host.js` reads it from the desk link (`[data-rate]`), so nothing is hard-coded and `ask.astro` is touched only in the desk row.
+- Stars: one link with `aria-label="Rate Fursat on Google (opens in a new tab)"`. Hover/focus lights them left to right (75ms stagger, opacity + transform only). A soft shimmer runs once when the section is 45% in view. Reduced motion: stars static gold, no shimmer. On phones (no hover) the shimmer and the "Tap a star" line carry the invite.
+- No score, count, quote or offer anywhere. Not linked to FURSAT15.
+- QR + "Scan with your phone" only at >=900px. Elephant: existing `elephant-cocktail` (same as HomeVisit), no new art.
+- "suggestion" is matched only in clear feedback phrases ("I have a suggestion", "suggestion box"...). A plain "suggest a starter" still goes to the dish finder.
+- `ask.js` needed no change: `ask-host.js` runs first (capture phase) and handles both intents.
+- **AskFab: not changed.** Its bubble is a 2-second, `aria-hidden` text hint inside the link to /ask. A second link inside it would be invalid and untappable. No tip added.
+- This NOTES.md is session-only; merge it into the main NOTES by hand.
+
+## QA
+- Done: 8 widths (320-1920): no sideways scroll, button 48px, star link 56-72px tall, min text 12px. Reduced motion checked. Ask answers tested in a browser harness (links open `_blank` + `noopener`, no JS errors).
+- NOT run: `npm run build`, `npm run check:seo` (no node_modules, no install here). Home was previewed as the section alone (astro-lite can't render the full page). Please run both on merge.
+- Not tested: real-device taps, screen reader.
+
+## Files
+- new: HomeReviews.astro, google-review-qr.png
+- changed: index.astro, ask.astro, ask-host.js
+- git rm: none
+
+## Screenshots
+screenshots/reviews-390.png, screenshots/reviews-1366-hover.png (mid-sweep frame)
