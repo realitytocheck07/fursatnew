@@ -397,3 +397,8 @@ story-d-poster / story-d-video (1366x634), story-m-poster / story-m-video (390x8
 
 ## v5.85 Banquet film (watch button)
 - Banquet film files in public/assets/video/banquet-*-v1.* (see video-src/banquet-film/NOTES-banquet-film.md). Banquet hero gets a third CTA "▶ Watch the film" that opens a dialog with the full film (sound allowed by the tap; emits fk:music {id:"film"}). The silent hero loop is wired in Celebrate part 2.
+
+
+## v5.86 fixes
+- Header: "Home" link back in the desktop nav (v5.84 had it only in the phone sheet + logo).
+- Banquet film: music replaced with the owner's reel music (audio of the approved 26.5 s cut, faded out at the end). New names banquet-film-v2.mp4/.webm (v1 removed). Note: the reels' music may be licensed Instagram audio; owner chose to use it.

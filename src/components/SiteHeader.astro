@@ -29,6 +29,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     </a>
 
     <nav class="sh-nav" aria-label="Main Navigation">
+      <a href="/" class:list={["sh-link", { active: active === 'home' }]} aria-current={active === 'home' ? 'page' : undefined}>Home</a>
       <div class="sh-drop">
         <button class:list={["sh-link", "sh-drop-btn", { active: active === 'menu' }]} type="button" aria-expanded="false" aria-controls="sh-menu-menu"><span>Menu</span><svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="sh-menu" id="sh-menu-menu">
