@@ -19,6 +19,8 @@ import Mascot from '../components/Mascot.astro';
 import MascotOfferModal from '../components/MascotOfferModal.astro';
 import Sparkles from '../components/Sparkles.astro';
 import BookingDialog from '../components/BookingDialog.astro';
+import '../styles/home-only.css';
+import askLazyCss from '../styles/ask-lazy.css?url';
 import StickyBar from '../components/StickyBar.astro';
 import PicksTray from '../components/PicksTray.astro';
 import LegalBar from '../components/LegalBar.astro';
@@ -115,6 +117,12 @@ function idle(){if(window.requestIdleCallback)requestIdleCallback(go,{timeout:25
 if(document.readyState==="complete")idle();else addEventListener("load",idle)})();
 </script>
 <MobileBar active="home" />
+<script is:inline define:vars={{ href: askLazyCss }}>
+// Ask flow + Picks CSS (needed only once 12.js builds them): load off the critical path, on idle or first input.
+(function(){var d=0;function go(){if(d)return;d=1;var l=document.createElement("link");l.rel="stylesheet";l.href=href;document.head.appendChild(l);["pointerdown","keydown","touchstart","scroll"].forEach(function(t){removeEventListener(t,go)})}
+["pointerdown","keydown","touchstart","scroll"].forEach(function(t){addEventListener(t,go,{passive:true})});
+addEventListener("load",function(){(window.requestIdleCallback||function(f){setTimeout(f,1500)})(go,{timeout:3000})})})();
+</script>
 <script is:inline src="/js/motion-kit.js"></script>
 </Base>
 <style is:global>

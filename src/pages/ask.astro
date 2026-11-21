@@ -6,6 +6,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import MobileBar from '../components/MobileBar.astro';
 import EnquiryHub from '../components/ask/EnquiryHub.astro';
 import '../styles/ask-host.css';
+import '../styles/ask-lazy.css';
 import site from '../data/site.json';
 import MascotOfferModal from '../components/MascotOfferModal.astro';
 import menuJson from '../../public/data/menu.json';
@@ -35,7 +36,7 @@ const groups: Record<string, string[]> = {
   'Schezwan Chicken/ Fish/ Prawns': ['Schezwan Chicken', 'Schezwan Fish', 'Schezwan Prawns'],
   'Rice or Noodles': ['Rice / Noodles (Veg)', 'Rice / Noodles (Egg)', 'Rice / Noodles (Chicken)', 'Rice / Noodles (Mix)']
 };
-const spell: Record<string, string> = { 'Créme Brulee': 'Creme Brulee', 'Virgin Pina Colada': 'VIRGIN PINACOLADO', 'Mixed Berry Smoothie': 'MIX BERRY SMOOTHIE', 'Vietnamese Coffee': 'VIETNAMESE' };
+const spell: Record<string, string> = { 'Créme Brulee': 'Creme Brulee', 'Virgin Pina Colada': 'VIRGIN PINACOLADO', 'Mixed Berry Smoothie': 'MIX BERRY SMOOTHIE', 'Vietnamese Coffee': 'VIETNAMESE', 'Cortado': 'CARTADO' };
 const okMap: Record<string, string> = {};
 const dropped: string[] = [];
 for (const it of menuJson as any[]) {

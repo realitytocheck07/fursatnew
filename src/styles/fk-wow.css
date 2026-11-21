@@ -5,11 +5,6 @@
 
 /* ---------- STAGE 1.1  package dialog: sat under the phone nav (z 9000) and Book bar (8990) ---------- */
 .pk{z-index:9600}
-@media (max-width:767px){
-  .pk-sh{height:calc(100dvh - 10px - env(safe-area-inset-top,0px));max-height:100dvh}
-  .pk-bo{padding-bottom:20px;min-height:0}
-  .pk-ft{position:sticky;bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
-}
 /* floating buttons step aside while any dialog is open */
 body:has(.pk.on) :is(.afab,.waf-fab,.waf-tease,.ifab,.fk-igfab),
 body:has(dialog[open]) :is(.afab,.waf-fab,.waf-tease,.ifab,.fk-igfab){opacity:0!important;pointer-events:none!important;visibility:hidden}
