@@ -4,6 +4,7 @@
 // The first two cards deep-link to that exact drink card (/menu#dish=<name>), after the 21+ check. The third goes to the drinks side.
 // Set `mount="before:.xp-cards-sec"` to move the strip into a layout that has no slot (see restaurant-bar.astro).
 import LazyVideo from '../LazyVideo.astro';
+import ReelViewer from './ReelViewer.astro';
 import drinks from '../../data/drinks.json';
 
 interface Props { mount?: string; id?: string }
@@ -23,22 +24,32 @@ const lfb = byName('Life Fursat Bhai');
 const cos = byName('Cosmopolitan');
 const cards = [
   { key: 'lfb', name: title(lfb.name), line: lfb.description ?? '', href: `/menu/#dish=${encodeURIComponent(lfb.name)}`,
-    label: `${title(lfb.name)}, a Fursat cocktail in a coupe glass`, clip: '/assets/cocktails/cocktail-lfb-v1' },
+    label: `${title(lfb.name)}, a Fursat cocktail in a coupe glass`, reel: 'sig', clip: '/assets/cocktails/cocktail-lfb-v1' },
   { key: 'cos', name: title(cos.name), line: cos.description ?? '', href: `/menu/#dish=${encodeURIComponent(cos.name)}`,
-    label: `${title(cos.name)}, a Fursat cocktail in a martini glass`, clip: '/assets/cocktails/cocktail-cos-v1' },
+    label: `${title(cos.name)}, a Fursat cocktail in a martini glass`, reel: 'sig', clip: '/assets/cocktails/cocktail-cos-v1' },
   { key: 'bar', name: 'Crafted at our bar', line: 'Every cocktail is built by hand at our bar.', href: '/menu/#go=d-cocktails',
-    label: 'A bartender builds a layered cocktail at the Fursat bar', clip: '/assets/cocktails/cocktail-bar-v1' },
+    label: 'A bartender builds a layered cocktail at the Fursat bar', reel: 'bar', clip: '/assets/cocktails/cocktail-bar-v1' },
+];
+// The reel viewer: the brand's own reels with their original music (public/assets/reels). Opened by the pill and the cards' sound icons.
+const reels = [
+  { key: 'sig', name: `${title(lfb.name)} + ${title(cos.name)}`, label: `Fursat reel: ${title(lfb.name)} and ${title(cos.name)} cocktails, then the Fursat end card`,
+    href: cards[0].href, hrefLabel: `See ${title(lfb.name)} on the menu`, base: '/assets/reels/reel-signatures-v1' },
+  { key: 'bar', name: 'Crafted at our bar', label: 'Fursat reel: a bartender builds a layered cocktail at the bar',
+    href: cards[2].href, hrefLabel: 'See the drinks menu', base: '/assets/reels/reel-bar-v1' },
 ];
 ---
 <section class="sc" id={id} aria-labelledby={`${id}-h`} data-sc-mount={mount || undefined}>
   <div class="sc-head" data-fk-reveal>
     <p class="sc-kick">From the Fursat bar</p>
     <h2 class="fk-ty-h2" id={`${id}-h`}>Signature <em>cocktails</em></h2>
-    <a class="fk-btn fk-btn--secondary fk-btn--md" href="/menu/#go=d-cocktails">See the drinks menu</a>
+    <div class="sc-acts">
+      <button class="fk-btn fk-btn--primary fk-btn--md sc-watch" type="button" data-reel-open="sig"><i class="sc-dot" aria-hidden="true"></i>Watch with sound</button>
+      <a class="fk-btn fk-btn--secondary fk-btn--md" href="/menu/#go=d-cocktails">See the drinks menu</a>
+    </div>
   </div>
-  <ul class="sc-rail fk-rail fk-rail--cards fk-rail--m" data-fk-stagger>
-    {cards.map((c) => (
-      <li class="sc-card">
+  <ul class="sc-rail fk-rail fk-rail--cards fk-rail--m">
+    {cards.map((c, n) => (
+      <li class="sc-card" style={`--i:${n}`}>
         <a class="sc-link" href={c.href} aria-label={c.key === 'bar' ? `${c.name}: see the drinks menu` : `${c.name}: see it on the menu`}>
           <span class="sc-vid">
             <LazyVideo src={`${c.clip}.mp4`} webm={`${c.clip}.webm`} poster={`${c.clip}.webp`} width={540} height={720} label={c.label} />
@@ -48,10 +59,29 @@ const cards = [
             <span class="sc-line">{c.key === 'bar' ? c.line : sentence(c.line) + '.'}</span>
           </span>
         </a>
+        <button class="sc-snd" type="button" data-reel-open={c.reel}
+          data-reel-href={c.key === 'bar' ? undefined : c.href} data-reel-hlabel={c.key === 'bar' ? undefined : `See ${c.name} on the menu`}
+          aria-label={`Watch the ${c.key === 'bar' ? 'bar' : c.name} reel with sound`} aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
       </li>
     ))}
   </ul>
 </section>
+<ReelViewer reels={reels} />
+<script is:inline>
+  (function () {
+    // rise-up entrance: the 3 cards rise from below once, when the section enters view (no JS = cards just show)
+    if (!('IntersectionObserver' in window)) return;
+    document.querySelectorAll('section.sc:not(.sc-rise)').forEach(function (s) {
+      s.classList.add('sc-rise');
+      var io = new IntersectionObserver(function (es) {
+        if (es.some(function (e) { return e.isIntersecting; })) { s.classList.add('is-in'); io.disconnect(); }
+      }, { threshold: 0.2 });
+      io.observe(s);
+    });
+  })();
+</script>
 {mount && <script is:inline>
   (function () {
     // layouts without a slot: move the strip next to its anchor before first paint (no layout shift); no JS = it stays where it is
@@ -67,7 +97,14 @@ const cards = [
 .sc-kick{margin:0;font:600 12px/1.4 Rupee,Poppins,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a5a22}
 .sc-head .fk-ty-h2 em{font-style:italic;color:#c99a43}
 .sc-rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);padding:0 clamp(12px,2vw,28px);max-width:1040px;margin:0 auto;list-style:none}
-.sc-card{min-width:0;text-align:left}
+.sc-card{position:relative;min-width:0;text-align:left}
+.sc-acts{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:4px}
+.sc-dot{display:inline-block;width:9px;height:9px;margin-right:9px;border-radius:50%;background:#c0291f;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.sc-snd{position:absolute;z-index:2;top:16px;right:16px;display:grid;place-items:center;width:44px;height:44px;padding:0;border-radius:50%;border:1px solid rgba(246,230,209,.6);background:rgba(16,38,26,.72);color:#f6e6d1;cursor:pointer}
+.sc-snd:hover{background:rgba(16,38,26,.9)}
+.sc-snd:focus-visible,.sc-watch:focus-visible{outline:3px solid #C94716;outline-offset:3px}
+.sc-rise .sc-card{opacity:0;transform:translateY(48px)}
+.sc-rise.is-in .sc-card{opacity:1;transform:none;transition:opacity 600ms cubic-bezier(.2,0,0,1) calc(var(--i) * 90ms),transform 600ms cubic-bezier(.2,0,0,1) calc(var(--i) * 90ms)}
 .sc-link{display:flex;flex-direction:column;height:100%;border-radius:26px;overflow:hidden;color:inherit;text-decoration:none;background:linear-gradient(180deg,#fffaf0,#f7ecd5);box-shadow:0 0 0 1px rgba(214,170,90,.55),0 14px 30px -18px rgba(60,40,10,.45)}
 .sc-link:focus-visible{outline:3px solid #C94716;outline-offset:3px}
 .sc-vid{display:block;margin:8px 8px 0;border-radius:20px 20px 56px 20px;overflow:hidden;background:#2a1d10;aspect-ratio:3/4}
@@ -77,5 +114,5 @@ const cards = [
 .sc-line{font:400 14px/1.5 Rupee,Poppins,system-ui,sans-serif;color:#4a4330}
 @media(hover:hover){.sc-link{transition:transform .25s cubic-bezier(.23,1,.32,1)}.sc-link:hover{transform:translateY(-3px)}}
 @media(max-width:767px){.sc-rail{display:flex;max-width:none}.sc-rail>*{flex:0 0 calc(80% - 12px)}}
-@media(prefers-reduced-motion:reduce){.sc-link{transition:none}.sc-link:hover{transform:none}}
+
 </style>

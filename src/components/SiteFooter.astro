@@ -1,292 +1,234 @@
 ---
 import site from '../data/site.json';
-// SiteFooter.astro - Fursat Luxury Hospitality Footer
-// Legal Name, Address, FSSAI, Hours, Socials & Quick Links
+// SiteFooter.astro (v5.87): compact designed close. Brand row, 4 short columns, legal bar,
+// plus the trendy layer: curtain reveal, giant wordmark, marquee, micro-interactions.
 // TODO(client): the unit number / floor of the address is unconfirmed (legal info says Shop G1, the old footer said 'Level 3'). Only the confirmed part is shown.
 // TODO(client): a second phone number is unconfirmed. Only the main phone from site.json is shown.
-// One legal line only: the copyright line below. Legal name, GSTIN and FSSAI come from site.json.
+// TODO(client): the banquet-loop footer video is not in the repo (no /assets/video), so the optional video layer is skipped.
+const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWeek, o: s.opens, c: s.closes, ol: s.open, cl: s.close })));
+const year = new Date().getFullYear();
+const insta = [
+  { h: 'fursatind.in', l: 'Kitchen & Bar' },
+  { h: 'fursat_bitesandbuffet', l: 'Bites & Buffet' },
+  { h: 'fursatbanquets', l: 'Banquets' },
+  { h: 'fursatsocialclub', l: 'Social Club' },
+];
+const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Park, Madhapur'];
 ---
-<footer class="sf-footer" id="visit">
-  <div class="sf-container">
-    <!-- Top Row: Brand & Tagline -->
-    <div class="sf-top">
-      <div class="sf-brand-col">
-        <a href="/" class="sf-logo">
-          <img src="/assets/c86f49db5a.webp" alt="Fursat Kitchen | Bar" width="130" height="97" loading="lazy" decoding="async" />
-        </a>
-        <p class="sf-tagline">
-          Good Food · Great Drinks · Better Days.<br />
-          The luxury of unhurried time at Capital Park, Madhapur.
-        </p>
-      </div>
-
-      <!-- Quick Nav Links -->
-      <div class="sf-links-grid">
-        <div class="sf-link-group">
-          <h2 class="sf-group-title">Dining & Drinks</h2>
-          <a href="/">Home</a>
-          <a href="/reserve">Reserve a Table</a>
-          <a href="/menu">Full Menu</a>
-          <a href="/restaurant-bar">Restaurant & Bar (21+)</a>
-          <a href="/cafe">Fursat Café</a>
-          <a href="/order">Order Online</a>
-          <p class="sf-order-line">Order on <a href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a> · <a href={site.order.zomato} target="_blank" rel="noopener">Zomato</a></p>
-          <a href="/ask">Ask Fursat (Mood Search)</a>
-          <a href="/story">Our Story</a>
-        </div>
-
-        <div class="sf-link-group">
-          <h2 class="sf-group-title">Celebrations</h2>
-          <a href="/party">Parties &amp; Events</a>
-          <a href="/banquet">The Banquet Hall</a>
-          <a href="/party#birthday">Birthdays & Anniversaries</a>
-          <a href="/party#corporate">Corporate Gatherings</a>
-          <a href="/party#kitty">Kitty Parties & Socials</a>
-          <a href="/catering">Outdoor Catering</a>
-        </div>
-
-        <div class="sf-link-group">
-          <h2 class="sf-group-title">Visit Us</h2>
-          <p class="sf-info-p">
-            <b>Location:</b><br />
-            {/* TODO(client): add the unit number and floor once the client confirms them ("Level 3" removed: unconfirmed). */}
-            {site.address.line1}, {site.address.line2}, {site.address.state} {site.address.pin}
-          </p>
-          <p class="sf-info-p">
-            <b>Hours:</b><br />
-            {site.hours.display}
-          </p>
-          <p class="sf-info-p">
-            <b>Reservations:</b><br />
-            {/* TODO(client): second phone number unconfirmed, not shown. */}
-            <a href={`tel:+${site.phonePlain}`}>{site.phone}</a><br />
-            <a href={`mailto:${site.email}`}>{site.email}</a><br />
-            <a href={site.address.review} target="_blank" rel="noopener">Rate us on Google ★</a>
-          </p>
-        </div>
-      </div>
+<footer class="sf-footer" id="visit" data-sf>
+  <div class="sf-marquee" aria-hidden="true">
+    <div class="sf-mq-track">
+      {[0, 1].map(() => (
+        <ul class="sf-mq-set">
+          {marquee.map((w) => <li>{w}<i></i></li>)}
+        </ul>
+      ))}
     </div>
+  </div>
 
-    <!-- Instagram Feeds Row -->
-    <div class="sf-social-strip">
-      <span class="sf-ss-title">Follow along on Instagram:</span>
-      <div class="sf-ss-links">
-        <a href="https://www.instagram.com/fursatind.in" target="_blank" rel="noopener">@fursatind.in (Kitchen | Bar)</a>
-        <a href="https://www.instagram.com/fursat_bitesandbuffet" target="_blank" rel="noopener">@fursat_bitesandbuffet</a>
-        <a href="https://www.instagram.com/fursatbanquets" target="_blank" rel="noopener">@fursatbanquets</a>
-        <a href="https://www.instagram.com/fursatsocialclub" target="_blank" rel="noopener">@fursatsocialclub</a>
+  <div class="sf-band">
+    <div class="sf-giant" aria-hidden="true"></div>
+    <div class="sf-container">
+      <div class="sf-top">
+        <div class="sf-brand">
+          <a href="/" class="sf-word" aria-label="Fursat Kitchen | Bar, home"><img src="/assets/brand/fursat-wordmark.svg" alt="" width="441" height="88" loading="lazy" decoding="async" /></a>
+          <p class="sf-tagline">Good food · Great drinks · Better days</p>
+        </div>
+        <div class="sf-actions">
+          <a class="sf-btn sf-btn--red" href="/reserve" data-open="book">Reserve a table</a>
+          <a class="sf-btn" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener">WhatsApp</a>
+          <a class="sf-btn" href={`tel:+${site.phonePlain}`}>Call</a>
+        </div>
       </div>
-    </div>
 
-    <!-- Bottom Legal Bar -->
-    <div class="sf-bottom">
-      <p class="sf-copy">
-        © {new Date().getFullYear()} Fursat Kitchen | Bar · {site.legal.name} · GSTIN {site.legal.gstin} · FSSAI {site.legal.fssai}
-      </p>
-      <div class="sf-legal-links">
-        <a href="/terms">Terms</a>
-        <a href="/terms#privacy">Privacy Policy</a>
-        <a href="/terms#refund">Refund Policy</a>
+      <div class="sf-cols">
+        <section class="sf-col sf-visit" aria-labelledby="sf-t-visit">
+          <h2 class="sf-title" id="sf-t-visit">Visit</h2>
+          {/* TODO(client): add the unit number and floor once the client confirms them. */}
+          <p class="sf-addr">{site.address.line1}, {site.address.line2}, {site.address.state} {site.address.pin}</p>
+          <a class="sf-link" href={site.address.googleMaps} target="_blank" rel="noopener">Get directions</a>
+          <p class="sf-hours">{site.hours.display}</p>
+          <p class="sf-open" data-hours={hoursData} hidden></p>
+        </section>
+        <nav class="sf-col sf-explore" aria-labelledby="sf-t-explore">
+          <h2 class="sf-title" id="sf-t-explore">Explore</h2>
+          <a class="sf-link" href="/menu">Menu</a>
+          <a class="sf-link" href="/restaurant-bar">Bar &amp; Kitchen</a>
+          <a class="sf-link" href="/cafe">Café</a>
+          <a class="sf-link" href="/story">Our Story</a>
+          <a class="sf-link" href="/ask">Ask Fursat</a>
+          <p class="sf-order">Order: <a href={site.order.swiggy} target="_blank" rel="noopener">Swiggy</a> · <a href={site.order.zomato} target="_blank" rel="noopener">Zomato</a></p>
+        </nav>
+        <nav class="sf-col sf-celebrate" aria-labelledby="sf-t-cel">
+          <h2 class="sf-title" id="sf-t-cel">Celebrate</h2>
+          <a class="sf-link" href="/party">Parties &amp; events</a>
+          <a class="sf-link" href="/banquet">Banquet hall</a>
+          <a class="sf-link" href="/catering">Outdoor catering</a>
+        </nav>
+        <section class="sf-col sf-connect" aria-labelledby="sf-t-con">
+          <h2 class="sf-title" id="sf-t-con">Connect</h2>
+          <div class="sf-conn-links">
+            <a class="sf-link" href={`tel:+${site.phonePlain}`}>{site.phone}</a>
+            <a class="sf-link" href={`mailto:${site.email}`}>{site.email}</a>
+            <a class="sf-link" href={site.address.review} target="_blank" rel="noopener">Rate us on Google ★</a>
+          </div>
+          <ul class="sf-ig">
+            {insta.map((a) => (
+              <li><a href={`https://www.instagram.com/${a.h}`} target="_blank" rel="noopener" aria-label={`Instagram: ${a.l} (@${a.h})`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" class="sf-dot"/></svg>
+                <span class="sf-ig-n">{a.l}</span>
+              </a></li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <div class="sf-bottom">
+        <p class="sf-copy">© {year} Fursat Kitchen | Bar · {site.legal.name} · GSTIN {site.legal.gstin} · FSSAI {site.legal.fssai}</p>
+        <p class="sf-legal"><a href="/terms">Terms</a><a href="/terms#privacy">Privacy</a><a href="/terms#refund">Refund</a></p>
       </div>
     </div>
   </div>
 </footer>
 
 <style is:global>
-  .sf-footer {
-    background: #0D1308;
-    color: #F4ECDA;
-    border-top: 1px solid rgba(224, 166, 60, 0.25);
-    padding: clamp(50px, 7vw, 84px) 0 32px;
-    font-family: var(--sans, Rupee,"Poppins", system-ui, sans-serif);
-  }
-  .sf-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 clamp(16px, 4vw, 40px);
-  }
-  .sf-top {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-    margin-bottom: 48px;
-  }
-  @media (min-width: 960px) {
-    .sf-top {
-      grid-template-columns: 360px 1fr;
-    }
-  }
-  .sf-brand-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  /* the logo is dark green: it sits on a cream chip so it reads on the green footer */
-  .sf-logo {
-    align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    background: var(--fk-plaster, #F6E4C9);
-    padding: 8px 14px;
-    border-radius: 14px;
-  }
-  .sf-logo img {
-    height: 52px;
-    width: auto;
-    object-fit: contain;
-  }
-  .sf-tagline {
-    font-size: 0.9375rem;
-    color: rgba(244, 236, 218, 0.75);
-    line-height: 1.5;
-    margin: 0;
-  }
-  .sf-links-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 32px;
-  }
-  .sf-link-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .sf-group-title {
-    font-family: var(--serif, "Playfair Display", Georgia, serif);
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: #E0A63C;
-    margin: 0 0 6px;
-  }
-  .sf-link-group a {
-    color: rgba(244, 236, 218, 0.8);
-    text-decoration: none;
-    font-size: 0.9375rem;
-    transition: color 0.16s ease;
-  }
-  .sf-link-group a:hover {
-    color: #E0A63C;
-  }
-  .sf-info-p {
-    font-size: 0.875rem;
-    color: rgba(244, 236, 218, 0.7);
-    margin: 0;
-    line-height: 1.45;
-  }
-  .sf-info-p b {
-    color: #F4ECDA;
-  }
-  .sf-info-p a {
-    color: #E0A63C;
-    text-decoration: none;
-  }
-  .sf-social-strip {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 24px 0;
-    border-top: 1px solid rgba(244, 236, 218, 0.1);
-    border-bottom: 1px solid rgba(244, 236, 218, 0.1);
-    margin-bottom: 24px;
-  }
-  @media (min-width: 768px) {
-    .sf-social-strip {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-    }
-  }
-  .sf-ss-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: #E0A63C;
-  }
-  .sf-ss-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .sf-ss-links a {
-    color: rgba(244, 236, 218, 0.75);
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-  .sf-ss-links a:hover {
-    color: #F4ECDA;
-  }
-  .sf-bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 0.8125rem;
-    color: rgba(244, 236, 218, 0.85);
-  }
-  @media (min-width: 640px) {
-    .sf-bottom {
-      flex-direction: row;
-    }
-  }
-  .sf-copy {
-    margin: 0;
-  }
-  .sf-legal-links {
-    display: flex;
-    gap: 16px;
-  }
-  .sf-legal-links a {
-    color: rgba(244, 236, 218, 0.85);
-    text-decoration: none;
-  }
-  .sf-legal-links a:hover {
-    color: #E0A63C;
-  }
+  .sf-footer { --sf-bg:#10261a; --sf-cream:#f3ecd9; --sf-gold:#e8c27a; --sf-red:#c0291f; position:relative; z-index:0; background:var(--sf-bg); color:var(--sf-cream); font-family:var(--sans, Rupee,"Poppins",system-ui,sans-serif); }
+  .sf-footer *, .sf-footer *::before, .sf-footer *::after { box-sizing:border-box; }
+  .sf-footer a { color:var(--sf-cream); text-decoration:none; }
+  .sf-footer :focus-visible { outline:2px solid var(--sf-gold); outline-offset:3px; border-radius:4px; }
 
-  /* v4.6: footer in the brand system — forest green, gold hairline, serif group titles, one sans */
-  .sf-order-line { margin: 2px 0 0; font-size: .875rem; color: rgba(241,230,210,.8); display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px }
-  .sf-link-group .sf-order-line a { display: inline-flex; width: auto; padding: 0; min-height: 32px; align-items: center }
-  .sf-footer { position: relative; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); color: #f1e6d2; font-family: var(--fk-sans); border-top: 0; }
-  .sf-footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, #d9b36a 20%, #e8c886 50%, #d9b36a 80%, transparent); }
-  .sf-group-title { font-family: var(--fk-serif); font-weight: 500; font-size: 1.15rem; letter-spacing: 0; text-transform: none; color: #e8c886; }
-  .sf-link-group a { color: rgba(241, 230, 210, .86); font-size: .9375rem; }
-  .sf-tagline, .sf-info-p { color: rgba(241, 230, 210, .78); }
-  @media (hover: hover) { .sf-link-group a:hover { color: #e8c886; } }
-  /* Session E: phone tap targets >= 44px, text >= 12px, contrast >= 4.5:1 (measured). */
-  .sf-link-group a, .sf-ss-links a, .sf-legal-links a, .sf-info-p a { -webkit-tap-highlight-color: transparent; }
-  .sf-link-group a:focus-visible, .sf-ss-links a:focus-visible, .sf-legal-links a:focus-visible, .sf-info-p a:focus-visible, .sf-logo:focus-visible { outline: 2px solid #e8c886; outline-offset: 2px; border-radius: 4px; }
-  .sf-info-p a { color: #e8c886; text-decoration: underline; text-underline-offset: .2em; text-decoration-thickness: from-font; }
-  @media (prefers-reduced-motion: reduce) { .sf-link-group a, .sf-ss-links a { transition: none; } }
-  /* tap targets: every footer link is at least 44px tall (--fk-tap) at every width */
-  .sf-link-group { gap: 0; }
-  .sf-link-group a { display: flex; align-items: center; min-height: var(--fk-tap, 44px); }
-  .sf-info-p { margin: 0 0 8px; }
-  .sf-info-p a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
-  .sf-logo { min-height: var(--fk-tap, 44px); }
-  .sf-ss-links { gap: 0 16px; }
-  .sf-ss-links a { display: inline-flex; align-items: center; min-height: var(--fk-tap, 44px); }
-  .sf-legal-links { flex-wrap: wrap; gap: 0 12px; }
-  .sf-legal-links a { display: inline-flex; align-items: center; justify-content: center; min-width: var(--fk-tap, 44px); min-height: var(--fk-tap, 44px); padding: 0 4px; }
-  @media (max-width: 767px) {
-    .sf-group-title { margin: 0 0 4px; }
-    .sf-bottom { align-items: flex-start; }
-  }
+  /* marquee */
+  .sf-marquee { overflow:hidden; background:var(--sf-bg); padding:clamp(14px,2.4vw,28px) 0 0; -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent); mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent); }
+  .sf-mq-track { display:flex; width:max-content; animation:sf-mq 70s linear infinite; will-change:transform; }
+  .sf-mq-set { display:flex; flex:none; margin:0; padding:0; list-style:none; font:italic 500 clamp(2rem,6vw,4.5rem)/1.15 "Playfair Display",Georgia,serif; color:var(--sf-gold); white-space:nowrap; }
+  .sf-mq-set li { display:flex; align-items:center; }
+  .sf-mq-set i { width:.2em; height:.2em; border-radius:50%; background:var(--sf-red); margin:0 .6em; flex:none; }
+  @keyframes sf-mq { to { transform:translateX(-50%); } }
+  .sf-footer.sf-paused .sf-mq-track { animation-play-state:paused; }
+  @media (hover:hover) { .sf-marquee:hover .sf-mq-track { animation-play-state:paused; } }
 
-  /* v5.40 one footer on every page: same width, alignment and spacing. Page CSS cannot change it:
-     it is full width, one container (--sf-w) centred with the same side padding, a fixed grid, the same background. */
-  .sf-footer, .sf-footer *, .sf-footer *::before, .sf-footer *::after { box-sizing: border-box; }
-  /* phone: room for the nav pill + Book bar + safe area, so the last links are fully readable and tappable */
-  @media (max-width: 899px) { footer.sf-footer { padding-bottom: calc(var(--mb-clear, 76px) + 72px + env(safe-area-inset-bottom, 0px)); } }
-  /* decorative fizz bubbles (fk-fx canvas) stay behind the footer text on phone: canvas at z-index 1, footer content above it */
-  @media (max-width: 767px) { .fk-fx-canvas { z-index: 1 !important; } .sf-footer .sf-container { position: relative; z-index: 2; } }
-  footer.sf-footer { display: block; width: 100%; max-width: none; min-width: 0; margin: 0; overflow-x: clip; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); }
-  footer.sf-footer .sf-container { --sf-w: 1300px; width: 100%; max-width: var(--sf-w); margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
-  footer.sf-footer .sf-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; margin-bottom: 48px; }
-  footer.sf-footer .sf-links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; min-width: 0; }
-  @media (min-width: 768px) { footer.sf-footer .sf-links-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 960px) { footer.sf-footer .sf-top { grid-template-columns: 300px minmax(0, 1fr); gap: 48px; } }
-  footer.sf-footer .sf-social-strip, footer.sf-footer .sf-bottom { width: 100%; }
-  /* Swiggy / Zomato links: 44px tap height like every other footer link (was 32px) */
-  footer.sf-footer .sf-link-group .sf-order-line a { min-height: var(--fk-tap, 44px); padding: 0 4px; }
+  /* band */
+  .sf-band { position:relative; overflow:hidden; padding:clamp(20px,2.4vw,28px) 0 0; }
+  .sf-giant { position:absolute; left:0; right:0; margin:0 auto; width:min(96vw,1500px); aspect-ratio:441/88; bottom:-.02em; background:var(--sf-cream); opacity:.08; -webkit-mask:url(/assets/brand/fursat-wordmark.svg) center bottom/100% auto no-repeat; mask:url(/assets/brand/fursat-wordmark.svg) center bottom/100% auto no-repeat; pointer-events:none; z-index:0; }
+  .sf-container { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:0 clamp(16px,4vw,40px); }
+  .sf-top { display:flex; flex-direction:column; gap:18px; padding-bottom:clamp(18px,2vw,22px); }
+  .sf-word img { display:block; height:clamp(40px,4.8vw,64px); width:auto; filter:brightness(0) invert(1) sepia(.15) saturate(.6); opacity:.97; }
+  .sf-word { display:inline-block; }
+  .sf-tagline { margin:10px 0 0; font-size:.9375rem; color:var(--sf-cream); }
+  .sf-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .sf-btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 20px; border-radius:999px; border:1.5px solid rgba(243,236,217,.55); font-weight:600; font-size:.9375rem; transition:transform .12s ease, background-color .2s ease; -webkit-tap-highlight-color:transparent; }
+  .sf-btn--red { background:var(--sf-red); border-color:var(--sf-red); color:#fff !important; }
+  .sf-btn:active { transform:scale(.96); }
+  @media (hover:hover) { .sf-btn:not(.sf-btn--red):hover { background:rgba(243,236,217,.1); } .sf-btn--red:hover { background:#d63326; } }
+
+  /* columns */
+  .sf-cols { display:grid; grid-template-columns:1fr 1fr; gap:22px 20px; padding:22px 0; border-top:1px solid rgba(201,154,67,.35); }
+  .sf-col { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+  .sf-title { margin:0 0 8px; font:600 .75rem/1.2 var(--sans,"Poppins",sans-serif); letter-spacing:.14em; text-transform:uppercase; color:var(--sf-gold); }
+  .sf-link { position:relative; display:inline-flex; align-items:center; min-height:32px; font-size:.9375rem; overflow-wrap:anywhere; }
+  .sf-link::after { content:""; position:absolute; left:0; right:0; bottom:4px; height:1.5px; background:var(--sf-gold); transform:scaleX(0); transform-origin:left; transition:transform .2s ease; }
+  .sf-link:focus-visible::after { transform:scaleX(1); }
+  @media (hover:hover) { .sf-link:hover::after, .sf-order a:hover, .sf-legal a:hover { transform:scaleX(1); } .sf-order a:hover, .sf-legal a:hover { text-decoration:underline; text-decoration-color:var(--sf-gold); text-underline-offset:4px; } }
+  .sf-addr, .sf-hours { margin:0 0 6px; font-size:.9375rem; line-height:1.5; }
+  .sf-open { margin:2px 0 0; display:inline-flex; align-items:center; gap:7px; font-weight:600; font-size:.875rem; }
+  .sf-open::before { content:""; width:8px; height:8px; border-radius:50%; background:#ffb3a8; }
+  .sf-open.is-open::before { background:#7fd19a; }
+  .sf-order { margin:6px 0 0; font-size:.875rem; white-space:nowrap; }
+  .sf-order a { display:inline-block; padding:8px 2px; }
+  .sf-visit { grid-column:1 / -1; background:#16301f; padding:16px; border-radius:14px; }
+  .sf-connect { grid-column:1 / -1; }
+  .sf-conn-links { display:flex; flex-wrap:wrap; column-gap:22px; }
+  .sf-ig { display:flex; flex-wrap:nowrap; justify-content:flex-start; gap:8px; margin:10px 0 0; padding:0; list-style:none; }
+  .sf-ig a { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:44px; transition:transform .2s ease; }
+  .sf-ig svg { box-sizing:content-box; padding:12px; border-radius:50%; background:#1d3d29; }
+  .sf-ig svg { width:20px; height:20px; fill:none; stroke:var(--sf-cream); stroke-width:1.7; } .sf-ig .sf-dot { fill:var(--sf-cream); stroke:none; }
+  .sf-ig-n { font-size:.75rem; line-height:1.2; text-align:center; max-width:76px; transition:color .2s ease; }
+  .sf-ig a:focus-visible .sf-ig-n { color:var(--sf-gold); }
+  @media (hover:hover) { .sf-ig a:hover { transform:translateY(-2px); } .sf-ig a:hover .sf-ig-n { color:var(--sf-gold); } }
+
+  /* bottom bar */
+  .sf-bottom { display:flex; flex-direction:column; gap:6px; padding:8px 0 10px; border-top:1px solid rgba(201,154,67,.2); font-size:.75rem; }
+  .sf-copy { margin:0; color:var(--sf-cream); line-height:1.5; }
+  .sf-legal { margin:0; display:flex; gap:4px; }
+  .sf-legal a { display:inline-flex; align-items:center; min-height:44px; padding:0 10px 0 0; font-size:.8125rem; }
+  .sf-legal a + a { padding-left:10px; border-left:1px solid rgba(243,236,217,.3); }
+
+  /* entrance (once) */
+  .sf-js .sf-giant { opacity:0; transform:translateY(24px); transition:opacity .6s ease-out, transform .6s ease-out; }
+  .sf-js.sf-in .sf-giant { opacity:.08; transform:none; }
+  .sf-js .sf-col { opacity:0; transform:translateY(12px); transition:opacity .5s ease-out, transform .5s ease-out; transition-delay:calc(var(--i,0) * 70ms); }
+  .sf-js.sf-in .sf-col { opacity:1; transform:none; }
+
+  /* phone: keep v5.83 clearance for the Book bar / nav bar */
+  @media (max-width:899px) { .sf-band { padding-bottom:calc(var(--mb-clear,76px) + 72px + env(safe-area-inset-bottom,0px)); } .sf-giant { bottom:calc(var(--mb-clear,76px) + 10px + env(safe-area-inset-bottom,0px)); } .sf-link { min-height:44px; } .sf-order { display:flex; align-items:center; flex-wrap:nowrap; white-space:nowrap; min-height:44px; margin:0; } .sf-order a { padding:12px 4px; } .sf-mq-set { font-size:clamp(1.75rem,6vw,4.5rem); } }
+  @media (min-width:640px) and (max-width:899px) { .sf-cols { grid-template-columns:1.25fr 1fr 1fr 1.25fr; gap:20px 16px; } .sf-visit, .sf-connect { grid-column:auto; } .sf-visit { order:0; background:none; padding:0; border-radius:0; } .sf-ig { flex-wrap:wrap; } .sf-conn-links { display:flex; flex-direction:column; align-items:flex-start; } .sf-top { flex-direction:row; align-items:center; justify-content:space-between; } .sf-actions { display:flex; } }
+  @media (max-width:899px) { .sf-visit { order:-1; } }
+
+  /* desktop */
+  @media (min-width:900px) {
+    .sf-top { flex-direction:row; align-items:center; justify-content:space-between; }
+    .sf-actions { display:flex; }
+    .sf-cols { grid-template-columns:1.3fr .8fr .9fr 1.2fr; gap:32px; padding:22px 0; }
+    .sf-visit { grid-column:auto; background:none; padding:0; border-radius:0; order:0; }
+    .sf-connect { grid-column:auto; }
+    .sf-conn-links { display:flex; flex-direction:column; align-items:flex-start; }
+    .sf-bottom { flex-direction:row; justify-content:space-between; align-items:center; }
+    .sf-legal a { min-height:32px; }
+    .sf-footer.sf-curtain { position:sticky; bottom:0; }
+  }
+  .sf-curtain-lift { position:relative; z-index:1; }
+  .sf-footer.sf-curtain::before { content:""; position:absolute; left:0; right:0; top:0; height:72px; background:linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,0)); pointer-events:none; z-index:2; }
+
 </style>
+
+<script is:inline>
+  (function () {
+    var f = document.querySelector('footer.sf-footer[data-sf]');
+    if (!f) return;
+    var rm = false; // owner rule: motion runs for every visitor
+    // live Open now / Closed badge (same logic as the header; IST)
+    try {
+      var b = f.querySelector('.sf-open'), s = JSON.parse(b.getAttribute('data-hours'));
+      var P = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', weekday: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+      var g = function (t) { var p = P.find(function (x) { return x.type === t; }); return p ? p.value : ''; };
+      var D = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], day = g('weekday'), m = parseInt(g('hour'), 10) * 60 + parseInt(g('minute'), 10);
+      var M = function (x) { var a = x.split(':'); return parseInt(a[0], 10) * 60 + parseInt(a[1], 10); };
+      var R = function (d) { return s.find(function (r) { return r.d.indexOf(d) > -1; }); };
+      var t = R(day), y = R(D[(D.indexOf(day) + 6) % 7]), open = false, until = '';
+      if (y && M(y.c) < M(y.o) && m < M(y.c)) { open = true; until = y.cl; }
+      else if (t) { var o = M(t.o), c = M(t.c); if (c <= o) c += 1440; if (m >= o && m < c) { open = true; until = t.cl; } }
+      b.textContent = open ? 'Open now · until ' + until : 'Closed · opens ' + (t && m < M(t.o) ? t.ol : (R(D[(D.indexOf(day) + 1) % 7]) || {}).ol || '');
+      b.classList.toggle('is-open', open); b.hidden = false;
+    } catch (e) {}
+    f.querySelectorAll('.sf-col').forEach(function (c, i) { c.style.setProperty('--i', i); });
+    // curtain reveal: desktop only; the content above is lifted over the sticky footer. Skipped on the party stack.
+    var lifted = [];
+    var siblings = function () {
+      var out = [], e = f.previousElementSibling;
+      while (e) { if (!/^(SCRIPT|STYLE|LINK|TEMPLATE)$/.test(e.tagName)) { var cs = getComputedStyle(e); if (cs.position !== 'fixed' && cs.position !== 'absolute' && cs.display !== 'none') out.push(e); } e = e.previousElementSibling; }
+      return out;
+    };
+    var setCurtain = function () {
+      var on = window.matchMedia('(min-width: 900px)').matches && !rm && !document.querySelector('.pa-stack, [data-pa-stack]') && !/^\/party/.test(location.pathname) && !!f.previousElementSibling;
+      f.classList.toggle('sf-curtain', on);
+      lifted.forEach(function (e) { e.classList.remove('sf-curtain-lift'); if (e.dataset.sfBg) { e.style.backgroundColor = ''; delete e.dataset.sfBg; } });
+      lifted = [];
+      if (!on) return;
+      var bg = getComputedStyle(document.body).backgroundColor;
+      if (/rgba\(.*,\s*0\)|transparent/.test(bg)) bg = getComputedStyle(document.documentElement).backgroundColor;
+      siblings().forEach(function (e) {
+        e.classList.add('sf-curtain-lift'); lifted.push(e);
+        var c = getComputedStyle(e).backgroundColor;
+        if (/rgba\(.*,\s*0\)|transparent/.test(c)) { e.style.backgroundColor = bg; e.dataset.sfBg = '1'; }
+      });
+    };
+    setCurtain(); window.addEventListener('resize', setCurtain);
+    // once-in-view entrance + pause marquee off screen
+    if (rm || !('IntersectionObserver' in window)) return;
+    f.classList.add('sf-js');
+    var once = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { f.classList.add('sf-in'); once.disconnect(); } }, { threshold: 0.15 });
+    once.observe(f);
+    var mq = f.querySelector('.sf-marquee');
+    new IntersectionObserver(function (e) { f.classList.toggle('sf-paused', !e[0].isIntersecting); }).observe(mq);
+  })();
+</script>
