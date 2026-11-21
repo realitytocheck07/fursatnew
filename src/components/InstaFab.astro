@@ -5,6 +5,9 @@
 // scrolls past the first screen, so it never covers a hero's buttons. Hidden on /404, while the footer is in view, and while an Instagram follow card is on screen.
 // Home only: the account follows the section on screen (Banquet / Celebrate, Café / Bites & Buffet, Bar / Social Club, else the main one)
 // and the button glows softly (gold ring, 2 slow pulses) when it changes.
+// Entrance: drops from the top of the screen down the left edge (springy, gold light trail), 150 ms after WhatsApp; a gentle shine sweeps the face on
+// arrival then about every 9 s (one shine at a time, shared lock with WaAgent). Conic Instagram ring turns on hover only; hover/focus shows an account label pill.
+// Owner rule: no reduced-motion fallbacks, all motion runs for every visitor.
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const home = path === '/';
 const MAP: Record<string, string> = {
@@ -26,8 +29,13 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 {show && (
   <a class:list={['ifab', { 'ifab--solo': solo }]} href={`https://www.instagram.com/${handle}/`} target="_blank" rel="noopener"
      aria-label={`Open Fursat ${NAMES[handle]} on Instagram (opens in a new tab)`} data-ifab data-home={home ? '' : undefined} data-handle={handle} data-names={home ? JSON.stringify(NAMES) : undefined}>
+    <span class="ifab-trail" aria-hidden="true"></span>
     <span class="ifab-ic" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" class="ifab-dot"/></svg>
+      <span class="ifab-ring"></span>
+      <span class="ifab-face">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" class="ifab-dot"/></svg>
+        <span class="ifab-shine"></span>
+      </span>
     </span>
     <span class="ifab-t">@{handle}</span>
   </a>
@@ -45,7 +53,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   const below = () => ['legal', 'fxsticky', 'pb-dock'].map((id) => document.getElementById(id)).filter(Boolean);
   // Fade both buttons out while the footer is in view (they would cover its text), and the Instagram button also
   // while an Instagram follow card is on screen (one Instagram link at a time). Watched with IntersectionObserver.
-  let inFooter = false, inCard = false;
+  let inFooter = false, inCard = false, dropped = false;
   let raf = 0;
   const tick = () => {
     raf = 0;
@@ -59,6 +67,11 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
       if ((ph || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
     b.classList.toggle('is-on', on && !inCard);
+    if (on && !inCard && !dropped) { // first appearance: drop from the top edge down to the resting spot
+      dropped = true;
+      b.style.setProperty('--ifab-drop', Math.round(b.getBoundingClientRect().bottom + 10) + 'px');
+      b.classList.add('is-drop');
+    }
     if (ask) ask.classList.toggle('is-on', on);
     let lift = 0;
     const base = matchMedia('(max-width: 767px)').matches ? 84 : 20; // where the lowest button normally sits
@@ -92,6 +105,17 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   const mo = new MutationObserver(req);
   below().forEach((el) => mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }));
   addEventListener('transitionend', req, { passive: true });
+  // --- shine: one gentle sweep on arrival, then about every 9 s. One at a time (lock shared with the WhatsApp button); paused when the tab is hidden,
+  //     the WhatsApp dial/chat is open, or this button is not showing.
+  const face = b.querySelector('.ifab-face'), S = (window.__fkShine = window.__fkShine || { busy: false });
+  const canShine = () => !document.hidden && b.classList.contains('is-on') && !b.classList.contains('is-drop') && !document.querySelector('.waf.is-dial, .waf.is-chat') && getComputedStyle(b).visibility !== 'hidden';
+  const shine = () => { if (S.busy) return false; S.busy = true; face.classList.remove('is-shine'); void face.offsetWidth; face.classList.add('is-shine'); setTimeout(() => { S.busy = false; }, 1400); return true; };
+  const tryShine = (n) => { if (canShine() && shine()) return; if (n < 5) setTimeout(() => tryShine(n + 1), 1200); };
+  b.addEventListener('animationend', (e) => {
+    if (/ifab-shine/.test(e.animationName)) { face.classList.remove('is-shine'); S.busy = false; }
+    if (e.target === b && /ifab-drop/.test(e.animationName)) { b.classList.remove('is-drop'); setTimeout(() => tryShine(0), 200); }
+  });
+  setTimeout(() => setInterval(() => { if (canShine()) shine(); }, 9000), 4500);
   // --- Home: the account follows the section on screen. Sections watched (Home markup is not edited):
   //   #celebrate (Celebrate at Fursat)                     -> @fursatbanquets
   //   #spaces (tabs: banquet-hall / bites-buffet / social-club / kitchen-bar) -> the selected tab's account
@@ -120,7 +144,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
     ['celebrate', 'spaces'].forEach((id) => { const el = document.getElementById(id); if (el) sio.observe(el); });
     const sp = document.getElementById('spaces');
     if (sp) new MutationObserver(apply).observe(sp, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
-    b.addEventListener('animationend', () => b.classList.remove('is-glow'));
+    b.addEventListener('animationend', (e) => { if (/ifab-ring-pulse/.test(e.animationName)) b.classList.remove('is-glow'); });
   }
   if (isHome && introOn()) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); tick(); } }, 400); } // show the buttons the moment the intro is gone
   tick();
@@ -132,16 +156,32 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 :global(html.fab-js) .ifab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 300ms, 0s; }
 .ifab.is-on { transition-delay: 0s; }
 .ifab--solo { bottom: calc(20px + var(--fab-lift, 0px)); }
-.ifab-ic { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
-.ifab-ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; }
-.ifab-ic .ifab-dot { fill: currentColor; stroke: none; }
-.ifab-t { max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; transition-property: max-width, opacity, margin; transition-duration: 300ms; transition-timing-function: cubic-bezier(.23,1,.32,1); }
+/* arrival: drops from the top of the screen down the left edge, springy, 150 ms after WhatsApp, with a short gold light trail */
+.ifab.is-drop { animation: ifab-drop 900ms cubic-bezier(.2,.9,.25,1.15) 150ms backwards; }
+@keyframes ifab-drop { from { translate: 0 calc(-1 * var(--ifab-drop, 100vh)); } to { translate: 0 0; } }
+.ifab-trail { position: absolute; left: 26px; bottom: calc(100% - 6px); width: 8px; height: 150px; margin-left: -4px; border-radius: 8px; background: linear-gradient(to bottom, transparent, rgb(232 194 122 / .55)); opacity: 0; transform-origin: 50% 100%; pointer-events: none; }
+.ifab.is-drop .ifab-trail { animation: ifab-trail 900ms linear 150ms backwards; }
+@keyframes ifab-trail { 0% { opacity: 0; transform: scaleY(.3); } 12% { opacity: 1; transform: scaleY(1); } 70% { opacity: .85; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(.4); } }
+/* icon: a conic Instagram ring (turns slowly on hover/focus only) around the gradient face; the face carries the shine */
+.ifab-ic { position: relative; flex: none; width: 44px; height: 44px; border-radius: 50%; color: #fff; }
+.ifab-ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #fdf497, #fd5949, #d6249f, #285aeb, #fdf497); animation: ifab-spin 6s linear infinite paused; }
+@keyframes ifab-spin { to { transform: rotate(360deg); } }
+.ifab-face { position: absolute; inset: 4px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); box-shadow: 0 0 0 2px rgb(255 251 244 / .96); }
+.ifab-face svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; }
+.ifab-face .ifab-dot { fill: currentColor; stroke: none; }
+.ifab-shine { position: absolute; inset: -20%; background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / .4) 50%, transparent 62%); translate: -120% 0; opacity: 0; pointer-events: none; }
+.ifab-face.is-shine .ifab-shine { animation: ifab-shine 1000ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes ifab-shine { 0% { translate: -120% 0; opacity: 0; } 15% { opacity: 1; } 100% { translate: 120% 0; opacity: 0; } }
+/* label pill with the account name: appears beside the button on hover / focus (opacity + translate only) */
+.ifab-t { position: absolute; left: calc(100% + 8px); top: 50%; translate: -6px -50%; display: flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #10261a; color: #f6e6d1; box-shadow: inset 0 0 0 1px rgb(201 154 67 / .75), 0 10px 20px -12px rgb(0 0 0 / .6); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 200ms ease-out, translate 200ms cubic-bezier(.23,1,.32,1); }
 .ifab:focus-visible { outline: 3px solid #c99a43; outline-offset: 3px; }
-.ifab:focus-visible .ifab-t { max-width: 240px; opacity: 1; margin-right: 12px; }
+.ifab:focus-visible .ifab-t { opacity: 1; translate: 0 -50%; }
+.ifab:focus-visible .ifab-ring { animation-play-state: running; }
 .ifab:active { scale: .96; }
 @media (hover: hover) and (pointer: fine) {
   .ifab:hover { box-shadow: inset 0 0 0 1.5px #c99a43, 0 18px 32px -14px rgb(60 36 10 / .65); }
-  .ifab:hover .ifab-t { max-width: 240px; opacity: 1; margin-right: 12px; }
+  .ifab:hover .ifab-t { opacity: 1; translate: 0 -50%; }
+  .ifab:hover .ifab-ring { animation-play-state: running; }
 }
 /* phone: bottom-left, above the phone bar (WhatsApp is in the bar). Left, because list rows keep their "+" buttons on the right. */
 @media (max-width: 767px) {
@@ -151,8 +191,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 @media (min-width: 768px) { .ifab { bottom: calc(86px + var(--fab-lift, 0px)); } :global(html.fk-ear-on) .ifab { bottom: calc(136px + var(--fab-lift, 0px)); } .ifab--solo { bottom: calc(20px + var(--fab-lift, 0px)); } }
 /* glow when the account changes: a gold ring that pulses twice, slowly, then rests (transform + opacity only) */
 .ifab::after { content: ""; position: absolute; inset: 0; border-radius: 999px; box-shadow: 0 0 0 2px #f3c56b, 0 0 14px 2px rgb(243 197 107 / .55); opacity: 0; pointer-events: none; }
-.ifab.is-glow::after { animation: ifab-ring 1500ms cubic-bezier(.23,1,.32,1) 2 both; }
-@keyframes ifab-ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3, 1.4); } }
-@media (prefers-reduced-motion: reduce) { .ifab, .ifab-t { transition-duration: 0s; translate: none; } .ifab:active { scale: 1; } .ifab.is-glow::after { animation: none; opacity: .8; } }
+.ifab.is-glow::after { animation: ifab-ring-pulse 1500ms cubic-bezier(.23,1,.32,1) 2 both; }
+@keyframes ifab-ring-pulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3, 1.4); } }
 @media print { .ifab { display: none !important; } }
 </style>

@@ -1,26 +1,79 @@
 ---
-// WaAgent: floating WhatsApp button on every page (hangs and sways gently) that opens a small chat "agent":
-// greets the guest, asks name + phone, then offers the main routes (Ask Fursat, table, party, banquet, catering, order, menu).
-// Bookings can open the page or send the details to Fursat on WhatsApp. No server: name/phone live in sessionStorage
-// for this visit only and are used only inside the WhatsApp message the guest chooses to send.
-// Motion: transform/opacity only, ease-out, under 300 ms, staggered 50 ms. Reduced motion: no sway, no slides.
+// WaAgent: "Fursat Connect". A WhatsApp-green floating button (bottom-right on desktop; on phones the bottom nav's WhatsApp tab opens it,
+// the floating button stays hidden there as before). Tap = speed dial of 5 pills fanning upward: Chat on WhatsApp (opens the chat agent
+// panel below), Call, Email, Ask Fursat (page-aware start question, same map as AskFab) and See the menu.
+// Chat agent: greets the guest, name + phone are OPTIONAL (Skip), then the routes. Nothing is stored on a server: the optional name/phone
+// live in sessionStorage for this visit and are used only inside the WhatsApp message the guest chooses to send.
+// Motion: drop from the top edge with a gold light trail + one gentle shine (one shine at a time across both buttons), scroll progress ring,
+// breathing green glow while the restaurant is open now (India time, same hours as the header badge). Owner rule: all motion runs for every visitor.
 import site from '../data/site.json';
 const wa = site.whatsapp;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const home = path === '/';
+// same small map AskFab uses (copied, not imported): the page-aware starting question for /ask
+const HINTS: Record<string, string> = {
+  '/cafe': 'coffee and desserts',
+  '/restaurant-bar': 'cocktails and starters',
+  '/banquet': 'party starters',
+  '/party': 'party starters',
+  '/catering': 'biryani for a group',
+  '/reserve': 'dinner for two',
+  '/order': 'what to order',
+};
+const q = HINTS[path];
+const askHref = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
+const hours = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWeek, o: s.opens, c: s.closes, ol: s.open, cl: s.close })));
+const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
+const PI: Record<string, string> = {
+  call: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/>',
+  ask: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  menu: '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 8h7M8 12h7"/>',
+};
+type Item = { k: string; t: string; s: string; href?: string };
+const ITEMS: Item[] = [
+  { k: 'chat', t: 'Chat on WhatsApp', s: 'Pick what you need' },
+  { k: 'call', t: 'Call', s: site.phone, href: `tel:+${site.phonePlain}` },
+  { k: 'mail', t: 'Email', s: site.email, href: `mailto:${site.email}?subject=${encodeURIComponent('Enquiry from fursat website')}` },
+  ...(path !== '/ask' ? [{ k: 'ask', t: 'Ask Fursat', s: q ? `Start with ${q}` : 'What to eat or drink', href: askHref }] : []),
+  { k: 'menu', t: 'See the menu', s: 'Food, bar and cafe', href: '/menu/' },
+];
 ---
-<div class="waf" data-waf data-wa={wa}>
-  <button class="waf-fab" type="button" aria-label="Chat with Fursat" aria-expanded="false" aria-controls="waf-panel">
-    <span class="waf-ic" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+<div class="waf" data-waf data-wa={wa} data-home={home ? '' : undefined} data-hours={hours}>
+  <div class="waf-scrim" aria-hidden="true"></div>
+  <button class="waf-fab" type="button" aria-label="Fursat Connect: chat, call, email or ask Fursat" aria-haspopup="menu" aria-expanded="false" aria-controls="waf-dial">
+    <span class="waf-ring" aria-hidden="true"></span>
+    <span class="waf-trail" aria-hidden="true"></span>
+    <span class="waf-face" aria-hidden="true">
+      <span class="waf-ic waf-ic--wa"><svg viewBox="0 0 24 24"><path fill="currentColor" d={WA_PATH}/></svg></span>
+      <span class="waf-ic waf-ic--x"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+      <span class="waf-shine"></span>
     </span>
+    <span class="waf-badge" aria-hidden="true"><img src="/assets/ask-mascot-sm.webp" alt="" width="20" height="20" decoding="async" loading="lazy" /></span>
     <span class="waf-dot" aria-hidden="true"></span>
   </button>
-  <span class="waf-tease" aria-hidden="true">Hi 👋 Vibe with us</span>
-  <section class="waf-panel" id="waf-panel" role="dialog" aria-modal="false" aria-labelledby="waf-t" hidden>
+  <span class="waf-tease" aria-hidden="true">Hi, vibe with us</span>
+  <div class="waf-sd" role="dialog" aria-labelledby="waf-sdh-t">
+    <div class="waf-sdh">
+      <img class="waf-sdh-i" src="/assets/ask-mascot-sm.webp" alt="" width="36" height="36" decoding="async" loading="lazy" />
+      <div class="waf-sdh-b"><p class="waf-sdh-t" id="waf-sdh-t">Fursat Connect</p><p class="waf-sdh-s" data-waf-st>{site.hours.display}</p></div>
+    </div>
+    <ul class="waf-dial" id="waf-dial" role="menu" aria-label="Fursat Connect">
+      {ITEMS.map((it, i) => (
+        <li role="none" style={`--n:${i}`}>
+          {it.href
+            ? <a class="waf-pill" role="menuitem" href={it.href}><span class="waf-pi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={PI[it.k]}></svg></span><span class="waf-pt"><b>{it.t}</b><small>{it.s}</small></span></a>
+            : <button class="waf-pill waf-pill--wa" type="button" role="menuitem" data-act="chat"><span class="waf-pi" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d={WA_PATH}/></svg></span><span class="waf-pt"><b>{it.t}</b><small>{it.s}</small></span></button>}
+        </li>
+      ))}
+    </ul>
+  </div>
+  <section class="waf-panel" id="waf-panel" role="dialog" aria-modal="false" aria-labelledby="waf-t" tabindex="-1" hidden>
     <header class="waf-h">
       <img class="waf-av" src="/assets/ask-mascot-sm.webp" alt="" width="44" height="44" decoding="async" loading="lazy" />
       <div class="waf-hd">
         <h2 id="waf-t">Fursat Kitchen | Bar</h2>
-        <p><i class="waf-on" aria-hidden="true"></i>Online · we reply on WhatsApp</p>
+        <p><i class="waf-on" aria-hidden="true"></i><span data-waf-st>{site.hours.display}</span></p>
       </div>
       <button class="waf-x" type="button" aria-label="Close chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     </header>
@@ -32,11 +85,131 @@ const wa = site.whatsapp;
 (() => {
   const root = document.querySelector('[data-waf]');
   if (!root) return;
-  const WA = root.dataset.wa;
-  const fab = root.querySelector('.waf-fab'), panel = root.querySelector('.waf-panel'), log = root.querySelector('.waf-log'), tease = root.querySelector('.waf-tease');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const $ = (s) => root.querySelector(s);
+  const WA = root.dataset.wa, home = root.hasAttribute('data-home'), de = document.documentElement;
+  const fab = $('.waf-fab'), sd = $('.waf-sd'), scrim = $('.waf-scrim'), panel = $('.waf-panel'), log = $('.waf-log'), tease = $('.waf-tease'), face = $('.waf-face'), ring = $('.waf-ring');
+  const pills = [].slice.call(root.querySelectorAll('.waf-pill'));
+  root.classList.add('js');
   const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let dialOpen = false, chatOpen = false, opener = null, dropped = false, closeT = 0;
+
+  // ---------- open now (India time; same hours and rule as the header's "Open now" badge) ----------
+  let HOURS = []; try { HOURS = JSON.parse(root.dataset.hours || '[]'); } catch (e) {}
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const toM = (s) => { const a = s.split(':'); return parseInt(a[0], 10) * 60 + parseInt(a[1], 10); };
+  const status = () => {
+    const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', weekday: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+    const g = (t) => { const p = parts.find((x) => x.type === t); return p ? p.value : ''; };
+    const day = g('weekday'), mins = parseInt(g('hour'), 10) * 60 + parseInt(g('minute'), 10);
+    const rule = (d) => HOURS.find((r) => r.d.indexOf(d) > -1);
+    const today = rule(day), yest = rule(DAYS[(DAYS.indexOf(day) + 6) % 7]);
+    if (yest && toM(yest.c) < toM(yest.o) && mins < toM(yest.c)) return { open: true, until: yest.cl };
+    if (today) { const o = toM(today.o); let c = toM(today.c); if (c <= o) c += 1440; if (mins >= o && mins < c) return { open: true, until: today.cl }; }
+    return { open: false };
+  };
+  const paint = () => {
+    if (!HOURS.length) return;
+    const s = status(), t = s.open ? 'Open now · until ' + s.until : 'We’re closed now · we’ll reply when we open';
+    root.classList.toggle('is-live', s.open); root.classList.toggle('is-closed', !s.open);
+    root.querySelectorAll('[data-waf-st]').forEach((el) => { el.textContent = t; });
+  };
+  paint(); setInterval(paint, 60000);
+
+  // ---------- one shine at a time (shared lock with the Instagram button), paused when hidden / open / off screen ----------
+  const S = (window.__fkShine = window.__fkShine || { busy: false });
+  const canShine = () => !document.hidden && root.classList.contains('is-on') && !dialOpen && !chatOpen && !fab.classList.contains('is-drop') && fab.getBoundingClientRect().width > 0 && getComputedStyle(fab).visibility !== 'hidden';
+  const shine = () => {
+    if (S.busy) return false;
+    S.busy = true; face.classList.remove('is-shine'); void face.offsetWidth; face.classList.add('is-shine');
+    setTimeout(() => { S.busy = false; }, 1400); return true;
+  };
+  face.addEventListener('animationend', (e) => { if (/waf-shine/.test(e.animationName)) { face.classList.remove('is-shine'); S.busy = false; } });
+  const tryShine = (n) => { if (canShine() && shine()) return; if (n < 4) setTimeout(() => tryShine(n + 1), 1200); };
+  setInterval(() => { if (canShine()) shine(); }, 9000);
+  document.addEventListener('visibilitychange', () => { de.classList.toggle('waf-pause', document.hidden); });
+  fab.addEventListener('animationend', (e) => { if (e.target === fab && /waf-drop/.test(e.animationName)) { fab.classList.remove('is-drop'); setTimeout(() => tryShine(0), 120); } });
+
+  // ---------- scroll progress ring: CSS scroll() timeline, rAF fallback ----------
+  if (ring && !(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'))) {
+    ring.classList.add('is-js');
+    let rq = 0;
+    const upd = () => { rq = 0; const h = de.scrollHeight - innerHeight; ring.style.setProperty('--waf-p', (h > 0 ? Math.min(1, Math.max(0, scrollY / h)) * 360 : 0) + 'deg'); };
+    const req = () => { if (!rq) rq = requestAnimationFrame(upd); };
+    addEventListener('scroll', req, { passive: true }); addEventListener('resize', req, { passive: true }); upd();
+  }
+
+  // ---------- when the button shows: Home after the intro; never over the party plan bar / menu table in its corner ----------
+  const introOn = () => home && (de.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((id) => document.getElementById(id)));
+  const phone = () => innerWidth < 768;
+  let raf = 0;
+  const tick = () => {
+    raf = 0;
+    let on = !introOn();
+    if (on && !phone()) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
+      const r = el.getBoundingClientRect();
+      if (r.right > innerWidth - 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
+    }
+    root.classList.toggle('is-on', on);
+    if (on && !dropped && !phone()) {
+      dropped = true;
+      fab.style.setProperty('--waf-drop', Math.round(fab.getBoundingClientRect().bottom + 10) + 'px');
+      fab.classList.add('is-drop');
+    }
+    if (!on && dialOpen && !phone()) closeDial(false);
+    if (dialOpen) lay();
+  };
+  const req = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  addEventListener('scroll', req, { passive: true }); addEventListener('resize', req, { passive: true }); addEventListener('pageshow', req);
+  new MutationObserver(req).observe(de, { attributes: true, attributeFilter: ['class'] });
+  if (introOn()) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); tick(); } }, 400); }
+
+  // ---------- speed dial ----------
+  // place the stack: desktop = just above the button; phone = above the bottom nav and anything fixed in the corner (Ask, party bar, dock)
+  const lay = () => {
+    const ph = phone(), W = Math.min(272, innerWidth - 24), right = ph ? 12 : 20, spL = innerWidth - right - W, spR = innerWidth - right;
+    let top = innerHeight;
+    if (ph) { const nav = document.querySelector('.mb-bar'); top = nav ? nav.getBoundingClientRect().top : innerHeight - 76; }
+    else { const fr = fab.getBoundingClientRect(); if (fr.width) top = fr.top; }
+    for (const el of document.querySelectorAll('.afab, .ifab.is-on, #pb-bar.is-in, #pb-dock:not([hidden]), #fxsticky.on, [data-fab-avoid], #pa-plan')) {
+      if (root.contains(el)) continue;
+      const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width && r.top < innerHeight && r.bottom > innerHeight - 340 && r.right > spL && r.left < spR) top = Math.min(top, r.top);
+    }
+    sd.style.setProperty('--waf-sd-b', Math.max(12, Math.round(innerHeight - top + 12)) + 'px');
+  };
+  const focusBack = () => { const t = opener && opener.isConnected && opener.getClientRects().length ? opener : fab; if (t.getClientRects().length) t.focus({ preventScroll: true }); };
+  const openDial = () => {
+    if (dialOpen) return;
+    if (chatOpen) setChat(false, false);
+    dialOpen = true; opener = document.activeElement; lay();
+    root.classList.add('is-dial'); fab.setAttribute('aria-expanded', 'true'); sd.setAttribute('aria-modal', 'true');
+    tease.classList.remove('is-on'); store('fk-wa-teased', '1');
+    if (pills[0]) pills[0].focus({ preventScroll: true });
+  };
+  function closeDial(restore) {
+    if (!dialOpen) return;
+    dialOpen = false; root.classList.remove('is-dial'); fab.setAttribute('aria-expanded', 'false'); sd.removeAttribute('aria-modal');
+    if (restore !== false) focusBack();
+  }
+  fab.addEventListener('click', () => { if (chatOpen) setChat(false, true); else if (dialOpen) closeDial(true); else openDial(); });
+  scrim.addEventListener('click', () => closeDial(true));
+  sd.addEventListener('click', (e) => {
+    const p = e.target.closest('.waf-pill'); if (!p) return;
+    if (p.dataset.act === 'chat') { closeDial(false); setChat(true); } else setTimeout(() => closeDial(true), 0);
+  });
+  sd.addEventListener('keydown', (e) => {
+    if (!dialOpen) return;
+    const i = pills.indexOf(document.activeElement), n = pills.length; let j = -1;
+    if (e.key === 'Tab') j = e.shiftKey ? (i <= 0 ? n - 1 : i - 1) : (i === n - 1 || i < 0 ? 0 : i + 1);
+    else if (e.key === 'ArrowUp') j = (i + 1) % n;          // stack grows upward: next item is visually higher
+    else if (e.key === 'ArrowDown') j = (i - 1 + n) % n;
+    else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = n - 1;
+    if (j > -1) { e.preventDefault(); pills[j].focus({ preventScroll: true }); }
+  });
+
+  // ---------- chat agent (routes kept; name and phone optional) ----------
   const IC = {
     ask: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
     reserve: '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
@@ -58,21 +231,21 @@ const wa = site.whatsapp;
     { k: 'menu', t: 'See the menu', s: 'Food, bar and cafe', href: '/menu' }
   ];
   let lead = null; try { lead = JSON.parse(store('fk-wa-lead') || 'null'); } catch (e) {}
-  let n = 0, started = false, open = false, closeT = 0;
-
+  let n = 0, started = false;
+  // plain message unless the guest chose to add a name and/or number
   const link = (about) => {
-    const who = lead ? "I'm " + lead.name + ' (+91 ' + lead.phone + '). ' : '';
+    let who = '';
+    if (lead && (lead.name || lead.phone)) who = (lead.name ? "I'm " + lead.name + (lead.phone ? ' (+91 ' + lead.phone + ')' : '') : 'My number is +91 ' + lead.phone) + '. ';
     const msg = 'Hi Fursat! ' + who + (about ? "I'd like to " + about + '.' : 'I have a question.');
     return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg) + '&utm_source=website&utm_medium=chat_widget&utm_campaign=whatsapp';
   };
   const add = (html, cls) => {
     const d = document.createElement('div'); d.className = 'waf-m ' + cls; d.style.setProperty('--i', Math.min(n++, 8)); d.innerHTML = html; log.appendChild(d);
-    log.scrollTo({ top: log.scrollHeight, behavior: reduce.matches ? 'auto' : 'smooth' }); return d;
+    log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' }); return d;
   };
   const bot = (t) => add(t, 'waf-b');
   const me = (t) => add(esc(t), 'waf-u');
   const waBtn = (about, label) => '<a class="waf-wa" href="' + link(about) + '" target="_blank" rel="noopener">' + label + '</a>';
-
   const showMenu = () => {
     const html = '<ul class="waf-menu">' + ROUTES.map((r, i) =>
       '<li style="--j:' + i + '"><' + (r.book ? 'button type="button" data-k="' + r.k + '"' : 'a href="' + r.href + '"') + ' class="waf-opt">' +
@@ -83,82 +256,156 @@ const wa = site.whatsapp;
       const r = ROUTES.find((x) => x.k === b.dataset.k);
       me(r.t);
       setTimeout(() => {
-        bot('Lovely. I can open the page for you, or send your details to our team on WhatsApp so they confirm it personally.');
+        bot('Lovely. I can open the page for you, or send a plain message to our team on WhatsApp so they confirm it personally.');
         add('<a class="waf-pg" href="' + r.href + '">Open page ' + ico('arrow') + '</a>' + waBtn(r.wa, 'Send on WhatsApp'), 'waf-c waf-row');
-      }, reduce.matches ? 0 : 260);
+      }, 260);
     }));
   };
+  const skip = (d) => { d.remove(); store('fk-wa-skip', '1'); bot('No problem. What would you like to do?'); setTimeout(showMenu, 200); };
   const askLead = () => {
-    const d = add('<form class="waf-form" novalidate><label>Your name<input name="n" type="text" autocomplete="name" maxlength="40" required></label>' +
-      '<label>Phone number<span class="waf-ph"><span class="waf-pre">+91</span><input name="p" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12" placeholder="10-digit mobile" required></span></label>' +
-      '<p class="waf-err" role="alert"></p><button class="waf-go" type="submit">Start chat</button><a class="waf-skip" href="' + link('') + '" target="_blank" rel="noopener">Skip, open WhatsApp</a>' +
-      '<p class="waf-note">Used only to message you on WhatsApp. Not saved on our servers.</p></form>', 'waf-c');
+    const d = add('<form class="waf-form" novalidate><p class="waf-ft"><b>Add your name &amp; number</b> <span>(optional)</span></p>' +
+      '<label>Your name<input name="n" type="text" autocomplete="name" maxlength="40"></label>' +
+      '<label>Phone number<span class="waf-ph"><span class="waf-pre">+91</span><input name="p" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12" placeholder="10-digit mobile"></span></label>' +
+      '<p class="waf-err" role="alert"></p><div class="waf-fr"><button class="waf-go" type="submit">Continue</button><button class="waf-sk" type="button">Skip</button></div>' +
+      '<p class="waf-note">Optional. Used only so the team can reply to you on WhatsApp.</p></form>', 'waf-c');
     const f = d.querySelector('form'), err = f.querySelector('.waf-err');
+    f.querySelector('.waf-sk').addEventListener('click', () => skip(d));
     f.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = f.elements.n.value.trim().replace(/\s+/g, ' ');
       let ph = f.elements.p.value.replace(/\D/g, ''); if (ph.length === 12 && ph.startsWith('91')) ph = ph.slice(2); if (ph.length === 11 && ph[0] === '0') ph = ph.slice(1);
-      if (name.length < 2) { err.textContent = 'Please tell us your name.'; f.elements.n.focus(); return; }
-      if (!/^[6-9]\d{9}$/.test(ph)) { err.textContent = 'Please enter a 10-digit mobile number.'; f.elements.p.focus(); return; }
-      lead = { name, phone: ph }; store('fk-wa-lead', JSON.stringify(lead)); window.fkForm && window.fkForm.send('restaurant', 'WhatsApp chat lead', { name, phone: '+91 ' + ph });
-      f.remove(); d.remove();
-      me("I'm " + name);
-      setTimeout(() => { bot('Nice to meet you, ' + esc(name) + ' 👋 What would you like to do?'); setTimeout(showMenu, reduce.matches ? 0 : 200); }, reduce.matches ? 0 : 260);
+      if (ph && !/^[6-9]\d{9}$/.test(ph)) { err.textContent = 'Please enter a 10-digit mobile number, or leave it empty.'; f.elements.p.focus(); return; }
+      if (!name && !ph) { skip(d); return; }
+      lead = { name, phone: ph }; store('fk-wa-lead', JSON.stringify(lead));
+      if (ph && window.fkForm) window.fkForm.send('restaurant', 'WhatsApp chat lead', name ? { name, phone: '+91 ' + ph } : { phone: '+91 ' + ph });
+      d.remove();
+      me(name ? "I'm " + name : 'My number is +91 ' + ph);
+      setTimeout(() => { bot('Nice to meet you' + (name ? ', ' + esc(name) : '') + '. What would you like to do?'); setTimeout(showMenu, 200); }, 260);
     });
-    return f;
   };
   const start = () => {
     if (started) return; started = true;
-    bot('Hi, welcome to <b>Fursat</b> 👋');
-    setTimeout(() => bot('Vibe with us. Tell us who you are and we will take care of the rest.'), reduce.matches ? 0 : 320);
-    if (lead) { setTimeout(() => { bot('Good to see you, ' + esc(lead.name) + '. What would you like to do?'); setTimeout(showMenu, reduce.matches ? 0 : 200); }, reduce.matches ? 0 : 640); }
-    else setTimeout(askLead, reduce.matches ? 0 : 640);
+    bot('Hi, welcome to <b>Fursat</b>');
+    if (lead && (lead.name || lead.phone)) { setTimeout(() => { bot(lead.name ? 'Good to see you, ' + esc(lead.name) + '. What would you like to do?' : 'Good to see you. What would you like to do?'); setTimeout(showMenu, 200); }, 320); }
+    else if (store('fk-wa-skip')) setTimeout(() => { bot('What would you like to do?'); setTimeout(showMenu, 200); }, 320);
+    else { setTimeout(() => bot('Vibe with us. Add your name and number if you like, or skip straight to what you need.'), 320); setTimeout(askLead, 640); }
   };
-
-  const setOpen = (v) => {
-    open = v; clearTimeout(closeT); fab.setAttribute('aria-expanded', v); root.classList.toggle('is-open', v);
+  function setChat(v, restore) {
+    chatOpen = v; clearTimeout(closeT); root.classList.toggle('is-chat', v);
     if (v) {
       panel.hidden = false; void panel.offsetWidth; panel.classList.add('is-on'); store('fk-wa-teased', '1'); tease.classList.remove('is-on'); start();
-      setTimeout(() => { const t = panel.querySelector('input,button.waf-opt,a.waf-opt,.waf-x'); if (t) t.focus({ preventScroll: true }); }, reduce.matches ? 0 : 260);
+      setTimeout(() => panel.focus({ preventScroll: true }), 260);
     } else {
-      panel.classList.remove('is-on'); closeT = setTimeout(() => { panel.hidden = true; }, reduce.matches ? 0 : 220); fab.focus({ preventScroll: true });
+      panel.classList.remove('is-on'); closeT = setTimeout(() => { panel.hidden = true; }, 220);
+      if (restore !== false) focusBack();
     }
-  };
-  fab.addEventListener('click', () => setOpen(!open));
-  panel.querySelector('.waf-x').addEventListener('click', () => setOpen(false));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { e.preventDefault(); setOpen(false); } });
-  // one small greeting per visit, a few seconds after the page settles (not on Home during the intro)
-  if (!store('fk-wa-teased') && !reduce.matches) setTimeout(() => { if (!open && !document.documentElement.classList.contains('lock')) { tease.classList.add('is-on'); setTimeout(() => tease.classList.remove('is-on'), 5200); } }, 6000);
+  }
+  panel.querySelector('.waf-x').addEventListener('click', () => setChat(false, true));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (chatOpen) { e.preventDefault(); setChat(false, true); } else if (dialOpen) { e.preventDefault(); closeDial(true); }
+  });
+  // one small greeting per visit, a few seconds after the button settles
+  if (!store('fk-wa-teased')) setTimeout(() => { if (!dialOpen && !chatOpen && root.classList.contains('is-on') && !de.classList.contains('lock')) { tease.classList.add('is-on'); setTimeout(() => tease.classList.remove('is-on'), 5200); } }, 6000);
+  tick();
+  // keep the button off the footer links: it steps aside while the footer is on screen (not while the dial or chat is open)
+  const foot = document.querySelector('footer.sf-footer');
+  if (foot) {
+    // measured from the page end: the curtain footer is sticky, so it always counts as "on screen" for an IntersectionObserver
+    const sc = () => document.scrollingElement || document.documentElement;
+    let qd = 0;
+    const chk = () => { qd = 0; const e = sc(), y = (e === document.body ? document.body.scrollTop : 0) || scrollY || e.scrollTop; const left = e.scrollHeight - (y + innerHeight); root.classList.toggle('is-foot', left < foot.offsetHeight - 40); };
+    const q = () => { if (!qd) qd = requestAnimationFrame(chk); };
+    addEventListener('scroll', q, { passive: true }); document.body.addEventListener('scroll', q, { passive: true }); addEventListener('resize', q); chk();
+  }
 })();
 </script>
 
 <style is:global>
-.waf { --waf-g1: #1f4129; --waf-g2: #13301d; --waf-gold: #f3c56b; --waf-cream: #fcf7f0; --waf-ink: #2b2416; --waf-ease: cubic-bezier(.23, 1, .32, 1); }
+.waf.is-foot:not(.is-dial):not(.is-chat) .waf-fab{opacity:0;transform:translateY(24px) scale(.9);pointer-events:none;transition:opacity .25s ease,transform .3s cubic-bezier(.2,0,0,1)}
+.waf.is-foot:not(.is-dial):not(.is-chat) .waf-tease,.waf.is-foot:not(.is-dial):not(.is-chat) [class*=waf-ring]{opacity:0}
+@property --waf-p { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.waf { --waf-g1: #1f4129; --waf-g2: #13301d; --waf-gold: #f3c56b; --waf-cream: #fcf7f0; --waf-ink: #2b2416; --waf-ease: cubic-bezier(.23, 1, .32, 1); --waf-spring: cubic-bezier(.2, .9, .25, 1.15); }
 html.lock .waf { display: none; }
-.waf-fab { position: fixed; z-index: 8600; right: 12px; bottom: calc(142px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: #fff; background: linear-gradient(180deg, #22b45a 0%, #128c4a 100%); box-shadow: 0 14px 28px -12px rgb(10 60 30 / .7), inset 0 0 0 2px rgb(243 197 107 / .55); touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 160ms var(--waf-ease); }
-.waf-ic { display: grid; place-items: center; width: 28px; height: 28px; transform-origin: 50% 12%; animation: waf-sway 4.2s cubic-bezier(.77, 0, .175, 1) infinite; }
-.waf-ic svg { width: 28px; height: 28px; }
-.waf-fab:hover .waf-ic, .waf-fab:focus-visible .waf-ic, .waf.is-open .waf-ic { animation: none; }
-.waf-fab:active { transform: scale(.96); }
-.waf-fab:focus-visible { outline: 3px solid var(--waf-gold); outline-offset: 3px; }
-.waf-dot { position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: #c0291f; border: 2px solid #fff; }
-.waf.is-open .waf-dot { display: none; }
-@keyframes waf-sway { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
-.waf-tease { position: fixed; z-index: 8600; right: 72px; bottom: calc(150px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); padding: 9px 14px; border-radius: 14px 14px 4px 14px; background: var(--waf-cream); color: var(--waf-ink); font: 500 14px/1.3 Rupee,Poppins, system-ui, sans-serif; box-shadow: 0 10px 24px -12px rgb(10 30 18 / .5), inset 0 0 0 1px rgb(201 154 67 / .55); opacity: 0; transform: translateX(10px); pointer-events: none; transition: opacity 200ms var(--waf-ease), transform 200ms var(--waf-ease); white-space: nowrap; }
+/* ---- the button ---- */
+.waf-fab { position: fixed; z-index: 8600; right: 12px; bottom: calc(142px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: #fff; background: #25D366; box-shadow: 0 14px 28px -12px rgb(10 60 30 / .7), inset 0 0 0 2px rgb(243 197 107 / .55); touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: opacity 300ms var(--waf-ease), translate 300ms var(--waf-ease), scale 150ms ease-out, visibility 0s; }
+.waf.js:not(.is-on) .waf-fab { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 0s, 300ms; }
+.waf-fab:active { scale: .96; }
+.waf-fab:focus-visible { outline: 3px solid var(--waf-gold); outline-offset: 5px; }
+.waf.is-dial .waf-fab { z-index: 9400; }
+.waf-face { position: relative; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: grid; place-items: center; }
+.waf-ic { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity 300ms var(--waf-ease), scale 300ms var(--waf-ease), rotate 300ms var(--waf-ease), filter 300ms var(--waf-ease); }
+.waf-ic svg { width: 28px; height: 28px; filter: drop-shadow(0 1px 1px rgb(8 48 22 / .55)); }
+.waf-ic--x { opacity: 0; scale: .25; rotate: 90deg; filter: blur(4px); }
+.waf.is-dial .waf-ic--wa { opacity: 0; scale: .25; rotate: -90deg; filter: blur(4px); }
+.waf.is-dial .waf-ic--x { opacity: 1; scale: 1; rotate: 0deg; filter: blur(0); }
+/* arrival: drops from the top of the screen down the right edge, springy, with a short gold light trail */
+.waf-fab.is-drop { animation: waf-drop 900ms cubic-bezier(.2, .9, .25, 1.15) backwards; }
+@keyframes waf-drop { from { translate: 0 calc(-1 * var(--waf-drop, 100vh)); } to { translate: 0 0; } }
+.waf-trail { position: absolute; left: 50%; bottom: calc(100% - 6px); width: 8px; height: 150px; margin-left: -4px; border-radius: 8px; background: linear-gradient(to bottom, transparent, rgb(232 194 122 / .55)); opacity: 0; transform-origin: 50% 100%; pointer-events: none; }
+.waf-fab.is-drop .waf-trail { animation: waf-trail 900ms linear backwards; }
+@keyframes waf-trail { 0% { opacity: 0; transform: scaleY(.3); } 12% { opacity: 1; transform: scaleY(1); } 70% { opacity: .85; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(.4); } }
+/* gentle gloss sweep, on arrival then about every 9 s (scheduled in the script) */
+.waf-shine { position: absolute; inset: -20%; background: linear-gradient(105deg, transparent 38%, rgb(255 255 255 / .4) 50%, transparent 62%); translate: -120% 0; opacity: 0; pointer-events: none; }
+.waf-face.is-shine .waf-shine { animation: waf-shine 1000ms var(--waf-ease) both; }
+@keyframes waf-shine { 0% { translate: -120% 0; opacity: 0; } 15% { opacity: 1; } 100% { translate: 120% 0; opacity: 0; } }
+/* thin gold scroll-progress ring */
+.waf-ring { position: absolute; inset: -6px; border-radius: 50%; pointer-events: none; background: conic-gradient(from 0deg, #e8c27a var(--waf-p), rgb(201 154 67 / .3) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); animation: waf-prog linear both; animation-timeline: scroll(root block); }
+.waf-ring.is-js { animation: none; }
+@keyframes waf-prog { to { --waf-p: 360deg; } }
+/* glow mode: breathing green halo while open now (a blurred layer, opacity and scale only) */
+.waf-fab::before { content: ""; position: absolute; inset: -4px; border-radius: 50%; background: #25D366; filter: blur(12px); opacity: 0; z-index: -1; pointer-events: none; }
+.waf.is-live .waf-fab { box-shadow: 0 0 0 1px rgb(37 211 102 / .4), 0 0 20px 2px rgb(37 211 102 / .35), 0 14px 28px -12px rgb(10 60 30 / .7), inset 0 0 0 2px rgb(243 197 107 / .55); }
+.waf.is-live .waf-fab::before { animation: waf-breathe 2.4s ease-in-out infinite alternate; }
+@keyframes waf-breathe { from { opacity: .35; transform: scale(.96); } to { opacity: .7; transform: scale(1.1); } }
+html.waf-pause .waf-fab::before, html.waf-pause .waf-ring { animation-play-state: paused; }
+.waf:not(.is-on) .waf-fab::before { animation-play-state: paused; }
+/* Fursat elephant badge (top-left) and the "closed" dot (top-right, elephant red) */
+.waf-badge { position: absolute; top: -7px; left: -7px; z-index: 2; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: #f6e6d1; box-shadow: 0 0 0 1.5px #c99a43, 0 2px 6px rgb(0 0 0 / .25); pointer-events: none; }
+.waf-badge img { display: block; width: 20px; height: 20px; object-fit: cover; }
+.waf-dot { position: absolute; top: 1px; right: 1px; z-index: 2; width: 12px; height: 12px; border-radius: 50%; background: #c0291f; border: 2px solid #fff; display: none; pointer-events: none; }
+.waf.is-closed .waf-dot { display: block; }
+.waf-tease { position: fixed; z-index: 8600; right: 72px; bottom: calc(150px + env(safe-area-inset-bottom, 0px) + var(--fab-lift, 0px)); padding: 9px 14px; border-radius: 14px 14px 4px 14px; background: var(--waf-cream); color: var(--waf-ink); font: 500 14px/1.3 Rupee, Poppins, system-ui, sans-serif; box-shadow: 0 10px 24px -12px rgb(10 30 18 / .5), inset 0 0 0 1px rgb(201 154 67 / .55); opacity: 0; transform: translateX(10px); pointer-events: none; transition: opacity 200ms var(--waf-ease), transform 200ms var(--waf-ease); white-space: nowrap; }
 .waf-tease.is-on { opacity: 1; transform: none; }
-.waf-panel { position: fixed; z-index: 9200; right: 12px; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-height: min(78svh, 640px); display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: var(--waf-cream); color: var(--waf-ink); box-shadow: 0 30px 60px -20px rgb(10 30 18 / .6), 0 0 0 1px rgb(201 154 67 / .6); opacity: 0; transform: translateY(14px) scale(.98); transform-origin: 100% 100%; transition: opacity 220ms var(--waf-ease), transform 220ms var(--waf-ease); font: 400 15px/1.5 Rupee,Poppins, system-ui, sans-serif; }
+.waf:not(.is-on) .waf-tease { display: none; }
+/* ---- speed dial ---- */
+.waf-scrim { position: fixed; inset: 0; z-index: 9250; background: rgb(8 20 13 / .3); opacity: 0; visibility: hidden; -webkit-tap-highlight-color: transparent; transition: opacity 200ms var(--waf-ease), visibility 0s linear 200ms; }
+.waf.is-dial .waf-scrim { opacity: 1; visibility: visible; transition-delay: 0s; }
+.waf-sd { position: fixed; z-index: 9300; right: 20px; bottom: var(--waf-sd-b, 88px); width: min(272px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 10px; visibility: hidden; pointer-events: none; transition: visibility 0s linear 200ms; font-family: Rupee, Poppins, system-ui, sans-serif; }
+.waf.is-dial .waf-sd { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+.waf-sdh, .waf-dial li { transform-origin: 100% 100%; opacity: 0; transform: translateY(calc(var(--n, 5) * 56px + 24px)) scale(.6); transition: transform 160ms var(--waf-ease), opacity 120ms linear; }
+.waf-sdh { --n: 5; display: flex; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; border-radius: 18px; background: var(--waf-cream); color: var(--waf-ink); box-shadow: 0 14px 28px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(201 154 67 / .7); }
+.waf-sdh-i { flex: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: #f6e4c9; box-shadow: 0 0 0 1.5px #c99a43; }
+.waf-sdh-t { margin: 0; font: 500 1.05rem/1.2 "Playfair Display", Georgia, serif; color: #10261a; }
+.waf-sdh-s { margin: 2px 0 0; font: 500 .8125rem/1.3 Rupee, Poppins, system-ui, sans-serif; color: #5b4b2c; }
+.waf.is-dial .waf-sdh, .waf.is-dial .waf-dial li { opacity: 1; transform: none; transition: transform 420ms var(--waf-spring), opacity 180ms linear; transition-delay: calc(var(--n, 5) * 40ms); }
+.waf-dial { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column-reverse; gap: 10px; }
+.waf-pill { position: relative; width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 6px 16px 6px 8px; border: 1px solid transparent; border-radius: 999px; background: #10261a; color: #f6e6d1; text-align: left; text-decoration: none; cursor: pointer; box-shadow: 0 14px 28px -14px rgb(0 0 0 / .65), inset 0 0 0 1px rgb(201 154 67 / .75); font-family: Rupee, Poppins, system-ui, sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: scale 150ms ease-out, background-color 150ms ease-out, box-shadow 150ms ease-out; }
+.waf-pill:active { scale: .96; }
+.waf-pill:focus-visible { outline: 2px solid #e8c27a; outline-offset: 3px; }
+.waf-pi { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: rgb(232 194 122 / .14); color: #e8c27a; box-shadow: inset 0 0 0 1px rgb(201 154 67 / .45); }
+.waf-pi svg { width: 20px; height: 20px; }
+.waf-pill--wa .waf-pi { color: #25D366; background: rgb(37 211 102 / .14); box-shadow: inset 0 0 0 1px rgb(37 211 102 / .5); }
+.waf-pt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.waf-pt b { font: 600 .9375rem/1.2 Rupee, Poppins, system-ui, sans-serif; color: #f6e6d1; }
+.waf-pt small { font: 400 .8125rem/1.25 Rupee, Poppins, system-ui, sans-serif; color: rgb(246 230 209 / .8); overflow-wrap: anywhere; }
+@media (hover: hover) and (pointer: fine) { .waf-pill:hover { background: #17372a; box-shadow: 0 14px 28px -14px rgb(0 0 0 / .65), inset 0 0 0 1px #e8c27a; } }
+/* ---- chat panel ---- */
+.waf-panel { position: fixed; z-index: 9200; right: 12px; left: 12px; bottom: calc(var(--mb-clear, 76px) + 8px); max-height: min(72svh, 640px); display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: var(--waf-cream); color: var(--waf-ink); box-shadow: 0 30px 60px -20px rgb(10 30 18 / .6), 0 0 0 1px rgb(201 154 67 / .6); opacity: 0; transform: translateY(14px) scale(.98); transform-origin: 100% 100%; transition: opacity 220ms var(--waf-ease), transform 220ms var(--waf-ease); font: 400 15px/1.5 Rupee, Poppins, system-ui, sans-serif; outline: 0; }
 .waf-panel[hidden] { display: none; }
 .waf-panel.is-on { opacity: 1; transform: none; }
 .waf-h { display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; background: linear-gradient(180deg, var(--waf-g1) 0%, var(--waf-g2) 100%); color: #f6ecd8; box-shadow: inset 0 -1px 0 rgb(243 197 107 / .45); }
 .waf-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #f6e4c9; box-shadow: 0 0 0 2px rgb(243 197 107 / .7); }
 .waf-hd { min-width: 0; flex: 1; }
 .waf-hd h2 { margin: 0; font: 500 1.15rem/1.2 "Playfair Display", Georgia, serif; letter-spacing: -.005em; color: #fff7e6; }
-.waf-hd p { margin: 2px 0 0; display: flex; align-items: center; gap: 6px; font: 400 .8125rem/1.3 Rupee,Poppins, system-ui, sans-serif; color: #d9c9a6; }
+.waf-hd p { margin: 2px 0 0; display: flex; align-items: center; gap: 6px; font: 400 .8125rem/1.3 Rupee, Poppins, system-ui, sans-serif; color: #e6d7b6; }
 .waf-on { width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; flex: none; }
+.waf.is-closed .waf-on { background: #ffb3a8; }
 .waf-x { width: 44px; height: 44px; margin: -6px -4px -6px 0; border: 0; border-radius: 50%; background: none; color: #f6ecd8; display: grid; place-items: center; cursor: pointer; touch-action: manipulation; }
 .waf-x svg { width: 20px; height: 20px; }
 .waf-x:hover { background: rgb(255 255 255 / .1); }
-.waf-x:focus-visible, .waf-opt:focus-visible, .waf-go:focus-visible, .waf-wa:focus-visible, .waf-pg:focus-visible, .waf-skip:focus-visible, .waf-form input:focus-visible { outline: 2px solid #c99a43; outline-offset: 2px; }
+.waf-x:focus-visible, .waf-opt:focus-visible, .waf-go:focus-visible, .waf-sk:focus-visible, .waf-wa:focus-visible, .waf-pg:focus-visible, .waf-form input:focus-visible { outline: 2px solid #c99a43; outline-offset: 2px; }
+.waf-x:focus-visible { outline-color: #f3c56b; }
 .waf-log { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 14px 18px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
 .waf-m { max-width: 92%; animation: waf-in 240ms var(--waf-ease) both; animation-delay: calc(var(--i, 0) * 50ms); }
 @keyframes waf-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -168,43 +415,44 @@ html.lock .waf { display: none; }
 .waf-c { align-self: stretch; max-width: 100%; display: flex; flex-direction: column; gap: 10px; }
 .waf-row { gap: 8px; }
 .waf-form { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 18px; background: #fff; box-shadow: 0 8px 18px -12px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .4); }
-.waf-form label { display: flex; flex-direction: column; gap: 6px; font: 500 .8125rem/1.3 Rupee,Poppins, system-ui, sans-serif; color: #5b4b2c; }
-.waf-form input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid rgb(43 36 22 / .28); border-radius: 12px; background: #fffdf8; color: var(--waf-ink); font: 400 16px/1.2 Rupee,Poppins, system-ui, sans-serif; box-sizing: border-box; }
+.waf-ft { margin: 0; font: 400 .875rem/1.3 Rupee, Poppins, system-ui, sans-serif; color: #5b4b2c; }
+.waf-ft b { font-weight: 600; color: #1b3a26; }
+.waf-form label { display: flex; flex-direction: column; gap: 6px; font: 500 .8125rem/1.3 Rupee, Poppins, system-ui, sans-serif; color: #5b4b2c; }
+.waf-form input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid rgb(43 36 22 / .28); border-radius: 12px; background: #fffdf8; color: var(--waf-ink); font: 400 16px/1.2 Rupee, Poppins, system-ui, sans-serif; box-sizing: border-box; }
 .waf-ph { display: flex; align-items: stretch; }
-.waf-pre { display: grid; place-items: center; padding: 0 12px; border: 1px solid rgb(43 36 22 / .28); border-right: 0; border-radius: 12px 0 0 12px; background: #f4e6cc; color: #5b4b2c; font: 500 15px/1 Rupee,Poppins, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.waf-pre { display: grid; place-items: center; padding: 0 12px; border: 1px solid rgb(43 36 22 / .28); border-right: 0; border-radius: 12px 0 0 12px; background: #f4e6cc; color: #5b4b2c; font: 500 15px/1 Rupee, Poppins, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 .waf-ph input { border-radius: 0 12px 12px 0; font-variant-numeric: tabular-nums; }
-.waf-err { margin: 0; min-height: 0; color: #b3261e; font: 500 .8125rem/1.3 Rupee,Poppins, system-ui, sans-serif; }
+.waf-err { margin: 0; color: #b3261e; font: 500 .8125rem/1.3 Rupee, Poppins, system-ui, sans-serif; }
 .waf-err:empty { display: none; }
-.waf-go, .waf-wa, .waf-pg { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; font: 600 15px/1 Rupee,Poppins, system-ui, sans-serif; text-decoration: none; cursor: pointer; touch-action: manipulation; transition: transform 160ms var(--waf-ease), box-shadow 160ms var(--waf-ease); }
+.waf-fr { display: flex; gap: 8px; }
+.waf-fr > * { flex: 1; }
+.waf-go, .waf-sk, .waf-wa, .waf-pg { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 999px; font: 600 15px/1 Rupee, Poppins, system-ui, sans-serif; text-decoration: none; cursor: pointer; touch-action: manipulation; transition: scale 150ms ease-out; }
 .waf-go { background: linear-gradient(180deg, var(--waf-g1), var(--waf-g2)); color: #fff7e6; box-shadow: 0 10px 20px -12px rgb(10 30 18 / .8), inset 0 0 0 1px rgb(243 197 107 / .5); }
+.waf-sk { background: #fff; color: #1b3a26; box-shadow: inset 0 0 0 1px rgb(201 154 67 / .7); }
 .waf-wa { background: linear-gradient(180deg, #1a9a4a, #117a38); color: #fff; box-shadow: 0 10px 20px -12px rgb(10 60 30 / .7); }
 .waf-pg { background: #fff; color: #1b3a26; box-shadow: inset 0 0 0 1px rgb(201 154 67 / .7); }
 .waf-pg svg { width: 18px; height: 18px; }
-.waf-go:active, .waf-wa:active, .waf-pg:active, .waf-opt:active { transform: scale(.98); }
-.waf-skip { align-self: center; min-height: 44px; display: inline-flex; align-items: center; color: #1b3a26; font: 500 .875rem/1.2 Rupee,Poppins, system-ui, sans-serif; text-decoration: underline; text-underline-offset: 3px; }
-.waf-note { margin: 0; text-align: center; font: 400 .75rem/1.4 Rupee,Poppins, system-ui, sans-serif; color: #6a5c45; }
+.waf-go:active, .waf-sk:active, .waf-wa:active, .waf-pg:active, .waf-opt:active { scale: .96; }
+.waf-note { margin: 0; text-align: center; font: 400 .75rem/1.4 Rupee, Poppins, system-ui, sans-serif; color: #6a5c45; }
 .waf-menu { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .waf-menu li { animation: waf-slide 240ms var(--waf-ease) both; animation-delay: calc(var(--j, 0) * 50ms); }
 @keyframes waf-slide { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
-.waf-opt { position: relative; overflow: hidden; width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 0; border-radius: 16px; background: #fff; color: var(--waf-ink); text-align: left; text-decoration: none; cursor: pointer; box-shadow: 0 6px 14px -10px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .45); font-family: Rupee,Poppins, system-ui, sans-serif; touch-action: manipulation; transition: transform 160ms var(--waf-ease), box-shadow 160ms var(--waf-ease); }
+.waf-opt { position: relative; overflow: hidden; width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; border: 0; border-radius: 16px; background: #fff; color: var(--waf-ink); text-align: left; text-decoration: none; cursor: pointer; box-shadow: 0 6px 14px -10px rgb(43 36 22 / .5), inset 0 0 0 1px rgb(201 154 67 / .45); font-family: Rupee, Poppins, system-ui, sans-serif; touch-action: manipulation; transition: scale 150ms ease-out, box-shadow 160ms var(--waf-ease); }
 .waf-opt::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--waf-gold); transform: scaleX(0); transform-origin: 0 50%; transition: transform 200ms var(--waf-ease); }
 .waf-oi { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(180deg, #f6e4c9, #ecd3a4); color: #1b3a26; }
 .waf-oi svg { width: 20px; height: 20px; }
 .waf-ot { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.waf-ot b { font: 600 .9375rem/1.2 Rupee,Poppins, system-ui, sans-serif; color: #1b3a26; }
-.waf-ot small { font: 400 .8125rem/1.3 Rupee,Poppins, system-ui, sans-serif; color: #6a5c45; }
-.waf-oa { flex: none; width: 20px; height: 20px; color: #9a6f2a; transition: transform 200ms var(--waf-ease); }
+.waf-ot b { font: 600 .9375rem/1.2 Rupee, Poppins, system-ui, sans-serif; color: #1b3a26; }
+.waf-ot small { font: 400 .8125rem/1.3 Rupee, Poppins, system-ui, sans-serif; color: #6a5c45; }
+.waf-oa { flex: none; width: 20px; height: 20px; color: #8a5f1f; transition: transform 200ms var(--waf-ease); }
 .waf-oa svg { width: 20px; height: 20px; }
-@media (hover: hover) { .waf-opt:hover::before { transform: scaleX(1); } .waf-opt:hover .waf-oa { transform: translateX(4px); } .waf-opt:hover { box-shadow: 0 10px 20px -12px rgb(43 36 22 / .55), inset 0 0 0 1px rgb(201 154 67 / .8); } }
-@media (max-width: 767px) { .waf-fab, .waf-tease { display: none; } }
+@media (hover: hover) and (pointer: fine) { .waf-opt:hover::before { transform: scaleX(1); } .waf-opt:hover .waf-oa { transform: translateX(4px); } .waf-opt:hover { box-shadow: 0 10px 20px -12px rgb(43 36 22 / .55), inset 0 0 0 1px rgb(201 154 67 / .8); } }
+/* phones: the bottom nav's WhatsApp tab opens the dial; the floating button and greeting stay hidden there */
+@media (max-width: 767px) { .waf-fab, .waf-tease { display: none; } .waf-sd { right: max(12px, env(safe-area-inset-right, 0px)); } }
 @media (min-width: 768px) {
   .waf-fab { right: 20px; bottom: calc(20px + var(--fab-lift, 0px)); width: 56px; height: 56px; }
-  .waf-tease { right: 88px; bottom: calc(32px + var(--fab-lift, 0px)); }
-  .waf-panel { left: auto; right: 20px; bottom: 88px; width: 380px; max-height: min(74vh, 660px); }
+  .waf-tease { right: 96px; bottom: calc(32px + var(--fab-lift, 0px)); }
+  .waf-panel { left: auto; right: 20px; bottom: 96px; width: 380px; max-height: min(74vh, 660px); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .waf-ic { animation: none; }
-  .waf-m, .waf-menu li { animation: none; }
-  .waf-panel, .waf-tease, .waf-fab, .waf-opt, .waf-opt::before, .waf-oa, .waf-go, .waf-wa, .waf-pg { transition: none; }
-}
+@media print { .waf { display: none !important; } }
 </style>
