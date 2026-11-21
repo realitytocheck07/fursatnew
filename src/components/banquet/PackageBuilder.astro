@@ -2,7 +2,7 @@
 // PackageBuilder — the five banquet packages (party.json, group "banquet") as an interactive menu builder.
 // Guests pick a package, choose dishes within each course's "Any N", set guests/date and send the menu on WhatsApp.
 // Data: names, prices and rules come only from party.json (the client's package sheets, Nov 2026). Nothing invented.
-// No JS: the first package shows as a plain list. Reduced motion: no transitions.
+// No JS: the first package shows as a plain list. Owner rule: no reduced-motion fallbacks.
 import data from '../../data/party.json';
 import site from '../../data/site.json';
 
@@ -19,11 +19,12 @@ const pkgs = (data as any).packages
     });
     const choose = courses.filter((c: any) => c.pick > 0);
     const count = (re: RegExp) => choose.filter((c: any) => re.test(c.h)).reduce((t: number, c: any) => t + c.pick, 0);
-    const starters = count(/starters/i);
+    const tags = ([[count(/starters/i), 'starter', 'starters'], [count(/rice/i), 'rice', 'rice'], [count(/curries/i), 'curry', 'curries'], [count(/desserts/i), 'dessert', 'desserts']] as [number, string, string][])
+      .filter(([n]) => n > 0).map(([n, one, many]) => `${n} ${n === 1 ? one : many}`);
     return {
       id: p.id, price: p.price, veg: !!p.veg, courses, choose: choose.length,
       kind: p.veg ? 'Veg' : 'Non-veg',
-      sum: [`${starters} starters`, `${count(/rice/i)} rice`, `${count(/curries/i)} curries`, `${count(/desserts/i)} desserts`].join(' · '),
+      tags, sum: tags.join(' · '),
     };
   })
   .sort((a: any, b: any) => a.price - b.price);
@@ -42,10 +43,11 @@ const ICON: Record<string, string> = {
 };
 const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ? ICON.bowl : /salad/i.test(h) ? ICON.leaf : /starter/i.test(h) ? ICON.flame : /rice/i.test(h) ? ICON.rice : /curr|dal|fry/i.test(h) ? ICON.pot : /bread/i.test(h) ? ICON.bread : /dessert/i.test(h) ? ICON.sweet : ICON.plate;
 ---
-<section class="pb" id="packages" aria-labelledby="pb-h" data-wa={site.phonePlain}>
+<section class="pb" id="feast" aria-labelledby="pb-h" data-wa={site.phonePlain}>
+  <span class="pb-anchor" id="packages" aria-hidden="true"></span>{/* old #packages links (Home, footer, WhatsApp) still land here */}
   <div class="pb-in">
     <header class="pb-head">
-      <h2 id="pb-h" class="fk-ty-h2 pb-title">Build your <span class="pb-hl">banquet menu</span></h2>
+      <h2 id="pb-h" class="fk-ty-h2 pb-title">Craft your <span class="pb-hl">feast</span></h2>
       <p class="pb-lead">Pick a package, choose your dishes course by course, and send the menu to us on WhatsApp. Prices are per guest, plus taxes.</p>
     </header>
 
@@ -58,7 +60,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
           <span class="pb-kind">{p.kind}</span>
           <span class="pb-price">{inr(p.price)}</span>
           <span class="pb-per">per guest + taxes</span>
-          <span class="pb-sum">{p.sum}</span>
+          <span class="pb-tags">{p.tags.map((t: string) => <span class="pb-tag">{t}</span>)}</span>
         </button>
       ))}
     </div>
@@ -110,22 +112,23 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
         </button>
         <a class="pb-call" href={`tel:+${site.phonePlain}`}>Call Fursat</a>
         <p class="pb-note" id="pb-note">You can send it even before every course is chosen; we will help you finish it.</p>
-        <a class="pb-alt" href="#enquire">Prefer a call back? Use the enquiry form</a>
+        <a class="pb-alt" href="#lock-date">Prefer a call back? Use the enquiry form</a>
       </aside>
     </div>
+    <p class="pb-lockline">Not sure about dishes yet? <a href="#lock-date">Lock your date first →</a></p>
     <p class="pb-live pb-sr" id="pb-live" aria-live="polite"></p>
   </div>
 
   <!-- phone: compact bar above the bottom navigation -->
   <div class="pb-dock" id="pb-dock" hidden>
-    <span class="pb-dock-t" title="Estimate before taxes"><b id="pb-dock-price">{inr(first.price * 50)}</b> + taxes · <span id="pb-dock-prog">0/{first.choose}</span></span>
-    <button type="button" class="fk-btn fk-btn--primary fk-btn--md fk-btn--on-dark" id="pb-dock-send">Send menu</button>
+    <span class="pb-dock-t"><span class="pb-dock-1"><span id="pb-dock-pkg">{inr(first.price)} {first.kind}</span> · <span id="pb-dock-prog">0 of {first.choose} chosen</span></span><span class="pb-dock-2">Est. <b id="pb-dock-price">{inr(first.price * 50)}</b> + taxes</span></span>
+    <button type="button" class="fk-btn fk-btn--primary fk-btn--md fk-btn--on-dark pb-dock-b" id="pb-dock-send" aria-label="Send my menu on WhatsApp">Send ▸</button>
   </div>
 </section>
 
 <script is:inline>
 (function () {
-  var root = document.getElementById('packages'); if (!root) return;
+  var root = document.getElementById('feast'); if (!root) return;
   var q = function (s, c) { return (c || root).querySelector(s); }, qa = function (s, c) { return [].slice.call((c || root).querySelectorAll(s)); };
   var inr = function (n) { return '₹' + Number(n).toLocaleString('en-IN'); };
   var pkgBtns = qa('.pb-pkg'), live = q('#pb-live'), guests = q('#pb-guests'), date = q('#pb-date');
@@ -145,7 +148,8 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
     q('#pb-sc-price').textContent = inr(price); q('#pb-sc-kind').textContent = cur.dataset.kind;
     q('#pb-dock-price').textContent = inr(price * g);
     q('#pb-prog').textContent = done + ' of ' + cs.length + ' courses chosen';
-    q('#pb-dock-prog').textContent = done + '/' + cs.length;
+    q('#pb-dock-prog').textContent = done + ' of ' + cs.length + ' chosen';
+    q('#pb-dock-pkg').textContent = inr(price) + ' ' + cur.dataset.kind;
     q('#pb-bar').style.transform = 'scaleX(' + (cs.length ? done / cs.length : 0) + ')';
     q('#pb-est').textContent = inr(price * g);
   }
@@ -157,7 +161,8 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
     q('#pb-cap').textContent = inr(btn.dataset.price) + ' per guest + taxes · ' + btn.dataset.sum;
     live.textContent = btn.dataset.kind + ' package, ' + inr(btn.dataset.price) + ' per guest selected';
     refresh();
-    try { history.replaceState(null, '', '?pkg=' + btn.dataset.pkg + '#packages'); } catch (e) {}
+    try { history.replaceState(null, '', '?pkg=' + btn.dataset.pkg + '#feast'); } catch (e) {}
+    try { document.dispatchEvent(new CustomEvent('pb:pkg', { detail: { id: btn.dataset.pkg, price: btn.dataset.price, kind: btn.dataset.kind } })); } catch (e) {}
   }
   pkgBtns.forEach(function (b, i) {
     b.addEventListener('click', function () { selectPkg(b, false); });
@@ -195,12 +200,16 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   }
   q('#pb-send').addEventListener('click', send);
   q('#pb-dock-send').addEventListener('click', send);
-  // phone dock: visible while the builder is on screen
-  var dock = q('#pb-dock');
-  if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { dock.hidden = !es[0].isIntersecting; }, { threshold: 0.05 }).observe(q('.pb-body'));
+  // phone summary bar: visible while the builder is on screen, hidden while the real summary card is in view
+  var dock = q('#pb-dock'), inBody = false, inCard = false;
+  function dockSync() { dock.hidden = !(inBody && !inCard); }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) { inBody = es[0].isIntersecting; dockSync(); }, { threshold: 0.05 }).observe(q('.pb-body'));
+    new IntersectionObserver(function (es) { inCard = es[0].isIntersecting; dockSync(); }, { threshold: 0.25 }).observe(q('.pb-sum-card'));
+  }
   // deep link ?pkg=b1399
   var want = new URLSearchParams(location.search).get('pkg'), hit = want && pkgBtns.filter(function (b) { return b.dataset.pkg === want; })[0];
-  if (hit) selectPkg(hit, false); else refresh();
+  if (hit) selectPkg(hit, false); else { refresh(); try { document.dispatchEvent(new CustomEvent('pb:pkg', { detail: { id: cur.dataset.pkg, price: cur.dataset.price, kind: cur.dataset.kind } })); } catch (e) {} }
 })();
 </script>
 
@@ -227,11 +236,17 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-dot.is-veg { color: #7fd69a; } .pb-dot.is-nv { color: #ff9d8d; }
 .pb-pkg.is-on .pb-dot.is-veg { color: #1f7a3a; } .pb-pkg.is-on .pb-dot.is-nv { color: #a3341a; }
 .pb-kind { font: 600 .75rem/1.2 var(--fk-sans); letter-spacing: .12em; text-transform: uppercase; color: #e6c27a; }
-.pb-price { font: 600 clamp(1.5rem, 2.4vw, 1.9rem)/1.15 var(--fk-serif); font-variant-numeric: tabular-nums; }
+.pb-price { margin-top: 2px; font: 700 clamp(1.9rem, 3vw, 2.5rem)/1.05 var(--fk-serif); font-variant-numeric: tabular-nums; }
 .pb-per { font: 400 .75rem/1.3 var(--fk-sans); color: #e1d3b6; }
-.pb-sum { margin-top: 8px; font: 500 .78rem/1.4 var(--fk-sans); color: #e1d3b6; }
+.pb-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.pb-tag { padding: 3px 9px; border-radius: 999px; background: rgb(230 194 122 / .16); box-shadow: inset 0 0 0 1px rgb(230 194 122 / .35); font: 600 .72rem/1.4 var(--fk-sans); color: #f1dfb6; white-space: nowrap; }
+.pb-pkg.is-on .pb-tag { background: rgb(42 80 25 / .1); box-shadow: inset 0 0 0 1px rgb(122 84 24 / .4); color: #4a3410; }
+.pb-anchor { display: block; height: 0; scroll-margin-top: 96px; }
+.pb-lockline { margin: clamp(18px, 2.4vw, 28px) 0 0; text-align: center; font: 400 1rem/1.5 var(--fk-sans); color: var(--pb-mute); }
+.pb-lockline a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; font-weight: 700; color: #74501a; text-underline-offset: 3px; }
+.pb-lockline a:focus-visible { outline: 3px solid #8a5a14; outline-offset: 2px; border-radius: 6px; }
 .pb-pkg.is-on .pb-kind { color: #7a5418; }
-.pb-pkg.is-on .pb-per, .pb-pkg.is-on .pb-sum { color: #5b5240; }
+.pb-pkg.is-on .pb-per { color: #5b5240; }
 .pb-cap { display: none; }
 
 /* body */
@@ -287,22 +302,23 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .pb-dock { display: none; }
 
-@media (max-width: 1100px) { .pb-per, .pb-sum { display: none; } .pb-pkgs.fk-seg > .pb-pkg { padding: 12px 10px; } .pb-dot { top: 10px; right: 8px; } .pb-cap { display: block; margin: 14px 0 0; text-align: center; font: 500 .85rem/1.45 var(--fk-sans); color: #e1d3b6; } }
+@media (max-width: 1100px) { .pb-per, .pb-tags { display: none; } .pb-pkgs.fk-seg > .pb-pkg { padding: 12px 10px; } .pb-dot { top: 10px; right: 8px; } .pb-cap { display: block; margin: 14px 0 0; text-align: center; font: 500 .85rem/1.45 var(--fk-sans); color: #e1d3b6; } }
 @media (max-width: 900px) {
   .pb-body { grid-template-columns: 1fr; }
   .pb-sum-card { position: static; }
 }
 @media (max-width: 767px) {
-  .pb-dock:not([hidden]) { position: fixed; left: 10px; right: 10px; bottom: calc(82px + env(safe-area-inset-bottom)); z-index: 8000; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px; background: #13301d; color: #f6ecd8; box-shadow: 0 16px 32px -16px rgb(0 0 0 / .6); font: 500 .9rem/1 var(--fk-sans); }
+  .pb-dock:not([hidden]) { position: fixed; left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: calc(var(--mb-clear, 76px) + 8px); z-index: 8000; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 7px 7px 18px; border-radius: 999px; background: #10261a; color: #f6ecd8; border: 1px solid #c99a43; box-shadow: 0 16px 32px -16px rgb(0 0 0 / .6); font: 500 .8125rem/1.25 var(--fk-sans); animation: pb-dock-in 280ms cubic-bezier(.2,0,0,1) both; }
+  .pb-dock-t { display: grid; gap: 2px; min-width: 0; }
+  .pb-dock-1 { font-weight: 600; color: #e8c27a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pb-dock-2 b { font: 700 .9375rem/1 var(--fk-serif); color: #fff7ea; font-variant-numeric: tabular-nums; }
+  .pb-dock-b { flex: none; min-height: 44px; padding-inline: 18px; background: #c0291f; border-color: #c0291f; color: #fff; }
+  @keyframes pb-dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 }
 @media (max-width: 640px) {
   .pb-kind { letter-spacing: .02em; font-size: .75rem; } .pb-price { font-size: 1rem; } .pb-pkgs.fk-seg > .pb-pkg { padding: 10px 4px; justify-items: center; text-align: center; } .pb-dot { position: static; order: -1; margin-bottom: 4px; }
   .pb-panel { grid-template-columns: 1fr; }
   
-}
-@media (prefers-reduced-motion: reduce) {
-  .pb-pkg, .pb-chip, .pb-course, .pb-meter i{ transition: none; }
-  .pb-course.is-nudge { animation: none; }
 }
 /* Phase 4B: layout + colour only. */
 .pb-title { margin: 0 0 12px; color: var(--pb-ink); }

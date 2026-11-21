@@ -12,6 +12,11 @@ import MascotOfferModal from '../components/MascotOfferModal.astro';
 import PackageBuilder from '../components/banquet/PackageBuilder.astro';
 import CornerHero from '../components/CornerHero.astro';
 import InstagramFeed from '../components/InstagramFeed.astro';
+const words = (t: string) => t.split(' ');
+import partyData from '../data/party.json';
+const inr = (n: number) => '₹' + n.toLocaleString('en-IN');
+const pkgOpts = (partyData as any).packages.filter((p: any) => p.group === 'banquet').sort((a: any, b: any) => a.price - b.price).map((p: any) => ({ id: p.id, text: `${inr(p.price)} ${p.veg ? 'Veg' : 'Non-veg'} package` }));
+const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Corporate Gala / Seminar', 'Anniversary Celebration', 'Kitty Party / Family Reunion'];
 ---
 <Base
   title="Banquet Hall – Fursat Kitchen & Bar, Madhapur Events"
@@ -24,11 +29,43 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   <SiteHeader active="banquet" variant="plaster" />
 
   <main class="bq-page" id="main">
-    <CornerHero page="banquet" id="bq-h1" kicker="Banquet hall · Capital Park"
+    <CornerHero page="banquet" manual id="bq-h1" kicker="Banquet hall · Capital Park"
       h1a="The Grand Banquet" h1b="at Fursat"
-      lead="Birthdays, weddings and corporate events in Madhapur, with buffet packages from ₹925 per guest. Build your menu below and send it on WhatsApp."
+      lead="Birthdays, weddings and corporate events in Madhapur, with buffet packages from ₹925 per guest. Craft your feast below and send it on WhatsApp."
       alt="The Fursat banquet hall set with long red and gold tables, framed in gold"
-      ctas={[{ label: 'Build your menu', href: '#packages', primary: true }, { label: 'Enquire for dates', href: '#enquire' }, { label: '▶ Watch the film', href: '#film' }]} />
+      ctas={[{ label: 'Craft your feast', href: '#feast', primary: true }, { label: 'Lock your date', href: '#lock-date' }, { label: 'See the celebrations at Fursat', href: '#film', film: true }]}>
+      <Fragment slot="art">
+        {/* 4th slide: the silent banquet loop, shown only inside the hero window (same mask as the art). Loaded when the browser is idle (see the script below). */}
+        <div class="bq-sneak" aria-hidden="true">
+          <video class="bq-sneak-v" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1" width="1920" height="1080" data-src="/assets/video/banquet-loop-v1.mp4" data-poster="/assets/video/banquet-loop-poster-v1.jpg"></video>
+        </div>
+        <div class="bq-box">
+          <div class="bq-sweep" aria-hidden="true"><i></i></div>
+          <div class="bq-shade"></div>
+          <button class="bq-hit" type="button" tabindex="-1" aria-hidden="true"></button>
+          <div class="bq-story" role="group" aria-label="Hero slides">
+            {[0, 1, 2, 3].map((i) => <button class="bq-seg" type="button" data-i={i} aria-label={i < 3 ? `Show photo ${i + 1} of 4` : 'Show the sneak peek'}><span aria-hidden="true"><b></b></span></button>)}
+          </div>
+          <div class="bq-capwrap">
+            <div class="bq-a" aria-hidden="true">
+              <p class="bq-t">{words('Elegance in every detail').map((w, i) => <><b class="bq-w" style={`--i:${i}`}>{w}</b>{' '}</>)}</p>
+              <p class="bq-n">{['Main banquet floor', 'Grand dinner seating', 'Table layout'].map((t) => <span>{words(t).map((w, i) => <><b class="bq-w" style={`--i:${i + 4}`}>{w}</b>{' '}</>)}</span>)}</p>
+            </div>
+            <div class="bq-b">
+              <p class="bq-n bq-n--s" aria-hidden="true">{words('Sneak peek').map((w, i) => <><b class="bq-w" style={`--i:${i}`}>{w}</b>{' '}</>)}</p>
+              <button class="bq-play" type="button" aria-label="Play the Fursat celebrations film with sound"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6.5v11l9-5.5z" /></svg></i><span aria-hidden="true">{words('See the celebrations at Fursat').map((w, i) => <><b class="bq-w" style={`--i:${i + 2}`}>{w}</b>{' '}</>)}</span></button>
+            </div>
+          </div>
+        </div>
+      </Fragment>
+      {/* TODO(client): confirm the capacity line (350 floating / 220 round-table, dual 4K laser projection & AV, valet parking & lift access). Same facts as the old band, now in the hero. */}
+      <ul slot="after" class="bq-stats" role="list">
+        <li><b class="bq-num" data-to="350">350</b><span>Max floating capacity</span></li>
+        <li><b class="bq-num" data-to="220">220</b><span>Round-table seating</span></li>
+        <li><b class="bq-num" data-to="4" data-s="K">4K</b><span>Dual laser projection &amp; AV</span></li>
+        <li><b class="bq-num" data-to="100" data-s="%">100%</b><span>Valet parking &amp; lift access</span></li>
+      </ul>
+    </CornerHero>
 
     <!-- v5.85 banquet film: opens in a dialog with sound (the visitor's tap allows audio). Part 2 adds the silent loop in the new hero. -->
     <dialog class="bq-film" id="film" aria-label="Fursat Banquets film">
@@ -39,64 +76,16 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </video>
     </dialog>
 
-    <!-- Venue Capacity & Specs -->
-    <section class="bq-specs">
-      <div class="bq-container">
-        <div class="bq-specs-grid">
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">350</span>
-            <span class="bq-spec-lbl">Max Floating Capacity</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">220</span>
-            <span class="bq-spec-lbl">Round-Table Seating</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">4K</span>
-            <span class="bq-spec-lbl">Dual Laser Projection & AV</span>
-          </div>
-          <div class="bq-spec-box">
-            <span class="bq-spec-val">100%</span>
-            <span class="bq-spec-lbl">Valet Parking & Lift Access</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Photo Gallery -->
-    <section class="bq-gallery">
-      <div class="bq-container">
-        <div class="bq-sec-head text-center">
-          <span class="fk-ty-label bq-kicker">VENUE AMBIANCE</span>
-          <h2 class="fk-ty-h2 bq-sec-title mot-headline">Elegance in Every Detail</h2>
-        </div>
-
-        <div class="bq-gal-grid fk-rail fk-rail--cards fk-rail--m" data-dots>
-          <div class="bq-gal-card">
-            <img src="/assets/venue/banquet/banquet-stage-01-720.webp" srcset="/assets/venue/banquet/banquet-stage-01-480.webp 480w, /assets/venue/banquet/banquet-stage-01-720.webp 720w, /assets/venue/banquet/banquet-stage-01.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="The banquet stage and screen with covered chairs" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
-            <div class="bq-gal-tag">Main Banquet Floor</div>
-          </div>
-          <div class="bq-gal-card">
-            <img src="/assets/venue/banquet/banquet-hall-02-720.webp" srcset="/assets/venue/banquet/banquet-hall-02-480.webp 480w, /assets/venue/banquet/banquet-hall-02-720.webp 720w, /assets/venue/banquet/banquet-hall-02.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="Banquet seating under the Fursat sign" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="540" />
-            <div class="bq-gal-tag">Grand Dinner Seating</div>
-          </div>
-          <div class="bq-gal-card">
-            <img src="/assets/venue/banquet/banquet-tables-03-720.webp" srcset="/assets/venue/banquet/banquet-tables-03-480.webp 480w, /assets/venue/banquet/banquet-tables-03-720.webp 720w, /assets/venue/banquet/banquet-tables-03.webp 1200w" sizes="(max-width: 767px) 92vw, (max-width: 1100px) 45vw, 390px" alt="The banquet hall with long tables laid out in a U shape" class="mot-reveal-img" loading="lazy" decoding="async" width="720" height="960" />
-            <div class="bq-gal-tag">Table layout</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <PackageBuilder />
 
-    <!-- Enquiry Form Section -->
-    <section class="bq-enquiry" id="enquire">
+    <!-- Lock your date (old #enquire links still land here) -->
+    <section class="bq-enquiry" id="lock-date" aria-labelledby="bq-ld-h">
+      <span class="bq-anchor" id="enquire" aria-hidden="true"></span>
       <div class="bq-container bq-enquiry-wrap">
         <div class="bq-enquiry-card">
           <div class="bq-eq-head">
             <span class="fk-ty-label bq-kicker">RESERVE YOUR DATE</span>
-            <h2 class="fk-ty-h2">Banquet Booking & Date Check</h2>
+            <h2 class="fk-ty-h2" id="bq-ld-h">Lock your date</h2>
             <p>Tell us about your celebration and we will share availability and a quotation.</p>
           </div>
 
@@ -115,43 +104,47 @@ import InstagramFeed from '../components/InstagramFeed.astro';
                 <p class="bq-err" id="eq-phone-e" role="alert"></p>
               </div>
             </div>
-            <div class="bq-form-row">
-              <div class="bq-form-field">
-                <label for="eq-event">Occasion</label>
-                <select id="eq-event" name="occasion" data-l="Occasion" data-fk-sheet>
-                  <option value="Birthday Party">Birthday Celebration</option>
-                  <option value="Wedding / Reception">Wedding / Sangeet / Reception</option>
-                  <option value="Corporate Gathering">Corporate Gala / Seminar</option>
-                  <option value="Anniversary">Anniversary Celebration</option>
-                  <option value="Kitty / Social">Kitty Party / Family Reunion</option>
-                </select>
+
+            <div class="bq-form-field">
+              <span class="bq-lab" id="eq-date-l">Preferred date <span aria-hidden="true">*</span></span>
+              <div class="bq-chips" role="radiogroup" aria-labelledby="eq-date-l" id="bq-date-chips">
+                <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="sat1"><b>This Sat</b><small></small></button>
+                <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="sat2"><b>Next Sat</b><small></small></button>
+                <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="pick"><b>Pick a date</b><small></small></button>
               </div>
+              <input type="date" id="eq-date" name="date" class="bq-date" data-l="Date" data-v="date" aria-required="true" aria-labelledby="eq-date-l" aria-describedby="eq-date-e" hidden />
+              <p class="bq-err" id="eq-date-e" role="alert"></p>
+            </div>
+
+            <div class="bq-form-field">
+              <span class="bq-lab" id="eq-event-l">Occasion</span>
+              <div class="bq-chips" role="radiogroup" aria-labelledby="eq-event-l" id="bq-occ-chips">
+                {occasions.map((o, i) => <button type="button" class="bq-chip bq-chip--o" role="radio" aria-checked={i === 0 ? 'true' : 'false'} data-v={o}>{o}</button>)}
+              </div>
+              <input type="hidden" id="eq-event" name="occasion" data-l="Occasion" value={occasions[0]} />
+            </div>
+
+            <div class="bq-form-row">
               <div class="bq-form-field">
                 <label for="eq-guests">Approx. guest count <span aria-hidden="true">*</span></label>
-                <input type="number" id="eq-guests" name="guests" inputmode="numeric" min="30" max="400" data-l="Guests" data-v="count" aria-required="true" aria-describedby="eq-guests-e" placeholder="e.g. 100" />
+                <div class="bq-step">
+                  <button type="button" id="eq-minus" aria-label="Fewer guests">−</button>
+                  <input type="number" id="eq-guests" name="guests" inputmode="numeric" min="30" max="400" data-l="Guests" data-v="count" aria-required="true" aria-describedby="eq-guests-e" placeholder="e.g. 100" />
+                  <button type="button" id="eq-plus" aria-label="More guests">+</button>
+                </div>
                 <p class="bq-err" id="eq-guests-e" role="alert"></p>
-              </div>
-            </div>
-            <div class="bq-form-row">
-              <div class="bq-form-field">
-                <label for="eq-date">Preferred date <span aria-hidden="true">*</span></label>
-                <input type="date" id="eq-date" name="date" data-l="Date" data-v="date" aria-required="true" aria-describedby="eq-date-e" />
-                <p class="bq-err" id="eq-date-e" role="alert"></p>
               </div>
               <div class="bq-form-field">
                 <label for="eq-package">Interested package (optional)</label>
                 <select id="eq-package" name="package" data-l="Package" data-fk-sheet>
-                  <option value="₹925 Veg package">₹925 Veg package</option>
-                  <option value="₹1049 Veg package">₹1,049 Veg package</option>
-                  <option value="₹1299 Veg package">₹1,299 Veg package</option>
-                  <option value="₹1399 Non-veg package">₹1,399 Non-veg package</option>
-                  <option value="₹1599 Non-veg package">₹1,599 Non-veg package</option>
+                  {pkgOpts.map((o: any) => <option value={o.text} data-pkg={o.id}>{o.text}</option>)}
                   <option value="Customized Menu">Customized Menu Requirements</option>
                 </select>
               </div>
             </div>
-            <button type="submit" class="fk-btn fk-btn--primary">
-              <span>Send enquiry</span>
+            <button type="submit" class="bq-lock">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.37a9.9 9.9 0 0 0 4.74 1.2c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2z"/></svg>
+              <span>Lock my date on WhatsApp</span>
             </button>
             <p class="bq-direct-call">
               Your enquiry opens in WhatsApp. Prefer to call? Reach our Banquet desk at <a href="tel:+919059670033">+91 90596 70033</a>.{/* TODO(client): a second Banquet-desk number was removed here: unconfirmed (Google shows only the main number). Add it back only after the client confirms it. */}
@@ -193,17 +186,125 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .bq-film-x:focus-visible { outline: 2px solid #c99a43; outline-offset: 2px; }
 </style>
 <script is:inline>
+  /* Film dialog (with sound) + the hero: 4-slide rotation (3 photos 6 s, sneak-peek loop 8 s), stats count-up. All motion runs for every visitor (owner rule). */
   (function () {
-    var d = document.getElementById('film'); if (!d || !d.showModal) return;
-    var v = d.querySelector('video');
-    function open(e) { if (e) e.preventDefault(); try { d.showModal(); } catch (x) { return; }
+    var d = document.getElementById('film'), hero = document.querySelector('.ch[data-manual]');
+    var v = d && d.querySelector('video'), opener = null;
+    function open(e, from) {
+      if (e) e.preventDefault(); if (!d || !d.showModal) return;
+      opener = from || (e && e.currentTarget) || document.activeElement;
+      try { d.showModal(); } catch (x) { return; }
       try { dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'film' } })); } catch (x) {}   /* SOUND-CONTRACT: other tracks stop */
-      var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-    document.querySelectorAll('a[href="#film"]').forEach(function (a) { a.addEventListener('click', open); });
-    d.querySelector('.bq-film-x').addEventListener('click', function () { d.close(); });
-    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
-    d.addEventListener('close', function () { v.pause(); });
-    if (location.hash === '#film') open();
+      var p = v.play(); if (p && p.catch) p.catch(function () {});
+      if (hero) hero.dispatchEvent(new Event('bq:hold'));
+    }
+    if (d && d.showModal) {
+      document.querySelectorAll('a[href="#film"]').forEach(function (a) { a.addEventListener('click', open); });
+      var play = document.querySelector('.bq-play'), hit = document.querySelector('.bq-hit');
+      if (play) play.addEventListener('click', function (e) { open(e, play); });
+      if (hit) hit.addEventListener('click', function (e) { open(e, play); });
+      d.querySelector('.bq-film-x').addEventListener('click', function () { d.close(); });
+      d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+      d.addEventListener('close', function () {
+        v.pause();
+        var back = opener && opener.offsetParent !== null && !opener.hasAttribute('aria-hidden') ? opener : document.querySelector('a[href="#film"]');
+        if (back && back.focus) back.focus({ preventScroll: true });
+        if (hero) hero.dispatchEvent(new Event('bq:release'));
+      });
+      if (location.hash === '#film') open();
+    }
+
+    /* ---- stats: count up once when they come into view ---- */
+    var nums = [].slice.call(document.querySelectorAll('.bq-num[data-to]'));
+    function count(el) {
+      var to = +el.dataset.to, suf = el.dataset.s || '', t0 = 0, dur = 1400;
+      function f(t) { if (!t0) t0 = t; var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(to * e) + suf; if (k < 1) requestAnimationFrame(f); }
+      el.textContent = '0' + suf; requestAnimationFrame(f);
+    }
+    if ('IntersectionObserver' in window && nums.length) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); count(e.target); } }); }, { threshold: 0.6 });
+      nums.forEach(function (n) { io.observe(n); });
+    }
+
+    /* ---- hero rotation: 3 photos (6 s) + sneak-peek loop (8 s), with Ken Burns, blur cross-fade, gold sweep, story bar and rising captions ---- */
+    if (!hero) return;
+    var imgs = [hero.querySelector('.ch-img:not(.ch-alt)')].concat([].slice.call(hero.querySelectorAll('.ch-alt')));
+    var sneak = hero.querySelector('.bq-sneak'), vid = hero.querySelector('.bq-sneak-v');
+    var box = hero.querySelector('.bq-box'), sweep = hero.querySelector('.bq-sweep'), segs = [].slice.call(hero.querySelectorAll('.bq-seg'));
+    var photoN = imgs.length, N = photoN + (vid ? 1 : 0), cur = 0, vis = true, held = false, timer = 0, vidLoaded = false;
+    var kb = [], fx = false, remain = 6000, t0 = 0, running = false;
+    var saveData = !!(navigator.connection && navigator.connection.saveData);
+    var idle = window.requestIdleCallback || function (f) { setTimeout(f, 1500); };
+    var dur = function (n) { return n === photoN ? 8000 : 6000; };
+    function loadAlts() { imgs.slice(1).forEach(function (im) { if (im.dataset.srcset && !im.getAttribute('src')) { im.srcset = im.dataset.srcset; im.src = im.dataset.srcset.split(' ')[0]; } }); }
+    function loadVideo() {
+      if (!vid || vidLoaded) return; vidLoaded = true;
+      vid.poster = vid.dataset.poster;                       /* poster only when idle, never on first load */
+      if (saveData) return;                                   /* Save-Data: no auto video, slide 4 shows the poster */
+      var webm = vid.dataset.src.replace(/\.mp4$/, '.webm');
+      vid.src = vid.canPlayType('video/webm; codecs="vp9"') ? webm : vid.dataset.src; vid.preload = 'auto';
+      vid.addEventListener('canplay', playVid, { once: true }); vid.load();   /* plays at once if the sneak peek is already on screen */
+    }
+    function canRun() { return vis && !document.hidden && !held; }
+    function playVid() { if (vid && cur === photoN && vid.src && !saveData) { var p = vid.play(); if (p && p.catch) p.catch(function () {}); } }
+    function pauseNow() { if (running) { remain = Math.max(0, remain - (performance.now() - t0)); running = false; } clearTimeout(timer); hero.classList.add('is-paused'); if (vid && !vid.paused) vid.pause(); }
+    function runNow() { if (running || !fx) return; hero.classList.remove('is-paused'); t0 = performance.now(); running = true; clearTimeout(timer); timer = setTimeout(tick, remain); playVid(); }
+    function sync() { if (canRun()) runNow(); else pauseNow(); }
+    function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+    function paintBar(n) {
+      segs.forEach(function (sg, i) { sg.classList.remove('is-done', 'is-act'); sg.removeAttribute('aria-current'); sg.style.setProperty('--d', dur(i) + 'ms'); });
+      segs.forEach(function (sg, i) { if (i < n) sg.classList.add('is-done'); });
+      if (segs[n]) { void segs[n].offsetWidth; segs[n].classList.add('is-act'); segs[n].setAttribute('aria-current', 'true'); }
+    }
+    function fxIn(n, from) {
+      if (!fx) return;
+      restart(hero, 'is-cap'); if (sweep) restart(sweep, 'is-go'); paintBar(n);
+      kb.forEach(function (l) { l.classList.remove('is-top', 'is-first'); });
+      if (n < photoN && kb[n] && kb[n].firstChild.complete && kb[n].firstChild.naturalWidth) {
+        var k = kb[n];
+        if (from === photoN) kb.forEach(function (l) { l.classList.remove('is-on'); });
+        k.classList.remove('is-on'); void k.offsetWidth; k.classList.add('is-on', 'is-top');
+        setTimeout(function () { kb.forEach(function (l, i) { if (i !== cur) l.classList.remove('is-on'); }); }, 1400);
+      }
+    }
+    function show(n) {
+      if (n < photoN) {
+        var im = imgs[n];
+        if (!im.complete || !im.naturalWidth) return false;   /* not loaded yet: try next tick */
+        imgs[cur < photoN ? cur : photoN - 1].classList.remove('is-top');
+        im.classList.add('is-in', 'is-top');
+        if (n === 0) imgs.slice(1).forEach(function (a) { a.classList.remove('is-in'); });
+        else if (cur > 0 && cur < photoN) imgs[cur].classList.remove('is-in');
+      }
+      var from = cur; cur = n; hero.setAttribute('data-bq', String(n)); hero.setAttribute('data-set', String(Math.min(n, photoN - 1)));
+      if (vid) { if (n === photoN) { loadVideo(); playVid(); } else vid.pause(); }   /* a jump straight to the sneak peek loads it too */
+      if (n === 1) idle(loadVideo);
+      fxIn(n, from);
+      remain = dur(n); running = false; clearTimeout(timer); sync();
+      return true;
+    }
+    function tick() { running = false; if (!show((cur + 1) % N)) { remain = 1000; sync(); } }
+    function initFx() {
+      /* after load + idle: layers for Ken Burns, then the effects and the rotation start (photo 1 has already painted on its own) */
+      loadAlts();
+      var sz = imgs[0].getAttribute('sizes') || '100vw';
+      kb = imgs.map(function (im, i) {
+        var d = document.createElement('div'), x = new Image(); d.className = 'bq-kb'; d.setAttribute('aria-hidden', 'true');
+        x.alt = ''; x.decoding = 'async'; x.sizes = sz; x.srcset = im.getAttribute('srcset') || im.dataset.srcset; x.src = (x.srcset.split(' ')[0]);
+        d.appendChild(x); box.insertBefore(d, box.firstChild); return d;
+      });
+      fx = true; hero.classList.add('is-fx');
+      restart(hero, 'is-cap'); if (sweep) restart(sweep, 'is-go'); paintBar(cur);
+      if (kb[cur]) { kb[cur].classList.add('is-on', 'is-top', 'is-first'); }
+      remain = dur(cur); sync();
+    }
+    if (document.readyState === 'complete') idle(initFx); else addEventListener('load', function () { idle(initFx); });
+    segs.forEach(function (sg) { sg.addEventListener('click', function () { var n = +sg.dataset.i; if (fx && n !== cur) show(n); }); });
+    hero.setAttribute('data-bq', '0');
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { vis = e[0].isIntersecting; sync(); }).observe(hero);
+    document.addEventListener('visibilitychange', sync);
+    hero.addEventListener('bq:hold', function () { held = true; sync(); });
+    hero.addEventListener('bq:release', function () { held = false; sync(); });
   })();
 </script>
 
@@ -229,6 +330,38 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     const show = (el, msg) => { const e = errOf(el); if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid'); if (e) e.textContent = msg; };
     const dateEl = form.querySelector('input[type="date"]');
     if (dateEl) dateEl.min = today();
+    /* date chips: This Sat / Next Sat set the date, Pick a date reveals the picker */
+    const iso = (d) => { d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+    const sat = (k) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7) + 7 * (k - 1)); return d; };
+    const dChips = [...form.querySelectorAll('#bq-date-chips .bq-chip')];
+    const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    dChips.forEach((c) => { if (c.dataset.q === 'sat1') c.querySelector('small').textContent = fmt(sat(1)); if (c.dataset.q === 'sat2') c.querySelector('small').textContent = fmt(sat(2)); });
+    const pickDate = (c) => {
+      dChips.forEach((x) => x.setAttribute('aria-checked', x === c ? 'true' : 'false'));
+      const q = c.dataset.q; dateEl.hidden = q !== 'pick';
+      if (q === 'pick') { dateEl.value = ''; dateEl.focus(); try { dateEl.showPicker && dateEl.showPicker(); } catch (x) {} }
+      else { dateEl.value = iso(sat(q === 'sat1' ? 1 : 2)); }
+      if (dateEl.hasAttribute('aria-invalid')) show(dateEl, '');
+    };
+    dChips.forEach((c) => c.addEventListener('click', () => pickDate(c)));
+    dateEl.addEventListener('change', () => { const c = dChips.find((x) => x.dataset.q === 'pick'); const sm = c.querySelector('small'); sm.textContent = dateEl.value ? fmt(new Date(dateEl.value + 'T00:00')) : ''; });
+    /* occasion chips (radio group -> hidden field) */
+    const occ = form.querySelector('#eq-event'), oChips = [...form.querySelectorAll('#bq-occ-chips .bq-chip')];
+    oChips.forEach((c) => c.addEventListener('click', () => { oChips.forEach((x) => x.setAttribute('aria-checked', x === c ? 'true' : 'false')); occ.value = c.dataset.v; }));
+    /* arrow keys move inside each chip group */
+    form.querySelectorAll('.bq-chips').forEach((g) => g.addEventListener('keydown', (e) => {
+      const k = e.key, cs = [...g.querySelectorAll('.bq-chip')], i = cs.indexOf(document.activeElement); if (i < 0) return;
+      const j = k === 'ArrowRight' || k === 'ArrowDown' ? i + 1 : k === 'ArrowLeft' || k === 'ArrowUp' ? i - 1 : null; if (j === null) return;
+      e.preventDefault(); const n = cs[(j + cs.length) % cs.length]; n.focus(); n.click();
+    }));
+    /* guests stepper: 30-400, steps of 10 */
+    const gEl = form.querySelector('#eq-guests');
+    const stepG = (d) => { const v = parseInt(gEl.value, 10); const n = Number.isFinite(v) ? v + d : (d > 0 ? 50 : 30); gEl.value = Math.min(400, Math.max(30, n)); if (gEl.hasAttribute('aria-invalid')) show(gEl, ''); };
+    form.querySelector('#eq-minus').addEventListener('click', () => stepG(-10));
+    form.querySelector('#eq-plus').addEventListener('click', () => stepG(10));
+    /* package prefilled from the Craft your feast choice */
+    const pkgSel = form.querySelector('#eq-package');
+    document.addEventListener('pb:pkg', (e) => { const o = [...pkgSel.options].find((x) => x.dataset.pkg === e.detail.id); if (o) pkgSel.value = o.value; });
     fields.forEach((el) => {
       if (!el.dataset.v) return;
       el.addEventListener('input', () => { if (el.hasAttribute('aria-invalid')) show(el, ''); });
@@ -238,7 +371,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       e.preventDefault();
       let first = null;
       fields.forEach((el) => { if (!el.dataset.v) return; const m = check(el); show(el, m); if (m && !first) first = el; });
-      if (first) { first.focus(); return; }
+      if (first) { (first.hidden ? dChips[0] : first).focus(); return; }
       const lines = [form.dataset.waIntro], sent = {};
       fields.forEach((el) => {
         const t = el.dataset.v; let v = el.value.trim();
@@ -297,68 +430,113 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     font-weight: 700;
     text-decoration: none}
 
-  /* Specs Bar */
-  .bq-specs {
-    background: #efd8b8;
-    border-top: 1px solid rgba(201,154,67,0.40);
-    border-bottom: 1px solid rgba(201,154,67,0.40);
-    padding: 32px 0}
-  .bq-specs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 24px;
-    text-align: center}
-  .bq-spec-val {
-    font-family:var(--fk-serif);
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #74501a;
-    display: block;
-    line-height: 1;
-    margin-bottom: 6px}
-  .bq-spec-lbl {
-    font-size: 0.85rem;
-    color: #4a4232;
-    font-weight: 600}
-
-  /* Gallery */
-  .bq-gallery {
-    padding: clamp(60px, 8vw, 100px) 0;
-    background: transparent}
-  
-  .bq-gal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px}
-  .bq-gal-grid.fk-rail--m { display: flex; grid-template-columns: none; gap: 12px}
-  @media (min-width: 768px) {
-    .bq-gal-grid.fk-rail--m { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px}
+  /* ---- Hero add-ons (v5.90): caption, sneak-peek slide, stats ---- */
+  /* a box that copies how the photo is cropped (cover, left-aligned): percentages below land on the art window */
+  .ch[data-manual] .ch-art { container-type: size; }
+  .ch[data-manual] .ch-img { transition: opacity 600ms cubic-bezier(.23,1,.32,1) !important; }
+  .ch[data-manual] .ch-alt { transition-duration: 1200ms !important; }
+  .bq-box { position: absolute; left: 0; top: 50%; translate: 0 -50%; width: max(100cqw, 100cqh * 1672 / 941); height: max(100cqh, 100cqw * 941 / 1672); pointer-events: none; z-index: 3; }
+  .bq-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,20,13,0) 0%, rgba(8,20,13,.84) 21%, rgba(8,20,13,.5) 33%, rgba(8,20,13,0) 54%); }
+  .bq-shade, .bq-kb, .bq-sweep { -webkit-mask: url(/assets/heroes/bq-hero-window-mask.webp) 0 0 / 100% 100% no-repeat; mask: url(/assets/heroes/bq-hero-window-mask.webp) 0 0 / 100% 100% no-repeat; }
+  .bq-hit { position: absolute; left: 0; top: 14.56%; width: 36.66%; height: 64.82%; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none; }
+  .ch[data-bq="3"] .bq-hit { pointer-events: auto; }
+  .bq-capwrap { position: absolute; left: 4.4%; bottom: 33%; display: grid; width: 27%; }
+  .bq-a, .bq-b { grid-area: 1 / 1; align-self: end; transition: opacity 600ms cubic-bezier(.23,1,.32,1); }
+  .bq-b { opacity: 0; visibility: hidden; transition: opacity 600ms cubic-bezier(.23,1,.32,1), visibility 0s linear 600ms; }
+  .ch[data-bq="3"] .bq-a { opacity: 0; }
+  .ch[data-bq="3"] .bq-b { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .bq-t { margin: 0 0 6px; font: italic 500 clamp(1.05rem, 1.9vw, 1.75rem)/1.15 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #f6e6d1; text-shadow: 0 1px 10px rgba(0,0,0,.45); }
+  .bq-n { margin: 0; display: grid; font: 600 .75rem/1.3 var(--fk-sans, Rupee, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #e8c27a; }
+  .bq-n span { grid-area: 1 / 1; opacity: 0; transition: opacity 600ms cubic-bezier(.23,1,.32,1); }
+  .bq-n--s { display: block; margin: 0 0 8px; }
+  @media (min-width: 1100px) { .bq-n { font-size: .8125rem; } }
+  .ch[data-bq="0"] .bq-n span:nth-child(1), .ch[data-bq="1"] .bq-n span:nth-child(2), .ch[data-bq="2"] .bq-n span:nth-child(3) { opacity: 1; }
+  .bq-play { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px 0 8px; border: 0; border-radius: 999px; background: #c0291f; color: #fff; font: 600 .8125rem/1 var(--fk-sans, Rupee, Poppins, sans-serif); cursor: pointer; pointer-events: auto; box-shadow: 0 8px 20px -8px rgba(0,0,0,.6); transition: transform 160ms ease; }
+  .bq-play:active { transform: scale(.96); }
+  .bq-play:focus-visible, .bq-hit:focus-visible { outline: 2px solid #e8c27a; outline-offset: 3px; }
+  .bq-play i, .ch-play { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #fff; }
+  .ch .bq-play i svg, .ch .ch-play svg { width: 14px; height: 14px; fill: #c0291f; stroke: none; margin-left: 2px; }
+  .ch-play { background: #c0291f; flex: none; } .ch .ch-play svg { fill: #fff; }
+  .ch-film { gap: 10px; }
+  /* sneak peek: the silent loop, clipped to the hero window by the same mask as the art (cover, left center) */
+  .bq-sneak { position: absolute; inset: 0; z-index: 2; opacity: 0; pointer-events: none; transition: opacity 900ms cubic-bezier(.23,1,.32,1);
+    -webkit-mask-image: url(/assets/heroes/bq-hero-window-mask.webp); mask-image: url(/assets/heroes/bq-hero-window-mask.webp); -webkit-mask-size: cover; mask-size: cover; -webkit-mask-position: left center; mask-position: left center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+  .ch[data-bq="3"] .bq-sneak { opacity: 1; }
+  /* the clip is a portrait video centred in a 16:9 frame with blurred sides: the sharp strip is x 33-67%. Scale it and move its centre to the window centre (18.3% / 47%) so the hall and the people fill the frame at every width. */
+  .bq-sneak-v { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; background: transparent; transform-origin: 50% 50%; transform: translate(-31.7%, -18%) scale(1.25); }
+  @media (max-width: 820px) {
+    .bq-shade, .bq-kb, .bq-sweep { -webkit-mask-image: url(/assets/heroes/bq-hero-window-mask-768.webp); mask-image: url(/assets/heroes/bq-hero-window-mask-768.webp); }
+    .bq-sneak { -webkit-mask-image: url(/assets/heroes/bq-hero-window-mask-768.webp); mask-image: url(/assets/heroes/bq-hero-window-mask-768.webp); }
+    .bq-capwrap { left: 3%; width: 29%; bottom: 36%; }
+    .bq-t { font-size: .8125rem; margin-bottom: 4px; }
+    .bq-n { letter-spacing: .06em; font-size: .75rem; }
+    .bq-play span { display: none; } .bq-play { padding: 0; width: 44px; justify-content: center; } .bq-play i { width: 44px; height: 44px; background: transparent; } .ch .bq-play i svg { width: 18px; height: 18px; fill: #fff; }
   }
-  .bq-gal-card {
-    position: relative;
-    height: 320px;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid rgba(201,154,67,0.50)}
-  .bq-gal-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease}
-  .bq-gal-card:hover img {
-    transform: scale(1.05)}
-  .bq-gal-tag {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: rgba(251,243,231,.92);
-    backdrop-filter: blur(8px);
-    border: 1px solid #d6aa5a;
-    color: #74501a;
-    font-size: 0.8125rem;
-    font-weight: 700}
+  /* ---- photo effects (banquet only). All motion runs for every visitor (owner rule). ---- */
+  /* Ken Burns: each photo is also drawn in a layer clipped to the window mask, so only the picture zooms (1 -> 1.06 over 6 s, from the window centre) and the gold frame never moves.
+     Cross-fade: the incoming layer goes opacity 0->1 and blur(6px)->0 over 1.2 s. Layers are added by the script after load. */
+  .bq-kb { position: absolute; inset: 0; z-index: -2; pointer-events: none; opacity: 0; filter: blur(6px); }
+  .bq-kb img { display: block; width: 100%; height: 100%; transform-origin: 18.33% 46.97%; }
+  .bq-kb.is-top { z-index: -1; }
+  .bq-kb.is-on { opacity: 1; filter: none; transition: opacity 1200ms cubic-bezier(.2,0,0,1), filter 1200ms cubic-bezier(.2,0,0,1); }
+  .bq-kb.is-on.is-first { transition: none; }
+  .bq-kb.is-on img { animation: bq-kb 6s linear both; }
+  @keyframes bq-kb { from { transform: scale(1); } to { transform: scale(1.06); } }
+  .ch[data-bq="3"] .bq-kb { opacity: 0; transition: opacity 900ms cubic-bezier(.2,0,0,1); }
+  /* gold light sweep: one soft diagonal band across the window per slide change, 900 ms */
+  .bq-sweep { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .bq-sweep i { position: absolute; left: 0; top: 0; bottom: 0; width: 46%; background: linear-gradient(105deg, rgba(232,194,122,0) 30%, rgba(232,194,122,.35) 50%, rgba(232,194,122,0) 70%); transform: translateX(-110%); opacity: 0; }
+  .ch.is-fx .bq-sweep.is-go i { animation: bq-sweep 900ms cubic-bezier(.4,0,.2,1) both; }
+  @keyframes bq-sweep { from { transform: translateX(-110%); opacity: 1; } to { transform: translateX(95%); opacity: 1; } }
+  /* story bar: 4 thin gold segments (photos 1-3 + sneak peek); each button is a 44px target */
+  .bq-story { position: absolute; left: 3.4%; top: 23%; display: flex; pointer-events: none; opacity: 0; transition: opacity 600ms cubic-bezier(.2,0,0,1); }
+  .ch.is-fx .bq-story { opacity: 1; }
+  .bq-seg { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none; }
+  .ch.is-fx .bq-seg { pointer-events: auto; }
+  .bq-seg span { display: block; width: 36px; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(246,230,209,.4); box-shadow: 0 0 6px rgba(0,0,0,.35); }
+  .bq-seg b { display: block; height: 100%; background: #e8c27a; transform: scaleX(0); transform-origin: left center; }
+  .bq-seg.is-done b { transform: scaleX(1); }
+  .bq-seg.is-act b { animation: bq-fill var(--d, 6s) linear both; }
+  @keyframes bq-fill { to { transform: scaleX(1); } }
+  .bq-seg:focus-visible { outline: 2px solid #e8c27a; outline-offset: -6px; border-radius: 8px; }
+  /* captions rise word by word (y 8px -> 0, opacity, 60 ms stagger) with each slide */
+  .bq-w { display: inline-block; font: inherit; letter-spacing: inherit; }
+  .ch.is-cap .bq-w { animation: bq-rise 560ms cubic-bezier(.2,0,0,1) both; animation-delay: calc(var(--i) * 60ms + 120ms); }
+  @keyframes bq-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  /* paused while off screen, in a hidden tab or while the film is open */
+  .ch.is-paused .bq-kb img, .ch.is-paused .bq-seg b, .ch.is-paused .bq-w, .ch.is-paused .bq-sweep i { animation-play-state: paused; }
+  /* phones: the window is ~140px wide, so the caption sits just under the frame (14px italic + 10.5px name), never over the photo; the play button stays in the window */
+  @media (max-width: 520px) {
+    .bq-page .ch[data-manual] .ch-copy { padding-top: 92px; }
+    .bq-shade { display: none; }
+    .bq-capwrap { position: static; display: block; width: auto; }
+    .bq-a, .bq-b { position: absolute; display: block; }
+    .bq-story { left: clamp(12px, 4vw, 24px); top: calc(100% + 2px); }
+    .bq-seg span { background: rgba(24,48,31,.2); box-shadow: none; }
+    .bq-seg b { background: #c99a43; }
+    .bq-a { left: clamp(16px, 5vw, 28px); right: 16px; top: calc(100% + 48px); }
+    .bq-b { inset: 0; }
+    .bq-t { margin: 0 0 3px; font-size: .875rem; line-height: 1.2; color: #18301f; text-shadow: none; white-space: nowrap; }
+    .bq-n { font-size: .65625rem; letter-spacing: .1em; color: #7a5418; }
+    .bq-n--s { position: absolute; left: clamp(16px, 5vw, 28px); top: calc(100% + 48px); margin: 0; }
+    .bq-play { position: absolute; left: 3%; bottom: 36%; }
+  }
+  /* numbers in the hero text column */
+  .bq-stats { list-style: none; margin: 26px 0 0; padding: 0; display: flex; }
+  .bq-stats li { flex: 1 1 0; min-width: 0; padding: 0 14px; border-left: 1px solid #c99a43; display: flex; flex-direction: column; gap: 4px; }
+  .bq-stats li:first-child { padding-left: 0; border-left: 0; }
+  .bq-num { font: 700 clamp(1.7rem, 2.6vw, 2.4rem)/1 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #c0291f; font-variant-numeric: tabular-nums; }
+  .bq-stats span { font: 500 .8125rem/1.35 var(--fk-sans, Rupee, Poppins, sans-serif); color: #4a4232; }
+  /* phone hero: two buttons + a text link (nothing hides behind the bottom bar), stats as a 2x2 grid of cards */
+  @media (max-width: 820px) {
+    .ch[data-manual] .ch-btns { gap: 10px; }
+    .ch[data-manual] .ch-btns .fk-btn:not(.ch-film) { flex: 1 1 100%; min-height: 48px; padding-left: 18px; padding-right: 18px; white-space: nowrap; justify-content: center; }
+    .ch[data-manual] .ch-btns .ch-film { flex: 1 1 100%; justify-content: flex-start; min-height: 44px; padding: 0; background: none; border: 0; box-shadow: none; color: #18301f; font-weight: 600; }
+    .bq-page .ch[data-manual] .ch-copy { padding-bottom: calc(var(--mb-clear, 76px) + 8px); }
+    .bq-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .bq-stats li, .bq-stats li:first-child { padding: 12px 14px; border: 1px solid #ecd6b0; border-radius: 16px; background: #fff7ea; }
+    .bq-num { font-size: 1.75rem; }
+  }
 
   /* Packages */
 
@@ -369,11 +547,12 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .bq-enquiry-wrap {
     max-width: 840px}
   .bq-enquiry-card {
-    background: #efd8b8;
+    background: #10261a;
+    color: #f6e6d1;
     border: 2px solid rgba(201,154,67,0.60);
     border-radius: 28px;
     padding: clamp(28px, 5vw, 48px);
-    box-shadow: 0 20px 60px rgba(90,60,20,0.22)}
+    box-shadow: 0 20px 60px rgba(16,38,26,0.35)}
   .bq-eq-head {
     margin-bottom: 28px}
   
@@ -464,4 +643,36 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .bq-eq-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .bq-form .fk-btn { width: 100% }
   .bq-direct-call a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px }
+
+  /* ---- Lock your date: deep-green card, cream text, gold labels ---- */
+  .bq-anchor { display: block; height: 0; scroll-margin-top: 96px; }
+  .bq-enquiry { scroll-margin-top: 96px; }
+  .bq-enquiry-card .bq-kicker { color: #e8c27a; }
+  .bq-enquiry-card .bq-eq-head h2 { color: #f6e6d1; }
+  .bq-enquiry-card .bq-eq-head p, .bq-enquiry-card .bq-req, .bq-enquiry-card .bq-direct-call { color: #e1d3b6; }
+  .bq-enquiry-card .bq-direct-call a { color: #e8c27a; }
+  .bq-enquiry-card .bq-form-field label, .bq-lab { font-size: .8125rem; font-weight: 700; color: #e8c27a; }
+  .bq-enquiry-card .bq-form-field input, .bq-enquiry-card .bq-form-field select { background: rgba(246,230,209,.08); border: 1px solid rgba(232,194,122,.5); color: #f6e6d1; color-scheme: dark; }
+  .bq-enquiry-card .bq-form-field input::placeholder { color: rgba(246,230,209,.55); }
+  .bq-enquiry-card .bq-form-field select option { background: #10261a; color: #f6e6d1; }
+  .bq-enquiry-card .bq-form-field input:focus-visible, .bq-enquiry-card .bq-form-field select:focus-visible, .bq-enquiry-card .bq-chip:focus-visible, .bq-enquiry-card .bq-step button:focus-visible, .bq-lock:focus-visible { outline: 3px solid #e8c27a; outline-offset: 2px; }
+  .bq-enquiry-card .bq-form-field [aria-invalid="true"] { border-color: #ffb3a8; box-shadow: 0 0 0 3px rgba(255,179,168,.2); }
+  .bq-enquiry-card .bq-err { color: #ffb3a8; }
+  .bq-date[hidden] { display: none; }
+  .bq-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bq-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(232,194,122,.5); background: rgba(246,230,209,.06); color: #f6e6d1; font: 600 .875rem/1.2 var(--fk-sans, Rupee, Poppins, sans-serif); cursor: pointer; transition: transform 140ms ease, background-color 160ms ease, color 160ms ease; }
+  .bq-chip b { font-weight: 600; }
+  .bq-chip small { font: 500 .75rem/1 var(--fk-sans, Rupee, Poppins, sans-serif); opacity: .85; }
+  .bq-chip small:empty { display: none; }
+  .bq-chip:active { transform: scale(.96); }
+  .bq-chip[aria-checked="true"] { background: #e8c27a; border-color: #e8c27a; color: #10261a; }
+  .bq-step { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 8px; }
+  .bq-step button { height: 48px; border-radius: 12px; border: 1px solid rgba(232,194,122,.5); background: rgba(246,230,209,.08); color: #f6e6d1; font: 600 22px/1 var(--fk-sans, Rupee, Poppins, sans-serif); cursor: pointer; }
+  .bq-step button:active { transform: scale(.96); }
+  .bq-step input { text-align: center; font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: textfield; }
+  .bq-step input::-webkit-outer-spin-button, .bq-step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .bq-lock { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 24px; border: 0; border-radius: 999px; background: #c0291f; color: #fff; font: 700 1rem/1 var(--fk-sans, Rupee, Poppins, sans-serif); cursor: pointer; box-shadow: 0 12px 24px -12px rgba(0,0,0,.6); transition: transform 140ms ease, background-color 160ms ease; }
+  .bq-lock:hover { background: #a82118; }
+  .bq-lock:active { transform: scale(.98); }
+  .bq-lock svg { width: 22px; height: 22px; flex: none; }
 </style>

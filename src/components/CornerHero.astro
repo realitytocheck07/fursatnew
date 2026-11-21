@@ -3,11 +3,12 @@
 // window (scripts/make-heroes.py), so the page loads ONE image: no empty brown window while photos load.
 // A tiny blurred copy (LQIP) shows instantly, the sharp image fades over it. Text sits on the calm side of the art.
 import heroes from '../data/heroes.json';
-interface Cta { label: string; href: string; primary?: boolean; book?: boolean; external?: boolean }
+interface Cta { label: string; href: string; primary?: boolean; book?: boolean; external?: boolean; film?: boolean }
 // Optional props (party page): sub = italic line under the h1 (subHl = the word in it that gets the highlight colour),
 // hlColor = highlight colour for the h1 word, labels = small pills under the rings, one list per photo set, one name per ring.
-interface Props { page: 'cafe' | 'bar' | 'party' | 'banquet'; kicker: string; h1a: string; h1b?: string; lead: string; ctas: Cta[]; alt: string; id?: string; sub?: string; subHl?: string; hlColor?: string; labels?: string[][] }
-const { page, kicker, h1a, h1b, lead, ctas, alt, id = 'ch-h1', sub, subHl, hlColor, labels } = Astro.props;
+interface Props { page: 'cafe' | 'bar' | 'party' | 'banquet'; kicker: string; h1a: string; h1b?: string; lead: string; ctas: Cta[]; alt: string; id?: string; sub?: string; subHl?: string; hlColor?: string; labels?: string[][]; manual?: boolean }
+// manual (banquet): the page runs its own rotation (4 slides incl. the sneak-peek loop); slots 'art' (inside the art) and 'after' (under the buttons) are optional.
+const { page, kicker, h1a, h1b, lead, ctas, alt, id = 'ch-h1', sub, subHl, hlColor, labels, manual } = Astro.props;
 const h = (heroes as any)[page];
 const textRight = h.windows[0][0] < 20; // window on the left (banquet art) -> text on the right
 const src = (w: number, n = 1) => `/assets/heroes/${page}${n > 1 ? '-' + n : ''}-${w}.webp`;
@@ -18,12 +19,13 @@ const labY = Math.max(...h.windows.map((w: number[]) => w[3])) + 2.4;
 const labX = (k: number) => Math.min(90, (h.windows[k][0] + h.windows[k][2]) / 2);
 const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf(subHl)), subHl, sub.slice(sub.indexOf(subHl) + subHl.length)] : [sub]) : null;
 ---
-<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
+<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} data-manual={manual ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
   <div class="ch-art">
     <img class="ch-img" src={src(1024)} srcset={`${src(768)} 768w, ${src(1024)} 1024w, ${src(1536)} 1536w`} sizes="100vw"
       width={h.w} height={h.h} alt={alt} fetchpriority="high" loading="eager" decoding="async"
       onload="this.classList.add('is-in')" />
     {sets.slice(1).map((n) => <img class="ch-img ch-alt" data-srcset={srcset(n)} sizes="100vw" width={h.w} height={h.h} alt="" aria-hidden="true" decoding="async" />)}
+    <slot name="art" />
     {labels && (
       <div class="ch-labs">
         {labels.map((set, si) => set.map((t, k) => <span class={`ch-lab ch-lab--${k}`} data-set={si} style={`left:${labX(k)}%;top:${labY}%`}>{t}</span>))}
@@ -38,12 +40,13 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
     <p class="ch-lead">{lead}</p>
     <div class="ch-btns">
       {ctas.map((c) => (
-        <a class:list={['fk-btn', c.primary ? 'fk-btn--primary' : 'fk-btn--secondary']} href={c.href} data-open={c.book ? 'book' : undefined}
+        <a class:list={['fk-btn', c.primary ? 'fk-btn--primary' : 'fk-btn--secondary', { 'ch-film': c.film }]} href={c.href} data-open={c.book ? 'book' : undefined}
           target={c.external ? '_blank' : undefined} rel={c.external ? 'noopener' : undefined}>
-          <span>{c.label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          {c.film && <i class="ch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6.5v11l9-5.5z" /></svg></i>}<span>{c.label}</span>{!c.film && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>}
         </a>
       ))}
     </div>
+    <slot name="after" />
   </div>
 </section>
 <script is:inline>
@@ -53,6 +56,7 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
      Paused off-screen and in background tabs. Under reduced motion only a labelled hero (party) rotates, as an instant swap. */
   var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.ch').forEach(function (hero) {
+    if (hero.hasAttribute('data-manual')) return;   /* banquet drives its own 4-slide rotation */
     if (calm && !hero.hasAttribute('data-labelled')) return;
     var alts = [].slice.call(hero.querySelectorAll('.ch-alt')); if (!alts.length) return;
     var all = [hero.querySelector('.ch-img:not(.ch-alt)')].concat(alts), cur = 0, vis = true, timer = 0;
