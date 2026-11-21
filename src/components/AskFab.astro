@@ -134,10 +134,10 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       if (arm.done) return; arm.done = true;
       if (!reduce.matches) idle();
       // scroll start: one small hop
-      addEventListener('scroll', () => {
+      document.addEventListener('scroll', () => {
         if (!scrolling && live && visible() && performance.now() - lastHop > 900 && performance.now() - lastJump > 900) play(Math.random() < .5 ? 'hop' : 'spin');
         scrolling = 1; clearTimeout(arm.st); arm.st = setTimeout(() => { scrolling = 0; }, 200);
-      }, { passive: true });
+      }, { passive: true, capture: true });
       // a new main section comes into view: jump + coin + hint (one hint per 12 s)
       if (!('IntersectionObserver' in window)) return;
       const keyOf = (s) => {
@@ -171,7 +171,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       }
       a.toggleAttribute('data-hold', h);
     };
-    addEventListener('scroll', hold, { passive: true }); addEventListener('resize', hold, { passive: true });
+    addEventListener('scroll', hold, { passive: true }); document.addEventListener('scroll', hold, { passive: true, capture: true }); addEventListener('resize', hold, { passive: true });
     addEventListener('focusin', hold); addEventListener('focusout', () => setTimeout(hold, 60));
     const foot = document.querySelector('.sf-footer');
     if (foot && 'IntersectionObserver' in window) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; hold(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
@@ -180,7 +180,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
     const img2 = img, rnd = (x, y) => x + Math.random() * (y - x), phone = () => innerWidth < 768;
     const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2), cl = (v, x, y) => Math.max(x, Math.min(y, v));
     let st = null, wx = 0, nextAt = performance.now() + rnd(8000, 15000), raf = 0, prev = 0, lastScroll = -1e9, face = 1, phase = 0, chk = 0;
-    addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true });
+    document.addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true, capture: true });
     const paused = () => !live || reduce.matches || document.hidden || a.hasAttribute('data-hold') || a.classList.contains('is-intro') || !(a.classList.contains('is-on') || a.hasAttribute('data-early'))
       || typing() || !!document.querySelector('dialog[open], [aria-modal="true"]') || document.documentElement.classList.contains('fk-sheet-open') || document.documentElement.classList.contains('lock')
       || document.documentElement.classList.contains('fk-music') || /\bm-/.test(a.className) || a.matches(':active') || performance.now() - lastScroll < 600;

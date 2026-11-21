@@ -58,7 +58,8 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   const tick = () => {
     raf = 0;
     const ph = matchMedia('(max-width: 767px)').matches, fe = document.activeElement;
-    let on = (isHome ? !introOn() : scrollY > innerHeight * 0.6) && !inFooter;
+    const sy = window.scrollY || document.body.scrollTop || document.documentElement.scrollTop; // desktop pages scroll the body, not the window
+    let on = (isHome ? !introOn() : sy > innerHeight * 0.6) && !inFooter;
     // phone: step aside while a form field is focused or the banquet "Send menu" dock is up
     if (on && ph && ((fe && (/^(INPUT|TEXTAREA|SELECT)$/.test(fe.tagName) || fe.isContentEditable)) || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) on = false;
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
@@ -88,13 +89,16 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   };
   const req = () => { if (!raf) raf = requestAnimationFrame(tick); };
   addEventListener('scroll', req, { passive: true });
+  document.addEventListener('scroll', req, { passive: true, capture: true }); // body scroller (desktop) does not fire window scroll
   addEventListener('resize', req, { passive: true });
   addEventListener('focusin', req); addEventListener('focusout', () => setTimeout(req, 60));
   // these bars show and hide on their own (class or hidden attribute), so re-check when they change
   if ('IntersectionObserver' in window) {
     // the buttons sit in the bottom ~150px: count the footer as "in view" once its top is above that strip
     const foot = document.querySelector('.sf-footer');
-    if (foot) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; req(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+    // measured from the page end: the curtain footer is sticky, so an IntersectionObserver would see it "in view" all the time
+    if (foot) { const fchk = () => { const e = document.scrollingElement || document.documentElement, y = window.scrollY || document.body.scrollTop || e.scrollTop, h = Math.max(e.scrollHeight, document.body.scrollHeight); const v = h - (y + innerHeight) < foot.offsetHeight - 150; if (v !== inFooter) { inFooter = v; req(); } };
+      addEventListener('scroll', fchk, { passive: true }); document.addEventListener('scroll', fchk, { passive: true, capture: true }); addEventListener('resize', fchk); fchk(); }
     const cards = new Set();
     const cio = new IntersectionObserver((es) => {
       es.forEach((e) => (e.isIntersecting ? cards.add(e.target) : cards.delete(e.target)));
