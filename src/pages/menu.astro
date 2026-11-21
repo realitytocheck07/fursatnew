@@ -14,6 +14,7 @@ import { FOOD_GROUPS, DRINK_GROUPS, GROUP_ICONS, type Group } from '../component
 import { money } from '../components/menu/cart';
 import MenuDoors from '../components/menu/MenuDoors.astro';
 import DishRow from '../components/menu/DishRow.astro';
+import type { RowRec } from '../components/menu/dish-row';
 import TableLanding from '../components/menu/TableLanding.astro';
 import DrinksIntro from '../components/menu/DrinksIntro.astro';
 import { fitStyle } from '../components/menu/photoFit';
@@ -101,6 +102,25 @@ const addAttrs = (i: Item) => {
     'data-c': i.section, 'data-k': i.kind, 'data-v': i.veg ? 'v' : 'n', ...(i.alc ? { 'data-a': '1' } : {}),
   };
 };
+// Compact record of one dish row (see dish-row.ts). Only the first group is rendered into the HTML; the others ship as these
+// records in one JSON block and menu-v2.ts renders them when they are near the screen, searched, jumped to or opened by a link.
+const recOf = (i: Item): RowRec => {
+  const ph = PHOTOS[i.name], vs = variants(i), lab = mainLabel(i), nm = titleCase(i.name);
+  return {
+    n: nm, an: nm + (lab ? ` (${lab})` : ''),
+    ...(i.description ? { d: i.description } : {}), ...(i.note ? { o: i.note } : {}),
+    v: i.veg ? 1 : 0, ...(i.spicy ? { s: 1 } : {}), ...(i.chefSpecial ? { f: 1 } : {}), ...(i.alc ? { a: 1 } : {}),
+    p: i.price ?? null, ...(vs.length > 1 ? { vs: vs.map((v) => [v.label, v.value] as [string, number]) } : {}),
+    ...(i.image ? { g: i.image } : {}),
+    ...(ph ? { ph: [ph.sm, Math.round(640 * ph.w / ph.h), 640, fitStyle(i.name, ph.w / ph.h, 1, 0.5, 0.45)] as [string, number, number, string] } : {}),
+  };
+};
+const EAGER_GROUP = FOOD_GROUPS[0].id; // the group at the top of the list; every other group is filled in by menu-v2.ts
+const lazyRows: Record<string, { sec: string; k: 'food' | 'drink'; rows: RowRec[] }> = {};
+for (const g of [...FOOD_GROUPS, ...DRINK_GROUPS]) {
+  if (g.id === EAGER_GROUP) continue;
+  for (const sec of groupSections(g)) lazyRows[`s-${slug(sec.section)}`] = { sec: sec.section, k: sec.items[0]?.kind ?? 'food', rows: sec.items.map(recOf) };
+}
 // Drinks showcase: every bar item that has a real photo (dish-photos.json), in menu order
 const showcase = drinks.flatMap((s) => s.items).filter((i) => PHOTOS[i.name]).map((i) => ({
   name: titleCase(i.name), section: i.section, price: i.price, icon: GROUP_ICONS[(DRINK_GROUPS.find((g) => g.sections.includes(i.section)) ?? DRINK_GROUPS[0]).id], sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), attrs: addAttrs(i),
@@ -111,7 +131,7 @@ const tableDishes = tableData.dishes.map((d) => {
   const ph = PHOTOS[d.name];
   if (!it || !ph) throw new Error(`menu-table.json: "${d.name}" needs a menu item and a photo`);
   const a = addAttrs(it);
-  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: a['data-n'], sm: ph.sm, clip: (d as { clip?: string }).clip ?? '' };
+  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: a['data-n'], sm: ph.sm, w: Math.round(640 * ph.w / ph.h), clip: (d as { clip?: string }).clip ?? '' };
 });
 const vegMark = (veg?: boolean) => (veg ? 'mv-vm mv-vm--v' : 'mv-vm mv-vm--n');
 
@@ -320,12 +340,9 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
                 {groupSections(g).map((sec) => (
                   <section class="mv-sec" id={`s-${slug(sec.section)}`}>
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
-                    <ul class="mv-items">
-                      {sec.items.map((i) => {
-                        const ph = PHOTOS[i.name];
-                        return <DishRow i={i} name={titleCase(i.name)} vs={variants(i)} attrs={addAttrs(i)} photo={ph ? { src: ph.sm, w: Math.round(640 * ph.w / ph.h), h: 640 } : undefined} />;
-                      })}
-                    </ul>
+                    {g.id === EAGER_GROUP
+                      ? <ul class="mv-items">{sec.items.map((i) => <DishRow rec={recOf(i)} ctx={{ sec: i.section, k: i.kind }} />)}</ul>
+                      : <ul class="mv-items" data-lazy="" data-n={sec.items.length} style={`--n:${sec.items.length}`}></ul>}
                   </section>
                 ))}
               </div>
@@ -336,6 +353,9 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
         <p class="mv-fine">Prices in ₹, taxes extra.</p>
       </div>
     </section>
+
+    <!-- Dish rows of every group but the first, as compact records (rendered by menu-v2.ts). The same dishes are in the Menu schema below. -->
+    <script type="application/json" id="mv-rows" is:inline set:html={JSON.stringify(lazyRows).replace(/</g, '\\u003c')}></script>
 
     <!-- Dish detail sheet (phones). Native dialog: focus trap, Esc and inert background come with it. -->
     <dialog class="mv-sheet" id="mv-sheet" aria-labelledby="mv-sheet-name" aria-describedby="mv-sheet-desc">
@@ -387,5 +407,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 <script>
   import '../components/menu/menu-v2';
   import '../scripts/fk-motion';
-  import '../components/menu/menu-wow';
+  // The wow layer (scroll parallax, reveals, tilt) only enhances what is already visible: it loads when the browser is idle, not with the first screen.
+  const wow = () => import('../components/menu/menu-wow');
+  if ('requestIdleCallback' in window) requestIdleCallback(wow, { timeout: 3000 }); else setTimeout(wow, 1500);
 </script>

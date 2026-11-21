@@ -548,3 +548,8 @@ html:has(.mv){background:var(--fk-plaster-base)}
 .mv-card[data-soldout] .mv-c-thumb img,.mv-card[data-soldout] .mv-c-ph{opacity:.5;filter:grayscale(.6)}
 .fk-chip--soldout{background:#ececec;color:#4a4a4a;border:1px solid #cfcfcf}
 .mv-card .mv-add[disabled]{background:#ececec;color:#4a4a4a;border:1px solid #cfcfcf;cursor:not-allowed}
+
+/* Dish rows not filled in yet (menu-v2.ts fills them near the screen): hold roughly the room they will take, one card per row on a phone, 2 or 3 columns wider */
+.mv-items[data-lazy]{min-height:calc(var(--n,1) * 118px)}
+@media(min-width:768px){.mv-items[data-lazy]{min-height:calc(var(--n,1) * 59px)}}
+@media(min-width:1440px){.mv-items[data-lazy]{min-height:calc(var(--n,1) * 40px)}}

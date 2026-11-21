@@ -3,11 +3,10 @@
 // (the hotspot keeps data-go, so menu-v2 still owns the jump and the 21+ notice).
 // Food: a half-visible rotating table. Drag or swipe turns it with momentum and a spring snap,
 // the front dish grows, tapping it opens the dish sheet. The scroll landing onto the real table lives in TableLanding.
-// Motion = the table spring, in-view; Anime.js = the hotspot glow.
+// Motion = the table spring, in-view; Anime.js = the hotspot glow (loaded on the first hotspot tap).
 // The seam (B1): one rAF loop eases toward the cursor; per frame only transforms move (the bar door is a
 // counter-translate reveal), so nothing reflows or repaints while the cursor sweeps the doors.
 import { animate as mAnimate, inView } from 'motion';
-import { animate as aAnimate } from 'animejs';
 
 type Side = 'food' | 'drinks';
 const md = document.getElementById('md');
@@ -134,7 +133,8 @@ function init(md: HTMLElement) {
   const BW = +md.dataset.barW!, BH = +md.dataset.barH!, BY = +md.dataset.barY!;
   const placeSpots = () => {
     const W = ph.clientWidth, H = ph.clientHeight, s = Math.max(W / BW, H / BH), w = BW * s, h = BH * s;
-    spots.style.cssText = `left:${(W - w) / 2}px;top:${(H - h) * BY}px;width:${w}px;height:${h}px`;
+    // CSS (container units, menu-doors.css) already sizes the box; this is only the fallback for browsers without cq units
+    if (!CSS.supports('width', '1cqw')) spots.style.cssText = `left:${(W - w) / 2}px;top:${(H - h) * BY}px;width:${w}px;height:${h}px`;
     // labels near the screen edge open inward
     const mr = md.getBoundingClientRect();
     spots.querySelectorAll<HTMLElement>('.mb-spot').forEach((sp) => {
@@ -156,6 +156,7 @@ function init(md: HTMLElement) {
   const capParts = [...capB.querySelectorAll<HTMLElement>('.md-eyebrow,.md-hl,.md-sub,.md-btn')];
   const hit = (a: { l: number; t: number; r: number; b: number }, b: { l: number; t: number; r: number; b: number }) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
   function placeCap() {
+    capB.dataset.placed = ''; // shown only once placed (menu-doors.css): its late move no longer counts as a layout shift
     if (open === 'food') return; // the Food side shows only the small "The Bar" tab; placed again when it closes
     const W = md.clientWidth, H = md.clientHeight, S = signBox();
     capB.removeAttribute('data-mode'); capB.removeAttribute('data-compact'); capB.style.removeProperty('--cap-x'); capB.style.removeProperty('--cap-w');
@@ -201,7 +202,8 @@ function init(md: HTMLElement) {
     const sr = spot.getBoundingClientRect(), pr = ph.getBoundingClientRect();
     ph.style.setProperty('--zx', ((sr.left + sr.width / 2 - pr.left) / pr.width) * 100 + '%');
     ph.style.setProperty('--zy', ((sr.top + sr.height / 2 - pr.top) / pr.height) * 100 + '%');
-    aAnimate(spot.querySelector('.mb-hex')!, { scale: [1.1, 1.35, 1.15], duration: 520, ease: 'outQuad' });
+    const hex = spot.querySelector('.mb-hex')!;
+    import('animejs').then(({ animate }) => animate(hex, { scale: [1.1, 1.35, 1.15], duration: 520, ease: 'outQuad' })); // loaded on the first tap, not with the page
     const z = ph.animate([{ scale: '1' }, { scale: '1.28' }], { duration: 560, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards' });
     z.finished.then(() => {
       go();

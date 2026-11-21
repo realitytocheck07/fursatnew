@@ -1,44 +1,8 @@
 ---
-import { fitStyle } from './photoFit';
-// One dish in the full menu: an "App card" (name, chips, ₹ pill on the left; photo thumb + Add on the right).
+import { rowHtml, type RowRec, type RowCtx } from './dish-row';
+// One dish in the full menu, rendered by dish-row.ts (the same function menu-v2.ts uses for the groups it fills in on demand).
 // Hooks the menu script reads: [data-row], .mv-open, .mv-iname, .mv-idesc, .mv-note, .mv-item-price, .fk-chip, [data-add].
-import { money } from './cart';
-interface Props {
-  i: { name: string; section: string; description?: string; note?: string; price: number | null; veg?: boolean; spicy?: boolean; chefSpecial?: boolean; image?: string };
-  name: string;
-  vs: { label: string; value: number }[];
-  attrs: Record<string, string>;
-  photo?: { src: string; w: number; h: number };
-}
-const { i, name, vs, attrs, photo } = Astro.props as Props;
-const row = { 'data-row': '', 'data-sec': i.section, 'data-veg': i.veg ? '1' : '0', 'data-text': `${name} ${i.description ?? ''} ${i.section}`.toLowerCase(), ...(i.image ? { 'data-img': i.image } : {}) };
-// "Half ₹599 | Full ₹999" is shown as two price pills, so it is not repeated as a description.
-const desc = vs.length > 1 ? (i.description ?? '').replace(/\s*Half\s*₹?\s*[\d,]+\s*\|\s*Full\s*₹?\s*[\d,]+\s*/i, '').trim() : (i.description ?? '');
+interface Props { rec: RowRec; ctx: RowCtx }
+const { rec, ctx } = Astro.props as Props;
 ---
-<li class="mv-item mv-card" {...row}>
-  <div class="mv-c-info">
-    <h4 class="mv-item-name"><button class="mv-open" type="button" aria-haspopup="dialog"><span class="mv-iname">{name}</span></button></h4>
-    {desc && <p class="mv-idesc">{desc}</p>}
-    {i.note && <p class="mv-note">{i.note}</p>}
-    <div class="fk-chips">
-      <span class={i.veg ? 'fk-chip fk-chip--veg' : 'fk-chip fk-chip--nonveg'}>{i.veg ? 'Veg' : 'Non-veg'}</span>
-      {i.spicy && <span class="fk-chip fk-chip--spicy">🌶 Spicy</span>}
-      {i.chefSpecial && <span class="fk-chip fk-chip--pick">★ Chef's pick</span>}
-    </div>
-    <div class="mv-c-row">
-      <span class="mv-item-price num">
-        {vs.length > 1
-          ? vs.map((v) => <span class="mv-pp"><small>{v.label}</small> {money(v.value)}</span>)
-          : <span class="mv-pp">{i.price != null ? money(i.price) : '—'}</span>}
-      </span>
-    </div>
-  </div>
-  <div class="mv-c-thumb">
-    {photo
-      ? <span class="mv-c-clip"><img class="fk-fit" src={photo.src} alt="" width={photo.w} height={photo.h} loading="lazy" decoding="async" style={fitStyle(i.name, photo.w / photo.h, 1, 0.5, 0.45)} /></span>
-      : <span class="mv-c-ph" aria-hidden="true">F</span>}
-    {i.price != null && (
-      <button class="mv-add" type="button" aria-pressed="false" aria-label={`Add ${name} to picks`} {...attrs}><span class="mv-add-t" aria-hidden="true">+ Add</span></button>
-    )}
-  </div>
-</li>
+<Fragment set:html={rowHtml(rec, ctx)} />

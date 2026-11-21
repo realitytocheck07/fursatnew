@@ -20,7 +20,12 @@
 .md-shade{position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(90deg,rgb(11 7 5 / .45),rgb(11 7 5 / 0) 34%),linear-gradient(180deg,rgb(11 7 5 / .5) 0,rgb(11 7 5 / 0) 22%,rgb(11 7 5 / 0) 50%,rgb(11 7 5 / .8) 82%,rgb(11 7 5 / .94))}
 
-.mb-spots{position:absolute;left:0;top:0;width:100%;height:100%;z-index:2}
+/* Same cover math as object-fit:cover + object-position (menu-doors.ts placeSpots), done in CSS so the box is right at first paint (no layout shift).
+   .md-ph is a size container; --bw/--bh/--by come from MenuDoors.astro. */
+.md-ph{container-type:size}
+.mb-spots{position:absolute;z-index:2;
+  width:max(100cqw,calc(100cqh * var(--bw,1) / var(--bh,1)));height:max(100cqh,calc(100cqw * var(--bh,1) / var(--bw,1)));
+  left:calc((100cqw - max(100cqw,calc(100cqh * var(--bw,1) / var(--bh,1)))) / 2);top:calc((100cqh - max(100cqh,calc(100cqw * var(--bh,1) / var(--bw,1)))) * var(--by,.5))}
 .mb-spot[hidden]{display:none}
 .mb-spot{position:absolute;width:calc(var(--r) * 2%);aspect-ratio:1;translate:-50% -50%;padding:0;border:0;background:none;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}
 .mb-hex{position:absolute;inset:0;opacity:.45;transition:opacity 250ms ease,scale 400ms var(--md-ease),background-color 250ms ease;
@@ -195,3 +200,10 @@
   .mb-hex{opacity:.7}
   .md :is(.md-cap,.mt-front,.mt-nav,.mb-lab,.mb-hex,.md-tag,.md-x){transition:none!important}
 }
+
+/* The bar caption stays invisible until placeCap() has positioned it (opacity: no layout shift). No JS: it shows after 1.5 s. */
+.md-cap--bar:not([data-placed]){opacity:0;animation:md-cap-show 0s 1.5s forwards}
+.md-cap--bar[data-placed]{animation:md-cap-in 240ms ease-out}
+@keyframes md-cap-show{to{opacity:1}}
+@keyframes md-cap-in{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.md-cap--bar[data-placed]{animation:none}}

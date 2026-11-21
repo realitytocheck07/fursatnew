@@ -5,7 +5,7 @@
 // tapping it opens the dish sheet (Add to Picks). Phone: Drinks on top, Food below.
 // Real photos only (dish-photos.json). A dish upgrades to its spin clip when menu-table.json lists one.
 import '../../styles/menu-doors.css';
-interface Dish { title: string; label: string; price: string; dn: string; sm: string; clip: string }
+interface Dish { title: string; label: string; price: string; dn: string; sm: string; w?: number; clip: string }
 interface Spot { label: string; go: string; x: number; y: number; r: number }
 interface Bar { image: string; srcset: string; w: number; h: number; posY: number; alt: string; spots: Spot[] }
 interface Props { foodCount: number; drinkCount: number; foodSections: number; drinkSections: number; dishes: Dish[]; bar: Bar }
@@ -13,7 +13,7 @@ const { foodCount, drinkCount, foodSections, drinkSections, dishes, bar } = Astr
 const spots = [...bar.spots].sort((a, b) => a.x - b.x); // Tab order = left to right
 const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
 ---
-<section class="md" id="md" aria-labelledby="md-title" style="--rest:50%" data-bar-w={bar.w} data-bar-h={bar.h} data-bar-y={bar.posY}>
+<section class="md" id="md" aria-labelledby="md-title" style={`--rest:50%;--bw:${bar.w};--bh:${bar.h};--by:${bar.posY}`} data-bar-w={bar.w} data-bar-h={bar.h} data-bar-y={bar.posY}>
   <h1 class="md-tag" id="md-title">Fursat menu<small aria-hidden="true">drinks · food</small></h1>
   <!-- DRINKS: the bar with hexagon hotspots (top layer: left on desktop, top on phone).
        Counter-translate reveal: the wrapper (overflow:hidden) moves one way, .md-bar-in moves the other way by the same
@@ -58,7 +58,7 @@ const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
         {dishes.map((d, i) => (
           <li class="mt-dish" data-i={i} data-dn={d.dn} data-clip={d.clip || undefined} data-title={d.title} data-label={d.label} data-price={d.price}>
             <button class="mt-plate" type="button" tabindex="-1" aria-label={`${d.title}, ${d.price}`}>
-              <span class="mt-drop"><img src={d.sm} alt="" width="640" height="640" decoding="async" loading={i < 4 ? 'eager' : 'lazy'} draggable="false" /></span>
+              <span class="mt-drop"><img src={d.sm} alt="" width={d.w ?? 640} height="640" decoding="async" loading={i < 4 ? 'eager' : 'lazy'} draggable="false" /></span>
             </button>
           </li>
         ))}

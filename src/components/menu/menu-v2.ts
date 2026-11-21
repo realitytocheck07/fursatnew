@@ -2,6 +2,7 @@
 // scroll entrance, phone dish sheet.
 // No framework, no animation library.
 import { reducer, keyOf, money, total, count, waLink, type Line, type MenuItem } from './cart';
+import { rowHtml, type RowRec } from './dish-row';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
@@ -178,7 +179,7 @@ function init(root: HTMLElement) {
   }
   function go(id: string | null, side?: Side) {
     const sd = side || (id && id.startsWith('d-') ? 'drinks' : id && id.startsWith('f-') ? 'food' : (root.dataset.side as Side));
-    need21(sd, () => { setSide(sd); mark(id); scrollTo(id ? document.getElementById('g-' + id) : $('#mv-list')); });
+    need21(sd, () => { const tg = id ? document.getElementById('g-' + id) : null; fillThrough(tg); setSide(sd); mark(id); scrollTo(tg ?? $('#mv-list')); });
   }
   root.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
@@ -192,6 +193,7 @@ function init(root: HTMLElement) {
   let afterSheet: (() => void) | null = null;
   const jumpTo = (id: string, side: Side) => need21(side, () => {
     const sec = document.getElementById(id);
+    fillThrough(sec);
     setSide(side); mark(sec?.closest<HTMLElement>('[data-group]')?.dataset.group ?? null); scrollTo(sec);
   });
   document.addEventListener('click', (e) => {
@@ -237,12 +239,46 @@ function init(root: HTMLElement) {
 
   /* ── search (highlight) + diet filters ────────────────── */
   const q = $<HTMLInputElement>('#mv-q')!, countEl = $('#mv-count')!, emptyEl = $('#mv-empty')!;
-  const rows = $$('[data-row]');
+  const rows = $$<HTMLElement>('[data-row]');
   const names = new Map(rows.map((r) => [r, $('.mv-iname', r)!]));
   const descs = new Map(rows.map((r) => [r, $('.mv-idesc', r)]));
   const orig = new Map<Element, string>();
   names.forEach((el) => orig.set(el, el.textContent || ''));
   descs.forEach((el) => el && orig.set(el, el.textContent || ''));
+  /* ── dish rows are filled in on demand: the page ships only the first group; the rest are records in #mv-rows ──
+     A section is filled when it is within ~1200px of the screen, or before a search / filter, a jump (chips, tiles, hotspots, #go=),
+     a #dish= link or the table's "See dish" needs it. A jump fills every section above its target too, so the page does not move. */
+  const LAZY: Record<string, { sec: string; k: 'food' | 'drink'; rows: RowRec[] }> = (() => { try { return JSON.parse($('#mv-rows')?.textContent || '{}'); } catch { return {}; } })();
+  let onRows: ((li: HTMLElement[]) => void) | null = null;
+  function fillSection(sec: Element) {
+    const ul = sec.querySelector<HTMLElement>('.mv-items[data-lazy]');
+    if (!ul) return;
+    ul.removeAttribute('data-lazy'); ul.style.removeProperty('--n');
+    const d = LAZY[sec.id];
+    if (!d) return;
+    ul.innerHTML = d.rows.map((r) => rowHtml(r, { sec: d.sec, k: d.k })).join('');
+    const li = $$<HTMLElement>('[data-row]', ul);
+    li.forEach((r) => {
+      const n = $('.mv-iname', r)!, ds = $('.mv-idesc', r);
+      rows.push(r); names.set(r, n); descs.set(r, ds); orig.set(n, n.textContent || ''); if (ds) orig.set(ds, ds.textContent || '');
+    });
+    // the soft light that follows the pointer on a card (fk-motion.ts binds it once at start, so rows filled in later get it here)
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) li.forEach((el) => el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${e.clientX - r.left}px`); el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    }, { passive: true }));
+    onRows?.(li);
+  }
+  function fillAll() { $$('.mv-sec').forEach(fillSection); }
+  function fillThrough(el: Element | null) {
+    if (!el) return;
+    $$('.mv-sec').forEach((s) => { if (s === el || el.contains(s) || !(el.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING)) fillSection(s); });
+  }
+  const lazySecs = $$('.mv-sec').filter((s) => s.querySelector('.mv-items[data-lazy]'));
+  if ('IntersectionObserver' in window) {
+    const lio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { lio.unobserve(e.target); fillSection(e.target); } }), { rootMargin: '1200px 0px' });
+    lazySecs.forEach((s) => lio.observe(s));
+  } else fillAll();
   const diets = new Set<string>();
   let jumped = false, timer = 0;
   const reEsc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -253,10 +289,11 @@ function init(root: HTMLElement) {
   }
   // live count of what is showing on the open side, e.g. "24 dishes" (read out by the status region)
   function updateCount() {
-    const side = root.dataset.side as Side, n = $$(`[data-side-block="${side}"] [data-row]:not([hidden])`).length;
+    const side = root.dataset.side as Side, n = $$(`[data-side-block="${side}"] [data-row]:not([hidden])`).length + $$(`[data-side-block="${side}"] .mv-items[data-lazy]`).reduce((k, u) => k + Number(u.dataset.n || 0), 0);
     countEl.textContent = n ? `${n} ${side === 'food' ? (n === 1 ? 'dish' : 'dishes') : (n === 1 ? 'drink' : 'drinks')}` : 'No matches';
   }
   function filter() {
+    fillAll(); // every dish is searched, filled in or not
     const toks = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const active = toks.length > 0 || diets.size > 0;
     let shown = 0;
@@ -331,6 +368,7 @@ function init(root: HTMLElement) {
     const syncOpens = () => opens.forEach((b) => { if (phone.matches) { b.removeAttribute('tabindex'); b.setAttribute('aria-haspopup', 'dialog'); } else { b.tabIndex = -1; b.removeAttribute('aria-haspopup'); } });
     syncOpens();
     phone.addEventListener('change', syncOpens);
+    onRows = (li) => { li.forEach((r) => { const b = $<HTMLButtonElement>('.mv-open', r); if (b) opens.push(b); }); syncOpens(); };
     let opener: HTMLElement | null = null, pushed = false, closing = false, flashing = false, flashT = 0, closeT = 0;
 
     const el = (tag: string, cls: string, text = '') => { const n = document.createElement(tag); n.className = cls; if (text) n.textContent = text; return n; };
@@ -400,6 +438,7 @@ function init(root: HTMLElement) {
     // the rotating table (menu-doors.ts) opens a dish's sheet by its exact menu name, on any screen
     document.addEventListener('mv:open', (e) => {
       const name = (e as CustomEvent<string>).detail;
+      fillAll();
       const li = $$<HTMLElement>('[data-row]').find((r) => $<HTMLElement>('[data-add]', r)?.dataset.n === name);
       if (li) openSheet(li);
     });
@@ -409,6 +448,7 @@ function init(root: HTMLElement) {
       if (gm && document.getElementById('g-' + gm[1])) { go(gm[1]); return; } // /menu/#go=d-cocktails: group jump, 21+ check first for drinks
       const m = /^#dish=(.+)$/.exec(location.hash);
       if (!m) return;
+      fillAll();
       let want = '';
       try { want = decodeURIComponent(m[1]).trim().toLowerCase(); } catch { return; }
       const ns = $$<HTMLElement>('[data-row]').map((r) => $<HTMLElement>('[data-add]', r)?.dataset.n ?? '');
