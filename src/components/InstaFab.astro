@@ -189,6 +189,8 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 }
 /* phone: bottom-left, above the phone bar (WhatsApp is in the bar). Left, because list rows keep their "+" buttons on the right. */
 @media (max-width: 767px) {
+  .ifab:not([data-home]) { display: none !important; } /* phones: the Instagram button shows only on Home (it stays on every page on laptop) */
+  html.fk-typing .ifab { display: none !important; }
   .ifab, .ifab--solo { left: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); height: 48px; padding: 2px; }
 }
 /* desktop stack (bottom to top, 10px gaps): Ask Fursat, Offers tab, Instagram: sits just above the Offers tab while it shows */

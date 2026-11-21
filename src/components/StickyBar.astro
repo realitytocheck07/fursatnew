@@ -112,7 +112,12 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
   @media (prefers-reduced-motion: reduce) { .fx-sticky.fk-bookbar { transition: none; } }
   /* the footer is in view: the Book bar slides away so the last links stay readable and tappable (same pattern as the Instagram button) */
   @media (max-width: 899px) {
-    .fx-sticky.fk-bookbar.is-foot { transform: translateY(calc(100% + 140px)) !important; opacity: 0 !important; pointer-events: none !important; }
+    .fx-sticky.fk-bookbar.is-foot, .fx-sticky.fk-bookbar.is-avoid, html.fk-typing .fx-sticky.fk-bookbar { transform: translateY(calc(100% + 140px)) !important; opacity: 0 !important; pointer-events: none !important; }
+  }
+  /* Phone: at most 2 floating items above the nav. While the Book bar is up, the round WhatsApp button steps aside (the nav has a WhatsApp tab that opens the same agent), and it also steps aside while a form field is focused. */
+  @media (max-width: 767px) {
+    html:has(#fxsticky.on:not(.is-foot):not(.is-avoid)) .waf:not(.is-dial):not(.is-chat) .waf-fab,
+    html.fk-typing .waf:not(.is-dial):not(.is-chat) .waf-fab { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
   }
 </style>
 <script is:inline>
@@ -124,5 +129,30 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
       var on = es[es.length - 1].isIntersecting;
       if (on !== bar.classList.contains('is-foot')) { bar.classList.toggle('is-foot', on); window.dispatchEvent(new Event('resize')); }
     }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+  })();
+</script>
+<script is:inline>
+  /* The page has its own sticky bar in the corner (party estimate bar #pb-bar, #pa-plan, anything marked data-fab-avoid): the Book bar steps aside while it is on screen. */
+  (function () {
+    var bar = document.getElementById('fxsticky');
+    if (!bar) return;
+    var raf = 0;
+    function check() {
+      raf = 0;
+      var hit = !!document.querySelector('#pb-bar.is-in');
+      if (!hit) {
+        var els = document.querySelectorAll('[data-fab-avoid], #pa-plan');
+        for (var i = 0; i < els.length; i++) {
+          var r = els[i].getBoundingClientRect();
+          if (r.bottom > innerHeight - 170 && r.top < innerHeight) { hit = true; break; }
+        }
+      }
+      if (hit !== bar.classList.contains('is-avoid')) { bar.classList.toggle('is-avoid', hit); window.dispatchEvent(new Event('resize')); }
+    }
+    var req = function () { if (!raf) raf = requestAnimationFrame(check); };
+    addEventListener('scroll', req, { passive: true });
+    document.addEventListener('scroll', req, { passive: true, capture: true });
+    addEventListener('resize', req, { passive: true });
+    check();
   })();
 </script>

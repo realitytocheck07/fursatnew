@@ -253,7 +253,8 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       const place = () => {
         requestAnimationFrame(place);
         const cs = getComputedStyle(a), r = a.getBoundingClientRect();
-        const show = !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
+        const pth = location.pathname.replace(/\/$/, '') || '/', earPage = !phone() || pth === '/' || pth === '/reserve';   // phones: the Offers ear shows only on Home and Reserve
+        const show = earPage && !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
         if (!show) { if (!ear.hidden) { document.documentElement.classList.remove('fk-ear-on'); ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
         if (ear.hidden) { ear.hidden = false; if (phone()) { const seen = store('fk-ear-seen'); if (seen) ear.classList.add('is-compact'); else { store('fk-ear-seen', '1'); setTimeout(() => ear.classList.add('is-compact'), 5000); } } }
         document.documentElement.classList.toggle('fk-ear-on', !phone());

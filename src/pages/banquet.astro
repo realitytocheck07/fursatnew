@@ -113,6 +113,7 @@ const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Cor
             <div class="bq-form-field">
               <span class="bq-lab" id="eq-date-l">Preferred date <span aria-hidden="true">*</span></span>
               <div class="bq-chips" role="radiogroup" aria-labelledby="eq-date-l" id="bq-date-chips">
+                <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="today"><b>Today</b><small></small></button>
                 <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="sat1"><b>This Sat</b><small></small></button>
                 <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="sat2"><b>Next Sat</b><small></small></button>
                 <button type="button" class="bq-chip" role="radio" aria-checked="false" data-q="pick"><b>Pick a date</b><small></small></button>
@@ -358,7 +359,9 @@ if (bqh) {
   if (form) {
     const fields = Array.from(form.querySelectorAll('input:not([name=botcheck]), select'));
     const digits = (v) => { let x = v.replace(/\D/g, ''); if (x.length > 10 && x.startsWith('91')) x = x.slice(2); if (x.length === 11 && x[0] === '0') x = x.slice(1); return x; };
-    const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+    /* all dates are Hyderabad (IST) dates, whatever the visitor's own timezone; a Date here is that calendar day at 12:00 UTC */
+    const istDay = () => { const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()).split('-').map(Number); return new Date(Date.UTC(y, m - 1, d, 12)); };
+    const today = () => istDay().toISOString().slice(0, 10);
     const errOf = (el) => document.getElementById(el.getAttribute('aria-describedby') || '');
     const check = (el) => {
       const v = el.value.trim(), t = el.dataset.v;
@@ -371,27 +374,34 @@ if (bqh) {
     const show = (el, msg) => { const e = errOf(el); if (msg) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid'); if (e) e.textContent = msg; };
     const dateEl = form.querySelector('input[type="date"]');
     if (dateEl) dateEl.min = today();
-    /* date chips: This Sat / Next Sat set the date, Pick a date reveals the picker */
-    const iso = (d) => { d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
-    const sat = (k) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7) + 7 * (k - 1)); return d; };
+    /* date chips: Today / This Sat / Next Sat set the date, Pick a date reveals the picker.
+       This Sat = the coming Saturday (today, when today is Saturday: then the Today chip covers it and This Sat is hidden); Next Sat = the one after. */
+    const iso = (d) => d.toISOString().slice(0, 10);
+    const sat = (k) => { const d = istDay(); d.setUTCDate(d.getUTCDate() + ((6 - d.getUTCDay() + 7) % 7) + 7 * (k - 1)); return d; };
+    const isSat = istDay().getUTCDay() === 6;
     const dChips = [...form.querySelectorAll('#bq-date-chips .bq-chip')];
-    const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-    dChips.forEach((c) => { if (c.dataset.q === 'sat1') c.querySelector('small').textContent = fmt(sat(1)); if (c.dataset.q === 'sat2') c.querySelector('small').textContent = fmt(sat(2)); });
+    const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    const dateOf = (q) => q === 'today' ? istDay() : q === 'sat1' ? sat(1) : sat(2);
+    dChips.forEach((c) => {
+      const q = c.dataset.q;
+      if (q === 'sat1' && isSat) c.hidden = true;
+      if (q === 'today' || q === 'sat1' || q === 'sat2') c.querySelector('small').textContent = fmt(q === 'sat2' && isSat ? sat(2) : dateOf(q));
+    });
     const pickDate = (c) => {
       dChips.forEach((x) => x.setAttribute('aria-checked', x === c ? 'true' : 'false'));
       const q = c.dataset.q; dateEl.hidden = q !== 'pick';
       if (q === 'pick') { dateEl.value = ''; dateEl.focus(); try { dateEl.showPicker && dateEl.showPicker(); } catch (x) {} }
-      else { dateEl.value = iso(sat(q === 'sat1' ? 1 : 2)); }
+      else { dateEl.value = iso(dateOf(q)); }
       if (dateEl.hasAttribute('aria-invalid')) show(dateEl, '');
     };
     dChips.forEach((c) => c.addEventListener('click', () => pickDate(c)));
-    dateEl.addEventListener('change', () => { const c = dChips.find((x) => x.dataset.q === 'pick'); const sm = c.querySelector('small'); sm.textContent = dateEl.value ? fmt(new Date(dateEl.value + 'T00:00')) : ''; });
+    dateEl.addEventListener('change', () => { const c = dChips.find((x) => x.dataset.q === 'pick'); const sm = c.querySelector('small'); sm.textContent = dateEl.value ? fmt(new Date(dateEl.value + 'T12:00:00Z')) : ''; });
     /* occasion chips (radio group -> hidden field) */
     const occ = form.querySelector('#eq-event'), oChips = [...form.querySelectorAll('#bq-occ-chips .bq-chip')];
     oChips.forEach((c) => c.addEventListener('click', () => { oChips.forEach((x) => x.setAttribute('aria-checked', x === c ? 'true' : 'false')); occ.value = c.dataset.v; }));
     /* arrow keys move inside each chip group */
     form.querySelectorAll('.bq-chips').forEach((g) => g.addEventListener('keydown', (e) => {
-      const k = e.key, cs = [...g.querySelectorAll('.bq-chip')], i = cs.indexOf(document.activeElement); if (i < 0) return;
+      const k = e.key, cs = [...g.querySelectorAll('.bq-chip:not([hidden])')], i = cs.indexOf(document.activeElement); if (i < 0) return;
       const j = k === 'ArrowRight' || k === 'ArrowDown' ? i + 1 : k === 'ArrowLeft' || k === 'ArrowUp' ? i - 1 : null; if (j === null) return;
       e.preventDefault(); const n = cs[(j + cs.length) % cs.length]; n.focus(); n.click();
     }));
@@ -703,6 +713,7 @@ if (bqh) {
   .bq-date[hidden] { display: none; }
   .bq-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .bq-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(232,194,122,.5); background: rgba(246,230,209,.06); color: #f6e6d1; font: 600 .875rem/1.2 var(--fk-sans, Rupee, Poppins, sans-serif); cursor: pointer; transition: transform 140ms ease, background-color 160ms ease, color 160ms ease; }
+  .bq-chip[hidden] { display: none; }
   .bq-chip b { font-weight: 600; }
   .bq-chip small { font: 500 .75rem/1 var(--fk-sans, Rupee, Poppins, sans-serif); opacity: .85; }
   .bq-chip small:empty { display: none; }

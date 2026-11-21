@@ -9,7 +9,7 @@ interface Props {
   active?: string;
 }
 const { active = '' } = Astro.props;
-const showBook = !['home', 'reserve', 'ask', ''].includes(active); // Home already includes <StickyBar />
+const showBook = !['home', 'reserve', 'ask', 'celebrate', ''].includes(active); // 'celebrate' = /party, /banquet, /catering: they have their own CTAs // Home already includes <StickyBar />
 ---
 {showBook && <StickyBar always />}
 <nav class="mb-bar" aria-label="Mobile quick navigation">
@@ -50,6 +50,16 @@ const showBook = !['home', 'reserve', 'ask', ''].includes(active); // Home alrea
   </a>
 </nav>
 
+<script is:inline>
+  /* Phones: while a form field is focused (keyboard up) the floating items step aside: html.fk-typing (CSS in StickyBar / AskFab / InstaFab). */
+  (function () {
+    var root = document.documentElement;
+    var isField = function (e) { return !!e && (/^(TEXTAREA|SELECT)$/.test(e.tagName) || (e.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|range|image|file|color)$/i.test(e.type)) || e.isContentEditable); };
+    var sync = function () { root.classList.toggle('fk-typing', isField(document.activeElement)); };
+    document.addEventListener('focusin', sync);
+    document.addEventListener('focusout', function () { setTimeout(sync, 60); });
+  })();
+</script>
 <script is:inline>
   /* Phones: the WhatsApp tab opens the chat agent (same as the desktop button). No agent on the page -> normal WhatsApp link. */
   document.addEventListener('click', function (e) {
