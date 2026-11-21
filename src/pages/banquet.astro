@@ -28,7 +28,16 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       h1a="The Grand Banquet" h1b="at Fursat"
       lead="Birthdays, weddings and corporate events in Madhapur, with buffet packages from ₹925 per guest. Build your menu below and send it on WhatsApp."
       alt="The Fursat banquet hall set with long red and gold tables, framed in gold"
-      ctas={[{ label: 'Build your menu', href: '#packages', primary: true }, { label: 'Enquire for dates', href: '#enquire' }]} />
+      ctas={[{ label: 'Build your menu', href: '#packages', primary: true }, { label: 'Enquire for dates', href: '#enquire' }, { label: '▶ Watch the film', href: '#film' }]} />
+
+    <!-- v5.85 banquet film: opens in a dialog with sound (the visitor's tap allows audio). Part 2 adds the silent loop in the new hero. -->
+    <dialog class="bq-film" id="film" aria-label="Fursat Banquets film">
+      <button class="bq-film-x" type="button" aria-label="Close the film">×</button>
+      <video class="bq-film-v" controls playsinline preload="none" poster="/assets/video/banquet-film-poster-v1.jpg" width="1920" height="1080">
+        <source src="/assets/video/banquet-film-v1.webm" type="video/webm" />
+        <source src="/assets/video/banquet-film-v1.mp4" type="video/mp4" />
+      </video>
+    </dialog>
 
     <!-- Venue Capacity & Specs -->
     <section class="bq-specs">
@@ -176,6 +185,27 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </div>
     </section>
   </main>
+<style is:global>
+  .bq-film { width: min(94vw, 1180px); max-width: none; padding: 0; border: 0; border-radius: 18px; background: #0d1308; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+  .bq-film::backdrop { background: rgba(10,14,8,.78); }
+  .bq-film-v { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #0d1308; }
+  .bq-film-x { position: absolute; top: 10px; right: 10px; z-index: 2; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(246,230,209,.92); color: #17200f; font-size: 26px; line-height: 1; cursor: pointer; }
+  .bq-film-x:focus-visible { outline: 2px solid #c99a43; outline-offset: 2px; }
+</style>
+<script is:inline>
+  (function () {
+    var d = document.getElementById('film'); if (!d || !d.showModal) return;
+    var v = d.querySelector('video');
+    function open(e) { if (e) e.preventDefault(); try { d.showModal(); } catch (x) { return; }
+      try { dispatchEvent(new CustomEvent('fk:music', { detail: { id: 'film' } })); } catch (x) {}   /* SOUND-CONTRACT: other tracks stop */
+      var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    document.querySelectorAll('a[href="#film"]').forEach(function (a) { a.addEventListener('click', open); });
+    d.querySelector('.bq-film-x').addEventListener('click', function () { d.close(); });
+    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+    d.addEventListener('close', function () { v.pause(); });
+    if (location.hash === '#film') open();
+  })();
+</script>
 
   <MascotOfferModal />
   <SiteFooter />

@@ -395,16 +395,5 @@ story-d-poster / story-d-video (1366x634), story-m-poster / story-m-video (390x8
 - Merge: story.astro kept from v5.82 (hero video + routes); only the address line from kit 27 applied. QA from the kit was not run by the session: build is checked by the owner push, layout QA is done live afterwards in Chrome.
 
 
-## v5.84 Celebrate premium part 1: header + packages (kit 28e phase 2, parts header + packages)
-## Done: header (celebrate-p2-header.zip)
-- `SiteHeader.astro` rewritten: green info strip (hours from site.json, live open badge, map, call), cream bar, elephant mark + wordmark, red Reserve, Celebrate photo mega-menu, phone sheet (photo rows, Reserve + Call pinned; quick-nav bar hidden while open). Height constant (--sh-h 112 desktop / 94 phone, in fk-tokens.css). Skip link, Esc, arrow keys, aria kept.
-- fk-tokens.css: removed old .sh-plaster reserve/sweep rules (dead); added `--fk-red-on-dark: #ffb3a8`.
-- "Order" link removed from nav and phone sheet (owner decision: hidden; /order page stays).
-- Catering page now highlights Celebrate (active="celebrate").
-## Done: packages (celebrate-p2-packages.zip) — Packages C
-- Party `PartyBuilder.astro`: green 3-step panel (event type, guests, package) + cream estimate (live total, WhatsApp, new "Call Fursat" link, honeypot kept). Same data, prices, JS hooks and ids; phone sheet + sticky bar unchanged. Estimate block moved out of the left column (ids unchanged). `PartyPackages.astro`: eyebrow label and gold ring removed.
-- Banquet `PackageBuilder.astro`: green package panel (step 1), dishes (step 2), cream estimate card with guests/date (step 3), "Call Fursat" link. Highlight word "banquet menu" in elephant red.
-- "Most popular" ribbon: not built (unconfirmed claim).
-- "Call Fursat" uses site.json phone (no separate banquet-desk number invented).
-
-- Merge: SiteHeader taken from the kit (rewritten) with the v5.83 Rupee font stack re-applied; fk-tokens.css 3-way merged (no conflicts). Not built/QA-ed by the session: owner build + live check.
+## v5.85 Banquet film (watch button)
+- Banquet film files in public/assets/video/banquet-*-v1.* (see video-src/banquet-film/NOTES-banquet-film.md). Banquet hero gets a third CTA "▶ Watch the film" that opens a dialog with the full film (sound allowed by the tap; emits fk:music {id:"film"}). The silent hero loop is wired in Celebrate part 2.
