@@ -528,9 +528,9 @@
   .rs-hy .rs-mpanel{margin-top:14px}
   /* two columns: date + time | guests, occasion, seating, name, phone */
   .rs-hy .rs-qgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px;align-items:start;
-    grid-template-areas:"date date guests occ" "time time zone zone" "time time name phone" "party party party party"}
+    grid-template-areas:"date date guests occ" "time time zone zone" "time time name phone" "time time email email" "party party party party"}
   .rs-hy #f-date{grid-area:date}.rs-hy #f-time{grid-area:time}.rs-hy #f-guests{grid-area:guests}.rs-hy #f-occasion{grid-area:occ}
-  .rs-hy #f-zone{grid-area:zone}.rs-hy #f-name{grid-area:name}.rs-hy #f-phone{grid-area:phone}.rs-hy #rs-party{grid-area:party}
+  .rs-hy #f-zone{grid-area:zone}.rs-hy #f-name{grid-area:name}.rs-hy #f-phone{grid-area:phone}.rs-hy #f-email{grid-area:email}.rs-hy #rs-party{grid-area:party}
   .rs-hy .rs-qgrid > .rs-q{grid-column:auto;margin:0}
   /* foot: note left, button right */
   .rs-hy .rs-foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:center;margin-top:12px}

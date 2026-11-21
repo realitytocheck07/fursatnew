@@ -5,7 +5,6 @@ import site from '../../data/site.json';
 const real = (v?: string) => !!v && !v.startsWith('TODO');
 const a = site.address;
 const address = [real(a.line1) ? a.line1 : '', a.line2, `${a.state} ${a.pin}`].filter(Boolean).join(', ');
-// TODO(client): site.json address.line1 (unit number, building) is still a placeholder, so it is left out here.
 const schedule = site.hours.schedule;
 const tel = `+${site.phonePlain}`;
 const arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
@@ -35,6 +34,7 @@ const arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
     <a class="fk-btn fk-btn--secondary" href={`https://wa.me/${site.phonePlain}?text=${encodeURIComponent("Hi Fursat! I have a question.")}`} target="_blank" rel="noopener">WhatsApp</a>
     <a class="fk-btn fk-btn--secondary" href={`tel:${tel}`}>Call</a>
     <a class="fk-btn fk-btn--secondary" href={a.googleMaps} target="_blank" rel="noopener">Directions</a>
+    <a class="fk-btn fk-btn--secondary hv-rate" href={a.review} target="_blank" rel="noopener">Rate us on Google</a>
   </div>
 </section>
 
@@ -52,6 +52,7 @@ const arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
 .hv-tel{display:inline-flex;align-items:center;min-height:44px;color:#1A1608;font-variant-numeric:tabular-nums;text-underline-offset:3px}
 .hv-tel:focus-visible{outline:2px solid #C94716;outline-offset:3px;border-radius:4px}
 .hv-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hv-rate{grid-column:1/-1}
 .hv-ele{grid-column:1/-1;margin:0 0 4px;display:flex;align-items:center;gap:clamp(14px,2vw,22px)}
 .hv-ele img{flex:none;display:block;width:clamp(130px,16vw,200px);height:auto;aspect-ratio:640/582;object-fit:cover;border-radius:22px;box-shadow:0 10px 24px -14px rgba(26,22,8,.45)}
 .hv-ele figcaption{font:italic 600 clamp(1.375rem,2.4vw,1.75rem)/1.2 'Playfair Display',serif;color:#1b3a26}

@@ -145,6 +145,11 @@ const conditions: string[] = [];
           <span class="rs-sr" id="res-phone-hint">Enter a 10-digit mobile number.</span>
           <p class="rs-ferr" id="res-phone-err" role="alert"></p>
         </div>
+        <div class="rs-q" id="f-email">
+          <label class="rs-ql" for="res-email"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7.5l8 6 8-6"/></svg>Email<span class="rs-sr"> (optional)</span><span class="rs-long" aria-hidden="true"> (optional)</span></label>
+          <div class="rs-box"><input type="email" id="res-email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="80" placeholder="you@example.com" aria-describedby="res-email-err" /></div>
+          <p class="rs-ferr" id="res-email-err" role="alert"></p>
+        </div>
       </div>
     </div>
 
@@ -250,7 +255,7 @@ const conditions: string[] = [];
   const phoneOk = (v) => { const n = String(v || '').replace(/\D/g, '').length; return n >= 10 && n <= 13; };
 
   /* ───────── one booking object, shared by Quick and Concierge ───────── */
-  const booking = { date: todayStr(), time: '', timeMin: -1, guests: 4, zone: '', occasion: 'Casual Dining', name: '', phone: '' };
+  const booking = { date: todayStr(), time: '', timeMin: -1, guests: 4, zone: '', occasion: 'Casual Dining', name: '', phone: '', email: '' };
   /* optional table picked in the 3D room (src/components/booking3d) arrives as "fk:table" { id, seats, line } or null. The form works without it. */
   booking.table = ''; booking.tableSeats = 0;
   function renderTable() {
@@ -343,12 +348,14 @@ const conditions: string[] = [];
   /* ───────── zone + occasion + name + phone ───────── */
   const zoneChips = qsa('#rs-zones .rs-chip');
   zoneChips.forEach((c) => c.addEventListener('click', () => { booking.zone = c.dataset.v; renderAll(); }));
-  const occEl = $('res-occasion'), nameEl = $('res-name'), phoneEl = $('res-phone');
+  const occEl = $('res-occasion'), nameEl = $('res-name'), phoneEl = $('res-phone'), emailEl = $('res-email');
   const occText = () => { const o = qsa('option', occEl).find((x) => x.value === booking.occasion); return o ? o.textContent : booking.occasion; };
   occEl.addEventListener('change', () => { booking.occasion = occEl.value; $('f-occasion').classList.remove('is-prefilled'); renderAll(); });
   nameEl.addEventListener('input', () => { booking.name = nameEl.value; clearErr(['f-name']); updateTicket(); });
   phoneEl.addEventListener('input', () => { booking.phone = phoneEl.value; clearErr(['f-phone']); updateTicket(); });
-  const syncInputs = () => { nameEl.value = booking.name; phoneEl.value = booking.phone; occEl.value = booking.occasion; };
+  emailEl.addEventListener('input', () => { booking.email = emailEl.value; clearErr(['f-email']); });
+  emailEl.addEventListener('blur', () => { const v = emailEl.value.trim(); if (v && !emailOk(v)) { $('res-email-err').textContent = 'Please check the email address.'; emailEl.setAttribute('aria-invalid', 'true'); $('f-email').classList.add('is-bad'); } });
+  const syncInputs = () => { nameEl.value = booking.name; phoneEl.value = booking.phone; emailEl.value = booking.email; occEl.value = booking.occasion; };
 
   /* ───────── render: Quick DOM from the booking object ───────── */
   function renderQuick() {
@@ -627,7 +634,8 @@ const conditions: string[] = [];
   /* ───────── submit: wa.me/919059670033 with the message (format unchanged) ───────── */
   const submit = $('res-submit-btn');
   /* field errors: text sits under its field (aria-describedby), role=alert announces it; chat/pick modes keep the single message above the button */
-  const FE = { 'f-name': ['res-name', 'res-name-err'], 'f-phone': ['res-phone', 'res-phone-err'], 'f-time': ['rs-times', 'rs-time-err'] };
+  const FE = { 'f-name': ['res-name', 'res-name-err'], 'f-phone': ['res-phone', 'res-phone-err'], 'f-email': ['res-email', 'res-email-err'], 'f-time': ['rs-times', 'rs-time-err'] };
+  const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   function clearErr(ids) {
     (ids || Object.keys(FE)).forEach((id) => { const e = FE[id]; $(e[1]).textContent = ''; $(e[0]).removeAttribute('aria-invalid'); $(id).classList.remove('is-bad'); });
     if (!ids) $('rs-err').classList.remove('on');
@@ -639,12 +647,13 @@ const conditions: string[] = [];
   }
   timeBox.addEventListener('click', () => clearErr(['f-time']));
   submit.addEventListener('click', () => {
-    const name = booking.name.trim(), phone = booking.phone.trim();
+    const name = booking.name.trim(), phone = booking.phone.trim(), email = booking.email.trim();
     const bad = [];
     if (!booking.time) bad.push(['f-time', 'Please choose a time.']);
     if (!name) bad.push(['f-name', 'Please enter your name.']);
     if (!phone) bad.push(['f-phone', 'Please enter your mobile number.']);
     else if (!phoneOk(phone)) bad.push(['f-phone', 'Please enter a 10-digit mobile number.']);
+    if (email && !emailOk(email)) bad.push(['f-email', 'Please check the email address.']);
     if (bad.length) {
       showErr(bad);
       if (mode === 'quick') { const f = bad[0][0], t = f === 'f-time' ? qs('#rs-times .rs-chip[aria-checked="true"]:not(:disabled)') || qs('#rs-times .rs-chip:not(:disabled)') : $(FE[f][0]); if (t) t.focus(); } else submit.focus();
@@ -652,9 +661,9 @@ const conditions: string[] = [];
     }
     clearErr();
     const date = friendly(booking.date), seating = booking.zone || 'No preference', occasion = booking.occasion || 'Dining';
-    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (booking.table ? '\n• Table: ' + booking.table : '') + (offerOf() ? '\n• Offer: ' + offerOf() : '');
+    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + (email ? '\n• Email: ' + email : '') + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (booking.table ? '\n• Table: ' + booking.table : '') + (offerOf() ? '\n• Offer: ' + offerOf() : '');
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
-    window.fkForm?.send('restaurant', 'Table booking', { name, phone, guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
+    window.fkForm?.send('restaurant', 'Table booking', { name, phone, ...(email ? { email } : {}), guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
     const w = window.open(url, '_blank');
     const fine = $('rs-fine');
     fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';

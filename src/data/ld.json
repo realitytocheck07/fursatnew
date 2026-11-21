@@ -10,20 +10,21 @@
   "image": "https://fursatind.in/assets/interior/fursat_space_01.webp",
   "logo": "https://fursatind.in/assets/c86f49db5a.webp",
   "telephone": [
-   "+919059670033",
-   "+919848360033"
+   "+919059670033"
   ],
   "servesCuisine": [
    "Indian",
+   "South Indian",
    "Hyderabadi",
    "Andhra",
+   "Chinese",
    "Continental",
    "Asian"
   ],
-  "hasMap": "https://www.google.com/maps/search/?api=1&query=Fursat+Kitchen+Bar+Capital+Park+Madhapur+Hyderabad",
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=Fursat+kitchen+%26+Bar+C9WP%2BHF3+Madhapur+Hyderabad",
   "address": {
    "@type": "PostalAddress",
-   "streetAddress": "Capital Park, Madhapur",
+   "streetAddress": "Capital Park Road, Ayyappa Society, Madhapur",
    "addressLocality": "Hyderabad",
    "addressRegion": "Telangana",
    "addressCountry": "IN"
@@ -32,7 +33,13 @@
    "https://www.instagram.com/fursatind.in",
    "https://www.instagram.com/fursat_bitesandbuffet",
    "https://www.instagram.com/fursatbanquets"
-  ]
+  ],
+  "geo": {
+   "@type": "GeoCoordinates",
+   "latitude": 17.44639,
+   "longitude": 78.38873
+  },
+  "email": "fursat.hyd@gmail.com"
  },
  {
   "@context": "https://schema.org",

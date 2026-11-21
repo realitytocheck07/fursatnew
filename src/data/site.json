@@ -9,14 +9,17 @@
   "order": { "swiggy": "https://www.swiggy.com/menu/1127487", "zomato": "https://zomato.onelink.me/xqzv/tu94x96v", "dotpe": "https://fursat.dotpe.in/", "pickup": false },
   "rista": { "live": false },
   "forms": { "restaurant": "df9a716d-4f53-4f0c-8459-e0aa4899e20d", "events": "b44ccfa2-178a-4ae4-a1d3-949ede2d4daa" },
-  "email": "TODO(client)@fursatind.in",
+  "email": "fursat.hyd@gmail.com",
   "address": {
-    "line1": "TODO(client): Unit number, Capital Park",
+    "line1": "Capital Park Road, Ayyappa Society",
     "line2": "Madhapur, Hyderabad",
     "state": "Telangana",
     "pin": "500081",
-    "googleMaps": "https://maps.google.com/?q=Fursat+Kitchen+Bar+Madhapur+Hyderabad",
-    "embed": "TODO(client): Google Maps embed URL"
+    "googleMaps": "https://www.google.com/maps/search/?api=1&query=Fursat+kitchen+%26+Bar+C9WP%2BHF3+Madhapur+Hyderabad",
+    "embed": "https://www.google.com/maps?q=17.44639,78.38873&z=17&output=embed",
+    "geo": { "lat": 17.44639, "lng": 78.38873 },
+    "plusCode": "C9WP+HF3",
+    "review": "https://g.page/r/CTXMkTZabEEBEAE/review"
   },
   "hours": {
     "open": "12:00",

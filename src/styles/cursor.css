@@ -1,41 +1,26 @@
-/* Fursat cursor: the cocktail glass replaces the pointer on desktop (mouse) only.
-   Sprite is 42x65 css px; hotspot (the click point) is the glass rim at 6.1 / 17.5. */
-:root{--fkc-w:42px;--fkc-h:65px;--fkc-hx:6.1px;--fkc-hy:17.5px;--fkc-gold:#c99a43;--fkc-ease:cubic-bezier(.23,1,.32,1)}
+/* Fursat cursor v5.70: the cocktail glass is a real system cursor (PNG, zero lag). fk-cursor.js adds html.fk-cur
+   on desktop mouse only; the bubble/sparkle effects live in .fk-cf. Glass 39x60 css (2x = 78x120, under the 128px browser limit).
+   Hotspots (css px): upright 6 16, tilted (links) 7 15 (the tilted PNG has the gold click ring baked in at the hotspot).
+   If a browser ignores an image, the trailing "auto" keeps the normal arrow. */
+:root{--fkc-gold:#c99a43;--fkc-ease:cubic-bezier(.23,1,.32,1)}
 
-/* hide the OS cursor only after the sprite is loaded and live; native zones (inputs, 360 viewer) opt out */
-html.fk-cur:not(.fk-cur-native),
-html.fk-cur:not(.fk-cur-native) *{cursor:none!important}
+/* glass everywhere except native zones (text fields, selects, iframes, video controls, the 360 viewer) */
+html.fk-cur,
+html.fk-cur :not(:where(input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=range]),textarea,select,[contenteditable=""],[contenteditable="true"],iframe,video[controls],.pv,[data-cursor="native"])):not(:where(input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=range]),textarea,select,[contenteditable=""],[contenteditable="true"],iframe,video[controls],.pv,[data-cursor="native"]) *){cursor:url(/assets/brand/fursat-cursor.png) 6 16,auto!important;cursor:-webkit-image-set(url(/assets/brand/fursat-cursor.png) 1x,url(/assets/brand/fursat-cursor@2x.png) 2x) 6 16,auto!important;cursor:image-set(url(/assets/brand/fursat-cursor.png) 1x,url(/assets/brand/fursat-cursor@2x.png) 2x) 6 16,auto!important}
+/* links and buttons: tilted glass */
+html.fk-cur :where(a[href],button:not(:disabled),[role=button],[role=link],[role=tab],summary,label[for],input[type=checkbox],input[type=radio],input[type=submit],input[type=button],input[type=range],.cursor-pointer,.ms-tray,[data-cursor="hover"]),
+html.fk-cur :where(a[href],button:not(:disabled),[role=button],[role=link],[role=tab],summary,label[for],input[type=checkbox],input[type=radio],input[type=submit],input[type=button],input[type=range],.cursor-pointer,.ms-tray,[data-cursor="hover"]) *:not(:where(input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=range]),textarea,select,[contenteditable=""],[contenteditable="true"],iframe,video[controls],.pv,[data-cursor="native"])),
+html.fk-cur.fk-cur-bl,
+html.fk-cur.fk-cur-bl *{cursor:url(/assets/brand/fursat-cursor-tilt.png) 7 15,auto!important;cursor:-webkit-image-set(url(/assets/brand/fursat-cursor-tilt.png) 1x,url(/assets/brand/fursat-cursor-tilt@2x.png) 2x) 7 15,auto!important;cursor:image-set(url(/assets/brand/fursat-cursor-tilt.png) 1x,url(/assets/brand/fursat-cursor-tilt@2x.png) 2x) 7 15,auto!important}
+/* native zones keep their own cursor (I-beam in fields) */
+html.fk-cur :where(input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=range]),textarea,select,[contenteditable=""],[contenteditable="true"],iframe,video[controls],.pv,[data-cursor="native"]){cursor:auto}
 
-.fk-c{position:fixed;inset:auto;left:0;top:0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;
-  pointer-events:none;z-index:2147483647;opacity:0;will-change:transform;contain:layout style}
-.fk-c.is-on{opacity:1;transition:opacity .12s linear}
-.fk-c.is-hid{opacity:0}
-
-.fk-c-in{position:absolute;left:calc(var(--fkc-hx) * -1);top:calc(var(--fkc-hy) * -1);width:var(--fkc-w);height:var(--fkc-h);
-  transform-origin:var(--fkc-hx) var(--fkc-hy);transition:transform .18s var(--fkc-ease)}
-.fk-c-tilt{position:absolute;inset:0;transform-origin:var(--fkc-hx) var(--fkc-hy)}
-.fk-c-tilt img{display:block;width:100%;height:100%;user-select:none;-webkit-user-drag:none}
-
-/* hover is seen tens of times a day, so it stays small: a 7deg tip plus a gold ring on the exact click point.
-   press snaps in (90ms), release settles slower (180ms) */
-.fk-c.is-link .fk-c-in{transform:rotate(-7deg)}
-.fk-c.is-down .fk-c-in{transform:scale(.92);transition-duration:.09s}
-.fk-c.is-link.is-down .fk-c-in{transform:rotate(-7deg) scale(.94)}
-.fk-c-pt,.fk-c-rip{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;box-sizing:border-box}
-.fk-c-pt{border:1.5px solid var(--fkc-gold);background:rgba(242,238,228,.4);opacity:0;transition:opacity .12s linear}
-.fk-c.is-link .fk-c-pt{opacity:1}
-.fk-c-rip{border:1px solid var(--fkc-gold);opacity:0}
-
-/* effects layer: same top-layer trick as the glass, one step below it; bubbles and sparks are tiny absolutely-positioned elements animated with WAAPI */
+/* effects layer (bubbles, click sparkles, ripple): tiny elements animated with WAAPI transform + opacity, in the top layer so they sit above dialogs */
 .fk-cf{position:fixed;inset:auto;left:0;top:0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;pointer-events:none;z-index:2147483646}
-.fk-cf i{position:absolute;border-radius:50%;background:radial-gradient(circle at 32% 30%,#fff,rgba(255,255,255,.55) 55%,rgba(255,255,255,.1) 75%);box-shadow:0 0 0 .6px rgba(201,154,67,.55);will-change:transform,opacity}
-.fk-cf u{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--fkc-gold);box-shadow:0 0 6px rgba(243,197,107,.9);will-change:transform,opacity}
+.fk-cf i,.fk-cf u,.fk-cf s{position:absolute;left:0;top:0;will-change:transform,opacity}
+.fk-cf i{border-radius:50%;background:radial-gradient(circle at 32% 30%,#fff,rgba(255,255,255,.55) 55%,rgba(255,255,255,.1) 75%);box-shadow:0 0 0 .6px rgba(201,154,67,.55)}
+.fk-cf u{width:5px;height:5px;border-radius:50%;background:var(--fkc-gold);box-shadow:0 0 6px rgba(243,197,107,.9)}
+.fk-cf s{width:14px;height:14px;border-radius:50%;box-sizing:border-box;border:1px solid var(--fkc-gold)}
 
-@media (prefers-reduced-motion:reduce){
-  .fk-cf{display:none}
-  .fk-c-in{transition:none}
-  .fk-c.is-link .fk-c-in,.fk-c.is-down .fk-c-in,.fk-c.is-link.is-down .fk-c-in{transform:none}
-  .fk-c-pt{transition:opacity .1s linear}
-  .fk-c-rip{display:none}
-}
-@media (forced-colors:active),(hover:none),(pointer:coarse){.fk-c{display:none!important}}
+@media (prefers-reduced-motion:reduce){.fk-cf{display:none}}
+@media (forced-colors:active),(hover:none),(pointer:coarse){.fk-cf{display:none!important}}

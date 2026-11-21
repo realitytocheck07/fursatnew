@@ -59,7 +59,9 @@ import site from '../data/site.json';
           <p class="sf-info-p">
             <b>Reservations:</b><br />
             {/* TODO(client): second phone number unconfirmed, not shown. */}
-            <a href={`tel:+${site.phonePlain}`}>{site.phone}</a>
+            <a href={`tel:+${site.phonePlain}`}>{site.phone}</a><br />
+            <a href={`mailto:${site.email}`}>{site.email}</a><br />
+            <a href={site.address.review} target="_blank" rel="noopener">Rate us on Google ★</a>
           </p>
         </div>
       </div>
