@@ -109,6 +109,10 @@ import InstagramFeed from '../components/InstagramFeed.astro';
                 <input type="tel" id="ct-f2" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="ct-f2-e" placeholder="Your phone number" />
                 <p class="ct-err" id="ct-f2-e" role="alert"></p>
               </div>
+              <div class="ct-field">
+                <label for="ct-email">Email <span class="opt">(optional)</span></label>
+                <input type="email" id="ct-email" name="email" autocomplete="email" data-l="Email" placeholder="you@example.com" />
+              </div>
             </div>
             <div class="ct-row">
               <div class="ct-field">
@@ -184,6 +188,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       const lines = [form.dataset.waIntro], sent = {};
       fields.forEach((el) => {
         const t = el.dataset.v; let v = el.value.trim();
+        if (el.type === 'email' && !v) return; // optional: only sent when filled
         if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
         else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();

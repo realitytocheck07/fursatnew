@@ -132,6 +132,11 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
           <p class="pb-est-v" id="pb-total" data-val={initial.price * initGuests}>{inr(initial.price * initGuests)}</p>
           <p class="pb-est-s" id="pb-sub">{initGuests} guests &times; {inr(initial.price)} {UNIT} &middot; before taxes</p>
           <p class="pb-sr" id="pb-live" role="status" aria-live="polite"></p>
+          <div class="pb-contact">
+            <label class="pb-cf"><span>Your name</span><input type="text" id="pb-name" name="name" autocomplete="name" placeholder="e.g. Priya" /></label>
+            <label class="pb-cf"><span>Mobile / WhatsApp</span><input type="tel" id="pb-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit number" pattern="[0-9 +]{10,14}" /></label>
+            <label class="pb-cf pb-cf--w"><span>Email <em>(optional)</em></span><input type="email" id="pb-email" name="email" autocomplete="email" placeholder="you@example.com" /></label>
+          </div>
           <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
           <a class="fk-btn fk-btn--primary pb-wa" id="pa-wa" href={waHi} target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.9 7L4 20l1.1-3.9A8 8 0 1 1 20 12z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2z"/></svg>
@@ -418,4 +423,13 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
   .pb *,.pb-bar,.pb-sheet *{transition:none!important}
   .pb-host[data-pose="cheer"] .pa-cheer,.pa-star{animation:none!important}.pa-star{display:none}
 }
+
+/* contact fields (name, phone, optional email) — sent with the WhatsApp message and the email copy */
+.pb-contact{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:14px 0 12px}
+.pb-cf{display:flex;flex-direction:column;gap:5px;font:600 .75rem/1.2 var(--fk-sans,"Poppins",sans-serif);letter-spacing:.06em;text-transform:uppercase;color:inherit;opacity:.92}
+.pb-cf em{font-style:normal;text-transform:none;letter-spacing:0;opacity:.75}
+.pb-cf--w{grid-column:1/-1}
+.pb-cf input{min-height:46px;padding:0 14px;border-radius:12px;border:1px solid rgba(201,154,67,.55);background:rgba(255,250,240,.96);color:#10261a;font:500 1rem/1 var(--fk-sans,"Poppins",sans-serif);text-transform:none;letter-spacing:0}
+.pb-cf input:focus-visible{outline:2px solid #c99a43;outline-offset:2px}
+@media (max-width:420px){.pb-contact{grid-template-columns:1fr}}
 </style>

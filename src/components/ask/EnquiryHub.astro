@@ -164,6 +164,10 @@ const ico: Record<string, string> = {
             <input id="eh-tel" name="tel" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="16" placeholder="10 digits" aria-describedby="eh-tel-e" required />
             <p class="eh-err" id="eh-tel-e" role="alert"></p>
           </div>
+          <div class="eh-f">
+            <label for="eh-email">Email <span>(optional)</span></label>
+            <input id="eh-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+          </div>
           <div class="eh-f eh-f--wide">
             <label for="eh-note">Anything special? <span>(optional)</span></label>
             <textarea id="eh-note" name="note" rows="3" maxlength="300" placeholder="Décor, cake, dietary needs"></textarea>
@@ -405,6 +409,7 @@ const ico: Record<string, string> = {
       if (r) L.push('\u2022 Package: ' + r.getAttribute('data-name') + ' ' + inr(r.getAttribute('data-price')) + ' + taxes per guest');
     }
     L.push('\u2022 Name: ' + name.value.trim(), '\u2022 Mobile: ' + digits());
+    var em = form.querySelector('#eh-email'); if (em && em.value.trim()) L.push('\u2022 Email: ' + em.value.trim());
     if (note.value.trim()) L.push('\u2022 Note: ' + note.value.trim().replace(/\s+/g, ' '));
     return L.join('\n');
   }
@@ -414,7 +419,7 @@ const ico: Record<string, string> = {
     // earlier steps were validated on Next; re-check quietly in case a field changed
     if (!(checkGuests() && checkDate() && checkTime())) { show(1, true); validate(1); return; }
     if (hasPkg() && !checkPkg()) { show(2, true); return; }
-    if (window.fkForm) window.fkForm.send('events', 'Event enquiry', { occasion: tiles[cur].name, guests: guests.value.trim(), date: date.value, time: time.value, name: name.value.trim(), phone: digits(), note: note.value.trim() }, form.querySelector('[name=botcheck]'));
+    if (window.fkForm) window.fkForm.send('events', 'Event enquiry', { email: (form.querySelector('#eh-email') || {}).value || '', occasion: tiles[cur].name, guests: guests.value.trim(), date: date.value, time: time.value, name: name.value.trim(), phone: digits(), note: note.value.trim() }, form.querySelector('[name=botcheck]'));
     var url = 'https://wa.me/' + D.wa + '?text=' + encodeURIComponent(message());
     fine.textContent = 'Opening WhatsApp with your enquiry.';
     window.open(url, '_blank', 'noopener');

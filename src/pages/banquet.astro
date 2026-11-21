@@ -104,6 +104,10 @@ const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Cor
                 <input type="tel" id="eq-phone" name="phone" autocomplete="tel-national" inputmode="numeric" maxlength="14" data-l="Phone" data-v="phone" aria-required="true" aria-describedby="eq-phone-e" placeholder="Your phone number" />
                 <p class="bq-err" id="eq-phone-e" role="alert"></p>
               </div>
+              <div class="bq-form-field">
+                <label for="eq-email">Email <span class="opt">(optional)</span></label>
+                <input type="email" id="eq-email" name="email" autocomplete="email" data-l="Email" placeholder="you@example.com" />
+              </div>
             </div>
 
             <div class="bq-form-field">
@@ -412,6 +416,7 @@ if (bqh) {
       const lines = [form.dataset.waIntro], sent = {};
       fields.forEach((el) => {
         const t = el.dataset.v; let v = el.value.trim();
+        if (el.type === 'email' && !v) return; // optional: only sent when filled
         if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
         else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();

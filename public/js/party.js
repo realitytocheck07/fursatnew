@@ -87,12 +87,16 @@
       countTo(0, 'Enter the number of guests'); live.textContent = 'Enter the number of guests.';
     }
     var msg = ['Hi Fursat! I would like to plan a party:', '\u2022 Package: ' + p.label, '\u2022 Price: ' + inr(p.price) + ' + taxes per guest', '\u2022 Guests: ' + (ok ? g : 'to be confirmed')].concat(ok ? ['\u2022 Estimate: ' + inr(sum) + ' + taxes'] : []).join('\n');
+    var who = contact(); if (who.length) msg += '\n' + who.join('\n');
     var href = 'https://wa.me/' + D.wa + '?text=' + encodeURIComponent(msg);
     wa.href = href; if (barWa) barWa.href = href;
     if (barT) barT.textContent = p.label + ' \u00b7 ' + (ok ? g : '?') + ' \u00b7 ' + (ok ? inr(sum) : 'add guests');
     setMenu(); syncBar();
   }
 
+  /* contact fields (optional email): added to the WhatsApp text and the email copy */
+  function cv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  function contact() { var a = []; if (cv('pb-name')) a.push('\u2022 Name: ' + cv('pb-name')); if (cv('pb-phone')) a.push('\u2022 Phone: ' + cv('pb-phone')); if (cv('pb-email')) a.push('\u2022 Email: ' + cv('pb-email')); return a; }
   function setGroup(id, keepPkg) {
     if (id !== st.group) { st.group = id; var cur = pkgOf(st.pkg); if (!cur || cur.group !== id || !keepPkg) st.pkg = D.pkgs.filter(function (p) { return p.group === id; })[0].id; }
   }
@@ -118,8 +122,9 @@
   /* WhatsApp (keeps today's flow): email copy first, then the link opens as normal; the WhatsApp flow never waits for the email */
   function mail() {
     var p = pkgOf(st.pkg), g = clampN(st.guests);
-    if (window.fkForm) window.fkForm.send('events', 'Party plan', { package: p.label, guests: st.guests >= 1 ? g : 'to be confirmed' }, $('#pa-plan [name=botcheck]'));
+    if (window.fkForm) window.fkForm.send('events', 'Party plan', { package: p.label, guests: st.guests >= 1 ? g : 'to be confirmed', name: cv('pb-name'), phone: cv('pb-phone'), email: cv('pb-email') }, $('#pa-plan [name=botcheck]'));
   }
+  ['pb-name','pb-phone','pb-email'].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener('input', render); });
   wa.addEventListener('click', mail); if (barWa) barWa.addEventListener('click', mail);
 
   /* occasion cards -> pre-select the group, scroll to the builder */
