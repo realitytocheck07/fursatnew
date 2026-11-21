@@ -474,7 +474,7 @@ function init(root: HTMLElement) {
     sheet.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(); }); // Escape
     sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); }); // outside the panel
     addEventListener('popstate', () => { if (sheet.open) closeSheet(true); });      // back button / swipe-back
-    phone.addEventListener('change', () => { syncInert(); if (!phone.matches && sheet.open) closeSheet(); });
+    phone.addEventListener('change', () => { syncOpens(); if (!phone.matches && sheet.open) closeSheet(); });
     root.addEventListener('mv:picks', () => { if (sheet.open) status(); });
     addBtn.addEventListener('click', () => {
       flashing = true; addBtn.classList.add('is-added'); clearTimeout(flashT);

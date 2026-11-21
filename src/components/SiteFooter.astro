@@ -217,6 +217,9 @@ const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Par
       var bg = getComputedStyle(document.body).backgroundColor;
       if (/rgba\(.*,\s*0\)|transparent/.test(bg)) bg = getComputedStyle(document.documentElement).backgroundColor;
       siblings().forEach(function (e) {
+        // never lift the header or anything fixed/sticky or already stacked above (its menus must stay on top of the page)
+        var cs = getComputedStyle(e), z = parseInt(cs.zIndex, 10);
+        if (e.matches('header, .sh-header, [data-no-curtain]') || cs.position === 'fixed' || cs.position === 'sticky' || z > 1) return;
         e.classList.add('sf-curtain-lift'); lifted.push(e);
         var c = getComputedStyle(e).backgroundColor;
         if (/rgba\(.*,\s*0\)|transparent/.test(c)) { e.style.backgroundColor = bg; e.dataset.sfBg = '1'; }
