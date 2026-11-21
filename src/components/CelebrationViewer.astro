@@ -1,0 +1,165 @@
+---
+// Shared full-screen photo viewer + photo tile + swipe strip (Party gallery, Banquet "Hosted at Fursat", Party cakes).
+// Use: put a [data-cv-group] around some `.cvt` buttons (each has data-cv-full, data-cv-alt, optional data-cv-w/-h), then include <CelebrationViewer /> ONCE per page.
+// Tiles inside a [hidden] ancestor are skipped, so a tabbed gallery pages through the open tab only.
+// Motion: transform + opacity only (WAAPI). No reduced-motion branch, by owner rule.
+---
+<dialog class="cv" id="cv" aria-label="Photo viewer">
+  <div class="cv-stage" id="cv-stage">
+    <img class="cv-img" id="cv-img" alt="" width="640" height="853" decoding="async" draggable="false" />
+  </div>
+  <button type="button" class="cv-btn cv-x" id="cv-x" aria-label="Close photo viewer" autofocus>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+  </button>
+  <button type="button" class="cv-btn cv-nav cv-prev" id="cv-prev" aria-label="Previous photo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+  </button>
+  <button type="button" class="cv-btn cv-nav cv-next" id="cv-next" aria-label="Next photo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+  </button>
+  <p class="cv-count" id="cv-count" aria-live="polite"></p>
+</dialog>
+
+<style is:global>
+/* ---- photo tile (button that opens the viewer) ---- */
+.cvt{position:relative;display:block;width:100%;padding:0;border:0;margin:0;font:inherit;color:inherit;background:#10261a;border-radius:18px;overflow:hidden;cursor:zoom-in;aspect-ratio:var(--r,3/4);box-shadow:0 12px 26px -14px rgba(14,34,20,.55);-webkit-tap-highlight-color:transparent;transition:transform var(--fk-dur-1) var(--fk-ease-out),box-shadow var(--fk-dur-1) var(--fk-ease-out)}
+.cvt img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 50%}
+.cvt::after{content:"";position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;background:rgba(16,38,26,.72) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e6c27a' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6'/%3E%3Cpath d='M16 16l4 4M11 8.5v5M8.5 11h5'/%3E%3C/svg%3E") center/18px no-repeat;box-shadow:0 0 0 1.5px rgba(201,154,67,.8);pointer-events:none}
+.cvt:focus-visible{outline:3px solid #c99a43;outline-offset:3px}
+@media(hover:hover){.cvt:hover{transform:translateY(-5px);box-shadow:0 0 0 1px #c99a43,0 20px 32px -14px rgba(14,34,20,.6)}}
+.cvt:active{transform:scale(.985)}
+
+/* ---- swipe strip (always a horizontal snap row; next tile peeks) ---- */
+.cv-strip{list-style:none;margin:0;padding:6px 16px 18px;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%)}
+.cv-strip::-webkit-scrollbar{display:none}
+.cv-strip>li{flex:0 0 min(62vw,240px);scroll-snap-align:start}
+@media(min-width:768px){.cv-strip{padding-inline:clamp(16px,4vw,48px);scroll-padding-inline:clamp(16px,4vw,48px);justify-content:safe center}.cv-strip>li{flex-basis:clamp(200px,19vw,236px)}}
+
+/* ---- full-screen viewer ---- */
+.cv{border:0;padding:0;margin:0;width:100%;max-width:none;height:100%;max-height:none;background:rgba(10,22,15,.97);color:#fbf3e6;overflow:hidden;overscroll-behavior:contain}
+.cv:not([open]){display:none}
+.cv[open]{display:block}
+.cv::backdrop{background:transparent}
+.cv-stage{position:absolute;inset:0;display:grid;place-items:center;touch-action:none;cursor:zoom-out;padding:max(64px,env(safe-area-inset-top)) 12px max(72px,env(safe-area-inset-bottom))}
+.cv-img{display:block;width:min(94vw,calc((100dvh - 150px) * var(--cv-r,.75)));height:auto;aspect-ratio:var(--cv-r,.75);object-fit:cover;border-radius:14px;background:#10261a;box-shadow:0 0 0 1.5px rgba(201,154,67,.7),0 24px 60px -20px rgba(0,0,0,.7);cursor:default;user-select:none;-webkit-user-select:none;will-change:transform}
+.cv-btn{position:absolute;z-index:2;width:48px;height:48px;border-radius:50%;border:0;display:grid;place-items:center;padding:0;cursor:pointer;color:#e6c27a;background:rgba(16,38,26,.82);box-shadow:0 0 0 1.5px #c99a43;-webkit-tap-highlight-color:transparent;transition:transform var(--fk-dur-1) var(--fk-ease-out),background-color var(--fk-dur-1)}
+.cv-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cv-btn:active{transform:scale(.94)}
+.cv-btn:focus-visible{outline:3px solid #fbf3e6;outline-offset:3px}
+@media(hover:hover){.cv-btn:hover{background:#10261a}}
+.cv-x{top:max(14px,env(safe-area-inset-top));right:14px}
+.cv-nav{bottom:max(14px,env(safe-area-inset-bottom))}
+.cv-prev{left:14px}.cv-next{right:14px}
+.cv-count{position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom));height:48px;margin:0;display:grid;place-items:center;font:600 14px/1 var(--fk-sans);letter-spacing:.08em;color:#e6c27a;pointer-events:none}
+@media(min-width:768px){
+  .cv-nav{bottom:auto;top:50%;margin-top:-24px}
+  .cv-prev{left:clamp(14px,3vw,40px)}.cv-next{right:clamp(14px,3vw,40px)}
+  .cv-stage{padding-bottom:max(72px,env(safe-area-inset-bottom))}
+}
+.cv-one .cv-nav,.cv-one .cv-count{display:none}
+</style>
+
+<script>
+const dlg = document.getElementById('cv') as HTMLDialogElement | null;
+if (dlg) {
+  const stage = document.getElementById('cv-stage') as HTMLElement;
+  const img = document.getElementById('cv-img') as HTMLImageElement;
+  const count = document.getElementById('cv-count') as HTMLElement;
+  const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+  let items: HTMLElement[] = [];
+  let idx = 0;
+  let opener: HTMLElement | null = null;
+  let closing = false;
+
+  const collect = (t: HTMLElement) => {
+    const g = t.closest('[data-cv-group]');
+    const all = g ? Array.from(g.querySelectorAll<HTMLElement>('[data-cv-full]')) : [t];
+    return all.filter((el) => !el.closest('[hidden]'));
+  };
+
+  function paint(i: number, dir: number) {
+    idx = (i + items.length) % items.length;
+    const el = items[idx];
+    const w = Number(el.dataset.cvW) || 640;
+    const h = Number(el.dataset.cvH) || 853;
+    dlg!.style.setProperty('--cv-r', String(w / h));
+    img.width = w; img.height = h;
+    img.alt = el.dataset.cvAlt || '';
+    img.src = el.dataset.cvFull || '';
+    count.textContent = `${idx + 1} / ${items.length}`;
+    if (dir) {
+      img.animate([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration: 220, easing: EASE });
+    }
+    [1, -1].forEach((d) => { const n = items[(idx + d + items.length) % items.length]; if (n) new Image().src = n.dataset.cvFull || ''; });
+  }
+
+  function open(t: HTMLElement) {
+    items = collect(t);
+    const start = Math.max(0, items.indexOf(t));
+    opener = t;
+    dlg!.classList.toggle('cv-one', items.length < 2);
+    paint(start, 0);
+    dlg!.showModal();
+    dlg!.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: EASE });
+    img.animate([{ opacity: 0, transform: 'translateY(16px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: EASE });
+  }
+
+  function close() {
+    if (closing || !dlg!.open) return;
+    closing = true;
+    dlg!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out' }).finished
+      .catch(() => {})
+      .then(() => { closing = false; dlg!.close(); });
+  }
+
+  const go = (d: number) => { if (items.length > 1) paint(idx + d, d); };
+
+  document.addEventListener('click', (e) => {
+    const t = (e.target as Element).closest<HTMLElement>('[data-cv-full]');
+    if (t) { e.preventDefault(); open(t); }
+  });
+  dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+  dlg.addEventListener('close', () => {
+    items = [];
+    img.removeAttribute('src');
+    if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
+    opener = null;
+  });
+  dlg.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') { e.preventDefault(); if (items.length > 1) paint(0, -1); }
+    else if (e.key === 'End') { e.preventDefault(); if (items.length > 1) paint(items.length - 1, 1); }
+  });
+  dlg.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
+  document.getElementById('cv-x')!.addEventListener('click', close);
+  document.getElementById('cv-prev')!.addEventListener('click', () => go(-1));
+  document.getElementById('cv-next')!.addEventListener('click', () => go(1));
+  stage.addEventListener('click', (e) => { if (e.target === stage) close(); });
+
+  /* swipe: the photo follows the finger (transform only), a clear horizontal flick changes photo */
+  let sx = 0, sy = 0, sid = -1, moved = false;
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if ((e.target as Element).closest('.cv-btn')) return;
+    sx = e.clientX; sy = e.clientY; sid = e.pointerId; moved = false;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== sid) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { moved = true; img.style.transform = `translateX(${dx * 0.6}px)`; }
+  });
+  const end = (e: PointerEvent) => {
+    if (e.pointerId !== sid) return;
+    sid = -1;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    img.style.transform = '';
+    if (moved && Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) go(dx < 0 ? 1 : -1);
+    else if (moved) img.animate([{ transform: `translateX(${dx * 0.6}px)` }, { transform: 'translateX(0)' }], { duration: 200, easing: EASE });
+    if (moved) { const stop = (ev: Event) => { ev.stopPropagation(); }; stage.addEventListener('click', stop, { capture: true, once: true }); setTimeout(() => stage.removeEventListener('click', stop, true), 0); }
+  };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+}
+</script>

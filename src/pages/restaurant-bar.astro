@@ -59,5 +59,26 @@ import SignatureCocktails from '../components/home/SignatureCocktails.astro';
     ]}
   >
     <SignatureCocktails slot="before-cards" />
+    <!-- Match nights: one real photo + one line. TODO(client): confirm which matches are screened (same open point as the Social Club pillar). -->
+    <section slot="before-cards" class="mn" aria-labelledby="mn-h">
+      <figure class="mn-ph">
+        <img src="/assets/celebrations/match-night-big-screen-640.webp" srcset="/assets/celebrations/match-night-big-screen-360.webp 360w, /assets/celebrations/match-night-big-screen-640.webp 640w" sizes="(max-width: 767px) 40vw, 220px" alt="Diners watching a live cricket match on the big screen in the Fursat hall" width="640" height="853" loading="lazy" decoding="async" />
+      </figure>
+      <div class="mn-tx">
+        <p class="mn-k">Social Club</p>
+        <h2 class="mn-h fk-ty-h2" id="mn-h">Match nights</h2>
+        <p class="mn-p">Catch the big games on our big screens</p>
+      </div>
+    </section>
+    <style is:global>
+    .mn{display:flex;align-items:center;gap:clamp(16px,3vw,32px);max-width:760px;margin:clamp(20px,3vw,40px) auto;padding:clamp(14px,2.4vw,22px);border-radius:22px;background:#10261a;color:#fbf3e6;box-shadow:0 0 0 1.5px #c99a43,0 18px 34px -16px rgba(14,34,20,.6)}
+    .mn-ph{flex:0 0 clamp(104px,30vw,200px);margin:0;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:#0b1c13}
+    .mn-ph img{display:block;width:100%;height:100%;object-fit:cover}
+    .mn-tx{min-width:0}
+    .mn-k{margin:0 0 6px;font:600 12px/1.3 var(--fk-sans);letter-spacing:.15em;text-transform:uppercase;color:#e6c27a}
+    .mn-h{margin:0 0 8px;color:#fbf3e6}
+    .mn-p{margin:0;font:400 1rem/1.5 var(--fk-sans);color:#e1d3b6}
+    @media(max-width:767px){.mn{margin-inline:16px}}
+    </style>
   </ExperienceLayout>
 </Base>

@@ -117,6 +117,13 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </div>
     </section>
 
+    <section class="st-brand" aria-label="The Fursat wall">
+      <figure class="st-wall" data-fx-reveal>
+        <img src="/assets/celebrations/brand-wall-group-640.webp" srcset="/assets/celebrations/brand-wall-group-360.webp 360w, /assets/celebrations/brand-wall-group-640.webp 640w" sizes="(max-width: 767px) 62vw, 300px" alt="A group of friends in blue t-shirts standing in front of the Fursat wall with the brand slogan" width="640" height="853" loading="lazy" decoding="async" />
+        <figcaption>Fursat, <em>aur kuch nahi</em></figcaption>
+      </figure>
+    </section>
+
     <section class="sw" aria-labelledby="sw-h">
       <h2 class="fk-ty-h2 sw-h" id="sw-h" data-fx-reveal>A look <em>around</em></h2>
       <ul class="sw-grid">
@@ -193,6 +200,12 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-bh em { color: #e8c27a; }
   .st-band-orn { width: calc(240 * var(--u)); }
 
+  /* Brand photo: the slogan on the wall (0037), sits between the brand line and the photo wall */
+  .st-brand { background: #10261a; padding: clamp(8px, 2vw, 24px) 6vw 0; }
+  .st-wall { margin: 0 auto; width: clamp(220px, 62vw, 300px); text-align: center; }
+  .st-wall img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; box-shadow: 0 0 0 1.5px #c99a43, 0 16px 34px rgba(0, 0, 0, .4); background: #0b1c13; }
+  .st-wall figcaption { margin-top: 14px; font: italic 500 clamp(20px, 2.4vw, 28px) / 1.25 var(--fk-serif); color: #fbf3e6; }
+  .st-wall figcaption em { color: #e8c27a; }
   /* Photo wall: CSS columns = masonry; photos keep their own ratio so the tile heights differ. */
   .sw { background: #10261a; padding: clamp(40px, 6vw, 88px) 6vw 0; }
   .sw-h { text-align: center; color: #fbf3e6; font-style: italic; margin-bottom: clamp(20px, 3vw, 36px); }

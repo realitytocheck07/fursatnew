@@ -11,6 +11,7 @@ import MobileBar from '../components/MobileBar.astro';
 import MascotOfferModal from '../components/MascotOfferModal.astro';
 import PackageBuilder from '../components/banquet/PackageBuilder.astro';
 import CornerHero from '../components/CornerHero.astro';
+import CelebrationViewer from '../components/CelebrationViewer.astro';
 import InstagramFeed from '../components/InstagramFeed.astro';
 const words = (t: string) => t.split(' ');
 import partyData from '../data/party.json';
@@ -153,6 +154,22 @@ const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Cor
         </div>
       </div>
     </section>
+
+    <!-- Hosted at Fursat: real event photos, swipe row + full-screen viewer (shared CelebrationViewer) -->
+    <section class="bq-hosted bq-hosted--pre" id="bq-hosted" aria-labelledby="bq-hosted-h">
+      <div class="bq-container">
+        <h2 class="fk-ty-h2 bq-sec-title text-center" id="bq-hosted-h">Hosted at Fursat</h2>
+        <p class="bq-hosted-sub">Felicitations, talks, corporate meets and private parties.</p>
+      </div>
+      <ul class="cv-strip" data-cv-group="banquet" aria-label="Photos of events hosted at Fursat">
+        <li><button type="button" class="cvt" data-cv-full="/assets/celebrations/felicitation-group-stage-640.webp" data-cv-alt="A felicitation group photo on the stage at Fursat" data-cv-w="640" data-cv-h="853" aria-haspopup="dialog"><img src="/assets/celebrations/felicitation-group-stage-640.webp" srcset="/assets/celebrations/felicitation-group-stage-360.webp 360w, /assets/celebrations/felicitation-group-stage-640.webp 640w" sizes="(max-width: 767px) 62vw, 236px" alt="A felicitation group photo on the stage at Fursat" width="640" height="853" loading="lazy" decoding="async" /></button></li>
+        <li><button type="button" class="cvt" data-cv-full="/assets/celebrations/talk-event-stage-640.webp" data-cv-alt="A talk on stage with the audience seated in banquet chairs" data-cv-w="640" data-cv-h="853" aria-haspopup="dialog"><img src="/assets/celebrations/talk-event-stage-640.webp" srcset="/assets/celebrations/talk-event-stage-360.webp 360w, /assets/celebrations/talk-event-stage-640.webp 640w" sizes="(max-width: 767px) 62vw, 236px" alt="A talk on stage with the audience seated in banquet chairs" width="640" height="853" loading="lazy" decoding="async" /></button></li>
+        <li><button type="button" class="cvt" data-cv-full="/assets/celebrations/corporate-audience-stage-640.webp" data-cv-alt="A corporate audience seated in the hall facing a lit stage" data-cv-w="640" data-cv-h="853" aria-haspopup="dialog"><img src="/assets/celebrations/corporate-audience-stage-640.webp" srcset="/assets/celebrations/corporate-audience-stage-360.webp 360w, /assets/celebrations/corporate-audience-stage-640.webp 640w" sizes="(max-width: 767px) 62vw, 236px" alt="A corporate audience seated in the hall facing a lit stage" width="640" height="853" loading="lazy" decoding="async" /></button></li>
+        <li><button type="button" class="cvt" data-cv-full="/assets/celebrations/hall-audience-cheering-640.webp" data-cv-alt="A packed audience cheering in the Fursat hall" data-cv-w="640" data-cv-h="853" aria-haspopup="dialog"><img src="/assets/celebrations/hall-audience-cheering-640.webp" srcset="/assets/celebrations/hall-audience-cheering-360.webp 360w, /assets/celebrations/hall-audience-cheering-640.webp 640w" sizes="(max-width: 767px) 62vw, 236px" alt="A packed audience cheering in the Fursat hall" width="640" height="853" loading="lazy" decoding="async" /></button></li>
+        <li><button type="button" class="cvt" data-cv-full="/assets/celebrations/private-party-entrance-sign-640.webp" data-cv-alt="A Private Party sign at the hall entrance" data-cv-w="640" data-cv-h="853" aria-haspopup="dialog"><img src="/assets/celebrations/private-party-entrance-sign-640.webp" srcset="/assets/celebrations/private-party-entrance-sign-360.webp 360w, /assets/celebrations/private-party-entrance-sign-640.webp 640w" sizes="(max-width: 767px) 62vw, 236px" alt="A Private Party sign at the hall entrance" width="640" height="853" loading="lazy" decoding="async" /></button></li>
+      </ul>
+    </section>
+    <CelebrationViewer />
 
     <!-- FAQ -->
 <InstagramFeed account="banquets" layout="page" title="Latest from Fursat Banquets" />
@@ -311,6 +328,26 @@ const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Cor
   <MascotOfferModal />
   <SiteFooter />
 <MobileBar active="celebrate" />
+<style is:global>
+.bq-hosted{padding:clamp(36px,5vw,64px) 0 clamp(8px,2vw,20px)}
+.bq-hosted .bq-sec-title{margin-bottom:8px}
+.bq-hosted-sub{margin:0 auto clamp(14px,2.4vw,24px);padding-inline:16px;max-width:52ch;text-align:center;font:400 1rem/1.5 var(--fk-sans);color:#4d4434}
+.bq-hosted--pre .cvt{opacity:0}
+</style>
+<script>
+/* Hosted at Fursat: tiles rise in (stagger) when the strip scrolls into view. Transform + opacity only. */
+const bqh = document.getElementById('bq-hosted');
+if (bqh) {
+  const go = () => {
+    bqh.classList.remove('bq-hosted--pre');
+    bqh.querySelectorAll<HTMLElement>('.cvt').forEach((t, i) => t.animate([{ opacity: 0, transform: 'translateY(22px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, delay: i * 55, easing: 'cubic-bezier(0.23, 1, 0.32, 1)', fill: 'backwards' }));
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); go(); } }, { rootMargin: '0px 0px -12% 0px' });
+    io.observe(bqh);
+  } else go();
+}
+</script>
 <script is:inline src="/js/motion-kit.js"></script>
 <script>
   const form = document.querySelector('form[data-wa-form]');

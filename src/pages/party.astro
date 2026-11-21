@@ -8,6 +8,7 @@ import HyWindows from '../components/hybrid/HyWindows.astro';
 import CornerHero from '../components/CornerHero.astro';
 import PartyPackages from '../components/party/PartyPackages.astro';
 import PartyBuilder from '../components/party/PartyBuilder.astro';
+import CelebrationViewer from '../components/CelebrationViewer.astro';
 import pDesk from '../../scripts/bg-specs/party-desk.out.json';
 import '../styles/fk-tokens.css';
 // v5.36 redesign: hero (CornerHero + labels) -> Our Party Packages (4 cards) -> Build Your Celebration -> closing panel.
@@ -21,6 +22,34 @@ const why = [
   { t: 'Warm Hospitality', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
   { t: 'Prime Location', i: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>' },
 ];
+// "Real celebrations at Fursat": the venue's own event photos (public/assets/celebrations). Alt texts describe the scene only, never name a guest.
+const cg = (name: string, alt: string) => ({ name, alt });
+const celebTabs = [
+  { id: 'birthdays', t: 'Birthdays', items: [
+    cg('birthday-krishna-cake-family', 'A family birthday with a baby, a Krishna-theme cake and balloon decor'),
+    cg('birthday-cake-cutting-stage', 'A birthday cake being cut on stage with confetti and a big screen behind'),
+    cg('birthday-amma-led-screen', 'A birthday greeting for Amma on the big LED screen above the stage set'),
+    cg('birthday-flower-arch-stage', 'A family birthday on stage with a flower arch and a cake'),
+    cg('birthday-cake-dad', 'A birthday cake with the word Dad written on it'),
+  ] },
+  { id: 'kids', t: 'Kids', items: [
+    cg('kids-party-stage-dance', 'Kids dancing on a stage at a party, with balloons around'),
+    cg('mascot-dancing-kids', 'The Fursat elephant mascot dancing with kids, seen from behind'),
+    cg('kids-carnival-entrance-arch', 'The Fursat Kids Carnival entrance arch at the hall'),
+  ] },
+  { id: 'kitty', t: 'Kitty', items: [
+    cg('kitty-ladies-matching-dresses', 'A group of ladies in matching dresses at a kitty party'),
+    cg('kitty-high-table-games', 'Ladies standing at a high table playing games at a kitty party'),
+  ] },
+  { id: 'corporate', t: 'Corporate', items: [
+    cg('corporate-audience-stage', 'A corporate audience seated in the hall facing a lit stage'),
+    cg('hall-audience-cheering', 'A packed audience cheering in the Fursat hall'),
+    cg('talk-event-stage', 'A talk on stage with the audience in banquet chairs'),
+    cg('felicitation-group-stage', 'A felicitation group photo on the stage'),
+    cg('private-party-entrance-sign', 'A Private Party sign at the hall entrance'),
+  ] },
+];
+const celebAspect = ['3/4', '4/5', '3/4', '4/5', '3/4'];
 const WA = '919059670033';
 const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I would like to plan a party.');
 import InstagramFeed from '../components/InstagramFeed.astro';
@@ -41,7 +70,31 @@ import InstagramFeed from '../components/InstagramFeed.astro';
         alt="Two oval gold windows with photos of Fursat set for a party"
         ctas={[{ label: 'Plan Your Party', href: '#pa-plan', primary: true }, { label: 'See Packages', href: '#pa-packs' }]} />
     </div>
-    <div class="pa-panel pa-panel--packs" data-pa-panel><PartyPackages /></div>
+    <div class="pa-panel pa-panel--packs" data-pa-panel>
+      <PartyPackages />
+      <section class="cg cg-pre" id="pa-celebrations" aria-labelledby="cg-h">
+        <h2 class="fk-ty-h2 cg-h" id="cg-h">Real celebrations at <span class="cg-hl">Fursat</span></h2>
+        <p class="cg-sub">Birthdays, kids parties, kitty days and corporate evenings, all in our own hall.</p>
+        <div class="cg-tabs" role="tablist" aria-label="Type of celebration">
+          {celebTabs.map((c, i) => <button type="button" class="cg-tab" role="tab" id={`cg-tab-${c.id}`} aria-controls={`cg-p-${c.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{c.t}</button>)}
+        </div>
+        <div class="cg-panels" data-cv-group="party">
+          {celebTabs.map((c, i) => (
+            <div class="cg-panel" role="tabpanel" id={`cg-p-${c.id}`} aria-labelledby={`cg-tab-${c.id}`} hidden={i !== 0}>
+              <ul class="cg-grid">
+                {c.items.map((it, j) => (
+                  <li class="cg-li">
+                    <button type="button" class="cvt" style={`--r:${celebAspect[j % celebAspect.length]}`} data-cv-full={`/assets/celebrations/${it.name}-640.webp`} data-cv-alt={it.alt} data-cv-w="640" data-cv-h="853" aria-haspopup="dialog">
+                      <img src={`/assets/celebrations/${it.name}-640.webp`} srcset={`/assets/celebrations/${it.name}-360.webp 360w, /assets/celebrations/${it.name}-640.webp 640w`} sizes="(max-width: 767px) 62vw, (max-width: 999px) 30vw, 270px" alt={it.alt} width="640" height="853" loading="lazy" decoding="async" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
     <div class="pa-panel pa-panel--feast" data-pa-panel>
       <figure class="pa-feast" data-fx-reveal>
         <img src="/assets/feast/feast-table-1200.webp"
@@ -86,6 +139,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 <InstaFollow handle="fursatbanquets" />
 <SiteFooter />
 <MobileBar active="celebrate" />
+<CelebrationViewer />
 <script>import '../scripts/fk-motion';</script>
 <style is:global>
 /* v5.72 stacked sticky sections: Welcome -> Packages -> Feast -> Plan. Each panel is sticky under the header and covers the one before it. */
@@ -182,11 +236,88 @@ html[data-daypart="evening"] .pa-panel--packs::before{opacity:1;background:radia
 .pa-close .fk-ty-h2{color:#fbf3e6}
 .pa-close .fk-ty-h2 em{font-style:normal;color:#eda05a}
 @media(max-width:767px){.pa-why-h{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.pa-close .fk-ty-h2{font-size:var(--fk-fs-4)}}
+/* Real celebrations gallery (inside the Packages panel, so the stacked-sections script treats it as part of that panel) */
+.cg{max-width:1240px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,48px) clamp(28px,4vw,56px);scroll-margin-top:96px}
+.cg-h{margin:0 0 8px;text-align:center;color:#18301f}
+.cg-hl{color:#c02a1a;font-style:italic}
+.cg-sub{margin:0 auto clamp(16px,2.4vw,24px);max-width:52ch;text-align:center;font:400 1rem/1.5 var(--fk-sans);color:#4d4434}
+.cg-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 clamp(16px,2.4vw,26px)}
+.cg-tab{min-height:46px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(42,80,25,.4);background:transparent;color:#18301f;font:600 14px/1 var(--fk-sans);letter-spacing:.02em;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color var(--fk-dur-2) var(--fk-ease-out),color var(--fk-dur-2) var(--fk-ease-out),border-color var(--fk-dur-2),transform var(--fk-dur-1) var(--fk-ease-out)}
+.cg-tab:active{transform:scale(.97)}
+.cg-tab[aria-selected="true"]{background:#10261a;color:#e6c27a;border-color:#c99a43}
+.cg-tab:focus-visible{outline:3px solid #c99a43;outline-offset:3px}
+@media(hover:hover){.cg-tab[aria-selected="false"]:hover{background:rgba(42,80,25,.08)}}
+.cg-panel[hidden]{display:none}
+.cg-grid{list-style:none;margin:0;padding:0}
+.cg-pre .cvt{opacity:0}
+@media(max-width:767px){
+  .cg{padding-inline:0}
+  .cg-h,.cg-sub,.cg-tabs{padding-inline:16px}
+  .cg-tabs{gap:6px;padding-inline:10px;flex-wrap:nowrap}
+  .cg-tab{padding:0 12px;font-size:13.5px}
+  .cg-grid{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;overscroll-behavior-x:contain;scrollbar-width:none;padding:6px 16px 18px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent 100%)}
+  .cg-grid::-webkit-scrollbar{display:none}
+  .cg-li{flex:0 0 min(64vw,260px);scroll-snap-align:start;align-self:flex-start}
+}
+@media(min-width:768px){
+  .cg-grid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:18px}
+  .cg-li{width:calc((100% - 36px)/3)}
+  .cg-li:nth-child(3n+2){margin-top:26px}
+}
+@media(min-width:1000px){
+  .cg-grid{gap:20px}
+  .cg-li{width:calc((100% - 60px)/4)}
+  .cg-li:nth-child(3n+2){margin-top:0}
+  .cg-li:nth-child(4n+2),.cg-li:nth-child(4n+4){margin-top:30px}
+}
 /* hero: second button = cream with a gold rim */
 .pa .ch-btns .fk-btn--secondary{border-color:#c99a43;background:#fcf7f0}
 /* phone: leave room for the summary bar so it never covers the footer links */
 @media(max-width:767px){.pa{overflow-x:clip}}
 </style>
+<script>
+/* Real celebrations: tabs (cross-fade + stagger rise). Transform + opacity only. */
+const cgRoot = document.getElementById('pa-celebrations');
+if (cgRoot) {
+  const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+  const tabs = Array.from(cgRoot.querySelectorAll<HTMLButtonElement>('.cg-tab'));
+  const panels = Array.from(cgRoot.querySelectorAll<HTMLElement>('.cg-panel'));
+  let current = 0, token = 0;
+  const rise = (panel: HTMLElement) => {
+    panel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: EASE });
+    panel.querySelectorAll<HTMLElement>('.cvt').forEach((t, i) => {
+      t.animate([{ opacity: 0, transform: 'translateY(22px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, delay: Math.min(i, 6) * 55, easing: EASE, fill: 'backwards' });
+    });
+  };
+  const show = async (n: number, focus: boolean) => {
+    if (n === current) { if (focus) tabs[n].focus(); return; }
+    const my = ++token, out = panels[current], inn = panels[n];
+    tabs.forEach((b, i) => { b.setAttribute('aria-selected', i === n ? 'true' : 'false'); b.tabIndex = i === n ? 0 : -1; });
+    if (focus) tabs[n].focus();
+    current = n;
+    await out.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: 'ease-out' }).finished.catch(() => {});
+    if (my !== token) return;
+    out.hidden = true; inn.hidden = false;
+    inn.querySelector<HTMLElement>('.cg-grid')!.scrollLeft = 0;
+    rise(inn);
+  };
+  tabs.forEach((b, i) => {
+    b.addEventListener('click', () => show(i, false));
+    b.addEventListener('keydown', (e) => {
+      const k = e.key; let n = -1;
+      if (k === 'ArrowRight') n = (i + 1) % tabs.length; else if (k === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+      else if (k === 'Home') n = 0; else if (k === 'End') n = tabs.length - 1;
+      if (n >= 0) { e.preventDefault(); show(n, true); }
+    });
+  });
+  /* first reveal when the gallery scrolls into view */
+  const first = () => { cgRoot.classList.remove('cg-pre'); rise(panels[current]); };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); first(); } }, { rootMargin: '0px 0px -12% 0px' });
+    io.observe(cgRoot);
+  } else first();
+}
+</script>
 <script is:inline src="/js/party.js"></script>
 <script is:inline src="/js/pa-stack.js" defer></script>
 </Base>

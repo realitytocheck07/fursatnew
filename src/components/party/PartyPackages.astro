@@ -4,10 +4,10 @@
 import data from '../../data/party.json';
 const groupOf = (id: string) => (data.groups as any[]).find((g) => g.id === id)!;
 const occ = [
-  { id: 'birthday', t: 'Birthdays', g: 'elite', base: '/assets/venue/interior/long-table-dining', ow: 1200, alt: 'A long table set for a group celebration at Fursat', icon: '<path d="M4 11h16v9H4z"/><path d="M4 15c2 1.4 3 1.4 4 0s2-1.4 4 0 3 1.4 4 0 2-1.4 4 0"/><path d="M12 11V8M12 8c-1-1-1-2 0-3 1 1 1 2 0 3z"/>' },
-  { id: 'corporate', t: 'Corporate', g: 'banquet', base: '/assets/venue/banquet/banquet-tables-03', ow: 1200, alt: 'The banquet hall in a U-shaped layout for a corporate meeting', icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>' },
-  { id: 'kitty', t: 'Kitty parties', g: 'elite', base: '/assets/venue/interior/mural-booths', ow: 1200, alt: 'Booths beside the Hyderabad mural wall at Fursat', icon: '<path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="3.2"/><path d="M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.3M15.5 4.9a3.2 3.2 0 0 1 0 6.2"/>' },
-  { id: 'barbash', t: 'Bar bashes', g: 'bar', base: '/assets/interior/fursat_space_08', ow: 1280, alt: 'The bar counter at Fursat', note: 'Alcohol is served to guests aged 21 and above only.', icon: '<path d="M4 4h16l-8 9z"/><path d="M12 13v7M8 20h8"/>' },
+  { id: 'birthday', t: 'Birthdays', g: 'elite', base: '/assets/celebrations/birthday-cake-cutting-stage-45', alt: 'A birthday cake being cut on the Fursat stage under confetti, with the big screen behind', icon: '<path d="M4 11h16v9H4z"/><path d="M4 15c2 1.4 3 1.4 4 0s2-1.4 4 0 3 1.4 4 0 2-1.4 4 0"/><path d="M12 11V8M12 8c-1-1-1-2 0-3 1 1 1 2 0 3z"/>' },
+  { id: 'corporate', t: 'Corporate', g: 'banquet', base: '/assets/celebrations/corporate-audience-stage-45', alt: 'A corporate audience seated in the Fursat hall facing a lit stage', icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>' },
+  { id: 'kitty', t: 'Kitty parties', g: 'elite', base: '/assets/celebrations/kitty-high-table-games-45', alt: 'Ladies gathered around a high table playing games at a kitty party', icon: '<path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10" cy="8" r="3.2"/><path d="M20 20v-1.5a3.5 3.5 0 0 0-2.5-3.3M15.5 4.9a3.2 3.2 0 0 1 0 6.2"/>' },
+  { id: 'barbash', t: 'Bar bashes', g: 'bar', base: '/assets/celebrations/hall-audience-cheering-45', alt: 'A packed audience cheering in the Fursat hall during a night event', note: 'Alcohol is served to guests aged 21 and above only.', icon: '<path d="M4 4h16l-8 9z"/><path d="M12 13v7M8 20h8"/>' },
 ];
 ---
 <section class="pc" id="pa-packs" aria-labelledby="pa-packs-h">
@@ -18,8 +18,8 @@ const occ = [
       {occ.map((o, i) => (
         <li class="pc-li" id={o.id} style={`--i:${i}`}>
           <a class="pc-card" href="#pa-plan" data-occ={o.g} data-occasion={o.id}>
-            <img class="pc-img" src={`${o.base}-720.webp`} srcset={`${o.base}-480.webp 480w, ${o.base}-720.webp 720w, ${o.base}.webp ${o.ow}w`}
-              sizes="(max-width: 767px) 78vw, (max-width: 999px) 45vw, 290px" alt={o.alt} width="1200" height="1600" loading="lazy" decoding="async" />
+            <img class="pc-img" src={`${o.base}-640.webp`} srcset={`${o.base}-360.webp 360w, ${o.base}-640.webp 640w`}
+              sizes="(max-width: 767px) 78vw, (max-width: 999px) 45vw, 290px" alt={o.alt} width="640" height="800" loading="lazy" decoding="async" />
             <span class="pc-badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={o.icon} /></span>
             <span class="pc-body">
               <span class="pc-t">{o.t}</span>
