@@ -1,5 +1,6 @@
 ---
 import InstaFollow from '../components/InstaFollow.astro';
+import LazyVideo from '../components/LazyVideo.astro';
 import site from '../data/site.json';
 // story.astro v4 — About / Our Story (mock-about.png). Hybrid: textless background art (public/assets/bg/about-*,
 // scripts/prep-bg.py) carries the carved plaster, frames, plates and green band; live HTML on top in stage units.
@@ -117,6 +118,15 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </ul>
     </section>
 
+    <section class="iv" aria-labelledby="iv-h">
+      <h2 class="fk-ty-h2 iv-h" id="iv-h" data-fx-reveal>Inside <em>Fursat</em></h2>
+      <div class="iv-frame">
+        <LazyVideo class="iv-v" src="/assets/video/inside-fursat-720.mp4" webm="/assets/video/inside-fursat-720.webm" poster="/assets/video/inside-fursat-poster.webp" width={720} height={1280} label="A short film walking through Fursat: the café, desserts, booths, the bar and the elephant mural" />
+        <LazyVideo class="iv-d" src="/assets/video/inside-fursat-16x9.mp4" webm="/assets/video/inside-fursat-16x9.webm" poster="/assets/video/inside-fursat-poster-16x9.webp" width={1280} height={720} label="A short film walking through Fursat: the café, desserts, booths, the bar and the elephant mural" />
+      </div>
+      <p class="iv-credit">Video: <a href="https://instagram.com/framesofhyd" target="_blank" rel="noopener">@framesofhyd</a></p>
+    </section>
+
     <section class="st-legal-wrap" aria-labelledby="st-lh">
       <div class="fk-emboss st-legal">
         <h2 class="fk-ty-h3" id="st-lh">Business information</h2>
@@ -179,6 +189,15 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .sw-tile { break-inside: avoid; margin: 0 0 clamp(10px, 1.6vw, 18px); border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(232, 194, 122, .45), 0 10px 22px rgba(0, 0, 0, .35); background: #1b3a26; }
   .sw-tile img { display: block; width: 100%; height: auto; }
   @media (max-width: 767px) { .sw { padding: 36px 16px 0; } .sw-grid { columns: 2; } .sw-tile { border-radius: 14px; } }
+  .iv { background: var(--fk-plaster, #f2eee4); padding: clamp(40px, 6vw, 88px) 6vw; text-align: center; }
+  .iv-h { color: #17200f; margin-bottom: clamp(20px, 3vw, 36px); }
+  .iv-h em { color: #2a5019; }
+  .iv-frame { max-width: 980px; margin: 0 auto; }
+  .iv-frame .iv-v { width: min(100%, 360px); margin: 0 auto; border-radius: 14px; }
+  .iv-frame .iv-d { display: none !important; width: 100%; border-radius: 18px; }
+  .iv-credit { margin: 14px 0 0; font: 400 .8125rem / 1.4 var(--fk-sans); color: #17200f; }
+  .iv-credit a { display: inline-block; min-height: 44px; line-height: 44px; padding: 0 6px; text-decoration: underline; text-underline-offset: 3px; }
+  @media (min-width: 768px) { .iv-frame .iv-v { display: none !important; } .iv-frame .iv-d { display: block !important; } }
 
   .st-legal-wrap { background: #10261a; padding: clamp(24px, 3vw, 40px) 6vw clamp(48px, 6vw, 88px); }
   .st-legal { margin: 0 auto; max-width: 44rem; border-radius: 24px; padding: 1.6rem 1.9rem 1.5rem; color: var(--fk-ink); background: #f8ead8; box-shadow: 0 0 0 1px rgba(214, 170, 90, .5), 0 0 0 6px #f1dfc3, 0 22px 40px rgba(0, 0, 0, .35), inset 0 2px 3px #fff; }
