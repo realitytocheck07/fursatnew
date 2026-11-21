@@ -1,3 +1,4 @@
+/* Served as-is from public/ (v5.78): Vite broke the image-set() cursor URLs when this was bundled, so the glass fell back to the arrow. Do not import it into the bundle. */
 /* Fursat cursor v5.70: the cocktail glass is a real system cursor (PNG, zero lag). fk-cursor.js adds html.fk-cur
    on desktop mouse only; the bubble/sparkle effects live in .fk-cf. Glass 39x60 css (2x = 78x120, under the 128px browser limit).
    Hotspots (css px): upright 6 16, tilted (links) 7 15 (the tilted PNG has the gold click ring baked in at the hotspot).

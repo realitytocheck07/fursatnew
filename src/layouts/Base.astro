@@ -16,7 +16,6 @@ import '../styles/08.css';
 import '../styles/09.css';
 import '../styles/10.css';
 import '../styles/motion.css';
-import '../styles/cursor.css';
 import '../styles/fk-wow.css';
 
 const DOMAIN = site.domain;
@@ -172,6 +171,7 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
     fetchpriority="high"
   />
 ))}
+<link rel="stylesheet" href="/css/fk-cursor-v2.css">
 <link rel="icon" href="/assets/9a3bba811b.webp">
 <script type="application/ld+json" is:inline set:html={ldJson}></script>
 {crumbLd && <script type="application/ld+json" is:inline set:html={crumbLd}></script>}

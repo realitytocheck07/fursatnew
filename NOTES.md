@@ -309,3 +309,7 @@ Frame strip: screenshots/strip-390-scroll.png (8 scroll points).
 
 ## Screenshots
 screenshots/reviews-390.png, screenshots/reviews-1366-hover.png (mid-sweep frame)
+
+
+## v5.78 cursor fix
+- The glass cursor showed as the normal arrow on the live site. Cause: Vite bundled cursor.css and replaced the 4 image-set() PNG URLs with unresolved __VITE_PUBLIC_ASSET__ placeholders (the 4 build warnings). Fix: the file now lives in public/css/fk-cursor-v2.css (served as-is) and Base.astro links it; the import is removed. Never import it into the bundle.
