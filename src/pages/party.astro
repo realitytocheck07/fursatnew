@@ -85,6 +85,12 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 <MobileBar active="celebrate" />
 <script>import '../scripts/fk-motion';</script>
 <style is:global>
+/* v5.63: each section is one full "page": it fills the screen under the header, so the next one never peeks in below it */
+@media (min-width: 768px) {
+  [data-snap]:not([data-snap-fit]):not([data-snap="Feast"]) { min-height: calc(100svh - var(--sh-h, 104px) - 1px); display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
+  [data-snap="Feast"] { min-height: calc(100svh - var(--sh-h, 104px) - 1px); box-sizing: border-box; }
+}
+
 /* hybrid stage: textless background art + the closing panel (quote, plates, band) laid over the bottom slice */
 .pa{flex:none;background:#f6e6d1;color:var(--fk-ink);font-family:var(--fk-sans)}
 .pa-hy{--mid:url(/assets/bg/party-desk-1.webp);--bot:url(/assets/bg/party-desk-2.webp);--th:2;--bh:500;background:#f6e6d1}

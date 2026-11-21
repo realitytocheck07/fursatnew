@@ -112,7 +112,10 @@ function init(root: HTMLElement) {
     const inside = path.includes(picksEl) || path.some((n) => n instanceof HTMLElement && n.hasAttribute('data-add'));
     if (!panel.hasAttribute('hidden') && !inside) closePanel();
   });
-  wa.addEventListener('click', (e) => { if (wa.getAttribute('aria-disabled') === 'true') e.preventDefault(); });
+  wa.addEventListener('click', (e) => {
+    if (wa.getAttribute('aria-disabled') === 'true') { e.preventDefault(); return; }
+    (window as any).fkForm?.send('restaurant', 'Menu order', { order: lines.map((l) => `${l.qty} x ${l.item.n}`).join(', '), subtotal: money(total(lines)) });
+  });
 
   // Collapse the pill to bag + count while the page scrolls; expand 700ms after it stops.
   // Never while the list panel is open or focus is inside the pill (keyboard users keep the full bar).

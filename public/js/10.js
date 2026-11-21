@@ -138,7 +138,7 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
     ls("fz_n",nm);ls("fz_m",x);
     var dt=new Date(d.value+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
     var msg=["Hi Fursat! 👋 I would like to reserve a table:","• Name: "+nm,"• Phone: +91 "+x.slice(0,5)+" "+x.slice(5),"• Date: "+dt,"• Time: "+t.value,"• Guests: "+g,"• Zone: "+z.value].join("\n");
-    var a=document.createElement("a");a.href="https://wa.me/"+WA+"?text="+encodeURIComponent(msg);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();dlg.close&&dlg.close()});
+    if(window.fkForm)window.fkForm.send("restaurant","Table request (home)",{name:nm,phone:x,date:dt,time:t.value,guests:String(g),zone:z.value});var a=document.createElement("a");a.href="https://wa.me/"+WA+"?text="+encodeURIComponent(msg);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();dlg.close&&dlg.close()});
 })();
 
 /* ======================= 17. Elephant Flow clip (colour + matte packed side by side, composited on a canvas) ======================= */
@@ -255,7 +255,7 @@ function onClick(e){var t=e.target.closest("[data-cc],[data-tab]");if(!t)return;
  else if(a==="plan"){var p=el.querySelector("#cc-plan");p&&p.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})}
  else if(a==="occ"||a==="diet"){st[a]=t.getAttribute("data-v");[].forEach.call(t.parentNode.children,function(c){c.classList.toggle("on",c===t)})}
  else if(a==="g-"||a==="g+"){st.guests=Math.max(10,Math.min(2000,st.guests+(a==="g+"?10:-10)));el.querySelector("#cc-g").textContent=st.guests}
- else if(a==="send"){var d=el.querySelector("#cc-d");st.date=d?d.value:"";var dl=st.date?new Date(st.date+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"}):"";wa(["Hi Fursat! 👋 I would like to plan an event:","• Occasion: "+st.occ,"• Guests: about "+st.guests].concat(dl?["• Date: "+dl]:[],["• Food and drinks: "+st.diet,"Please share hall options, availability and a quote."]).join("\n"))}
+ else if(a==="send"){var d=el.querySelector("#cc-d");st.date=d?d.value:"";if(window.fkForm)window.fkForm.send("events","Event planner (home)",{occasion:st.occ,guests:String(st.guests),date:st.date||"not chosen",food_and_drinks:st.diet});var dl=st.date?new Date(st.date+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric"}):"";wa(["Hi Fursat! 👋 I would like to plan an event:","• Occasion: "+st.occ,"• Guests: about "+st.guests].concat(dl?["• Date: "+dl]:[],["• Food and drinks: "+st.diet,"Please share hall options, availability and a quote."]).join("\n"))}
  else if(a==="wa-cater")wa("Hi Fursat! I would like to know about buffet and catering options.");
  else if(a==="wa-hours")wa("Hi Fursat! Could you confirm today’s opening hours?");
  else if(a==="wa-hi")wa("Hi Fursat! I would like to know more.");

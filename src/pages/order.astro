@@ -67,6 +67,19 @@ const menuTiles = [
         <source media="(max-width:760px)" srcset="/assets/order/order-hero-phone-720.webp 720w, /assets/order/order-hero-phone-1112.webp 1112w" sizes="100vw" />
         <img class="od-hero-bg" src="/assets/order/order-hero-1600.webp" srcset="/assets/order/order-hero-768.webp 768w, /assets/order/order-hero-1200.webp 1200w, /assets/order/order-hero-1600.webp 1600w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async" />
       </picture>
+      <!-- natural motion on the real photo: steam off the hot plates, fizz + foam in the tall glass (CSS only, transform/opacity, paused off-screen, off for reduced motion) -->
+      <div class="od-fx" id="od-fx" aria-hidden="true">
+        <i class="st" style="--x:22.5%;--y:63%;--d:0s"></i><i class="st" style="--x:25%;--y:63%;--d:1.6s;--dx:-10px"></i><i class="st" style="--x:23.5%;--y:64%;--d:3.1s"></i>
+        <i class="st" style="--x:52%;--y:69%;--d:.8s"></i><i class="st" style="--x:56%;--y:68%;--d:2.4s;--dx:-8px"></i><i class="st" style="--x:54%;--y:70%;--d:3.9s"></i>
+        <i class="st" style="--x:83%;--y:41%;--d:.4s;--dx:8px"></i><i class="st" style="--x:85%;--y:41%;--d:2.2s"></i>
+        <span class="od-glass"></span>
+      </div>
+      <script is:inline>
+      (function(){var fx=document.getElementById('od-fx');if(!fx||matchMedia('(prefers-reduced-motion: reduce)').matches)return;var g=fx.querySelector('.od-glass'),h='';
+        for(var i=0;i<24;i++){var s=(3.6+Math.random()*4.4).toFixed(1);h+='<i style="--l:'+(8+Math.random()*78).toFixed(0)+'%;--s:'+s+'px;--t:'+(2.6+Math.random()*2.6).toFixed(1)+'s;--d:-'+(Math.random()*5).toFixed(1)+'s;--w:'+((Math.random()<.5?-1:1)*(2+Math.random()*4)).toFixed(0)+'px"></i>'}
+        for(var j=0;j<6;j++)h+='<b style="--l:'+(10+j*14)+'%;--d:-'+(Math.random()*3).toFixed(1)+'s"></b>';g.innerHTML=h;
+        if('IntersectionObserver' in window)new IntersectionObserver(function(e){fx.classList.toggle('is-off',!e[0].isIntersecting)}).observe(fx)})();
+      </script>
 
       <div class="od-hero-in">
         <p class="od-k"><span>Order online</span></p>

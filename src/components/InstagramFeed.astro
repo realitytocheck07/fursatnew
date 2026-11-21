@@ -144,4 +144,18 @@ const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
     .igfeed-lb-media { border-radius: 22px 0 0 22px; width: min(78dvh, 560px); }
     .igfeed-lb-body { padding: 56px 24px 24px; }
   }
+
+  /* ---- v5.65 bento: first post is the featured 2x2 tile, rest flow densely around it (>=640px). Layout only; live fetch/fallback/lightbox untouched ---- */
+  .igfeed { width: 100%; max-width: 1240px; margin-inline: auto; }
+  .igfeed-grid { width: 100%; }
+  @media (min-width: 640px) {
+    .igfeed-grid { grid-auto-flow: dense; }
+    .igfeed-grid > .igfeed-li:first-child { grid-column: span 2; grid-row: span 2; }
+    .igfeed-grid > .igfeed-li:first-child :is(.igfeed-wave, .igfeed-tile, .igfeed-sq) { height: 100%; }
+    .igfeed-grid > .igfeed-li:first-child .igfeed-tile { aspect-ratio: auto; border-radius: 26px; }
+    .igfeed-grid > .igfeed-li:first-child .igfeed-sq { aspect-ratio: auto; border-radius: 26px; }
+    .igfeed-grid > .igfeed-li:first-child .igfeed-wave { animation-name: none; }
+  }
+  @media (min-width: 1100px) { .igfeed-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (max-width: 639px) { .igfeed-grid > .igfeed-li:first-child { grid-column: 1 / -1; } .igfeed-grid > .igfeed-li:first-child .igfeed-tile { aspect-ratio: 16 / 11; border-radius: 22px; } .igfeed-grid > .igfeed-li:first-child .igfeed-sq { aspect-ratio: 16 / 11; } }
 </style>

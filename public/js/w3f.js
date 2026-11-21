@@ -5,7 +5,7 @@
   const keys = window.__FK_FORMS || {};
   window.fkForm = {
     send(kind, subject, fields, honeypot) {
-      const key = keys[kind];
+      const key = keys[kind] || keys.restaurant || keys.events;
       if (!key) return Promise.resolve(false);
       if (honeypot && (honeypot.type === 'checkbox' ? honeypot.checked : honeypot.value)) return Promise.resolve(true);
       const body = { access_key: key, subject: 'FURSAT website: ' + subject, from_name: 'FURSAT website', form: subject, page: location.pathname, ...fields };

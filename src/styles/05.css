@@ -16,3 +16,13 @@
 .pk-more[open] summary::after{transform:rotate(45deg)}
 .pk-more .pk-ul{margin:4px 0 8px}
 .pk-bt{margin-top:auto}
+/* v5.65 package cards: one-shot rise + soft lift on hover (transform/opacity only); tab switches re-render the cards so they re-enter */
+@media (prefers-reduced-motion: no-preference) {
+  .pk-c { animation: pk-in .55s cubic-bezier(.23,1,.32,1) both; }
+  .pk-c:nth-child(2) { animation-delay: 70ms; } .pk-c:nth-child(3) { animation-delay: 140ms; } .pk-c:nth-child(4) { animation-delay: 210ms; } .pk-c:nth-child(n+5) { animation-delay: 280ms; }
+  @keyframes pk-in { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(.98); } }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pk-c { transition: transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s ease; }
+  .pk-c:hover { transform: translate3d(0, -4px, 0); box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent), 0 26px 44px -26px color-mix(in srgb, var(--c) 55%, #000); }
+}

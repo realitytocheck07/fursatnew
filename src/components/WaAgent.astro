@@ -100,7 +100,7 @@ const wa = site.whatsapp;
       let ph = f.elements.p.value.replace(/\D/g, ''); if (ph.length === 12 && ph.startsWith('91')) ph = ph.slice(2); if (ph.length === 11 && ph[0] === '0') ph = ph.slice(1);
       if (name.length < 2) { err.textContent = 'Please tell us your name.'; f.elements.n.focus(); return; }
       if (!/^[6-9]\d{9}$/.test(ph)) { err.textContent = 'Please enter a 10-digit mobile number.'; f.elements.p.focus(); return; }
-      lead = { name, phone: ph }; store('fk-wa-lead', JSON.stringify(lead));
+      lead = { name, phone: ph }; store('fk-wa-lead', JSON.stringify(lead)); window.fkForm && window.fkForm.send('restaurant', 'WhatsApp chat lead', { name, phone: '+91 ' + ph });
       f.remove(); d.remove();
       me("I'm " + name);
       setTimeout(() => { bot('Nice to meet you, ' + esc(name) + ' 👋 What would you like to do?'); setTimeout(showMenu, reduce.matches ? 0 : 200); }, reduce.matches ? 0 : 260);

@@ -26,7 +26,13 @@ html.fk-cur:not(.fk-cur-native) *{cursor:none!important}
 .fk-c.is-link .fk-c-pt{opacity:1}
 .fk-c-rip{border:1px solid var(--fkc-gold);opacity:0}
 
+/* effects layer: same top-layer trick as the glass, one step below it; bubbles and sparks are tiny absolutely-positioned elements animated with WAAPI */
+.fk-cf{position:fixed;inset:auto;left:0;top:0;width:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible;pointer-events:none;z-index:2147483646}
+.fk-cf i{position:absolute;border-radius:50%;background:radial-gradient(circle at 32% 30%,#fff,rgba(255,255,255,.55) 55%,rgba(255,255,255,.1) 75%);box-shadow:0 0 0 .6px rgba(201,154,67,.55);will-change:transform,opacity}
+.fk-cf u{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--fkc-gold);box-shadow:0 0 6px rgba(243,197,107,.9);will-change:transform,opacity}
+
 @media (prefers-reduced-motion:reduce){
+  .fk-cf{display:none}
   .fk-c-in{transition:none}
   .fk-c.is-link .fk-c-in,.fk-c.is-down .fk-c-in,.fk-c.is-link.is-down .fk-c-in{transform:none}
   .fk-c-pt{transition:opacity .1s linear}
