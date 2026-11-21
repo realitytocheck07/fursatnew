@@ -371,9 +371,36 @@ window.FursatConcierge={open:openIt,route:route};
     raf=requestAnimationFrame(tick)}
   function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){var q=bg.play();if(q&&q.catch)q.catch(function(){})}if(!raf)raf=requestAnimationFrame(tick)}
   function halt(){fg.pause();if(bg)bg.pause()}
-  function resume(){var T=window.__fzSongPos?window.__fzSongPos():0;if(T<.5)return;  /* the intro song is playing: the reel carries the same song, so start the reel at the same second */
-    [fg,bg].forEach(function(x){if(!x)return;var go=function(){try{x.currentTime=Math.min(T,(x.duration||60)-.5)}catch(e){}};x.readyState>=1?go():x.addEventListener("loadedmetadata",go,{once:true})})}
-  function begin(){if(st!=="idle")return;st="play";load();resume();hero.classList.add("reel-on");m.pause();if(!paused())run()}
+  /* C10: the host (Cloudflare Pages) answers media Range requests with a 200, so the reel is not seekable by URL and currentTime = T is ignored.
+     Fix: while the intro plays, fetch the reel file the browser would pick into a Blob; a blob: URL is fully seekable, so the reel can start at the song's second. */
+  var blobUrl=null,blobP=null,conn=navigator.connection||{};
+  function songPos(){return window.__fzSongPos?window.__fzSongPos():0}
+  function soundOn(){var v=0;try{v=sessionStorage.getItem("fk-sound")==="1"}catch(e){}return v||songPos()>0}
+  function goodNet(){return !save&&!/^(slow-2g|2g|3g)$/.test(conn.effectiveType||"")}
+  function reelUrl(){var ss=fg.querySelectorAll("source"),i,t;for(i=0;i<ss.length;i++){t=ss[i].getAttribute("type");if(!t||fg.canPlayType(t))return ss[i].getAttribute("src")}return ""}
+  function fetchBlob(){if(blobP||save||calm||!window.fetch||!window.URL)return;var u=reelUrl();if(!u)return;   /* same URL the <video> would use, so the browser cache is shared: no second download */
+    blobP=fetch(u).then(function(r){return r.ok?r.blob():Promise.reject()}).then(function(b){blobUrl=URL.createObjectURL(b)}).catch(function(){})}
+  if(!save&&!calm){if(soundOn()||(!phone&&goodNet()))fetchBlob();addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on&&goodNet())fetchBlob()})}
+  addEventListener("pagehide",function(){if(blobUrl){try{URL.revokeObjectURL(blobUrl)}catch(e){}blobUrl=null}});
+  function fromBlob(done){var n=0,fin=function(){if(!n++)done()};
+    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.src=blobUrl;x.load()}});loaded=true;
+    if(fg.readyState>=1)fin();else{fg.addEventListener("loadedmetadata",fin,{once:true});setTimeout(fin,1500)}}
+  /* the seek and the first frames take a moment while the song keeps going: re-align to the song a few times right after the reel is really playing */
+  function lock(){var n=0,fix=function(){var T=songPos();if(T<.5||st!=="play")return;var d=Math.abs(fg.currentTime-T);
+      if(d>.22){try{fg.currentTime=Math.min(T+.3,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}}
+      if(++n<12)setTimeout(fix,600)};
+    fg.addEventListener("playing",function(){setTimeout(fix,150)},{once:true})}
+  function start(mode){st="play";hero.classList.add("reel-on");m.pause();
+    if(mode==="fresh"){window.__fzReel.keepSong=true;load()}   /* blob not ready: the mp3 keeps playing, the reel starts muted from 0, the song is never restarted */
+    else if(mode==="plain")load();
+    if(!paused())run()}
+  function begin(){if(st!=="idle")return;var T=songPos();
+    if(T<.5){start("plain");return}                    /* no song playing: the reel starts from 0 as before */
+    if(!blobP)fetchBlob();
+    var t0=Date.now();(function w(){if(st!=="idle")return;
+      if(blobUrl){st="wait";fromBlob(function(){var T2=songPos();try{fg.currentTime=Math.min(T2,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}st="idle";start("blob");lock()});return}
+      if(!blobP||Date.now()-t0>2000){start("fresh");return}   /* wait up to 2 s (the song keeps playing) */
+      setTimeout(w,100)})()}
   function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);hero.classList.remove("reel-on");
     m.classList.add("zin");rv.classList.add("out");
     try{m.currentTime=2.45}catch(e){}

@@ -68,6 +68,40 @@ function icon(path: string): SVGElement {
 }
 const PLAY = 'M8 5v14l11-7z';
 const STACK = 'M7 3h12a2 2 0 0 1 2 2v12h-2V5H7zM3 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z';
+/* Which posts are shown (B9). A post is hidden when
+   1) it is older than 30 days, or
+   2) its caption names a date (e.g. "22 Nov", "Nov 22th", "22/11", "22.11.2026") and the latest such date is before today (India time): a finished event.
+   A date without a year uses the post's year (next year if that would fall more than a week before the post). Captions without a date are only judged by rule 1. */
+const IG_MAX_AGE_DAYS = 30, IG_MIN_FRESH = 4;
+const MONTHS = 'jan feb mar apr may jun jul aug sep oct nov dec'.split(' ');
+const DAY = 86400000;
+function captionDates(c: string, postTs: number): number[] {
+  const out: number[] = [], py = new Date(postTs).getUTCFullYear();
+  const push = (d: number, m: number, y?: number) => {
+    if (m < 0 || m > 11 || d < 1 || d > 31) return;
+    let yy = y ?? py; if (yy < 100) yy += 2000;
+    let t = Date.UTC(yy, m, d);
+    if (y === undefined && t < postTs - 7 * DAY) t = Date.UTC(yy + 1, m, d);
+    out.push(t);
+  };
+  const mon = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)';
+  let m: RegExpExecArray | null;
+  const r1 = new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:of\\s+)?' + mon + '\\b(?:[,\\s]+(\\d{4}))?', 'gi');
+  while ((m = r1.exec(c))) push(+m[1], MONTHS.indexOf(m[2].slice(0, 3).toLowerCase()), m[3] ? +m[3] : undefined);
+  const r2 = new RegExp('\\b' + mon + '\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:[,\\s]+(\\d{4}))?', 'gi');
+  while ((m = r2.exec(c))) push(+m[2], MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()), m[3] ? +m[3] : undefined);
+  const r3 = /\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b/g;
+  while ((m = r3.exec(c))) push(+m[1], +m[2] - 1, m[3] ? +m[3] : undefined);
+  return out;
+}
+function isFresh(p: IgPost): boolean {
+  const ts = parseTs(p.timestamp), now = Date.now();
+  if (ts && now - ts > IG_MAX_AGE_DAYS * DAY) return false;
+  const ds = captionDates(p.caption || '', ts || now);
+  if (!ds.length) return true;
+  const ist = new Date(now + 5.5 * 3600000), today = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate());
+  return Math.max(...ds) >= today;
+}
 const altOf = (p: IgPost) => { const c = (p.caption || '').replace(/\s+/g, ' ').trim(); return c ? c.slice(0, 100) : 'Fursat Instagram post'; };
 const fmtDate = (p: IgPost) => { const t = parseTs(p.timestamp); return t ? new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(t)) : ''; };
 
@@ -209,6 +243,9 @@ async function initFeed(root: HTMLElement) {
     posts.forEach((p) => pool.push({ ...p, acct: targets[i] }));
   });
   pool.sort((a, b) => parseTs(b.timestamp) - parseTs(a.timestamp));
+  // old posts and finished events are dropped; with fewer than IG_MIN_FRESH left the grid is replaced by the "Follow us" card (see isFresh)
+  for (let i = pool.length - 1; i >= 0; i--) if (!isFresh(pool[i])) pool.splice(i, 1);
+  if (pool.length < IG_MIN_FRESH) pool.length = 0;
 
   if (!pool.length) { root.dataset.state = 'fallback'; return; }  // all failed or empty: buttons, no error text
 

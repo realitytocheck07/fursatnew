@@ -36,7 +36,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
     <span class="afab-spk" aria-hidden="true"><i style="--sx:-30px;--sy:-34px"></i><i style="--sx:0px;--sy:-46px"></i><i style="--sx:30px;--sy:-34px"></i><i style="--sx:-42px;--sy:-8px"></i><i style="--sx:42px;--sy:-8px"></i><i style="--sx:0px;--sy:-24px"></i></span>
     <span class="afab-bub" aria-hidden="true"></span>
   </a>
-  <button class="afab-ear" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="afab-offers" data-fk-ear hidden><span aria-hidden="true">🎁</span> Offers</button>
+  <button class="afab-ear" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="afab-offers" aria-label="Offers" data-fk-ear hidden><span aria-hidden="true">🎁</span><span class="afab-ear-t">Offers</span></button>
   <div class="afab-offers" id="afab-offers" role="dialog" aria-label="Offers at Fursat" hidden>
     <p class="afab-of-h">Offers at Fursat</p>
     <ul>
@@ -81,9 +81,26 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
     };
     a.addEventListener('animationend', (e) => { if (e.target !== a) return; a.className = a.className.replace(/\bm-\w+/g, '').trim(); swap(false); });
     const coin = () => { if (reduce.matches) return; a.classList.remove('m-coin'); void a.offsetWidth; a.classList.add('m-coin'); setTimeout(() => a.classList.remove('m-coin'), 1100); };
+    // is the strip where the hint bubble would open free of text, fields, buttons and images? (phone: bubble opens left of the mascot, else right)
+    const bubbleFree = (text) => {
+      const r = a.getBoundingClientRect(), w = Math.min(220, 28 + String(text).length * 7.2), h = 34, cy = r.top + r.height / 2;
+      const L = innerWidth < 768 ? r.left - 8 - w : r.right + 10, T = cy - h / 2, R = L + w, B = T + h;
+      if (L < 4 || R > innerWidth - 4) return false;
+      const hit = (q) => q.width > 0 && q.height > 0 && q.right > L - 4 && q.left < R + 4 && q.bottom > T - 2 && q.top < B + 2;
+      for (const el of document.querySelectorAll('h1,h2,h3,h4,h5,p,li,label,legend,dt,dd,td,th,figcaption,summary,input,textarea,select,button,a,img,video')) {
+        if (el === a || a.contains(el) || el.closest('[data-fk-ask],[data-ifab],.afab-ear,.afab-offers')) continue;
+        const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
+        if (/^(P|H[1-5]|LI|LABEL|LEGEND|DT|DD|TD|TH|FIGCAPTION|SUMMARY)$/.test(el.tagName)) {
+          const rg = document.createRange(); rg.selectNodeContents(el);
+          for (const q of rg.getClientRects()) if (hit(q)) return false;
+        } else if (hit(el.getBoundingClientRect())) return false;
+      }
+      return true;
+    };
     const say = (text, force) => {
       const now = performance.now();
       if (!force && (reduce.matches || now - lastBubble < 6000 || typing())) return;
+      if (!bubbleFree(text)) return;   // never over text, inputs or buttons: skip when there is no free space
       lastBubble = now; bub.textContent = text; a.classList.add('m-say'); clearTimeout(bt);
       bt = setTimeout(() => a.classList.remove('m-say'), 2000);
     };
@@ -144,15 +161,18 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       document.querySelectorAll('main > section, main section[id]').forEach((s) => io.observe(s));
     }
     // --- hold while the footer is in view or a sticky panel sits in the corner (same rule as the Instagram button) ---
+    const fieldOn = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
     const hold = () => {
       let h = inFooter;
+      if (!h && innerWidth < 768 && (fieldOn() || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) h = true;
       if (!h) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
         const r = el.getBoundingClientRect();
-        if (r.left < 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { h = true; break; }
+        if ((innerWidth < 768 || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { h = true; break; }
       }
       a.toggleAttribute('data-hold', h);
     };
     addEventListener('scroll', hold, { passive: true }); addEventListener('resize', hold, { passive: true });
+    addEventListener('focusin', hold); addEventListener('focusout', () => setTimeout(hold, 60));
     const foot = document.querySelector('.sf-footer');
     if (foot && 'IntersectionObserver' in window) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; hold(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
     // --- Mario routine: one rAF loop (runs only while a move plays). Walk along the bottom edge and back, sit, or peek off the edge.
@@ -234,9 +254,10 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
         requestAnimationFrame(place);
         const cs = getComputedStyle(a), r = a.getBoundingClientRect();
         const show = !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
-        if (!show) { if (!ear.hidden) { ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
-        if (ear.hidden) ear.hidden = false;
-        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.right - w - 8, top = r.top - ear.offsetHeight + 7 - (document.documentElement.classList.contains('fk-music') ? 30 : 0);   // rises above the dancing bars while music plays
+        if (!show) { if (!ear.hidden) { document.documentElement.classList.remove('fk-ear-on'); ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
+        if (ear.hidden) { ear.hidden = false; if (phone()) { const seen = store('fk-ear-seen'); if (seen) ear.classList.add('is-compact'); else { store('fk-ear-seen', '1'); setTimeout(() => ear.classList.add('is-compact'), 5000); } } }
+        document.documentElement.classList.toggle('fk-ear-on', !phone());
+        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.left, top = r.top - ear.offsetHeight - (phone() ? -7 : 10) - (document.documentElement.classList.contains('fk-music') ? 30 : 0);   // rises above the dancing bars while music plays
         const key = left.toFixed(0) + ',' + top.toFixed(0);
         if (key !== lastKey) { lastKey = key; ear.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0)`; }
         if (open) { card.style.left = phone() ? 'auto' : Math.max(12, r.left) + 'px'; card.style.right = phone() ? '12px' : 'auto'; card.style.bottom = (innerHeight - r.top + ear.offsetHeight + 4) + 'px'; }
@@ -255,7 +276,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
   </script>
 )}
 <style>
-.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Poppins, system-ui, sans-serif; transform-origin: 50% 100%; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
+.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Rupee,Poppins, system-ui, sans-serif; transform-origin: 50% 100%; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
 .afab-img { width: 44px; height: 44px; border-radius: 50%; background: #f6e4c9; object-fit: cover; }
 .afab-t b { color: #f3c56b; font-weight: 600; }
 .afab-q { display: block; max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; color: #d9c9a6; font-size: .78rem; transition-property: max-width, opacity, margin; transition-duration: 320ms; transition-timing-function: cubic-bezier(.23,1,.32,1); }
@@ -301,6 +322,8 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 .afab.m-tilt { animation: afab-tilt 700ms cubic-bezier(.23,1,.32,1) both; }
 .afab.m-spin { animation: afab-spin 760ms cubic-bezier(.23,1,.32,1) both; }
 .afab.m-flip { animation: afab-flip 820ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-spin .afab-img { animation: afab-spin-art 760ms cubic-bezier(.23,1,.32,1) both; }
+.afab.m-flip .afab-img { animation: afab-flip-art 820ms cubic-bezier(.23,1,.32,1) both; }
 .afab.m-power { animation: afab-power 1100ms cubic-bezier(.23,1,.32,1) both; }
 @keyframes afab-drop {
   0% { transform: translateY(calc(-100vh - 120px)) scale(1, 1); animation-timing-function: cubic-bezier(.77,0,.175,1); }
@@ -333,19 +356,22 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
   100% { transform: translateY(0) scale(1, 1); }
 }
 @keyframes afab-spin {
-  0% { transform: perspective(500px) translateY(0) rotateY(0) scale(1, 1); }
-  16% { transform: perspective(500px) translateY(0) rotateY(0) scale(1.12, .86); }
-  50% { transform: perspective(500px) translateY(-42px) rotateY(180deg) scale(.94, 1.1); }
-  82% { transform: perspective(500px) translateY(0) rotateY(360deg) scale(1.1, .9); }
-  100% { transform: perspective(500px) translateY(0) rotateY(360deg) scale(1, 1); }
+  0% { transform: translateY(0) scale(1, 1); }
+  16% { transform: translateY(0) scale(1.12, .86); }
+  50% { transform: translateY(-42px) scale(.94, 1.1); }
+  82% { transform: translateY(0) scale(1.1, .9); }
+  100% { transform: translateY(0) scale(1, 1); }
 }
 @keyframes afab-flip {
-  0% { transform: translateY(0) rotate(0) scale(1, 1); }
-  16% { transform: translateY(0) rotate(0) scale(1.12, .86); }
-  55% { transform: translateY(-52px) rotate(-200deg) scale(.94, 1.08); }
-  84% { transform: translateY(0) rotate(-360deg) scale(1.1, .9); }
-  100% { transform: translateY(0) rotate(-360deg) scale(1, 1); }
+  0% { transform: translateY(0) scale(1, 1); }
+  16% { transform: translateY(0) scale(1.12, .86); }
+  55% { transform: translateY(-52px) scale(.94, 1.08); }
+  84% { transform: translateY(0) scale(1.1, .9); }
+  100% { transform: translateY(0) scale(1, 1); }
 }
+/* the spin and the back-flip turn the mascot art only; the "Ask Fursat" label never mirrors or turns */
+@keyframes afab-spin-art { 0%, 16% { transform: perspective(500px) rotateY(0); } 50% { transform: perspective(500px) rotateY(180deg); } 82%, 100% { transform: perspective(500px) rotateY(360deg); } }
+@keyframes afab-flip-art { 0%, 16% { transform: rotate(0); } 55% { transform: rotate(-200deg); } 84%, 100% { transform: rotate(-360deg); } }
 @keyframes afab-power {
   0% { transform: translateY(0) scale(1, 1); }
   12% { transform: translateY(0) scale(1.2, .78); }
@@ -378,10 +404,10 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
   100% { opacity: 0; transform: translateY(-18px) scale(.9, .9); }
 }
 /* hint bubble: beside the mascot (never above it, where the Instagram button sits); opens away from the screen edge */
-.afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Poppins, system-ui, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
+.afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Rupee,Poppins, system-ui, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
 .afab.m-say .afab-bub { opacity: 1; transform: translate(0, -50%) scale(1); }
 @media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-spin .afab-img, .afab.m-flip .afab-img, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
 @media print { .afab { display: none !important; } }
 /* ---- Dance (v5.60): the mood music vibrates Ask Fursat like a music visualizer. html.fk-music is set by 06.js while sound is on; --fk-beat (kick, 0..1) and
    --fk-b0..--fk-b4 (live level of five frequency bands, bass first) come from the song's own audio. She shakes on the bass, glows on the kick, and pixel bars fan out
@@ -399,13 +425,17 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 @media (prefers-reduced-motion: reduce) { :global(html.fk-music) .afab .afab-img { animation: none; scale: none; box-shadow: none; } .afab-eq { display: none; } }
 
 /* ---- Offers ear: a small gold tab on the Ask pill + a real-offers card ---- */
-.afab-ear { position: fixed; left: 0; top: 0; z-index: 8501; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.afab-ear { position: fixed; left: 0; top: 0; z-index: 8501; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Rupee,Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .afab-ear[hidden], .afab-offers[hidden] { display: none; }
+/* desktop: Instagram, Offers and Ask Fursat form a tidy vertical stack (10px gaps, no overlap): Ask at the bottom, Offers above it, Instagram on top */
+@media (min-width: 768px) { .afab-ear { height: 40px; min-height: 40px; padding: 0 14px; margin: 0; border-radius: 14px; } }
+/* phone: after the first view the Offers tab collapses to a 44px icon chip */
+@media (max-width: 767px) { .afab-ear { min-width: 44px; justify-content: center; } .afab-ear.is-compact { width: 44px; padding-left: 0; padding-right: 0; } .afab-ear.is-compact .afab-ear-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
 .afab-ear:active { scale: .96; }
 .afab-ear:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
 .afab-ear.is-nudge { animation: afab-ear 900ms cubic-bezier(.23,1,.32,1) both; }
 @keyframes afab-ear { 0%, 100% { rotate: 0deg; } 20% { rotate: -7deg; } 45% { rotate: 6deg; } 70% { rotate: -3deg; } }
-.afab-offers { position: fixed; z-index: 8600; width: min(300px, calc(100vw - 24px)); padding: 14px 16px 12px; border-radius: 18px; background: #fff8e8; color: #13301d; box-shadow: 0 18px 40px -16px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(201 154 67 / .6); font-family: Poppins, system-ui, sans-serif; }
+.afab-offers { position: fixed; z-index: 8600; width: min(300px, calc(100vw - 24px)); padding: 14px 16px 12px; border-radius: 18px; background: #fff8e8; color: #13301d; box-shadow: 0 18px 40px -16px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(201 154 67 / .6); font-family: Rupee,Poppins, system-ui, sans-serif; }
 .afab-of-h { margin: 0 0 8px; font: 600 1rem/1.2 'Playfair Display', Georgia, serif; }
 .afab-offers ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .afab-offers li { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid rgb(201 154 67 / .35); }

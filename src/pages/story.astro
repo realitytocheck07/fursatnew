@@ -18,7 +18,7 @@ import '../styles/fk-tokens.css';
 // TODO(client): FSSAI licence number and GSTIN in site.json legal.* — the rows appear automatically once filled.
 // Real facts only (handoff §3/§4). Values still TODO(client) in site.json are not shown.
 const real = (v?: string) => !!v && !v.startsWith('TODO');
-const address = `Capital Park, ${site.address.line2}, ${site.address.state} ${site.address.pin}`;
+const address = `${site.address.line1}, ${site.address.line2}, ${site.address.state} ${site.address.pin}`;
 const legalRows = [
   { k: 'Brand', v: 'Fursat Kitchen | Bar' },
   { k: 'Address', v: address },

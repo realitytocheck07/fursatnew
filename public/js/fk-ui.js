@@ -227,3 +227,20 @@
   window.fkUI = { init: init, centerIn: centerIn };
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', function () { init(d); }); else init(d);
 })();
+
+/* B8: empty <input type=date> shows a blank box on Android. Keep a .has-value class in step with the value so fk-tokens.css can show a "Pick a date" label while it is empty.
+   The forms' own JS is not touched: it still reads and sets .value as before. */
+(function () {
+  'use strict';
+  var d = document;
+  function sel() { return d.querySelectorAll('input[type=date]:not(.rs-calinp)'); }
+  function sync(el) { el.classList.toggle('has-value', !!el.value); }
+  function all() { sel().forEach(sync); }
+  function onEvt(e) { var t = e.target; if (t && t.matches && t.matches('input[type=date]')) sync(t); }
+  ['input', 'change', 'focusout', 'blur'].forEach(function (n) { d.addEventListener(n, onEvt, true); });
+  d.addEventListener('reset', function () { setTimeout(all, 0); }, true);
+  addEventListener('pageshow', all);
+  d.addEventListener('visibilitychange', all);
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', all); else all();
+  setTimeout(all, 600); /* a form script may set the value right after load */
+})();

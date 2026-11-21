@@ -50,7 +50,7 @@ window.__fzSongPos=function(){return(M.on&&!viaReel&&!M.a.paused&&!M.a.ended)?M.
 var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
 /* sync: during the intro the song jumps to the helicopter's elapsed time. play() is called straight from the tap (Safari / iPhone need that). */
 var inIntro=function(){return document.documentElement.classList.contains("lock")};
-var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.__fzReel.on&&!calm&&!inIntro())};
+var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.__fzReel.on&&!window.__fzReel.keepSong&&!calm&&!inIntro())};
 /* the reel's own audio: fade in over the song's fade-out. If the browser refuses sound (it pauses the video), re-mute, keep the picture playing and leave "Sound on" for a tap. */
 function reelSound(on,quick){if(!rf)return;if(!on){rf.muted=true;return}
  try{rf.volume=0;rf.muted=false}catch(e){}

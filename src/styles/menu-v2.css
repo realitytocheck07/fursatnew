@@ -1,6 +1,6 @@
 /* /menu v2, Take B (framed windows). Scoped under .mv so site CSS is untouched.
    Palette: warm espresso, sand, gold, terracotta. No green surfaces. */
-body:has(.mv){--sans:Poppins,system-ui,sans-serif} /* one sans site-wide: Poppins (header, footer, menu) */
+body:has(.mv){--sans:Rupee,Poppins,system-ui,sans-serif} /* one sans site-wide: Poppins (header, footer, menu) */
 
 .mv{
   --mv-bg:#0b0705;--mv-raise:#1a120d;--mv-card-a:rgba(38,26,18,.97);--mv-card-b:rgba(19,12,8,.97);
@@ -8,7 +8,7 @@ body:has(.mv){--sans:Poppins,system-ui,sans-serif} /* one sans site-wide: Poppin
   --mv-hair:rgba(224,166,60,.38);--mv-terra:#C8531F;--mv-sand-a:#fbf3e3;--mv-sand-b:#ead8b8;--mv-ink:#2a1608;
   --mv-orange:linear-gradient(135deg,#f2832a,#d85a0c 55%,#b53f06);
   --mv-ease:cubic-bezier(.23,1,.32,1);--mv-out:cubic-bezier(.23,1,.32,1);--mv-ease-move:cubic-bezier(.77,0,.175,1);--mv-out-img:oklch(1 0 0 / .1);
-  --mv-serif:"Playfair Display",Georgia,serif;--mv-sans:Poppins,system-ui,sans-serif;
+  --mv-serif:"Playfair Display",Georgia,serif;--mv-sans:Rupee,Poppins,system-ui,sans-serif;
   position:relative;color:var(--mv-text);font:500 15px/1.5 var(--mv-sans);
   background:radial-gradient(90% 55% at 50% 0,#2b1a10,var(--mv-bg) 72%);
   -webkit-font-smoothing:antialiased;
@@ -327,7 +327,7 @@ html:has(.mv){background:var(--fk-plaster-base)}
 }
 /* the 21+ notice lives outside main.mv: same tokens */
 .mv-dialog{--mv-text:#2b2416;--mv-mute:#5a5040;--mv-hair:rgb(168 115 28 / .38);--mv-rim:var(--fk-edge);--mv-gold-hi:var(--fk-text-gold);--mv-out-img:oklch(0 0 0 / .1);
-  --mv-serif:"Playfair Display",Georgia,serif;--mv-sans:Poppins,system-ui,sans-serif;--mv-ease:cubic-bezier(.23,1,.32,1);--mv-out:cubic-bezier(.23,1,.32,1)}
+  --mv-serif:"Playfair Display",Georgia,serif;--mv-sans:Rupee,Poppins,system-ui,sans-serif;--mv-ease:cubic-bezier(.23,1,.32,1);--mv-out:cubic-bezier(.23,1,.32,1)}
 /* the doors start right under the fixed header (--sh-h: 78px desktop, 68px phone) */
 .mv{--md-top:var(--sh-h,78px)}
 

@@ -2,6 +2,7 @@
 // terms.astro - Fursat House Rules, Privacy & Cancellation Policy
 // TODO(client): confirm the grace period, the 2-hour reschedule notice, the 7-day refund window and the administrative fee. Kept as the owner decided.
 import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
 import '../styles/fk-tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -76,7 +77,7 @@ import MobileBar from '../components/MobileBar.astro';
           <p>
             For any clarifications regarding our terms or reservations, contact us at:
             <br />
-            <b>Fursat Kitchen | Bar</b> · Capital Park, Madhapur, Hyderabad · <a href="mailto:fursat.hyd@gmail.com">fursat.hyd@gmail.com</a> · +91 90596 70033
+            <b>Fursat Kitchen | Bar</b> · {site.address.line1}, {site.address.line2}, {site.address.state} {site.address.pin} · <a href={`mailto:${site.email}`}>{site.email}</a> · {site.phone}
           </p>
         </div>
       </div>

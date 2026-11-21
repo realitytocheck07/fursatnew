@@ -370,3 +370,26 @@ story-d-poster / story-d-video (1366x634), story-m-poster / story-m-video (390x8
 
 - Merge: desktop sound button moved to the top-left of the window (it sat under the WhatsApp button and the Vibe bubble). Unused files removed: inside-fursat-16x9.mp4/.webm, inside-fursat-poster.webp, inside-fursat-poster-16x9.webp.
 - Added routes on Story: Reserve + Menu buttons under the story text, and a "Your Fursat starts here" section with 6 link cards (Reserve, Menu, Party, Banquet, Order, Ask) before Business information.
+
+
+## v5.83 phone + content fixes (kit 27b, checkpoints 1-4)
+## Done
+- A1: footer/terms/story/ask address read from site.json (line1, line2, state pin). No hard-coded "Capital Park, Madhapur" in those four.
+- A2: second phone removed from banquet.astro enquiry note; TODO(client) left. Not present elsewhere outside site.json.
+- A3: "Rupee" @font-face (U+20B9, local Noto Sans/Segoe UI/Roboto/Arial) in fk-tokens.css + 04.css; "Rupee" first in every Poppins stack.
+## Decisions made
+- photos-A/B were not uploaded: the menu build guard throws on missing dish photos, so 75 temporary stub images (list: stubs.txt) were created only to run the real build. They are NOT in the zips.
+- B4: footer bottom padding (nav + Book bar + safe area, <900px); Book bar gets `.is-foot` and slides away while the footer is in view (StickyBar.astro, all pages incl. Home).
+- B5: InstaFab + Ask pill hide while a field is focused or the Send-menu dock/#pa-plan shows (phone, either side). Offers tab collapses to a 44px icon chip after the first view (sessionStorage `fk-ear-seen`). Ask bubble shows only if its strip has no text/field/button/image (`bubbleFree`), else skipped.
+- B6: fizz canvas z-index 1 on phone, footer content above it (SiteFooter.astro). Effect kept.
+- B7: pa-stack.js sets the Feast panel `min-height:0` on phone; stacking unchanged.
+- B8: `.has-value` sync in fk-ui.js + "Pick a date" label in fk-tokens.css (touch screens only; all date inputs but `.rs-calinp`).
+- 10a: spin/flip rotate the mascot art only (`afab-spin-art`, `afab-flip-art`); the label never turns.
+- 10b: desktop stack bottom→top: Ask pill, Offers tab (10px above, follows the pill), Instagram (10px above the tab).
+- A3 also covers `font:` shorthand stacks.
+- C10 (10.js §26b + one flag in 06.js `reelUsable`): while the intro plays the reel file (same URL the browser picks: webm if playable, else mp4) is fetched into a Blob when sound is on, or on desktop with a good connection and no Save-Data. At intro end, if the song plays: blob ready -> reel `src` = blob URL, seek to song position, re-aligned a few times (drift >0.22 s) after it plays. Not ready -> wait up to 2 s (song keeps playing), then `__fzReel.keepSong=true`: reel runs muted from 0, mp3 never restarted (06.js ignores the reel's audio). Blob URL revoked on pagehide. Tested with python3 -m http.server (no Range): drift -0.26..+0.15 s over 8 s; slow-network case keepSong true, muted, from 0.
+- B9 (`src/scripts/instagram-feed.ts`, `isFresh`): a post is hidden if older than 30 days, or if its caption names a date ("22 Nov", "Nov 22nd", "22/11", with or without year; year defaults to the post's year) and the latest such date is before today (IST). Captions without a date are judged by age only. After filtering, fewer than 4 posts -> the grid is replaced by the "Follow us" card (existing fallback state). Rules unit-tested in node; ?igmock=ok (old mock dates) gives the Follow card.
+## Next
+- QA
+
+- Merge: story.astro kept from v5.82 (hero video + routes); only the address line from kit 27 applied. QA from the kit was not run by the session: build is checked by the owner push, layout QA is done live afterwards in Chrome.

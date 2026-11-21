@@ -244,9 +244,9 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   @media (hover: hover) { .sh-sub-item:hover .sh-thumb { transform: scale(1.06); } }
   @media (prefers-reduced-motion: reduce) { .sh-sub-item:hover .sh-thumb { transform: none; } }
   .sh-sub-item:hover { background: rgba(243,211,140,.28); transform: translateX(2px); }
-  .sh-si-t { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .9375rem; font-weight: 500; color: #14301c; }
+  .sh-si-t { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .9375rem; font-weight: 500; color: #14301c; }
   .sh-sub-item:hover .sh-si-t { color: #9c4f1c; }
-  .sh-sub-item small { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .775rem; color: #5a5040; }
+  .sh-sub-item small { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .775rem; color: #5a5040; }
 
   /* keyboard focus ring (the nav links use all:unset, which removes the browser default) */
   .sh-header :is(a, button):focus-visible { outline: 2px solid #14301c; outline-offset: 3px; border-radius: 999px; }
@@ -284,7 +284,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   @keyframes sh-slide { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
   .sh-mp-inner { display: flex; flex-direction: column; gap: 20px; }
   .sh-mp-group { display: flex; flex-direction: column; gap: 2px; }
-  .sh-mp-label { font-family: var(--fk-sans, "Poppins", system-ui, sans-serif); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #74501a; margin-bottom: 2px; }
+  .sh-mp-label { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #74501a; margin-bottom: 2px; }
   .sh-mp-link { font-family: var(--fk-serif, "Playfair Display", Georgia, serif); font-size: 1.0625rem; color: #14301c; text-decoration: none; min-height: 44px; display: flex; align-items: center; gap: 10px; }
   .sh-mp-cta { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(60,40,10,.12); }
   .sh-mp-reserve { display: grid; place-items: center; min-height: 48px; border-radius: 999px; background: linear-gradient(180deg, #21492b 0%, #12301c 100%); color: #fbf5e6; font-weight: 500; text-decoration: none; }
@@ -295,7 +295,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   .sh-header.sh-hidden:focus-within { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
 
   /* live open badge: quiet text, green dot when open */
-  .sh-open { display: inline-flex; align-items: center; gap: 7px; font: 500 .8rem/1 var(--fk-sans, Poppins, sans-serif); color: #5a5040; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sh-open { display: inline-flex; align-items: center; gap: 7px; font: 500 .8rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); color: #5a5040; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .sh-open::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #a8731c; box-shadow: 0 0 0 3px rgba(168,115,28,.18); }
   .sh-open.is-open::before { background: #1f7a3a; box-shadow: 0 0 0 3px rgba(31,122,58,.18); }
   .sh-open[hidden] { display: none !important; }

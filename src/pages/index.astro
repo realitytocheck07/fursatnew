@@ -150,7 +150,7 @@ if(document.readyState==="complete")idle();else addEventListener("load",idle)})(
 /* Intro sound button: visible from the first second of the intro (html.lock), gone when the intro ends; the hero keeps #snd (music) + #fxpv (pause). */
 .fk-isnd { display: none; }
 html.lock .fk-isnd { position: fixed; left: 16px; top: calc(var(--sh-h, 104px) + 14px); z-index: 2147482999; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 14px 0 0; border-radius: 9999px; border: 1px solid rgba(42,37,20,.32); background: rgba(255,250,238,.9); color: #2A2514; box-shadow: 0 10px 24px -12px rgba(0,0,0,.45); }
-.fk-isnd-b { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 14px; border: 0; border-radius: 9999px; background: none; color: inherit; font: 600 14px/1 var(--fk-font-text, 'Poppins', system-ui, sans-serif); cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(.23,1,.32,1); }
+.fk-isnd-b { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 14px; border: 0; border-radius: 9999px; background: none; color: inherit; font: 600 14px/1 var(--fk-font-text, Rupee,'Poppins', system-ui, sans-serif); cursor: pointer; touch-action: manipulation; transition: transform 160ms cubic-bezier(.23,1,.32,1); }
 .fk-isnd-v { width: 84px; height: 44px; margin: 0; accent-color: #C94716; cursor: pointer; touch-action: manipulation; background: none; }
 .fk-isnd svg { width: 20px; height: 20px; flex: none; }
 .fk-isnd-b:active { transform: scale(.97); }

@@ -1,7 +1,7 @@
 /* ask-host.css: reception-desk layer for /ask (status chip, desk row, host bubble, desk answers).
    Colours come from the page's own --as-* tokens (the few it lacks are defined below). Motion is transform/opacity only, with a reduced-motion path. */
 
-:root{--as-sans:var(--fk-sans,Poppins,system-ui,sans-serif);--as-serif:var(--fk-serif,"Playfair Display",Georgia,serif);--as-line:rgba(201,154,67,.35);--as-cream:#f6ecd8;--as-green-deep:#13301d;--as-ease:cubic-bezier(.23,1,.32,1);--as-sh:74 48 16}
+:root{--as-sans:var(--fk-sans,Rupee,Poppins,system-ui,sans-serif);--as-serif:var(--fk-serif,"Playfair Display",Georgia,serif);--as-line:rgba(201,154,67,.35);--as-cream:#f6ecd8;--as-green-deep:#13301d;--as-ease:cubic-bezier(.23,1,.32,1);--as-sh:74 48 16}
 /* status chip: greeting + open/closed, from the real hours */
 .ah-status{display:inline-flex;align-items:center;gap:10px;margin:0 0 14px;padding:0 16px 0 12px;min-height:36px;border-radius:999px;background:var(--as-ivory,#fffaf2);border:1px solid rgba(201,154,67,.7);box-shadow:0 4px 12px -8px rgba(74,48,16,.45);color:var(--as-green);font:500 .8125rem/1.2 var(--as-sans)}
 .ah-dot{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:#2E7D32}

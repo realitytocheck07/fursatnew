@@ -49,11 +49,14 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   let raf = 0;
   const tick = () => {
     raf = 0;
+    const ph = matchMedia('(max-width: 767px)').matches, fe = document.activeElement;
     let on = (isHome ? !introOn() : scrollY > innerHeight * 0.6) && !inFooter;
+    // phone: step aside while a form field is focused or the banquet "Send menu" dock is up
+    if (on && ph && ((fe && (/^(INPUT|TEXTAREA|SELECT)$/.test(fe.tagName) || fe.isContentEditable)) || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) on = false;
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
     if (on) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
       const r = el.getBoundingClientRect();
-      if (r.left < 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
+      if ((ph || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
     b.classList.toggle('is-on', on && !inCard);
     if (ask) ask.classList.toggle('is-on', on);
@@ -73,6 +76,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   const req = () => { if (!raf) raf = requestAnimationFrame(tick); };
   addEventListener('scroll', req, { passive: true });
   addEventListener('resize', req, { passive: true });
+  addEventListener('focusin', req); addEventListener('focusout', () => setTimeout(req, 60));
   // these bars show and hide on their own (class or hidden attribute), so re-check when they change
   if ('IntersectionObserver' in window) {
     // the buttons sit in the bottom ~150px: count the footer as "in view" once its top is above that strip
@@ -123,7 +127,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 })();
 </script>
 <style>
-.ifab { position: fixed; z-index: 8500; left: 20px; bottom: calc(88px + var(--fab-lift, 0px)); display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 4px; border-radius: 999px; text-decoration: none; background: rgb(255 251 244 / .96); box-shadow: inset 0 0 0 1.5px #d6a64c, 0 14px 28px -14px rgb(60 36 10 / .6); color: #1f2a1a; font: 600 .85rem/1 Poppins, system-ui, sans-serif;
+.ifab { position: fixed; z-index: 8500; left: 20px; bottom: calc(88px + var(--fab-lift, 0px)); display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 4px; border-radius: 999px; text-decoration: none; background: rgb(255 251 244 / .96); box-shadow: inset 0 0 0 1.5px #d6a64c, 0 14px 28px -14px rgb(60 36 10 / .6); color: #1f2a1a; font: 600 .85rem/1 Rupee,Poppins, system-ui, sans-serif;
   transition-property: opacity, translate, visibility, box-shadow; transition-duration: 300ms, 300ms, 0s, 200ms; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
 :global(html.fab-js) .ifab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 300ms, 0s; }
 .ifab.is-on { transition-delay: 0s; }
@@ -143,6 +147,8 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
 @media (max-width: 767px) {
   .ifab, .ifab--solo { left: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); height: 48px; padding: 2px; }
 }
+/* desktop stack (bottom to top, 10px gaps): Ask Fursat, Offers tab, Instagram: sits just above the Offers tab while it shows */
+@media (min-width: 768px) { .ifab { bottom: calc(86px + var(--fab-lift, 0px)); } :global(html.fk-ear-on) .ifab { bottom: calc(136px + var(--fab-lift, 0px)); } .ifab--solo { bottom: calc(20px + var(--fab-lift, 0px)); } }
 /* glow when the account changes: a gold ring that pulses twice, slowly, then rests (transform + opacity only) */
 .ifab::after { content: ""; position: absolute; inset: 0; border-radius: 999px; box-shadow: 0 0 0 2px #f3c56b, 0 0 14px 2px rgb(243 197 107 / .55); opacity: 0; pointer-events: none; }
 .ifab.is-glow::after { animation: ifab-ring 1500ms cubic-bezier(.23,1,.32,1) 2 both; }

@@ -1,3 +1,4 @@
+@font-face{font-family:"Rupee";src:local("Noto Sans"),local("Segoe UI"),local("Roboto"),local("Arial"),local("Helvetica Neue"),local("Helvetica");unicode-range:U+20B9;font-display:swap}
 /* ==========================================================================
    Fursat Design Tokens (fk-*) — Extended from Reference Design Measurements
    Loaded without preflight so existing site CSS is untouched.
@@ -52,7 +53,7 @@
   --fk-gold-300: #e6c27a; --fk-gold-500: #c99a43; --fk-gold-700: #9a6f2a;
   --fk-ink: #2b2416; --fk-red: #c0291f; --fk-amber: #c27a2c;
   --fk-serif: "Playfair Display", Georgia, serif;
-  --fk-sans: Poppins, system-ui, sans-serif;
+  --fk-sans: Rupee, Poppins, system-ui, sans-serif;
   --fk-script: "Cormorant Garamond", Georgia, serif;
   --fk-ease: cubic-bezier(.16, 1, .3, 1);
   /* v5.12a motion tokens: durations, easing, distances (read by fk-motion.ts) */
@@ -590,3 +591,11 @@ html.fk-sheet-open{overflow:hidden}
   .fk-reveal.is-armed.is-in{opacity:1;transform:none;transition:opacity 500ms ease-out,transform 500ms ease-out}
 }
 /* UI2 end */
+
+/* ---- B8. EMPTY DATE FIELDS ---- Android shows a blank box for an empty <input type=date>: show "Pick a date" in the field's own style while it is empty (touch screens only;
+   fk-ui.js keeps .has-value in step). The value, the picker and the forms' JS are unchanged. */
+@media (pointer: coarse) {
+  input[type="date"]:not(.has-value):not(:focus):not(.rs-calinp)::before { content: "Pick a date"; color: var(--fk-ph, #7a6c4f); font: inherit; opacity: .9; margin-right: 6px; }
+  input[type="date"]:not(.has-value):not(:focus):not(.rs-calinp)::-webkit-datetime-edit { opacity: 0; width: 0; flex: 0 0 0; overflow: hidden; }
+  input[type="date"]:not(.rs-calinp) { min-height: 44px; }
+}

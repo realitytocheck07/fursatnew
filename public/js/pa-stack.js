@@ -36,6 +36,8 @@
     return Math.round(r);
   }
   function measure() {
+    /* phone (<=767px): the Feast panel fits its picture (no forced full-screen min-height, so no empty bands); stacking is unchanged */
+    panels.forEach(function (p) { if (p.classList.contains('pa-panel--feast')) { p.style.minHeight = phone.matches ? '0' : ''; p.style.justifyContent = phone.matches ? 'flex-start' : ''; } });
     var vh = viewH(), sh = shH(), res = reserve();
     stack.style.setProperty('--pa-d', Math.max(1, vh - sh) + 'px');
     panels.forEach(function (p, i) {

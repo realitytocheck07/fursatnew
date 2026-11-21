@@ -50,7 +50,7 @@ import site from '../data/site.json';
           <p class="sf-info-p">
             <b>Location:</b><br />
             {/* TODO(client): add the unit number and floor once the client confirms them ("Level 3" removed: unconfirmed). */}
-            Capital Park, {site.address.line2} {site.address.pin}
+            {site.address.line1}, {site.address.line2}, {site.address.state} {site.address.pin}
           </p>
           <p class="sf-info-p">
             <b>Hours:</b><br />
@@ -98,7 +98,7 @@ import site from '../data/site.json';
     color: #F4ECDA;
     border-top: 1px solid rgba(224, 166, 60, 0.25);
     padding: clamp(50px, 7vw, 84px) 0 32px;
-    font-family: var(--sans, "Poppins", system-ui, sans-serif);
+    font-family: var(--sans, Rupee,"Poppins", system-ui, sans-serif);
   }
   .sf-container {
     max-width: 1400px;
@@ -276,6 +276,10 @@ import site from '../data/site.json';
   /* v5.40 one footer on every page: same width, alignment and spacing. Page CSS cannot change it:
      it is full width, one container (--sf-w) centred with the same side padding, a fixed grid, the same background. */
   .sf-footer, .sf-footer *, .sf-footer *::before, .sf-footer *::after { box-sizing: border-box; }
+  /* phone: room for the nav pill + Book bar + safe area, so the last links are fully readable and tappable */
+  @media (max-width: 899px) { footer.sf-footer { padding-bottom: calc(var(--mb-clear, 76px) + 72px + env(safe-area-inset-bottom, 0px)); } }
+  /* decorative fizz bubbles (fk-fx canvas) stay behind the footer text on phone: canvas at z-index 1, footer content above it */
+  @media (max-width: 767px) { .fk-fx-canvas { z-index: 1 !important; } .sf-footer .sf-container { position: relative; z-index: 2; } }
   footer.sf-footer { display: block; width: 100%; max-width: none; min-width: 0; margin: 0; overflow-x: clip; background: linear-gradient(180deg, #14321e 0%, #0f2617 100%); }
   footer.sf-footer .sf-container { --sf-w: 1300px; width: 100%; max-width: var(--sf-w); margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
   footer.sf-footer .sf-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; margin-bottom: 48px; }

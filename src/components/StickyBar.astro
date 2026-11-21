@@ -53,7 +53,7 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
       display: flex;
       flex-direction: column;
       min-width: 0;
-      font-family: var(--sans, "Poppins", system-ui, sans-serif);
+      font-family: var(--sans, Rupee,"Poppins", system-ui, sans-serif);
       color: #16301a;
       line-height: 1.25;
     }
@@ -110,4 +110,19 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
 </script>
 <style is:global>
   @media (prefers-reduced-motion: reduce) { .fx-sticky.fk-bookbar { transition: none; } }
+  /* the footer is in view: the Book bar slides away so the last links stay readable and tappable (same pattern as the Instagram button) */
+  @media (max-width: 899px) {
+    .fx-sticky.fk-bookbar.is-foot { transform: translateY(calc(100% + 140px)) !important; opacity: 0 !important; pointer-events: none !important; }
+  }
 </style>
+<script is:inline>
+  (function () {
+    var bar = document.getElementById('fxsticky'), foot = document.querySelector('.sf-footer');
+    if (!bar || !foot || !('IntersectionObserver' in window)) return;
+    // count the footer as "in view" once its top is above the bar's strip (bar + nav = about 150px from the bottom)
+    new IntersectionObserver(function (es) {
+      var on = es[es.length - 1].isIntersecting;
+      if (on !== bar.classList.contains('is-foot')) { bar.classList.toggle('is-foot', on); window.dispatchEvent(new Event('resize')); }
+    }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
+  })();
+</script>
