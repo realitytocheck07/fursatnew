@@ -1,12 +1,17 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
-/js/*
-  Cache-Control: public, max-age=86400
+/js/h/*
+  Cache-Control: public, max-age=31536000, immutable
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+/data/*
+  Cache-Control: public, max-age=3600
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), usb=(), serial=(), bluetooth=(), payment=(), microphone=(self), geolocation=(self)
 
 https://:project.pages.dev/*
   X-Robots-Tag: noindex

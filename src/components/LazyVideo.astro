@@ -1,0 +1,27 @@
+---
+// A video that costs nothing until it is near the screen.
+//   <LazyVideo src="/assets/video/party.mp4" webm="/assets/video/party.webm" poster="/assets/video/party.webp" width={1280} height={720} label="Party night at Fursat" />
+// - the poster paints immediately (give it real width/height so the layout never shifts); no video bytes load before the clip is near the viewport
+// - clips are muted, looped and inline; Save-Data, 2g/3g and reduced-motion visitors keep the poster only
+// - give it NO audio track and keep it short (6-10 s, about 1.5 MB at 720p). Encode with: node scripts/encode-video.mjs <input> <out-name>
+interface Props {
+  src: string;            // mp4 (H.264)
+  webm?: string;          // optional smaller VP9 version, tried first
+  poster: string;         // webp or jpg, same aspect ratio as the clip
+  width: number;
+  height: number;
+  label?: string;         // describes the clip; leave empty for decorative video
+  class?: string;
+}
+const { src, webm, poster, width, height, label = '', class: cls = '' } = Astro.props;
+---
+<video
+  class={`fk-lazy-video ${cls}`.trim()}
+  muted loop playsinline preload="none"
+  disablepictureinpicture disableremoteplayback
+  poster={poster} width={width} height={height}
+  data-lazy-video data-src={src} data-webm={webm}
+  aria-label={label || undefined} aria-hidden={label ? undefined : 'true'}
+  style={`aspect-ratio:${width}/${height};max-width:100%;height:auto;display:block;`}
+></video>
+<script is:inline src="/js/lazy-video.js" defer></script>

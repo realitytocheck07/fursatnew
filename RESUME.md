@@ -37,3 +37,10 @@ Small-fixes session. Tick each item after committing.
 - [x] BATCH 1.1: Velocity-skewed marquee on MarqueeStrip.astro
 - [x] BATCH 1.2: Gold foil tilt on Mascot 15% offer card (MascotOfferModal.astro)
 - [x] BATCH 1.3: Day/Evening curtain slider on index.astro between Tour and Reels
+- [x] PERF/SEO 1: titles, breadcrumb JSON-LD, robots /api/, redirects, owner token header
+- [x] PERF/SEO 2: security headers, /data cache
+- [x] PERF/SEO 3: fonts woff -> woff2
+- [x] PERF/SEO 4: post-build JS minify + content hash (scripts/optimize-public-js.mjs)
+- [x] PERF/SEO 5: /reserve 3D starts 3 s after load, visible tab only
+- [x] PERF/SEO 6: LazyVideo component + encode script (not adopted by pages yet)
+- [x] PERF/SEO 7: seo-check script + CI workflow + docs/PERF-SEO-NOTES.md

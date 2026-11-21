@@ -18,7 +18,7 @@ import '../styles/reserve.css';
 const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fursat', w: 780, h: 1040, pos: '50% 60%', eager: true };
 ---
 <Base
-  title="Reserve a Table — Fursat Kitchen | Bar, Madhapur"
+  title="Reserve a Table – Fursat Kitchen & Bar, Madhapur"
   description="Request a table at Fursat Kitchen | Bar, Capital Park, Madhapur. Date nights, groups and celebrations. We confirm on WhatsApp."
   canonical="https://fursatind.in/reserve/"
   ogImage="https://fursatind.in/assets/fursat_space_01.webp"
@@ -112,7 +112,14 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
         } catch { failed = true; h.remove(); host = null; hero?.classList.remove('bk3d-on'); top?.classList.remove('bk3d-grow'); }   // photo stays
         busy = false;
       };
-      const kick = () => { const go = () => setTimeout(start, 2500); 'requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 3000 }) : go(); };
+      // The 3D room loads only on this page, 3 s after it has finished loading, and only while the tab is actually being looked at.
+      // A tab opened in the background waits until it is shown, so it never spends bandwidth or GPU on a page nobody is viewing.
+      const whenVisible = (fn: () => void) => {
+        if (!document.hidden) return fn();
+        const on = () => { if (document.hidden) return; document.removeEventListener('visibilitychange', on); fn(); };
+        document.addEventListener('visibilitychange', on);
+      };
+      const kick = () => { const go = () => setTimeout(() => whenVisible(start), 3000); 'requestIdleCallback' in window ? (window as any).requestIdleCallback(go, { timeout: 3000 }) : go(); };
       document.readyState === 'complete' ? kick() : addEventListener('load', kick, { once: true });
       matchMedia('(max-width:700px)').addEventListener('change', () => { if (host?.classList.contains('bk3d-host--card')) return; setTimeout(start, 300); });
       // phone sticky bar: "T7 · Booths · 4 seats → Book" scrolls to the form

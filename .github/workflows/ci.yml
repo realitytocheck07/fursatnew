@@ -1,0 +1,17 @@
+name: ci
+on:
+  push:
+    branches: ['**']
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build        # astro build + minify/fingerprint /js (scripts/optimize-public-js.mjs)
+      - run: npm run check:seo    # titles, canonicals, robots, JSON-LD, sitemap, redirects (scripts/seo-check.mjs)

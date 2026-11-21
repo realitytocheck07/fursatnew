@@ -7,6 +7,7 @@ export const json = (data, status = 200, cacheSecs = 0) => new Response(JSON.str
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': status === 200 && cacheSecs > 0 ? `public, max-age=${cacheSecs}` : 'no-store',
     'X-Content-Type-Options': 'nosniff',
+    'X-Robots-Tag': 'noindex',
   },
 });
 
@@ -22,6 +23,15 @@ export async function guard(env, fn, cacheSecs) {
     return json({ error: 'rista_unavailable' }, 502);
   }
 }
+
+// Owner token: send it as the X-Debug-Token header (preferred: URLs end up in logs and history).
+// The ?token= query still works unless DEBUG_ALLOW_QUERY is set to '0' in the Cloudflare settings.
+export const ownerToken = (request, env) => {
+  const h = request.headers.get('x-debug-token');
+  if (h) return h;
+  if (String(env.DEBUG_ALLOW_QUERY ?? '1') === '0') return null;
+  return new URL(request.url).searchParams.get('token');
+};
 
 export const sameText = (a, b) => {
   if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;

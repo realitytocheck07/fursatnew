@@ -1,13 +1,14 @@
-// GET /api/debug?token=...&path=/branch/list : raw Rista reply, owner only (secret DEBUG_TOKEN). May contain prices.
+// GET /api/debug?path=/branch/list with header X-Debug-Token: <DEBUG_TOKEN> : raw Rista reply, owner only. May contain prices.
+// (?token= still works until DEBUG_ALLOW_QUERY=0 is set.)
 import { ristaGet } from '../_lib/rista/rista.js';
-import { json, sameText } from '../_lib/rista/respond.js';
+import { json, sameText, ownerToken } from '../_lib/rista/respond.js';
 import { branchOf, channelOf } from '../_lib/rista/config.js';
 
 const PATHS = ['/branch/list', '/branch', '/items/soldout', '/stockStatus', '/catalog', '/catalog/enterprise', '/catalog/item/list'];
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  if (!env.DEBUG_TOKEN || !sameText(url.searchParams.get('token'), env.DEBUG_TOKEN)) return json({ error: 'not_found' }, 404);
+  if (!env.DEBUG_TOKEN || !sameText(ownerToken(request, env), env.DEBUG_TOKEN)) return json({ error: 'not_found' }, 404);
   const path = url.searchParams.get('path');
   if (!PATHS.includes(path)) return json({ error: 'bad_path', allowed: PATHS }, 400);
   const params = {};

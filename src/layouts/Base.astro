@@ -104,7 +104,7 @@ interface Props {
 const ownUrl = DOMAIN + (Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/');
 
 const {
-  title = 'Fursat Kitchen | Bar – Café, Bar & Banquet in Madhapur, Hyderabad',
+  title = 'Fursat Kitchen & Bar – Café, Bar & Banquet in Madhapur',
   description = 'Fursat Kitchen | Bar at Capital Park, Madhapur, Hyderabad: a café, kitchen, bar and banquet space. Ask Fursat for dishes by mood. Party packages from ₹925 per person, buffets and bar bashes.',
   canonical = ownUrl,
   noindex = false,
@@ -121,6 +121,20 @@ const ogPath = resolveImage(ogImage);
 const ogUrl = DOMAIN + ogPath;
 const ogAlt = ogPath === FALLBACK_OG ? FALLBACK_OG_ALT : (ogImageAlt ?? title);
 const ogDims = imgDims(PUBLIC + ogPath);
+
+// BreadcrumbList for inner pages (Home > Page). Label = the title up to the first " – ", so it always matches the page.
+// Skipped on the home page and on noindex pages (404). Same site, no visual change: it is JSON-LD only.
+const crumbPath = Astro.url.pathname.replace(/\/+$/, '');
+const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
+  ? JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: DOMAIN + '/' },
+        { '@type': 'ListItem', position: 2, name: title.split(' – ')[0].trim(), item: canonical },
+      ],
+    })
+  : '';
 ---
 <!doctype html>
 <html lang="en">
@@ -142,8 +156,8 @@ const ogDims = imgDims(PUBLIC + ogPath);
 <meta property="og:image:alt" content={ogAlt}>
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content={title}><meta name="twitter:description" content={description}>
 <meta name="twitter:image" content={ogUrl}><meta name="twitter:image:alt" content={ogAlt}>
-<link rel="preload" href="/assets/8da3ca8f0a.woff" as="font" type="font/woff" crossorigin>
-<link rel="preload" href="/assets/1233814dd2.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/assets/8da3ca8f0a.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/1233814dd2.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
@@ -160,6 +174,7 @@ const ogDims = imgDims(PUBLIC + ogPath);
 ))}
 <link rel="icon" href="/assets/9a3bba811b.webp">
 <script type="application/ld+json" is:inline set:html={ldJson}></script>
+{crumbLd && <script type="application/ld+json" is:inline set:html={crumbLd}></script>}
 <script is:inline define:vars={{ fkForms: site.forms }}>window.__FK_FORMS = fkForms;</script>
 <script is:inline src="/js/w3f.js" defer></script>
 <script is:inline src="/js/fk-ui.js" defer></script>

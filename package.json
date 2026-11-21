@@ -8,7 +8,9 @@
   },
   "scripts": {
     "dev": "astro dev --host",
-    "build": "astro build",
+    "build": "astro build && node scripts/optimize-public-js.mjs",
+    "build:raw": "astro build",
+    "check:seo": "node scripts/seo-check.mjs",
     "preview": "astro preview --host",
     "deploy": "node node_modules/wrangler/bin/wrangler.js pages deploy dist --project-name=fursat-kitchen-bar",
     "deploy:login": "node node_modules/wrangler/bin/wrangler.js login",

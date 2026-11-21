@@ -1,3 +1,5 @@
+> **Out of date (written 5 Nov).** Image compression has since been done (WebP + responsive sizes). See docs/PERF-SEO-NOTES.md for the current state.
+
 # 🔍 Fursat Asset Audit — Pre-Deployment Checklist
 > **Status: NO DEPLOYMENT YET** — Audit findings to resolve first  
 > **Date:** November 5, 2026 | 08:40 IST
