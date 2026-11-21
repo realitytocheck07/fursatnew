@@ -333,3 +333,7 @@ screenshots/reviews-390.png, screenshots/reviews-1366-hover.png (mid-sweep frame
 
 ## v5.80 cursor on touchscreen laptops
 - Live check (Chrome 157, Windows touchscreen laptop): pointer:coarse, hover:none, any-pointer:fine false even with a touchpad, so fk-cursor.js never added html.fk-cur. Now the class is added at the first real mouse/touchpad pointermove (and at load when pointer:fine). The effects layer is no longer hidden by (hover:none)/(pointer:coarse). CSS renamed to fk-cursor-v3.css.
+
+
+## v5.81 Cloudflare _routes.json (media seeking)
+- Live check: every asset answered a Range request with 200 (no 206), so <video>/<audio> had seekable [0,0]. The hero reel could not start at the intro song position (it restarted at 0 and the song repeated). Cause: functions/ exists and there was no _routes.json, so ALL requests ran through Pages Functions. Fix: public/_routes.json includes only /api/* (static files are served directly, with range support, and no function invocations).
