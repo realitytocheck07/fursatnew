@@ -6,6 +6,7 @@ import site from '../data/site.json';
 // TODO(client): confirm cocktail descriptions, 'Vegetarian & Jain' wording, kitchen/marinade/charcoal claims. Cocktail names + prices come from drinks.json only.
 import Base from '../layouts/Base.astro';
 import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
+import SignatureCocktails from '../components/home/SignatureCocktails.astro';
 ---
 <Base
   title="Restaurant & Bar – Fursat Kitchen & Bar, Madhapur"
@@ -56,5 +57,7 @@ import ExperienceLayout from '../components/experience/ExperienceLayout.astro';
       { q: 'Do you take table reservations in advance?', a: `Yes. We recommend requesting a table ahead, especially for weekend dinner slots (Friday to Sunday). We are open ${site.hours.display}. Send a request online or on WhatsApp and we confirm it on WhatsApp.` },
       { q: 'Are vegetarian options available?', a: 'Yes. The menu has vegetarian dishes including Classic Paneer Tikka, Malai Cheese Broccoli, Dal Makhni and Veg Biryani.' },
     ]}
-  />
+  >
+    <SignatureCocktails slot="before-cards" />
+  </ExperienceLayout>
 </Base>

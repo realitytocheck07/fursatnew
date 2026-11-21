@@ -1,0 +1,81 @@
+---
+// "Signature cocktails": 3 short silent clips of real Fursat cocktails (brand reels, overlays cropped out).
+// Names + one-line descriptions come from drinks.json (matched by name). No prices here, by owner decision (prices stay on /menu).
+// The first two cards deep-link to that exact drink card (/menu#dish=<name>), after the 21+ check. The third goes to the drinks side.
+// Set `mount="before:.xp-cards-sec"` to move the strip into a layout that has no slot (see restaurant-bar.astro).
+import LazyVideo from '../LazyVideo.astro';
+import drinks from '../../data/drinks.json';
+
+interface Props { mount?: string; id?: string }
+const { mount = '', id = 'signature-cocktails' } = Astro.props;
+
+const rows = (drinks as any[]).flatMap((s) => s.items as { name: string; description?: string }[]);
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const byName = (n: string) => {
+  const r = rows.find((x) => norm(x.name) === norm(n));
+  if (!r) throw new Error(`SignatureCocktails: "${n}" is not in drinks.json`);
+  return r;
+};
+const title = (s: string) => s.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+const sentence = (s = '') => s.replace(/\.$/, '').replace(/^(.)/, (c) => c.toUpperCase());
+
+const lfb = byName('Life Fursat Bhai');
+const cos = byName('Cosmopolitan');
+const cards = [
+  { key: 'lfb', name: title(lfb.name), line: lfb.description ?? '', href: `/menu/#dish=${encodeURIComponent(lfb.name)}`,
+    label: `${title(lfb.name)}, a Fursat cocktail in a coupe glass`, clip: '/assets/cocktails/cocktail-lfb-v1' },
+  { key: 'cos', name: title(cos.name), line: cos.description ?? '', href: `/menu/#dish=${encodeURIComponent(cos.name)}`,
+    label: `${title(cos.name)}, a Fursat cocktail in a martini glass`, clip: '/assets/cocktails/cocktail-cos-v1' },
+  { key: 'bar', name: 'Crafted at our bar', line: 'Every cocktail is built by hand at our bar.', href: '/menu/#go=d-cocktails',
+    label: 'A bartender builds a layered cocktail at the Fursat bar', clip: '/assets/cocktails/cocktail-bar-v1' },
+];
+---
+<section class="sc" id={id} aria-labelledby={`${id}-h`} data-sc-mount={mount || undefined}>
+  <div class="sc-head" data-fk-reveal>
+    <p class="sc-kick">From the Fursat bar</p>
+    <h2 class="fk-ty-h2" id={`${id}-h`}>Signature <em>cocktails</em></h2>
+    <a class="fk-btn fk-btn--secondary fk-btn--md" href="/menu/#go=d-cocktails">See the drinks menu</a>
+  </div>
+  <ul class="sc-rail fk-rail fk-rail--cards fk-rail--m" data-fk-stagger>
+    {cards.map((c) => (
+      <li class="sc-card">
+        <a class="sc-link" href={c.href} aria-label={c.key === 'bar' ? `${c.name}: see the drinks menu` : `${c.name}: see it on the menu`}>
+          <span class="sc-vid">
+            <LazyVideo src={`${c.clip}.mp4`} webm={`${c.clip}.webm`} poster={`${c.clip}.webp`} width={540} height={720} label={c.label} />
+          </span>
+          <span class="sc-body">
+            <span class="sc-name">{c.name}</span>
+            <span class="sc-line">{c.key === 'bar' ? c.line : sentence(c.line) + '.'}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+{mount && <script is:inline>
+  (function () {
+    // layouts without a slot: move the strip next to its anchor before first paint (no layout shift); no JS = it stays where it is
+    document.querySelectorAll('[data-sc-mount]').forEach(function (s) {
+      var p = s.getAttribute('data-sc-mount').split(':'), t = p[1] && document.querySelector(p[1]);
+      if (t && t.parentNode) t.parentNode.insertBefore(s, p[0] === 'before' ? t : t.nextSibling);
+    });
+  })();
+</script>}
+<style is:global>
+.sc{background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(40px,6vw,72px) 0 clamp(36px,5vw,64px);text-align:center}
+.sc-head{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 clamp(12px,2vw,28px);margin-bottom:clamp(20px,3vw,34px)}
+.sc-kick{margin:0;font:600 12px/1.4 Poppins,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8a5a22}
+.sc-head .fk-ty-h2 em{font-style:italic;color:#c99a43}
+.sc-rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);padding:0 clamp(12px,2vw,28px);max-width:1040px;margin:0 auto;list-style:none}
+.sc-card{min-width:0;text-align:left}
+.sc-link{display:flex;flex-direction:column;height:100%;border-radius:26px;overflow:hidden;color:inherit;text-decoration:none;background:linear-gradient(180deg,#fffaf0,#f7ecd5);box-shadow:0 0 0 1px rgba(214,170,90,.55),0 14px 30px -18px rgba(60,40,10,.45)}
+.sc-link:focus-visible{outline:3px solid #C94716;outline-offset:3px}
+.sc-vid{display:block;margin:8px 8px 0;border-radius:20px 20px 56px 20px;overflow:hidden;background:#2a1d10;aspect-ratio:3/4}
+.sc-vid .fk-lazy-video{width:100%;height:100%;object-fit:cover}
+.sc-body{display:flex;flex-direction:column;gap:4px;padding:14px 18px 20px}
+.sc-name{font:500 clamp(20px,1.9vw,24px)/1.2 var(--fk-font-head,'Playfair Display',serif);color:#1A1608}
+.sc-line{font:400 14px/1.5 Poppins,system-ui,sans-serif;color:#4a4330}
+@media(hover:hover){.sc-link{transition:transform .25s cubic-bezier(.23,1,.32,1)}.sc-link:hover{transform:translateY(-3px)}}
+@media(max-width:767px){.sc-rail{display:flex;max-width:none}.sc-rail>*{flex:0 0 calc(80% - 12px)}}
+@media(prefers-reduced-motion:reduce){.sc-link{transition:none}.sc-link:hover{transform:none}}
+</style>

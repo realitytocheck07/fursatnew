@@ -403,13 +403,19 @@ function init(root: HTMLElement) {
     });
     // deep link: /menu#dish=<menu name, URL-encoded> opens that dish card (same mv:open as "See dish"); unknown name = nothing
     const openFromHash = () => {
+      const gm = /^#go=([a-z0-9-]+)$/.exec(location.hash);
+      if (gm && document.getElementById('g-' + gm[1])) { go(gm[1]); return; } // /menu/#go=d-cocktails: group jump, 21+ check first for drinks
       const m = /^#dish=(.+)$/.exec(location.hash);
       if (!m) return;
       let want = '';
       try { want = decodeURIComponent(m[1]).trim().toLowerCase(); } catch { return; }
       const ns = $$<HTMLElement>('[data-row]').map((r) => $<HTMLElement>('[data-add]', r)?.dataset.n ?? '');
       const hit = ns.find((n) => n.toLowerCase() === want) ?? ns.find((n) => n.replace(/ \([^)]*\)$/, '').toLowerCase() === want);
-      if (hit) document.dispatchEvent(new CustomEvent('mv:open', { detail: hit }));
+      if (!hit) return;
+      // drinks side: the 21+ check comes first, the drink card opens right after "yes" ("no" goes to food, nothing opens)
+      const row = $$<HTMLElement>('[data-row]').find((r) => $<HTMLElement>('[data-add]', r)?.dataset.n === hit);
+      const side: Side = row?.closest('[data-side-block]')?.getAttribute('data-side-block') === 'drinks' ? 'drinks' : 'food';
+      need21(side, () => document.dispatchEvent(new CustomEvent('mv:open', { detail: hit })));
     };
     openFromHash();
     addEventListener('hashchange', openFromHash);

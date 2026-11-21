@@ -101,6 +101,8 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
     </div>
   </section>
 
+  <slot name="before-cards" />
+
   {p.cards && p.cards.length > 0 && (
     <section class="xp-cards-sec" id={p.cardsId} aria-labelledby="xp-cards-h">
       {p.cardsKicker && <p class="xp-sec-kicker">{p.cardsKicker}</p>}

@@ -1,5 +1,5 @@
 /* ---------- 29. hero dish names: label follows the baked hero video's own clock ----------
-   Edit CLIPS if the video is re-rendered. t0/t1 = seconds in hero-master-v2.mp4. No entry = no label (elephant intro/outro).
+   Edit CLIPS if the video is re-rendered. t0/t1 = seconds in hero-master-v3.mp4. No entry = no label (elephant intro/outro).
    data-dish on #fxdn carries the current dish name, ready for a later "click -> menu page" route. */
 (function(){
   var v=document.getElementById("fxplv"),box=document.getElementById("fxdn"),nm=document.getElementById("fxdn-n"),bar=document.getElementById("fxdn-b");
@@ -9,10 +9,12 @@
     {t0:4.3, t1:8.0, n:"Life Fursat Bhai"},
     {t0:8.0, t1:11.7,n:"Death By Chocolate"},
     {t0:11.7,t1:15.4,n:"Life Fursat Bhai"},
-    {t0:15.4,t1:19.6,n:"Fursat Rahasyam"},
-    {t0:19.6,t1:22.75,n:"Iced Latte"},
-    {t0:22.75,t1:27.8,n:"Cafe Latte"},
-    {t0:27.8,t1:32.3,n:"Hot Cappuccino"}
+    {t0:15.4,t1:19.0,n:"Fursat Rahasyam"},
+    {t0:21.2,t1:22.9,n:"Life Fursat Bhai"},
+    {t0:23.0,t1:24.5,n:"Cosmopolitan"},
+    {t0:24.9,t1:26.85,n:"Iced Latte"},
+    {t0:26.85,t1:31.9,n:"Cafe Latte"},
+    {t0:31.9,t1:36.4,n:"Hot Cappuccino"}
   ];
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,cur=-2,raf=0,tok=0,EASE="cubic-bezier(.23,1,.32,1)";
   function find(t){for(var i=0;i<CLIPS.length;i++)if(t>=CLIPS[i].t0&&t<CLIPS[i].t1)return i;return -1}
