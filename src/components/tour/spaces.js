@@ -49,7 +49,7 @@ export const EMI = {
  "cafe": "/assets/tour/emi/cafe.webp"
 };
 // Living photos: real clips cut from the Inside Fursat and Veg Combo reels
-export const CLIPS = {'entrance':{src:'/assets/tour/clips/entrance.mp4',tag:'The hall, from the entrance'},'bar':{src:'/assets/tour/clips/bar.mp4',tag:'The bar counter, on video'},'high-tables':{src:'/assets/tour/clips/high-tables.mp4',tag:'The red mural wall and booths'},'cafe':{src:'/assets/tour/clips/cafe.mp4',tag:'Cakes at the café counter'},'table-for-two':{src:'/assets/tour/clips/table-for-two.mp4',tag:'From the Fursat kitchen'}};
+export const CLIPS = {'entrance':{src:'/assets/tour/clips/entrance-v2.mp4',tag:'The hall, from the entrance'},'bar':{src:'/assets/tour/clips/bar-v2.mp4',tag:'The bar counter, on video'},'high-tables':{src:'/assets/tour/clips/high-tables-v2.mp4',tag:'The red mural wall and booths'},'cafe':{src:'/assets/tour/clips/cafe-v2.mp4',tag:'Cakes at the café counter'},'table-for-two':{src:'/assets/tour/clips/table-for-two-v2.mp4',tag:'From the Fursat kitchen'}};
 // Elephant hunt hotspots (uv in the photo, r = radius)
 export const HOT = [{s:'entrance',x:.55,y:.53,r:.10},{s:'entrance',x:.665,y:.395,r:.055},{s:'bar',x:.38,y:.535,r:.075},{s:'bar',x:.39,y:.345,r:.065},{s:'sign-wall',x:.545,y:.455,r:.075},{s:'cafe',x:.52,y:.2,r:.15}];
 // Auto colour per photo (sampled from each photo)

@@ -209,3 +209,5 @@ Nothing to `git rm`.
 
 ### Final git add -f lines
 git add -f public/assets/tour/clips/entrance.mp4 public/assets/tour/clips/bar.mp4 public/assets/tour/clips/high-tables.mp4 public/assets/tour/clips/cafe.mp4 public/assets/tour/clips/table-for-two.mp4 public/assets/video/inside-fursat-720.mp4 public/assets/video/inside-fursat-16x9.mp4
+
+- Cache fix: tour clips renamed to *-v2.mp4 (assets are cached 1 year as immutable, so same names would keep the old clips for returning visitors). Old clip files removed with git rm.
