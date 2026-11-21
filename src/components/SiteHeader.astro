@@ -10,141 +10,76 @@ interface Props {
 }
 const { active = 'home' } = Astro.props;
 // live "Open now" badge: hours come only from site.json (schedule with dayOfWeek/opens/closes, IST)
+const phone = site.phone, phonePlain = site.phonePlain;
 const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWeek, o: s.opens, c: s.closes, ol: s.open, cl: s.close })));
 ---
-<script is:inline>try{if(sessionStorage.getItem('sh-seen'))document.documentElement.classList.add('sh-seen');else sessionStorage.setItem('sh-seen','1')}catch(e){}</script>
 <header class:list={["sh-header", "sh-plaster", { "sh-flow": active === 'home' }]} id="site-header">
+  <!-- Info strip: hours come from site.json; the live badge fills in the open/closed state -->
+  <div class="sh-strip">
+    <span class="sh-st sh-st--hours"><span class="sh-open" data-hours={hoursData} hidden></span><span class="sh-st-hours">{site.hours.display}</span></span>
+    <span class="sh-st-sep" aria-hidden="true"></span>
+    <a class="sh-st sh-st--map" href={site.address.googleMaps} target="_blank" rel="noopener"><svg class="sh-sic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>Capital Park, Madhapur</a>
+    <span class="sh-st-sep" aria-hidden="true"></span>
+    <a class="sh-st sh-st--call" href={`tel:+${phonePlain}`}><svg class="sh-sic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg><span class="sh-st-call-n">Call {phone}</span><span class="sh-st-call-s">Call</span></a>
+  </div>
   <div class="sh-inner">
-    <!-- Brand Logo -->
     <a href="/" class="sh-logo" aria-label="Fursat Kitchen | Bar Home">
-      <img class="sh-lg-word" src="/assets/c86f49db5a.webp" alt="Fursat Kitchen | Bar" width="118" height="88" />
-      <img class="sh-lg-el" src="/assets/c86f49db5a.webp" alt="" aria-hidden="true" width="118" height="88" />
+      <img class="sh-lg-word" src="/assets/brand/fursat-wordmark.svg" alt="Fursat Kitchen | Bar" width="441" height="88" />
+      <img class="sh-lg-el" src="/assets/brand/fursat-elephant.webp" alt="" aria-hidden="true" width="135" height="172" />
     </a>
-    <span class="sh-div sh-div--logo" aria-hidden="true"></span>
 
-    <!-- Desktop Navigation -->
     <nav class="sh-nav" aria-label="Main Navigation">
-      <span class="sh-ind" aria-hidden="true"></span>
-      <a href="/" class:list={["sh-link", { active: active === 'home' }]} aria-current={active === 'home' ? 'page' : undefined}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>Home</a>
-      <!-- Menu Dropdown -->
       <div class="sh-drop">
-        <button class:list={["sh-link", "sh-drop-btn", { active: active === 'menu' }]} type="button" aria-expanded="false" aria-controls="sh-menu-menu">
-          <svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v20"/><path d="M4 2v6a3 3 0 0 0 6 0V2"/><path d="M17 2c-2 2-3 5-3 8h6V2Z"/><path d="M17 10v12"/></svg><span>Menu</span>
-          <svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        <button class:list={["sh-link", "sh-drop-btn", { active: active === 'menu' }]} type="button" aria-expanded="false" aria-controls="sh-menu-menu"><span>Menu</span><svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="sh-menu" id="sh-menu-menu">
-          <a href="/menu" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/menu-all.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">All Categories</span>
-            <small>North Indian, Asian, Continental & Kebabs</small></span>
-          </a>
-          <a href="/restaurant-bar#cocktails" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/bar.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">Bar & Mixology</span>
-            <small>Artisanal Cocktails, Single Malts & Beers</small></span>
-          </a>
-          <a href="/menu?menu=cafe" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/cafe.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">Café & Coffee</span>
-            <small>Specialty Brews, Shakes & Bakes</small></span>
-          </a>
-          <a href="/menu?tab=craft" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/craft.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">Craft Your Plate</span>
-            <small>Customize your feast step-by-step</small></span>
-          </a>
+          <a href="/menu" class="sh-sub-item"><img class="sh-thumb" src="/assets/nav/menu-all.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><span class="sh-si-body"><span class="sh-si-t">All Categories</span><small>North Indian, Asian, Continental & Kebabs</small></span></a>
+          <a href="/restaurant-bar#cocktails" class="sh-sub-item"><img class="sh-thumb" src="/assets/nav/bar.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><span class="sh-si-body"><span class="sh-si-t">Bar & Mixology</span><small>Artisanal Cocktails, Single Malts & Beers</small></span></a>
+          <a href="/menu?menu=cafe" class="sh-sub-item"><img class="sh-thumb" src="/assets/nav/cafe.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><span class="sh-si-body"><span class="sh-si-t">Café & Coffee</span><small>Specialty Brews, Shakes & Bakes</small></span></a>
+          <a href="/menu?tab=craft" class="sh-sub-item"><img class="sh-thumb" src="/assets/nav/craft.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><span class="sh-si-body"><span class="sh-si-t">Craft Your Plate</span><small>Customize your feast step-by-step</small></span></a>
         </div>
       </div>
 
-      <!-- Celebrate Dropdown -->
-      <div class="sh-drop">
-        <button class:list={["sh-link", "sh-drop-btn", { active: active === 'celebrate' || active === 'banquet' || active === 'party' }]} type="button" aria-expanded="false" aria-controls="sh-menu-celebrate">
-          <svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6Z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"/></svg><span>Celebrate</span>
-          <svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-        <div class="sh-menu" id="sh-menu-celebrate">
-          <a href="/party" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/party.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">Parties &amp; Events</span>
-            <small>Birthdays, kitty parties, bar bashes and packages</small></span>
-          </a>
-          <a href="/banquet" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/banquet.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">The Grand Banquet Hall</span>
-            <small>Capacity 50–350 guests with AV & live stage</small></span>
-          </a>
-          <a href="/catering" class="sh-sub-item">
-            <img class="sh-thumb" src="/assets/nav/catering.webp" alt="" width="56" height="56" loading="lazy" decoding="async" />
-            <span class="sh-si-body">
-            <span class="sh-si-t">Outdoor Catering</span>
-            <small>Fursat royal dining delivered to your venue</small></span>
-          </a>
+      <div class="sh-drop sh-drop--mega">
+        <button class:list={["sh-link", "sh-drop-btn", { active: active === 'celebrate' || active === 'banquet' || active === 'party' || active === 'catering' }]} type="button" aria-expanded="false" aria-controls="sh-menu-celebrate"><span>Celebrate</span><svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="sh-menu sh-mega" id="sh-menu-celebrate">
+          <a href="/party" class="sh-tile" style="--tile:url(/assets/venue/interior/mural-booths-720.webp)"><span class="sh-tile-t">Parties &amp; Events</span><small>Birthdays, kitty parties, bar bashes and packages</small></a>
+          <a href="/banquet" class="sh-tile" style="--tile:url(/assets/venue/banquet/banquet-hall-02-720.webp)"><span class="sh-tile-t">The Grand Banquet Hall</span><small>Capacity 50–350 guests with AV &amp; live stage</small></a>
+          <a href="/catering" class="sh-tile" style="--tile:url(/assets/venue/banquet/banquet-tables-02.webp)"><span class="sh-tile-t">Outdoor Catering</span><small>Fursat royal dining delivered to your venue</small></a>
         </div>
       </div>
 
-      <a href="/restaurant-bar" class:list={["sh-link", { active: active === 'restaurant-bar' }]}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 22h8"/><path d="M12 15v7"/><path d="M5 3h14l-1 6a6 6 0 0 1-12 0Z"/></svg>Bar & Kitchen</a>
-      <a href="/cafe" class:list={["sh-link", { active: active === 'cafe' }]}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M7 2v2M11 2v2"/></svg>Café</a>
-      <a href="/ask" class:list={["sh-link", { active: active === 'ask' }]}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.9-.9L3 20.5l1.5-4.6A8.4 8.4 0 1 1 21 11.5Z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/></svg>Ask Fursat</a>
-      <a href="/story" class:list={["sh-link", { active: active === 'story' }]}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H2Z"/><path d="M22 4h-7a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h8Z"/></svg>Story</a>
-      <a href="/order" class:list={["sh-link", { active: active === 'order' }]} aria-current={active === 'order' ? 'page' : undefined}><svg class="sh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>Order</a>
+      <a href="/restaurant-bar" class:list={["sh-link", { active: active === 'restaurant-bar' }]} aria-current={active === 'restaurant-bar' ? 'page' : undefined}>Bar & Kitchen</a>
+      <a href="/cafe" class:list={["sh-link", { active: active === 'cafe' }]} aria-current={active === 'cafe' ? 'page' : undefined}>Café</a>
+      <a href="/ask" class:list={["sh-link", { active: active === 'ask' }]} aria-current={active === 'ask' ? 'page' : undefined}>Ask Fursat</a>
+      <a href="/story" class:list={["sh-link", { active: active === 'story' }]} aria-current={active === 'story' ? 'page' : undefined}>Story</a>
     </nav>
 
-    <!-- Header Actions -->
     <div class="sh-actions">
-      <span class="sh-open" data-hours={hoursData} hidden></span>
-      <a href="https://wa.me/919059670033" target="_blank" rel="noopener" class="sh-wa" aria-label="WhatsApp Fursat">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.63C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.3C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-      </a>
-
-      <!-- Gold Reserve Button -->
-      <a href="/reserve" class:list={["sh-reserve-btn", { "is-current": active === 'reserve' }]} data-open="book" aria-current={active === 'reserve' ? 'page' : undefined}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 14h1M11.5 14h1M14.5 14h1M8.5 17h1M11.5 17h1"/></svg>
-        <span class="sh-rl-long">Reserve a Table</span><span class="sh-rl-short" aria-hidden="true">Reserve</span>
-      </a>
-
-      <span class="sh-div sh-div--burger" aria-hidden="true"></span>
-      <!-- Mobile Hamburger -->
-      <button class="sh-burger" id="sh-burger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sh-mobile-panel">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <a href="/reserve" class:list={["sh-reserve-btn", { "is-current": active === 'reserve' }]} data-open="book" aria-current={active === 'reserve' ? 'page' : undefined}>Reserve</a>
+      <button class="sh-burger" id="sh-burger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sh-mobile-panel"><span></span><span></span><span></span></button>
     </div>
   </div>
 
-  <!-- Mobile Menu Drawer -->
+  <!-- Phone menu sheet: Celebrate as photo rows, Reserve + Call pinned at the bottom -->
   <div class="sh-mobile-panel" id="sh-mobile-panel" hidden>
-    <div class="sh-mp-inner">
-      <div class="sh-mp-group">
-        <a href="/" class="sh-mp-link" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
-        <span class="sh-mp-label">Dining & Bar</span>
-        <a href="/menu" class="sh-mp-link">Explore Menu</a>
-        <a href="/restaurant-bar" class="sh-mp-link">Restaurant & Bar (21+)</a>
-        <a href="/cafe" class="sh-mp-link">Fursat Café & Shakes</a>
-        <a href="/order" class="sh-mp-link" aria-current={active === 'order' ? 'page' : undefined}>Order Online</a>
+    <div class="sh-mp-scroll">
+      <span class="sh-mp-label">Celebrate</span>
+      <div class="sh-mp-rows">
+        <a href="/party" class="sh-mp-row" style="--tile:url(/assets/venue/interior/mural-booths-480.webp)"><span>Parties &amp; Events</span></a>
+        <a href="/banquet" class="sh-mp-row" style="--tile:url(/assets/venue/banquet/banquet-hall-02-480.webp)"><span>The Banquet Hall</span><small>50–350 guests</small></a>
+        <a href="/catering" class="sh-mp-row" style="--tile:url(/assets/venue/banquet/banquet-tables-02.webp)"><span>Outdoor Catering</span></a>
       </div>
-      <div class="sh-mp-group">
-        <span class="sh-mp-label">Occasions & Spaces</span>
-        <a href="/party" class="sh-mp-link">Parties &amp; Events</a>
-        <a href="/banquet" class="sh-mp-link">The Banquet Hall (50–350 Pax)</a>
-        <a href="/catering" class="sh-mp-link">Outdoor Catering</a>
-      </div>
-      <div class="sh-mp-group">
-        <span class="sh-mp-label">Experience</span>
-        <a href="/ask" class="sh-mp-link">Ask Fursat (Mood Search)</a>
-        <a href="/story" class="sh-mp-link">Our Story & Heritage</a>
-        <a href="/terms" class="sh-mp-link">Offers & Terms</a>
-      </div>
-      <div class="sh-mp-cta">
-        <a href="/reserve" class="sh-mp-reserve" data-open="book" aria-current={active === 'reserve' ? 'page' : undefined}>Reserve a Table</a>
-        <p class="sh-mp-time"><span class="sh-open sh-open--panel" data-hours={hoursData} hidden></span>{site.hours.display} · Capital Park, Madhapur</p>
-      </div>
+      <a href="/" class="sh-mp-link" aria-current={active === 'home' ? 'page' : undefined}>Home</a>
+      <a href="/menu" class="sh-mp-link">Explore Menu</a>
+      <a href="/restaurant-bar" class="sh-mp-link">Restaurant & Bar (21+)</a>
+      <a href="/cafe" class="sh-mp-link">Fursat Café & Shakes</a>
+      <a href="/ask" class="sh-mp-link">Ask Fursat</a>
+      <a href="/story" class="sh-mp-link">Our Story & Heritage</a>
+      <a href="/terms" class="sh-mp-link">Offers & Terms</a>
+    </div>
+    <div class="sh-mp-pin">
+      <a href="/reserve" class="sh-mp-reserve" data-open="book" aria-current={active === 'reserve' ? 'page' : undefined}>Reserve a Table</a>
+      <a href={`tel:+${phonePlain}`} class="sh-mp-call">Call</a>
     </div>
   </div>
 </header>
@@ -177,268 +112,127 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
 </script>
 
 <style is:global>
-  /* One header design for every page. */
-  .sh-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    /* solid cream at the top too, so a hero photo or blur under it never shows through the logo */
-    background: var(--fk-plaster, #F6E4C9); background-blend-mode: multiply;
-    border-bottom: 1px solid transparent;
-    transition: background-color .3s ease, box-shadow .3s ease, transform .32s cubic-bezier(.16,1,.3,1), opacity .32s ease;
-  }
-  /* Home: its layout is sized to a header that takes space, so it stays in the flow on a cream surface */
-  .sh-header.sh-flow { position: sticky; background: var(--fk-plaster, #F6E4C9); }
-  /* gold hairline, shown once scrolled */
-  .sh-header::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none; opacity: 0; transition: opacity .3s ease;
-    background: linear-gradient(90deg, transparent, rgba(201,154,67,.65) 18%, rgba(243,197,107,.9) 50%, rgba(201,154,67,.65) 82%, transparent);
-  }
-  .sh-header.sh-scrolled { background: rgba(250,243,233,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 12px 30px -20px rgba(74,48,16,.45); }
-  .sh-header.sh-scrolled::after, .sh-header.sh-flow::after { opacity: 1; }
+  /* Header C: green info strip + cream bar (elephant mark, red Reserve) + Celebrate photo mega-menu.
+     Height is constant (--sh-h: strip + bar), so nothing shifts while scrolling. */
+  .sh-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--fk-cream, #fbf1e2); color: #1c2a18;
+    transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .32s ease, box-shadow .3s ease; }
+  .sh-header.sh-flow { position: sticky; }
+  .sh-header.sh-scrolled { box-shadow: 0 12px 24px -20px rgba(43,36,22,.5); }
+  .sh-header.sh-hidden { transform: translateY(-110%); opacity: 0; pointer-events: none; }
+  .sh-header.sh-hidden:focus-within { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
 
-  .sh-inner { max-width: 1600px; margin: 0 auto; height: calc(var(--sh-h) - 1px); padding: 0 clamp(16px, 4.5vw, 72px); display: flex; align-items: center; justify-content: space-between; gap: 20px; transition: height .3s var(--fk-ease, ease); }
-  .sh-header.sh-scrolled .sh-inner { height: 58px; }
-  .sh-header.sh-flow.sh-scrolled .sh-inner { height: calc(var(--sh-h) - 1px); }
-  .sh-logo { display: flex; align-items: center; flex-shrink: 0; transition: transform .2s ease; }
-  .sh-logo:hover { transform: scale(1.03); }
-  .sh-logo img { height: 54px; width: auto; object-fit: contain; mix-blend-mode: multiply; transition: height .3s var(--fk-ease, ease); }
-  .sh-header.sh-scrolled .sh-logo img { height: 42px; }
+  .sh-strip { height: 36px; display: flex; align-items: center; justify-content: center; gap: 20px; padding: 0 16px; overflow: hidden; white-space: nowrap;
+    background: #2a5019; color: #f6ecd6; font: 400 .8125rem/1 var(--fk-sans, Rupee,Poppins, system-ui, sans-serif); letter-spacing: .02em; }
+  .sh-st { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; min-height: 36px; }
+  a.sh-st:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .sh-st-sep { width: 1px; height: 14px; background: rgba(230,194,122,.5); }
+  .sh-sic { width: 15px; height: 15px; fill: none; stroke: #e6c27a; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .sh-open { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+  .sh-open::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e6c27a; }
+  .sh-open.is-open::before { background: #6fd08c; }
+  .sh-open[hidden] { display: none !important; }
+  .sh-st-call-s { display: none; }
 
-  .sh-nav { display: flex; align-items: center; gap: 0; }
-  .sh-link {
-    all: unset; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 44px;
-    font-family: var(--fk-serif, "Playfair Display", Georgia, serif); font-weight: 400; font-size: clamp(.9rem, 1.05vw, 1rem); letter-spacing: .005em; white-space: nowrap;
-    color: #1c2a18; padding: 0 clamp(8px, .8vw, 12px); margin: 0 clamp(2px, .4vw, 6px); border-radius: 999px; text-decoration: none;
-    transition: color .2s cubic-bezier(.23,1,.32,1), background-color .2s cubic-bezier(.23,1,.32,1);
-  }
-  /* gold underline grows from the centre */
-  .sh-link::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 7px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, #c99a43, #9c4f1c); transform: scaleX(0); transform-origin: center; transition: transform .26s cubic-bezier(.23,1,.32,1); }
-  .sh-link:hover, .sh-link:focus-visible { color: #9c4f1c; }
-  .sh-link:hover::after, .sh-link:focus-visible::after { transform: scaleX(1); }
-  /* current page: soft gold pill */
-  .sh-link.active { color: #7a3a10; background: linear-gradient(180deg, rgba(243,211,140,.45), rgba(227,171,74,.28)); box-shadow: inset 0 0 0 1px rgba(201,154,67,.45); }
-  .sh-link.active::after { transform: scaleX(0); }
+  .sh-inner { position: relative; max-width: 1600px; margin: 0 auto; height: 76px; padding: 0 clamp(20px, 4vw, 56px); display: flex; align-items: center; gap: 30px;
+    border-bottom: 1px solid rgba(201,154,67,.45); }
+  .sh-logo { display: flex; align-items: center; gap: 12px; flex: none; text-decoration: none; }
+  .sh-logo img { display: block; width: auto; }
+  .sh-lg-word { height: 30px; order: 2; }
+  .sh-lg-el { height: 46px; order: 1; transform-origin: 50% 80%; transition: transform .45s cubic-bezier(.34,1.56,.64,1); }
+  @media (hover: hover) { .sh-logo:hover .sh-lg-el { transform: translateY(-2px) rotate(-6deg); } }
+
+  .sh-nav { display: flex; align-items: center; gap: 4px; margin: 0 auto; }
+  .sh-link { all: unset; cursor: pointer; position: relative; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px;
+    font: 500 .9375rem/1 var(--fk-sans, Rupee,Poppins, system-ui, sans-serif); color: #1c2a18; white-space: nowrap; text-decoration: none; transition: color .2s cubic-bezier(.23,1,.32,1); }
+  .sh-link::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 6px; height: 2px; border-radius: 2px; background: var(--fk-red, #c0291f);
+    transform: scaleX(0); transition: transform .24s cubic-bezier(.23,1,.32,1); }
+  .sh-link.active, .sh-link[aria-current="page"] { color: var(--fk-red, #c0291f); font-weight: 600; }
+  .sh-link.active::after, .sh-link[aria-current="page"]::after { transform: scaleX(1); }
+  @media (hover: hover) { .sh-link:hover:not(.active) { color: #2a5019; } .sh-link:hover:not(.active)::after { transform: scaleX(1); background: #2a5019; } }
   .sh-arr { width: 14px; height: 14px; transition: transform .25s ease; }
   .sh-drop { position: relative; }
   .sh-drop:hover .sh-arr, .sh-drop-btn[aria-expanded="true"] .sh-arr { transform: rotate(180deg); }
 
-  .sh-menu {
-    position: absolute; top: 100%; left: 0; margin-top: 8px; min-width: 260px; padding: 10px; z-index: 105;
-    display: flex; flex-direction: column; gap: 4px;
-    background: #fbf5ec; border: 1px solid rgba(201,154,67,.45); border-radius: 18px;
-    box-shadow: 0 24px 48px -24px rgba(74,48,16,.45), 0 2px 0 rgba(255,255,255,.8) inset;
-    opacity: 0; transform: translateY(10px);
-    /* closed = visibility:hidden, so the links take no Tab stops and are not read by screen readers */
-    visibility: hidden; pointer-events: none;
-    transition: opacity .22s cubic-bezier(.16,1,.3,1), transform .22s cubic-bezier(.16,1,.3,1), visibility 0s linear .22s;
-  }
-  /* keeps the pointer inside the dropdown while it crosses the 8px gap under the button */
-  .sh-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+  .sh-menu { position: absolute; top: 100%; left: 0; margin-top: 6px; min-width: 320px; padding: 10px; z-index: 105; display: flex; flex-direction: column; gap: 4px;
+    background: #fbf1e2; border: 1px solid rgba(201,154,67,.45); border-radius: 18px; box-shadow: 0 24px 48px -24px rgba(43,36,22,.5);
+    opacity: 0; transform: translateY(10px); visibility: hidden; pointer-events: none;
+    transition: opacity .22s cubic-bezier(.16,1,.3,1), transform .22s cubic-bezier(.16,1,.3,1), visibility 0s linear .22s; }
+  .sh-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }
   .sh-drop:hover .sh-menu, .sh-drop.is-open .sh-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition-delay: 0s; }
-  .sh-sub-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; border-radius: 14px; text-decoration: none; transition: background-color .2s, transform .2s; }
+  .sh-sub-item { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; border-radius: 14px; text-decoration: none; transition: background-color .2s; }
   .sh-si-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .sh-sub-item small { text-wrap: pretty; }
-  .sh-thumb { width: 56px; height: 56px; flex: none; border-radius: 10px; object-fit: cover; background: #f3e8d4; transition: transform .3s var(--fk-ease-out, cubic-bezier(.23,1,.32,1)); }
-  .sh-menu { min-width: 320px; }
-  @media (hover: hover) { .sh-sub-item:hover .sh-thumb { transform: scale(1.06); } }
-  @media (prefers-reduced-motion: reduce) { .sh-sub-item:hover .sh-thumb { transform: none; } }
-  .sh-sub-item:hover { background: rgba(243,211,140,.28); transform: translateX(2px); }
-  .sh-si-t { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .9375rem; font-weight: 500; color: #14301c; }
-  .sh-sub-item:hover .sh-si-t { color: #9c4f1c; }
-  .sh-sub-item small { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .775rem; color: #5a5040; }
+  .sh-thumb { width: 56px; height: 56px; flex: none; border-radius: 10px; object-fit: cover; background: #f3e2c6; }
+  .sh-si-t { font: 500 .9375rem/1.2 var(--fk-sans, Rupee,Poppins, sans-serif); color: #14301c; }
+  .sh-sub-item small { font: 400 .8125rem/1.35 var(--fk-sans, Rupee,Poppins, sans-serif); color: #5a5040; text-wrap: pretty; }
+  @media (hover: hover) { .sh-sub-item:hover { background: rgba(201,154,67,.16); } }
 
-  /* keyboard focus ring (the nav links use all:unset, which removes the browser default) */
+  /* Celebrate mega-menu: three photo tiles */
+  .sh-mega { left: 50%; width: min(860px, 92vw); flex-direction: row; gap: 14px; padding: 16px; transform: translate(-50%, 10px); }
+  .sh-drop:hover .sh-mega, .sh-drop.is-open .sh-mega { transform: translate(-50%, 0); }
+  .sh-tile { position: relative; flex: 1 1 0; min-width: 0; height: 230px; border-radius: 14px; overflow: hidden; color: #fff; text-decoration: none; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; padding: 14px;
+    background: var(--tile) center / cover no-repeat, #2a5019; }
+  .sh-tile::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,12,4,0) 30%, rgba(20,12,4,.88)); }
+  .sh-tile > * { position: relative; }
+  .sh-tile-t { font: 600 1.375rem/1.15 var(--fk-serif, "Playfair Display", Georgia, serif); }
+  .sh-tile small { font: 400 .8125rem/1.35 var(--fk-sans, Rupee,Poppins, sans-serif); opacity: .95; }
+  .sh-tile:hover, .sh-tile:focus-visible { outline: 2px solid #e6c27a; outline-offset: -2px; }
+
   .sh-header :is(a, button):focus-visible { outline: 2px solid #14301c; outline-offset: 3px; border-radius: 999px; }
-  .sh-header .sh-sub-item:focus-visible { border-radius: 12px; outline-offset: -2px; }
-  .sh-header .sh-mp-link:focus-visible { border-radius: 6px; }
+  .sh-header .sh-tile:focus-visible, .sh-header .sh-sub-item:focus-visible { border-radius: 14px; outline-offset: -3px; }
+  .sh-header .sh-tile:focus-visible { outline-color: #e6c27a; }
 
-  .sh-actions { display: flex; align-items: center; gap: 12px; }
-  .sh-wa { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #1f7a3a; background: rgba(31,122,58,.1); text-decoration: none; transition: transform .2s ease, background-color .2s ease; }
-  .sh-wa:hover { transform: scale(1.08); background: rgba(31,122,58,.2); }
-  .sh-wa svg { width: 20px; height: 20px; }
-  .sh-reserve-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 clamp(16px, 1.6vw, 24px); border-radius: 999px; text-decoration: none;
-    color: #fbf5e6; font-family: var(--fk-serif, "Playfair Display", Georgia, serif); font-weight: 400; font-size: clamp(.92rem, 1.05vw, 1.02rem); white-space: nowrap;
-    background: linear-gradient(180deg, #21492b 0%, #12301c 100%); border: 1px solid rgba(201,154,67,.55);
-    box-shadow: 0 10px 22px rgba(14,34,20,.3), 0 2px 4px rgba(14,34,20,.2), inset 0 1px 0 rgba(255,255,255,.16); transition: transform .16s ease, box-shadow .16s ease; }
-  .sh-reserve-btn:hover { transform: translateY(-1px); }
-  .sh-reserve-btn:active { transform: scale(.97); }
-  .sh-reserve-btn svg { width: 20px; height: 20px; color: #e6c27a; }
-  .sh-rl-short { display: none; }
+  .sh-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+  .sh-reserve-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 28px; border-radius: 999px; text-decoration: none;
+    font: 600 .9375rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); letter-spacing: .02em; color: #fff; background: var(--fk-red, #c0291f); box-shadow: 0 6px 16px -8px rgba(192,41,31,.7); transition: transform .16s ease, background-color .2s; }
+  .sh-reserve-btn:hover { background: #a82219; }
+  .sh-reserve-btn:active { transform: scale(.96); }
+  .sh-reserve-btn.is-current { box-shadow: 0 0 0 3px rgba(192,41,31,.2); }
+  .sh-header .sh-reserve-btn:focus-visible { outline-color: #14301c; }
 
-  .sh-burger { all: unset; cursor: pointer; display: none; flex-direction: column; justify-content: center; gap: 5px; width: 44px; height: 44px; padding: 4px; box-sizing: border-box; }
+  .sh-burger { all: unset; cursor: pointer; display: none; flex-direction: column; justify-content: center; gap: 5px; width: 44px; height: 44px; padding: 10px; box-sizing: border-box; }
   .sh-burger span { display: block; height: 2.5px; width: 100%; background: #1c2a18; border-radius: 2px; transition: transform .24s ease, opacity .24s ease; }
   .sh-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
   .sh-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
   .sh-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
 
-  /* phone menu: a panel that slides in from the right, under the header */
-  .sh-mobile-panel {
-    position: absolute; top: 100%; right: 0; width: min(92vw, 400px); box-sizing: border-box;
-    max-height: calc(100vh - var(--sh-h)); max-height: calc(100dvh - var(--sh-h));
-    overflow-y: auto; overscroll-behavior: contain; padding: 20px clamp(16px, 4vw, 28px) 28px;
-    background: #fbf5ec; border-left: 1px solid rgba(201,154,67,.3); border-bottom: 1px solid rgba(201,154,67,.3); border-radius: 0 0 0 22px;
-    box-shadow: 0 24px 40px rgba(60,40,10,.15); animation: sh-slide .28s cubic-bezier(.16,1,.3,1);
-  }
+  /* phone sheet */
+  .sh-mobile-panel { position: fixed; left: 0; right: 0; top: var(--sh-h); bottom: 0; z-index: 99; display: flex; flex-direction: column; background: #fbf1e2; animation: sh-slide .28s cubic-bezier(.16,1,.3,1); }
   .sh-mobile-panel[hidden] { display: none; }
-  @keyframes sh-slide { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
-  .sh-mp-inner { display: flex; flex-direction: column; gap: 20px; }
-  .sh-mp-group { display: flex; flex-direction: column; gap: 2px; }
-  .sh-mp-label { font-family: var(--fk-sans, Rupee,"Poppins", system-ui, sans-serif); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: #74501a; margin-bottom: 2px; }
-  .sh-mp-link { font-family: var(--fk-serif, "Playfair Display", Georgia, serif); font-size: 1.0625rem; color: #14301c; text-decoration: none; min-height: 44px; display: flex; align-items: center; gap: 10px; }
-  .sh-mp-cta { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(60,40,10,.12); }
-  .sh-mp-reserve { display: grid; place-items: center; min-height: 48px; border-radius: 999px; background: linear-gradient(180deg, #21492b 0%, #12301c 100%); color: #fbf5e6; font-weight: 500; text-decoration: none; }
-  .sh-mp-time { font-size: .8125rem; color: #5a5040; text-align: center; margin: 0; }
+  @keyframes sh-slide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .sh-mp-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px 20px; }
+  .sh-mp-label { display: block; font: 600 .75rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); letter-spacing: .16em; text-transform: uppercase; color: #6b5324; margin: 4px 0 10px; }
+  .sh-mp-rows { display: grid; gap: 10px; margin-bottom: 12px; }
+  .sh-mp-row { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 84px; padding: 0 16px; border-radius: 16px; overflow: hidden; color: #fff; text-decoration: none;
+    background: var(--tile) center / cover no-repeat, #2a5019; font: 600 1.25rem/1.1 var(--fk-serif, "Playfair Display", Georgia, serif); }
+  .sh-mp-row::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,12,4,.8), rgba(20,12,4,.15)); }
+  .sh-mp-row > * { position: relative; }
+  .sh-mp-row small { font: 500 .8125rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); }
+  .sh-mp-link { display: flex; align-items: center; min-height: 48px; padding: 0 4px; border-bottom: 1px solid rgba(201,154,67,.45); font: 500 1rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); color: #1c2a18; text-decoration: none; }
+  .sh-mp-link[aria-current="page"] { color: var(--fk-red, #c0291f); font-weight: 600; }
+  .sh-mp-pin { display: flex; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: #fbf1e2; border-top: 1px solid rgba(201,154,67,.45); }
+  .sh-mp-reserve, .sh-mp-call { display: grid; place-items: center; min-height: 48px; border-radius: 999px; font: 600 .9375rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); text-decoration: none; }
+  .sh-mp-reserve { flex: 1; background: var(--fk-red, #c0291f); color: #fff; }
+  .sh-mp-call { padding: 0 26px; border: 1.5px solid #c99a43; color: #1c2a18; }
+  .sh-mp-row:focus-visible, .sh-mp-link:focus-visible { border-radius: 12px; }
+  /* the open sheet owns the bottom edge: hide the quick-nav bar so Reserve + Call stay reachable */
+  html:has(#sh-mobile-panel:not([hidden])) .mb-bar { display: none; }
 
-  /* hide on scroll down, show on scroll up; reappears on keyboard focus */
-  .sh-header.sh-hidden { transform: translateY(-110%); opacity: 0; pointer-events: none; }
-  .sh-header.sh-hidden:focus-within { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
-
-  /* live open badge: quiet text, green dot when open */
-  .sh-open { display: inline-flex; align-items: center; gap: 7px; font: 500 .8rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); color: #5a5040; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .sh-open::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #a8731c; box-shadow: 0 0 0 3px rgba(168,115,28,.18); }
-  .sh-open.is-open::before { background: #1f7a3a; box-shadow: 0 0 0 3px rgba(31,122,58,.18); }
-  .sh-open[hidden] { display: none !important; }
-  .sh-open--panel { display: flex; margin-bottom: 6px; font-size: .85rem; }
-  .sh-actions > .sh-open { margin-right: 6px; }
-  @media (max-width: 1399px), (max-height: 746px) { .sh-actions > .sh-open { display: none; } }
-
-  @media (max-width: 1040px) { .sh-nav { display: none; } .sh-burger { display: flex; } }
-  /* phones: logo, Reserve and burger only */
-  @media (max-width: 760px) {
-    .sh-wa { display: none; }
-    .sh-actions { gap: 8px; }
-    .sh-logo img { height: 48px; }
-    .sh-header.sh-scrolled .sh-logo img { height: 40px; }
-    .sh-reserve-btn { min-height: 44px; padding: 0 16px; }
-    .sh-reserve-btn svg { display: none; }
-    .sh-rl-long { display: none; }
-    .sh-rl-short { display: inline; }
+  @media (max-width: 1160px) { .sh-nav { gap: 0; } .sh-link { padding: 0 10px; font-size: .9rem; } .sh-link::after { left: 10px; right: 10px; } .sh-inner { gap: 16px; } .sh-st-hours { display: none; } }
+  @media (max-width: 1040px) { .sh-nav { display: none; } .sh-burger { display: flex; } .sh-actions { margin-left: auto; } }
+  @media (max-width: 820px) {
+    .sh-strip { height: 34px; justify-content: space-between; gap: 10px; font-size: .75rem; }
+    .sh-st--map, .sh-st-sep { display: none; }
+    .sh-st-call-n { display: none; } .sh-st-call-s { display: inline; }
+    .sh-inner { height: 60px; gap: 8px; padding: 0 12px; }
+    .sh-lg-el { height: 38px; } .sh-lg-word { height: 24px; }
+    .sh-reserve-btn { min-height: 44px; padding: 0 20px; }
   }
-
-  /* v5.33 header: cream plaster bar, embossed leaves on the right, a green leaf at the far edge, gold line + dividers (owner mock) */
-  .sh-header::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20440%20150%22%3E%3Cdefs%3E%3Cfilter%20id=%22e%22%20x=%22-10%25%22%20y=%22-10%25%22%20width=%22120%25%22%20height=%22120%25%22%3E%3CfeDropShadow%20dx=%22-1.2%22%20dy=%22-1.2%22%20stdDeviation=%22.7%22%20flood-color=%22%23ffffff%22%20flood-opacity=%221%22/%3E%3CfeDropShadow%20dx=%221.6%22%20dy=%221.8%22%20stdDeviation=%221.3%22%20flood-color=%22%239c7841%22%20flood-opacity=%22.26%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20fill=%22%23fcf6ec%22%20stroke=%22%23ecdcc0%22%20stroke-width=%22.7%22%20filter=%22url(%23e)%22%3E%3Cg%20transform=%22translate(110%2040)%20rotate(-34)%20scale(1)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(150%2086)%20rotate(-14)%20scale(1.1)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(196%2030)%20rotate(16)%20scale(0.95)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(232%2074)%20rotate(-40)%20scale(1.05)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(276%2024)%20rotate(-8)%20scale(0.9)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(300%2096)%20rotate(-26)%20scale(1.1)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(338%2052)%20rotate(22)%20scale(1)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(70%2090)%20rotate(-52)%20scale(0.8)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(380%20100)%20rotate(-46)%20scale(0.85)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(400%2030)%20rotate(-18)%20scale(0.8)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(30%2052)%20rotate(-28)%20scale(0.6)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(250%20130)%20rotate(-10)%20scale(0.8)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3Cg%20transform=%22translate(140%20132)%20rotate(-30)%20scale(0.7)%22%3E%3Cpath%20d=%22M0%200C14-11%2042-11%2058%200C42%2011%2014%2011%200%200Z%22/%3E%3Cpath%20d=%22M5%200H53M18%200l7-5M30%200l7-5M18%200l7%205M30%200l7%205%22%20fill=%22none%22%20stroke-width=%22.5%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") right 40px center / auto 112% no-repeat, url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20320%2060%22%20preserveAspectRatio=%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22s%22%20x1=%220%22%20x2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23b98a35%22/%3E%3Cstop%20offset=%22.5%22%20stop-color=%22%23f3c56b%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23d9a648%22%20stop-opacity=%220%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22f%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23efd9b3%22%20stop-opacity=%22.0%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23ecd3a6%22%20stop-opacity=%22.75%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d=%22M0%2014C60%2022%20120%2056%20320%2058V60H0Z%22%20fill=%22url(%23f)%22/%3E%3Cpath%20d=%22M0%2014C60%2022%20120%2056%20320%2058%22%20fill=%22none%22%20stroke=%22url(%23s)%22%20stroke-width=%222.2%22/%3E%3C/svg%3E") left bottom / 280px 24px no-repeat; opacity: 1; }
-  .sh-inner { position: relative; z-index: 1; }
-  .sh-header, .sh-header.sh-flow, .sh-header.sh-scrolled { background-blend-mode: normal; }
-  .sh-header, .sh-header.sh-flow { background: linear-gradient(rgba(253,249,242,.72), rgba(253,249,242,.72)), url(/assets/surface/plaster-tile.webp) 0 0 / 900px 900px, #fbf4e8; }
-  .sh-header.sh-scrolled { background: linear-gradient(rgba(253,249,242,.8), rgba(253,249,242,.8)), url(/assets/surface/plaster-tile.webp) 0 0 / 900px 900px, #fbf4e8; }
-  .sh-logo img { mix-blend-mode: normal; }
-  .sh-header::after { opacity: 1 !important; height: 2px; background: linear-gradient(90deg, #b98a35, #f3c56b 30%, #d9a648 60%, #f3c56b 85%, #b98a35); }
-  .sh-header { box-shadow: 0 10px 24px -20px rgba(74,48,16,.5); }
-  .sh-div { flex: none; width: 1.5px; height: 46px; border-radius: 2px; background: linear-gradient(180deg, transparent, #d4a24c 20%, #c99a43 80%, transparent); }
-  .sh-div--burger { display: none; }
-  .sh-logo img { height: 70px; }
-  .sh-header.sh-scrolled .sh-logo img { height: 50px; }
-  .sh-header.sh-scrolled .sh-inner { height: 66px; }
-  .sh-div { height: 54px; }
-  .sh-header::after { height: 2.5px; }
-  .sh-inner { justify-content: flex-start; }
-  .sh-nav { margin: 0 auto; }
-  .sh-actions { margin-left: auto; }
-  .sh-actions > .sh-open { display: none !important; }
-  /* nav: icon + word; hover and current page = pill with a gold border (no fill) */
-  .sh-ic { width: 17px; height: 17px; flex: none; fill: none; stroke: #9c6a1f; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s cubic-bezier(.34,1.56,.64,1), stroke .2s; }
-  .sh-link::after { display: none; }
-  .sh-link { border: 1.5px solid transparent; transition: color .2s cubic-bezier(.23,1,.32,1), border-color .2s cubic-bezier(.23,1,.32,1), box-shadow .2s; }
-  .sh-link:hover, .sh-link:focus-visible, .sh-drop-btn[aria-expanded="true"] { color: #7a3a10; border-color: rgba(201,154,67,.75); background: transparent; }
-  .sh-link.active { color: #7a3a10; background: transparent; border-color: #c99a43; box-shadow: 0 0 0 3px rgba(201,154,67,.14); }
-  .sh-link:hover .sh-ic, .sh-link.active .sh-ic { stroke: #7a3a10; }
-  @media (hover: hover) { .sh-link:hover .sh-ic { transform: translateY(-1px) rotate(-8deg) scale(1.08); } }
-  .sh-reserve-btn { border: 1.5px solid #c99a43; }
-  @media (max-width: 1320px) { .sh-link { padding: 0 8px; margin: 0 1px; gap: 5px; font-size: .97rem; } .sh-ic { width: 16px; height: 16px; } .sh-inner { gap: 14px; } }
-  @media (max-width: 1160px) { .sh-ic { display: none; } }
-  @media (max-width: 1040px) { .sh-div--logo { display: none; } .sh-div--burger { display: block; height: 40px; } .sh-header::before { background-position: right 20px center, left bottom; } }
-  @media (max-width: 760px) { .sh-logo img { height: 52px; } .sh-header.sh-scrolled .sh-logo img { height: 44px; } .sh-header.sh-scrolled .sh-inner { height: calc(var(--sh-h) - 1px); } .sh-header::before { background: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20420%20120%22%3E%3Cdefs%3E%3Cfilter%20id=%22e%22%20x=%22-20%25%22%20y=%22-20%25%22%20width=%22140%25%22%20height=%22140%25%22%3E%3CfeDropShadow%20dx=%22-1%22%20dy=%22-1%22%20stdDeviation=%22.6%22%20flood-color=%22%23fff%22%20flood-opacity=%22.9%22/%3E%3CfeDropShadow%20dx=%221.4%22%20dy=%221.6%22%20stdDeviation=%221.1%22%20flood-color=%22%23a8814a%22%20flood-opacity=%22.35%22/%3E%3C/filter%3E%3C/defs%3E%3Cg%20fill=%22%23f8efe0%22%20stroke=%22%23e2c697%22%20stroke-width=%22.6%22%20filter=%22url(%23e)%22%3E%20%3Cg%20transform=%22translate(250%2028)%20rotate(-30)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(286%2070)%20rotate(-12)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(318%2022)%20rotate(18)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(206%2074)%20rotate(-48)%20scale(.8)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(352%2064)%20rotate(-38)%20scale(.9)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(330%20104)%20rotate(-8)%20scale(.7)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3Cg%20transform=%22translate(176%2030)%20rotate(-20)%20scale(.65)%22%3E%3Cpath%20d=%22M0%200C14-10%2040-10%2056%200C40%2010%2014%2010%200%200Z%22/%3E%3Cpath%20d=%22M4%200H52%22%20fill=%22none%22/%3E%3C/g%3E%20%3C/g%3E%3C/svg%3E") right -30px center / auto 100% no-repeat; opacity: .8; } }
-  @media (prefers-reduced-motion: reduce) { .sh-ic { transition: none; } .sh-link:hover .sh-ic { transform: none; } }
-
-  /* nav: clearer, larger words (senior pass) */
-  .sh-link { font-size: clamp(1rem, 1.12vw, 1.0625rem); font-weight: 500; color: #142a17; letter-spacing: .01em; }
-  .sh-ic { width: 18px; height: 18px; stroke: #8a5a14; stroke-width: 1.8; }
-  /* brand: logo drops in once per visit, a gold light sweeps across it every few seconds, lifts on hover */
-  .sh-logo { position: relative; isolation: isolate; }
-  .sh-logo::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-    -webkit-mask: url(/assets/c86f49db5a.webp) center / contain no-repeat; mask: url(/assets/c86f49db5a.webp) center / contain no-repeat;
-    background: linear-gradient(105deg, transparent 42%, rgba(255,233,170,.95) 50%, transparent 58%) 160% 0 / 260% 100% no-repeat;
-    mix-blend-mode: screen; animation: sh-shine 9s ease-in-out 1.2s infinite; }
-  @keyframes sh-shine { 0%, 78% { background-position: 160% 0; } 100% { background-position: -60% 0; } }
-  
-  @keyframes sh-drop { from { opacity: 0; transform: translateY(-10px) scale(.92); } }
-  .sh-logo:hover { transform: none; }
-  @media (hover: hover) { .sh-logo img { transition: height .3s var(--fk-ease, ease), transform .45s cubic-bezier(.34,1.56,.64,1); }  }
-  @media (prefers-reduced-motion: reduce) { .sh-logo::after, html:not(.sh-seen) .sh-logo img { animation: none; } .sh-logo:hover img { transform: none; } }
-
-  /* type to match the owner mock: larger, firmer serif in deep green */
-  .sh-link { font-size: 1.22rem; font-weight: 500; color: #173d26; letter-spacing: 0; padding: 0 12px; margin: 0 2px; }
-  .sh-link.active, .sh-link:hover, .sh-link:focus-visible, .sh-drop-btn[aria-expanded="true"] { color: #7a3a10; }
-  .sh-ic { width: 19px; height: 19px; }
-  .sh-arr { width: 15px; height: 15px; }
-  .sh-reserve-btn { font-size: 1.2rem; font-weight: 500; min-height: 54px; padding: 0 26px; }
-  .sh-reserve-btn svg { width: 21px; height: 21px; }
-  @media (max-width: 1599px) { .sh-link { font-size: 1.12rem; padding: 0 10px; margin: 0 1px; } }
-  @media (max-width: 1439px) { .sh-link { font-size: 1.06rem; padding: 0 8px; gap: 5px; } .sh-ic { width: 17px; height: 17px; } .sh-reserve-btn { font-size: 1.1rem; padding: 0 20px; min-height: 50px; } .sh-wa { display: none; } }
-  @media (max-width: 1279px) { .sh-link { font-size: 1rem; padding: 0 7px; margin: 0; } .sh-ic { display: none; } }
-  @media (max-width: 760px) { .sh-reserve-btn { font-size: 1.08rem; min-height: 46px; padding: 0 18px; } }
-
-  /* v5.33c: all 7 links, mock-style large serif; icons only where there is room */
-  .sh-logo img { height: 80px; }
-  .sh-header.sh-scrolled .sh-logo img { height: 56px; }
-  .sh-div { height: 62px; margin: 0 6px; }
-  .sh-nav { margin: 0 auto; gap: 0; }
-  .sh-link { font-size: 1.25rem; font-weight: 600; color: #0b2214; padding: 0 12px; margin: 0 2px; }
-  .sh-link.active, .sh-link:hover, .sh-link:focus-visible, .sh-drop-btn[aria-expanded="true"] { color: #6a2c06; }
-  .sh-arr { stroke-width: 2.6; }
-  .sh-reserve-btn, .sh-plaster .sh-reserve-btn { color: #ffffff; font-weight: 600; }
-  .sh-reserve-btn svg { color: #f3c56b; }
-  .sh-ic { width: 19px; height: 19px; }
-  @media (max-width: 1699px) { .sh-ic { display: none; } .sh-link { font-size: 1.22rem; padding: 0 11px; } }
-  @media (max-width: 1439px) { .sh-link { font-size: 1.12rem; padding: 0 9px; margin: 0 1px; } .sh-wa { display: none; } .sh-reserve-btn { font-size: 1.1rem; padding: 0 20px; } }
-  @media (max-width: 1279px) { .sh-link { font-size: 1.1rem; padding: 0 8px; margin: 0; } .sh-logo img { height: 68px; } .sh-reserve-btn svg { display: none; } .sh-rl-long { display: none; } .sh-rl-short { display: inline; } }
-  @media (max-width: 1140px) { .sh-link { font-size: 1.02rem; padding: 0 6px; } .sh-logo img { height: 62px; } }
-  @media (max-width: 760px) { .sh-logo img { height: 56px; } .sh-wa { display: none; } }
-
-  /* v5.33d brand: the elephant emblem lives on its own layer above the wordmark */
-  .sh-logo { position: relative; }
-  .sh-logo img.sh-lg-word { clip-path: inset(55% 0 0 0); transition: height .3s var(--fk-ease, ease), opacity .3s ease, transform .3s ease; }
-  .sh-logo img.sh-lg-el { position: absolute; left: 0; top: 0; clip-path: inset(0 0 45% 0); transform-origin: 50% 50%; transition: height .3s var(--fk-ease, ease), transform .45s cubic-bezier(.34,1.56,.64,1); animation: sh-nod 7s ease-in-out 2s 3; }
-  .sh-logo::before { content: ""; position: absolute; left: 50%; top: 27%; width: 70%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(243,197,107,.55), rgba(243,197,107,0) 68%); opacity: 0; transform: scale(.6); transition: opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: -1; }
-  .sh-logo::after { clip-path: inset(55% 0 0 0); }
-  @keyframes sh-nod { 0%, 84%, 100% { transform: none; } 88% { transform: translateY(-2px) rotate(-5deg); } 92% { transform: translateY(0) rotate(2deg); } 96% { transform: rotate(-1deg); } }
-  html:not(.sh-seen) .sh-logo img.sh-lg-el { animation: sh-drop-el .8s cubic-bezier(.34,1.56,.64,1) both, sh-nod 7s ease-in-out 2.5s 3; }
-  html:not(.sh-seen) .sh-logo img.sh-lg-word { animation: sh-word-in .7s cubic-bezier(.23,1,.32,1) .25s both; }
-  @keyframes sh-drop-el { from { opacity: 0; transform: translateY(-16px) scale(.85) rotate(-8deg); } }
-  @keyframes sh-word-in { from { opacity: 0; transform: translateY(6px); } }
-  @media (hover: hover) {
-    .sh-logo:hover img.sh-lg-word { transform: none; }
-    .sh-logo:hover img.sh-lg-el { animation: none; transform: translateY(-3px) rotate(-6deg) scale(1.07); }
-    .sh-logo:hover::before { opacity: 1; transform: scale(1); }
-  }
-  /* scrolled: compact emblem - the wordmark folds away, the elephant grows into the centre */
-  .sh-header.sh-scrolled .sh-logo img.sh-lg-word { opacity: 0; transform: translateY(8px); }
-  .sh-header.sh-scrolled .sh-logo img.sh-lg-el { animation: none; transform: translateY(24%) scale(1.45); }
-  @media (prefers-reduced-motion: reduce) { .sh-logo img.sh-lg-el, html:not(.sh-seen) .sh-logo img.sh-lg-el, html:not(.sh-seen) .sh-logo img.sh-lg-word { animation: none; } .sh-logo::before { transition: none; } }
   @media (prefers-reduced-motion: reduce) {
-    .sh-header, .sh-inner, .sh-logo, .sh-logo img, .sh-link, .sh-link::after, .sh-sub-item, .sh-menu, .sh-wa, .sh-reserve-btn, .sh-arr, .sh-burger span { transition: none; }
-    .sh-logo:hover, .sh-sub-item:hover, .sh-wa:hover, .sh-reserve-btn:hover, .sh-reserve-btn:active { transform: none; }
-    .sh-menu { transform: none; }
+    .sh-header, .sh-link, .sh-link::after, .sh-menu, .sh-arr, .sh-lg-el, .sh-burger span, .sh-reserve-btn, .sh-sub-item { transition: none; }
     .sh-mobile-panel { animation: none; }
+    .sh-logo:hover .sh-lg-el { transform: none; }
     .sh-header.sh-hidden { transform: none; }
   }
-
-  /* ── HEADER-MOTION: sliding gold indicator, staggered nav entry, dropdown + phone-menu item cascade.
-        transform/opacity only, ease-out / ease-in-out tokens, every move under 300 ms. Off under reduced motion. ── */
-  .sh-nav { position: relative; }
-  .sh-ind { position: absolute; left: 0; bottom: -7px; width: 100px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, #c99a43, #9c4f1c); transform: translateX(var(--ix, 0px)) scaleX(var(--iw, 0)); transform-origin: 0 50%; opacity: 0; pointer-events: none; transition: transform 260ms cubic-bezier(.77, 0, .175, 1), opacity 200ms cubic-bezier(.23, 1, .32, 1); }
-  .sh-ind.is-on { opacity: 1; }
-  @keyframes sh-nav-in { from { opacity: 0; transform: translateY(-8px); } }
-  @keyframes sh-item-in { from { opacity: 0; transform: translateY(6px); } }
-  html:not(.sh-seen) .sh-nav > .sh-link, html:not(.sh-seen) .sh-nav > .sh-drop { animation: sh-nav-in 260ms cubic-bezier(.23, 1, .32, 1) backwards; }
-  .sh-nav > :nth-child(2) { animation-delay: 120ms; } .sh-nav > :nth-child(3) { animation-delay: 170ms; } .sh-nav > :nth-child(4) { animation-delay: 220ms; } .sh-nav > :nth-child(5) { animation-delay: 270ms; } .sh-nav > :nth-child(6) { animation-delay: 320ms; } .sh-nav > :nth-child(7) { animation-delay: 370ms; } .sh-nav > :nth-child(8) { animation-delay: 420ms; } .sh-nav > :nth-child(9) { animation-delay: 470ms; } .sh-nav > :nth-child(10) { animation-delay: 520ms; } 
-  .sh-drop:hover .sh-sub-item, .sh-drop.is-open .sh-sub-item { animation: sh-item-in 220ms cubic-bezier(.23, 1, .32, 1) backwards; }
-  .sh-drop:hover .sh-sub-item:nth-child(1), .sh-drop.is-open .sh-sub-item:nth-child(1) { animation-delay: 30ms; } .sh-drop:hover .sh-sub-item:nth-child(2), .sh-drop.is-open .sh-sub-item:nth-child(2) { animation-delay: 60ms; } .sh-drop:hover .sh-sub-item:nth-child(3), .sh-drop.is-open .sh-sub-item:nth-child(3) { animation-delay: 90ms; } .sh-drop:hover .sh-sub-item:nth-child(4), .sh-drop.is-open .sh-sub-item:nth-child(4) { animation-delay: 120ms; } .sh-drop:hover .sh-sub-item:nth-child(5), .sh-drop.is-open .sh-sub-item:nth-child(5) { animation-delay: 150ms; } .sh-drop:hover .sh-sub-item:nth-child(6), .sh-drop.is-open .sh-sub-item:nth-child(6) { animation-delay: 180ms; } .sh-drop:hover .sh-sub-item:nth-child(7), .sh-drop.is-open .sh-sub-item:nth-child(7) { animation-delay: 210ms; } .sh-drop:hover .sh-sub-item:nth-child(8), .sh-drop.is-open .sh-sub-item:nth-child(8) { animation-delay: 240ms; } 
-  .sh-mobile-panel:not([hidden]) .sh-mp-group > * { animation: sh-item-in 240ms cubic-bezier(.23, 1, .32, 1) backwards; }
-  .sh-mp-group > :nth-child(1) { animation-delay: 75ms; } .sh-mp-group > :nth-child(2) { animation-delay: 110ms; } .sh-mp-group > :nth-child(3) { animation-delay: 145ms; } .sh-mp-group > :nth-child(4) { animation-delay: 180ms; } .sh-mp-group > :nth-child(5) { animation-delay: 215ms; } .sh-mp-group > :nth-child(6) { animation-delay: 250ms; } .sh-mp-group > :nth-child(7) { animation-delay: 285ms; } 
-  @media (prefers-reduced-motion: reduce) { .sh-ind { transition: none; } html:not(.sh-seen) .sh-nav > .sh-link, html:not(.sh-seen) .sh-nav > .sh-drop, .sh-drop:hover .sh-sub-item, .sh-drop.is-open .sh-sub-item, .sh-mobile-panel:not([hidden]) .sh-mp-group > * { animation: none; } }
 </style>
 
 <script is:inline>
@@ -555,36 +349,4 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     initHeader();
   }
   document.addEventListener('astro:page-load', initHeader);
-</script>
-
-<script is:inline>
-  /* HEADER-MOTION: the gold line glides to the hovered / focused nav link and rests on the current page */
-  (() => {
-    const nav = document.querySelector('.sh-nav'), ind = nav && nav.querySelector('.sh-ind');
-    if (!nav || !ind || ind.dataset.init) return;
-    ind.dataset.init = '1';
-    let raf = 0;
-    const rest = () => nav.querySelector('.sh-link.active, .sh-link[aria-current="page"]');
-    const to = (el, instant) => {
-      if (!el) { ind.classList.remove('is-on'); return; }
-      const r = el.getBoundingClientRect(), n = nav.getBoundingClientRect();
-      if (!r.width) { ind.classList.remove('is-on'); return; }
-      const first = !ind.classList.contains('is-on');
-      if (instant || first) ind.style.transition = 'none';
-      ind.style.setProperty('--ix', (r.left - n.left + 14).toFixed(1) + 'px');
-      ind.style.setProperty('--iw', (Math.max(0, r.width - 28) / 100).toFixed(3));
-      if (instant || first) { void ind.offsetWidth; ind.style.transition = ''; }
-      ind.classList.add('is-on');
-    };
-    const home = (instant) => to(rest(), instant);
-    nav.addEventListener('pointerover', (e) => { const l = e.target.closest && e.target.closest('.sh-link'); if (l && e.pointerType !== 'touch') to(l); });
-    nav.addEventListener('focusin', (e) => { const l = e.target.closest && e.target.closest('.sh-link'); if (l) to(l); });
-    nav.addEventListener('pointerleave', () => home());
-    nav.addEventListener('focusout', (e) => { if (!nav.contains(e.relatedTarget)) home(); });
-    const again = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => home(true)); };
-    addEventListener('resize', again);
-    addEventListener('load', again);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(again);
-    home(true);
-  })();
 </script>

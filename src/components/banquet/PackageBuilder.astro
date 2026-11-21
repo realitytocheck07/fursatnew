@@ -45,11 +45,12 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 <section class="pb" id="packages" aria-labelledby="pb-h" data-wa={site.phonePlain}>
   <div class="pb-in">
     <header class="pb-head">
-      <p class="fk-ty-label pb-kick">Banquet packages</p>
-      <h2 id="pb-h" class="fk-ty-h2 pb-title">Build your banquet menu</h2>
+      <h2 id="pb-h" class="fk-ty-h2 pb-title">Build your <span class="pb-hl">banquet menu</span></h2>
       <p class="pb-lead">Pick a package, choose your dishes course by course, and send the menu to us on WhatsApp. Prices are per guest, plus taxes.</p>
     </header>
 
+    <div class="pb-pkgp">
+    <h3 class="pb-sh"><span class="pb-n" aria-hidden="true">1</span>Choose your package</h3>
     <div class="pb-pkgs fk-seg" role="radiogroup" aria-label="Banquet package">
       {pkgs.map((p: any, i: number) => (
         <button type="button" class={`pb-pkg${i === 0 ? ' is-on' : ''}`} role="radio" aria-checked={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-pkg={p.id} data-price={p.price} data-kind={p.kind} data-sum={p.sum}>
@@ -62,9 +63,11 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
       ))}
     </div>
     <p class="pb-cap" id="pb-cap" aria-hidden="true">{inr(first.price)} per guest + taxes · {first.sum}</p>
+    </div>
 
     <div class="pb-body">
       <div class="pb-panels">
+        <h3 class="pb-sh pb-sh--dark"><span class="pb-n" aria-hidden="true">2</span>Choose your dishes</h3>
         {pkgs.map((p: any, i: number) => (
           <div class="pb-panel" data-panel={p.id} hidden={i !== 0 ? true : undefined}>
             {p.courses.map((c: any) => (
@@ -93,6 +96,7 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
           <div class="pb-meter" aria-hidden="true"><i id="pb-bar"></i></div>
           <p class="pb-sc-prog" id="pb-prog">0 of {first.choose} courses chosen</p>
         </div>
+        <p class="pb-sh pb-sh--dark"><span class="pb-n" aria-hidden="true">3</span>Guests &amp; date</p>
         <div class="pb-fields">
           <label class="pb-f"><span>Guests</span>
             <span class="pb-step"><button type="button" id="pb-minus" aria-label="Fewer guests">−</button><input id="pb-guests" type="number" inputmode="numeric" min="1" value="50" aria-label="Number of guests" /><button type="button" id="pb-plus" aria-label="More guests">+</button></span>
@@ -100,10 +104,11 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
           <label class="pb-f"><span>Event date <em>(optional)</em></span><input id="pb-date" type="date" /></label>
         </div>
         <p class="pb-est" aria-live="polite"><span>Estimate</span> <b id="pb-est">{inr(first.price * 50)}</b> <small>+ taxes</small></p>
-        <button type="button" class="fk-btn fk-btn--primary fk-btn--on-dark pb-send" id="pb-send">
+        <button type="button" class="fk-btn fk-btn--primary pb-send" id="pb-send">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.37a9.9 9.9 0 0 0 4.74 1.2c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2z"/></svg>
           Send my menu on WhatsApp
         </button>
+        <a class="pb-call" href={`tel:+${site.phonePlain}`}>Call Fursat</a>
         <p class="pb-note" id="pb-note">You can send it even before every course is chosen; we will help you finish it.</p>
         <a class="pb-alt" href="#enquire">Prefer a call back? Use the enquiry form</a>
       </aside>
@@ -207,22 +212,26 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 .pb-lead { margin: 0; font: 400 1rem/1.6 var(--fk-sans); color: var(--pb-mute); }
 
 /* package selector */
-.pb-pkgs.fk-seg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; box-sizing: border-box; border-radius: 26px; margin-bottom: clamp(22px, 3vw, 32px); }
-.pb-pkgs > :global(.fk-seg__thumb) { border-radius: 22px; }
-.pb-pkg { position: relative; display: grid; gap: 2px; justify-items: start; align-content: start; text-align: left; min-height: 44px; padding: 14px 16px 12px; border-radius: 22px; color: var(--ui2-ink); }
+.pb-pkgp { padding: clamp(20px, 3vw, 36px); margin-bottom: clamp(22px, 3vw, 32px); border-radius: 28px; background: #10261a; color: #f6ecd6; }
+.pb-sh { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font: 600 .75rem/1.2 var(--fk-sans); letter-spacing: .12em; text-transform: uppercase; color: #e6c27a; }
+.pb-sh--dark { color: #74501a; grid-column: 1 / -1; }
+.pb-n { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; font: 500 .875rem/1 var(--fk-serif); letter-spacing: 0; }
+.pb-pkgs.fk-seg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; width: 100%; box-sizing: border-box; padding: 0; border: 0; box-shadow: none; background: transparent; border-radius: 22px; }
+.pb-pkgs > :global(.fk-seg__thumb) { top: 0; bottom: 0; left: 0; width: calc(100% / var(--n)); border-radius: 22px; background: #fffaf0; box-shadow: none; }
+.pb-pkg { position: relative; display: grid; gap: 2px; justify-items: start; align-content: start; text-align: left; min-height: 44px; padding: 14px 16px 12px; border-radius: 22px; color: #fbf3e6; box-shadow: inset 0 0 0 1px rgb(230 194 122 / .4); }
 .pb-pkgs.fk-seg > .pb-pkg { white-space: normal; min-width: 0; padding: 14px 16px 12px; border-radius: 22px; }
-.pb-pkgs.fk-seg > .pb-pkg.is-on { color: var(--ui2-cream); }
-.pb-pkg.is-on { color: var(--ui2-cream); }
+.pb-pkgs.fk-seg > .pb-pkg.is-on { color: #18301f; box-shadow: inset 0 0 0 2px #e6c27a; }
+.pb-pkg.is-on { color: #18301f; }
 .pb-dot { position: absolute; top: 14px; right: 14px; width: 14px; height: 14px; border: 1.5px solid currentColor; border-radius: 3px; display: grid; place-items: center; }
 .pb-dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.pb-dot.is-veg { color: #1f7a3a; } .pb-dot.is-nv { color: #a3341a; }
-.pb-pkg.is-on .pb-dot { color: #fff; }
-.pb-kind { font: 600 .75rem/1.2 var(--fk-sans); letter-spacing: .12em; text-transform: uppercase; color: var(--fk-text-gold); }
+.pb-dot.is-veg { color: #7fd69a; } .pb-dot.is-nv { color: #ff9d8d; }
+.pb-pkg.is-on .pb-dot.is-veg { color: #1f7a3a; } .pb-pkg.is-on .pb-dot.is-nv { color: #a3341a; }
+.pb-kind { font: 600 .75rem/1.2 var(--fk-sans); letter-spacing: .12em; text-transform: uppercase; color: #e6c27a; }
 .pb-price { font: 600 clamp(1.5rem, 2.4vw, 1.9rem)/1.15 var(--fk-serif); font-variant-numeric: tabular-nums; }
-.pb-per { font: 400 .75rem/1.3 var(--fk-sans); color: var(--pb-mute); }
-.pb-sum { margin-top: 8px; font: 500 .78rem/1.4 var(--fk-sans); color: var(--pb-mute); }
-.pb-pkg.is-on .pb-kind { color: #f3d9a0; }
-.pb-pkg.is-on .pb-per, .pb-pkg.is-on .pb-sum { color: rgb(246 236 216 / .85); }
+.pb-per { font: 400 .75rem/1.3 var(--fk-sans); color: #e1d3b6; }
+.pb-sum { margin-top: 8px; font: 500 .78rem/1.4 var(--fk-sans); color: #e1d3b6; }
+.pb-pkg.is-on .pb-kind { color: #7a5418; }
+.pb-pkg.is-on .pb-per, .pb-pkg.is-on .pb-sum { color: #5b5240; }
 .pb-cap { display: none; }
 
 /* body */
@@ -250,31 +259,35 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
 @keyframes pb-nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
 /* summary card */
-.pb-sum-card { position: sticky; top: 96px; display: grid; gap: 14px; padding: 20px; border-radius: 22px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; box-shadow: 0 24px 48px -28px rgb(10 30 18 / .7); }
+.pb-sum-card { position: sticky; top: 96px; display: grid; gap: 14px; padding: 22px; border-radius: 22px; background: linear-gradient(180deg, #fffaf0, #f6e8d0); border: 2px dashed #c99a43; color: #18301f; }
 
-.pb-sc-p { margin: 4px 0 0; font: 600 2rem/1.1 var(--fk-serif); font-variant-numeric: tabular-nums; }
-.pb-sc-p small { font: 500 .85rem/1 var(--fk-sans); color: #d9c9a6; margin-left: 4px; }
-.pb-meter { height: 6px; border-radius: 99px; background: rgb(255 255 255 / .14); overflow: hidden; margin-top: 12px; }
-.pb-meter i { display: block; height: 100%; background: linear-gradient(90deg, #f3c56b, #e3ab4a); transform-origin: left; transform: scaleX(0); transition: transform var(--fk-dur-3, 320ms) var(--fk-ease-out, ease); }
-.pb-sc-prog { margin: 8px 0 0; font: 500 .85rem/1.4 var(--fk-sans); color: #d9c9a6; font-variant-numeric: tabular-nums; }
+.pb-sc-p { margin: 4px 0 0; font: 600 2rem/1.1 var(--fk-serif); font-variant-numeric: tabular-nums; color: #2a5019; }
+.pb-sc-p small { font: 500 .85rem/1 var(--fk-sans); color: #5a5040; margin-left: 4px; }
+.pb-meter { height: 6px; border-radius: 99px; background: rgb(42 80 25 / .15); overflow: hidden; margin-top: 12px; }
+.pb-meter i { display: block; height: 100%; background: #2a5019; transform-origin: left; transform: scaleX(0); transition: transform var(--fk-dur-3, 320ms) var(--fk-ease-out, ease); }
+.pb-sc-prog { margin: 8px 0 0; font: 500 .85rem/1.4 var(--fk-sans); color: #5a5040; font-variant-numeric: tabular-nums; }
 .pb-fields { display: grid; gap: 10px; }
-.pb-f { display: grid; gap: 6px; font: 500 .8rem/1.2 var(--fk-sans); color: #e9dcc1; }
-.pb-f em { font-style: normal; color: #bfae8a; }
-.pb-f input { height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / .22); background: rgb(255 255 255 / .08); color: #fff; padding: 0 12px; font: 500 16px/1 var(--fk-sans); color-scheme: dark; }
+.pb-f { display: grid; gap: 6px; font: 500 .8rem/1.2 var(--fk-sans); color: #3b3426; }
+.pb-f em { font-style: normal; color: #6a5c45; }
+.pb-f input { height: 44px; border-radius: 12px; border: 1px solid rgb(201 154 67 / .6); background: #fff; color: #1f2a1a; padding: 0 12px; font: 500 16px/1 var(--fk-sans); }
 .pb-step { display: grid; grid-template-columns: 44px 1fr 44px; gap: 6px; }
 .pb-step input { text-align: center; font-variant-numeric: tabular-nums; }
-.pb-step button { height: 44px; border-radius: 12px; border: 1px solid rgb(255 255 255 / .22); background: rgb(255 255 255 / .1); color: #fff; font: 600 20px/1 var(--fk-sans); cursor: pointer; }
-.pb-f input:focus-visible, .pb-step button:focus-visible { outline: 3px solid #f3c56b; outline-offset: 2px; }
-.pb-est { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 0; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / .14); font: 500 .85rem/1 var(--fk-sans); color: #d9c9a6; }
+.pb-step button { height: 44px; border-radius: 12px; border: 1px solid rgb(201 154 67 / .6); background: #fff; color: #18301f; font: 600 20px/1 var(--fk-sans); cursor: pointer; }
+.pb-f input:focus-visible, .pb-step button:focus-visible { outline: 3px solid #8a5a14; outline-offset: 2px; }
+.pb-est { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 0; padding-top: 12px; border-top: 1px solid rgb(201 154 67 / .5); font: 500 .85rem/1 var(--fk-sans); color: #5a5040; }
 .pb-est small { font-size: .875rem; }
-.pb-est b { font: 600 1.35rem/1 var(--fk-serif); color: #fff; font-variant-numeric: tabular-nums; }
+.pb-est b { font: 600 1.35rem/1 var(--fk-serif); color: #2a5019; font-variant-numeric: tabular-nums; }
 
-.pb-note { margin: 0; font: 400 .8rem/1.5 var(--fk-sans); color: #bfae8a; }
-.pb-alt { font: 500 .875rem/1.4 var(--fk-sans); color: #f3d9a0; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+.pb-note { margin: 0; font: 400 .8rem/1.5 var(--fk-sans); color: #5a5040; }
+.pb-alt { font: 500 .875rem/1.4 var(--fk-sans); color: #74501a; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+.pb-call { display: grid; place-items: center; min-height: 48px; border-radius: 999px; border: 1.5px solid #c99a43; color: #18301f; font: 600 .9375rem/1 var(--fk-sans); text-decoration: none; }
+.pb-call:active { transform: scale(.96); }
+.pb-call:focus-visible { outline: 3px solid #8a5a14; outline-offset: 2px; }
+.pb-hl { color: var(--fk-red); font-style: italic; }
 .pb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .pb-dock { display: none; }
 
-@media (max-width: 1100px) { .pb-per, .pb-sum { display: none; } .pb-pkgs.fk-seg > .pb-pkg { padding: 12px 10px; } .pb-dot { top: 10px; right: 8px; } .pb-cap { display: block; margin: -14px 0 22px; text-align: center; font: 500 .85rem/1.45 var(--fk-sans); color: var(--pb-mute); } }
+@media (max-width: 1100px) { .pb-per, .pb-sum { display: none; } .pb-pkgs.fk-seg > .pb-pkg { padding: 12px 10px; } .pb-dot { top: 10px; right: 8px; } .pb-cap { display: block; margin: 14px 0 0; text-align: center; font: 500 .85rem/1.45 var(--fk-sans); color: #e1d3b6; } }
 @media (max-width: 900px) {
   .pb-body { grid-template-columns: 1fr; }
   .pb-sum-card { position: static; }
@@ -292,9 +305,8 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   .pb-course.is-nudge { animation: none; }
 }
 /* Phase 4B: layout + colour only. */
-.pb-kick { margin: 0 0 10px; color: var(--fk-text-gold); }
 .pb-title { margin: 0 0 12px; color: var(--pb-ink); }
-.pb-sc-k { color: #e7c27a; }
+.pb-sc-k { color: #74501a; }
 .pb-send { width: 100%; }
 .pb-send svg { width: 20px; height: 20px; flex: none; }
 </style>
