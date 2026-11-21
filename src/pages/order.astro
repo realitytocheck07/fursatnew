@@ -107,13 +107,12 @@ const menuTiles = [
           <div class="od-row" id="od-row" role="list" tabindex="-1">
 
             <article class="od-card od-card--pick" role="listitem" aria-labelledby="od-t-pick">
-              <span class="od-tag">★ Most preferred ★</span>
               {/* TODO(client): replace this green panel with the Fursat takeaway-bag photo */}
               <span class="od-pimg" aria-hidden="true"><img src="/assets/brand/fursat-elephant.webp" alt="" width="120" height="120" decoding="async" /></span>
               <span class="od-badge od-badge--bag" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12l1 12H5Z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg></span>
               <h2 class="od-ct" id="od-t-pick">Pickup from <span class="g">Fursat</span></h2>
               <p class="od-cs">Skip the wait, collect it fresh</p>
-              <ul class="od-feat"><li>Pick your own time</li><li>Capital Park, Madhapur</li></ul>
+              <ul class="od-feat"><li>Order and pay online</li><li>Capital Park, Madhapur</li></ul>
               <a class="od-btn od-btn--wa" href={pickupHref} target="_blank" rel="noopener">
                 <Fragment set:html={dotpe ? '' : waIcon} /><span>{pickupLabel}<span class="od-vh"> (opens in a new tab)</span></span><svg class="od-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </a>

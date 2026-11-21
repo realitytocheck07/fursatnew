@@ -8,7 +8,6 @@ import EnquiryHub from '../components/ask/EnquiryHub.astro';
 import '../styles/ask-host.css';
 import '../styles/ask-lazy.css';
 import site from '../data/site.json';
-import MascotOfferModal from '../components/MascotOfferModal.astro';
 import menuJson from '../../public/data/menu.json';
 import foodJson from '../data/food.json';
 import drinksJson from '../data/drinks.json';
@@ -190,7 +189,6 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .ah-flour{display:inline-block;width:.86em;height:.54em;margin-left:.08em;vertical-align:.34em}
 .ah-lead{margin:10px 0 0;max-width:36em;font:400 clamp(1.05rem,.95rem + .45vw,1.35rem)/1.5 var(--fk-serif);color:#3b3326;text-wrap:pretty}
 .ah-lead a{position:relative;color:var(--as-brand);font-weight:500;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
-.ah-lead a::before{content:"";position:absolute;inset:-14px -8px}
 .ah-lead a:focus-visible{outline:2px solid var(--as-green);outline-offset:3px;border-radius:4px}
 @media(min-width:901px) and (max-height:760px){.ah .ah-h1{font-size:clamp(3rem,1rem + 3.9vw,4.4rem)}.ah-status{margin-bottom:8px}.ah-chips{margin-top:10px}.ah-in{padding-top:14px;padding-bottom:14px}}
 
@@ -200,10 +198,13 @@ a.skip{min-height:44px;display:inline-flex;align-items:center;box-sizing:border-
 .ah-sl.on{opacity:1;transform:none}
 .ah-sl img,img.ah-sl{width:100%;height:100%;object-fit:cover}
 picture.ah-sl img{display:block;object-position:34% 55%}
-.ah-dots{position:absolute;z-index:4;left:50%;bottom:16px;translate:-50% 0;display:flex;gap:2px;padding:4px 8px;border-radius:999px;background:rgba(20,32,22,.45)}
-.ah-dots button{all:unset;cursor:pointer;width:24px;height:24px;display:grid;place-items:center}
+.ah-dots{position:absolute;z-index:4;left:50%;bottom:10px;translate:-50% 0;display:flex;gap:0;padding:0}
+/* the pill is drawn behind the dots, so the buttons can be 44px tall without a taller bar */
+.ah-dots::before{content:"";position:absolute;inset:6px 4px;z-index:-1;border-radius:999px;background:rgba(20,32,22,.45)}
+.ah-dots button{all:unset;cursor:pointer;width:44px;height:44px;display:grid;place-items:center}
 .ah-dots button::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(255,248,232,.55);transition:width .3s ease,background-color .3s}
 .ah-dots button[aria-current=true]::before{width:20px;border-radius:5px;background:#f3c56b}
+.ah-lead a{display:inline-block;box-sizing:border-box;min-height:44px;padding:10px 6px;margin:-10px -6px;vertical-align:baseline}
 .ah-dots button:focus-visible{outline:2px solid #f3c56b;border-radius:6px}
 .ah-hero .ah-bubble{left:auto;right:7%;bottom:22%;max-width:min(240px,60%)}
 
@@ -229,7 +230,7 @@ picture.ah-sl img{display:block;object-position:34% 55%}
 .ah-chips svg{flex:none;width:18px;height:18px;color:var(--as-gold-ink)}
 @media(hover:hover){.ah-chips button:hover{background:#fff;border-color:var(--as-gold)}.ah-tabs button:not([aria-pressed=true]):hover{background:#f6ecd8}}
 /* "At the desk": small gold icon before each label */
-.ah-desk .fk-btn.fk-btn--ghost.fk-btn--md{gap:7px;padding:0 6px 0 4px;font:500 .8125rem/1 var(--fk-sans);color:#2f3a1f}
+.ah-desk .fk-btn.fk-btn--ghost.fk-btn--md{min-height:44px;gap:7px;padding:0 6px 0 4px;font:500 .8125rem/1 var(--fk-sans);color:#2f3a1f}
 .ah-desk .fk-btn::after{color:var(--as-gold-ink)}
 .ah-desk .fk-btn .ah-di{flex:none;width:20px;height:20px;color:var(--as-gold-ink);transform:none}
 
@@ -327,7 +328,6 @@ picture.ah-sl img{display:block;object-position:34% 55%}
 <script is:inline type="application/json" id="ask-host-data" set:html={JSON.stringify(host)}></script>
 <script is:inline src="/js/ask-host.js"></script>
 <script is:inline src="/js/ask.js"></script>
-<MascotOfferModal />
 <SiteFooter />
 <MobileBar active="ask" />
 <script is:inline src="/js/motion-kit.js"></script>

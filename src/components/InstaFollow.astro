@@ -31,6 +31,8 @@ const tiles = [...ACC.filter((a) => a.handle === handle), ...ACC.filter((a) => a
   </ul>
 </aside>
 <style>
+/* Hide when an InstagramFeed above it (same section / previous sibling) has loaded posts; otherwise this strip stays as the fallback. */
+:global([data-igfeed][data-state="ready"]) ~ .ig { display: none; }
 .ig { max-width: 1300px; margin: clamp(28px, 4vw, 48px) auto; padding: 0 clamp(16px, 4vw, 40px); }
 .ig-k { margin: 0 0 12px; text-align: center; font: 600 .75rem/1.2 Rupee,Poppins, system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #74501a; }
 .ig--dark .ig-k { color: #e7c27a; }

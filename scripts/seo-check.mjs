@@ -28,7 +28,7 @@ for (const f of pages) {
   if (noindex && !is404) at(`noindex on a normal page (${robots})`);
   if (!noindex) indexable.push(url);
   const canon = one(html, /<link rel="canonical" href="([^"]*)"/);
-  if (!canon) at('missing canonical');
+  if (!canon && !is404) at('missing canonical'); // a 404 must not claim a canonical URL
   else if (!is404 && canon !== DOMAIN + url) at(`canonical ${canon} != ${DOMAIN + url}`);
   const h1 = (html.match(/<h1[\s>]/g) || []).length;
   if (h1 !== 1 && !is404) at(`has ${h1} <h1>`, h1 === 0 ? errors : warns);

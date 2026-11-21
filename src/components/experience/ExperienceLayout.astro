@@ -7,7 +7,6 @@
 import SiteHeader from '../SiteHeader.astro';
 import SiteFooter from '../SiteFooter.astro';
 import MobileBar from '../MobileBar.astro';
-import MascotOfferModal from '../MascotOfferModal.astro';
 import CornerHero from '../CornerHero.astro';
 import InstaFollow from '../InstaFollow.astro';
 import '../../styles/fk-tokens.css';
@@ -27,6 +26,13 @@ interface Props {
   insta?: 'fursatind.in' | 'fursatbanquets' | 'fursat_bitesandbuffet' | 'fursatsocialclub';
 }
 const p = Astro.props;
+// Bar: SignatureCocktails (slot "before-cards") already shows these two drinks, so the card section after it is "More from the bar" and skips them.
+// Keep in sync with SignatureCocktails.astro (lfb, cos).
+const inReel = ['Life Fursat Bhai', 'Cosmopolitan'];
+const normName = (n: string) => n.toLowerCase().replace(/[^a-z0-9]/g, '');
+const hasReel = Astro.slots.has('before-cards');
+const cards = (p.cards ?? []).filter((c) => !(hasReel && inReel.some((n) => normName(n) === normName(c.name))));
+const cardsHeading = hasReel ? 'More from the bar' : p.cardsTitle;
 const heroKey = p.active === 'cafe' ? 'cafe' : 'bar';
 const icons: Record<string, string> = {
   coffee: '<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/>',
@@ -56,9 +62,8 @@ const momentSizes = ['(max-width: 900px) 56vw, (max-width: 1380px) 31vw, 420px',
 const cardSizes = (src: string) => { const k = VAR[src.replace(/\.webp$/, '')]?.[2]; const m = (n: string) => (k ? `calc(${n} * ${k})` : n); return `(max-width: 420px) ${m('90vw')}, (max-width: 900px) ${m('420px')}, ${m('300px')}`; };
 // Google FAQ rich results, from the same questions shown on the page
 const faqLd = JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) });
-import InstaFeed from '../InstaFeed.astro';
 import InstagramFeed from '../InstagramFeed.astro';
-// Instagram handle -> Worker account. Social Club has no Worker feed yet, so it keeps the placeholder strip.
+// Instagram handle -> Worker account. Social Club has no Worker feed yet, so it shows only the InstaFollow strip.
 const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'main', fursat_bitesandbuffet: 'bites', fursatbanquets: 'banquets' };
 ---
 
@@ -103,26 +108,28 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
 
   <slot name="before-cards" />
 
-  {p.cards && p.cards.length > 0 && (
+  {cards.length > 0 && (
     <section class="xp-cards-sec" id={p.cardsId} aria-labelledby="xp-cards-h">
       {p.cardsKicker && <p class="xp-sec-kicker">{p.cardsKicker}</p>}
-      <h2 class="xp-sec-h fk-ty-h2" id="xp-cards-h">{p.cardsTitle}</h2>
+      <h2 class="xp-sec-h fk-ty-h2" id="xp-cards-h">{cardsHeading}</h2>
       <ul class="xp-cards fk-cards fk-rail fk-rail--cards fk-rail--m" data-dots data-fx-pop>
-        {p.cards.map((c, i) => (
+        {cards.map((c, i) => (
           <li class="fk-card fk-card--glass">
-            <div class="fk-card__ph">
-              <img src={(c.img ?? cardFallback[i % cardFallback.length]).src} srcset={srcsetOf((c.img ?? cardFallback[i % cardFallback.length]).src)} sizes={cardSizes((c.img ?? cardFallback[i % cardFallback.length]).src)} alt={c.img?.alt ?? ''} width="600" height="450" loading="lazy" decoding="async" />
-              <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon ?? p.pillars[i % p.pillars.length].icon]} /></span>
-            </div>
-            <div class="fk-card__b">
-              {c.tag && <span class="fk-card__tag">{c.tag}</span>}
-              <h3 class="fk-card__t fk-ty-h4">{c.name}</h3>
-              <p class="fk-card__p">{c.text}</p>
-              <div class="fk-card__foot">
-                {c.price ? <span class="fk-card__price" data-fx-count>{c.price}</span> : <span></span>}
-                <a class="fk-card__go" href={p.cardsLink?.href ?? '/menu'} aria-label={`${c.name} on the menu`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></a>
+            <a class="xp-card" href={`/menu/#dish=${encodeURIComponent(c.name)}`} aria-label={`${c.name}: see this dish on the menu`}>
+              <div class="fk-card__ph">
+                <img src={(c.img ?? cardFallback[i % cardFallback.length]).src} srcset={srcsetOf((c.img ?? cardFallback[i % cardFallback.length]).src)} sizes={cardSizes((c.img ?? cardFallback[i % cardFallback.length]).src)} alt={c.img?.alt ?? ''} width="600" height="450" loading="lazy" decoding="async" />
+                <span class="fk-card__badge" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={icons[c.icon ?? p.pillars[i % p.pillars.length].icon]} /></span>
               </div>
-            </div>
+              <div class="fk-card__b">
+                {c.tag && <span class="fk-card__tag">{c.tag}</span>}
+                <h3 class="fk-card__t fk-ty-h4">{c.name}</h3>
+                <p class="fk-card__p">{c.text}</p>
+                <div class="fk-card__foot">
+                  {c.price ? <span class="fk-card__price" data-fx-count>{c.price}</span> : <span></span>}
+                  <span class="xp-seedish" aria-hidden="true">See dish →</span>
+                </div>
+              </div>
+            </a>
           </li>
         ))}
       </ul>
@@ -138,14 +145,11 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
         <details class="xp-faq-item"><summary>{f.q}</summary><p>{f.a}</p></details>
       ))}
     </div>
-    {p.insta && LIVE[p.insta]
-      ? <InstagramFeed account={LIVE[p.insta]} layout="page" tone="dark" title="Latest from our Instagram" />
-      : p.insta && <div class="igf-page"><InstaFeed handle={p.insta} tone="dark" /></div>}
+    {p.insta && LIVE[p.insta] && <InstagramFeed account={LIVE[p.insta]} layout="page" tone="dark" title="Latest from our Instagram" />}
     {p.insta && <InstaFollow handle={p.insta} tone="dark" />}
   </section>
 </main>
 
-<MascotOfferModal />
 <SiteFooter />
 <MobileBar active={p.mobileActive ?? 'menu'} />
 <script>import '../../scripts/fk-motion';</script>
@@ -205,6 +209,12 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
   .xp-sec-kicker { font: 600 .78rem/1.3 var(--fk-sans); letter-spacing: .2em; text-transform: uppercase; color: #e8c27a; }
   .xp-sec-h { color: #fbf3e6; margin: .35rem 0 clamp(24px, 3vw, 40px) !important; }
   .xp-cards { max-width: 1240px; margin: 0 auto; }
+  /* cards open the dish on the menu: the whole card is one link, "See dish →" shows on hover (and on keyboard focus) */
+  .xp-card { display: flex; flex-direction: column; flex: 1; min-width: 0; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; border-radius: 24px; }
+  .xp-card:focus-visible { outline: 3px solid #e8c27a; outline-offset: 4px; }
+  .xp-seedish { font: 600 .8125rem/1.2 var(--fk-sans); color: var(--fk-text-gold, #74501a); white-space: nowrap; opacity: 0; translate: -4px 0; transition: opacity 150ms ease-out, translate 150ms ease-out; }
+  .xp-card:focus-visible .xp-seedish { opacity: 1; translate: 0 0; }
+  @media (hover: hover) { .xp-card:hover .xp-seedish { opacity: 1; translate: 0 0; } }
   .xp-cards-more { margin-top: clamp(26px, 3vw, 40px) !important; }
   .xp-faq-list { display: grid; gap: 14px; max-width: 860px; margin: 0 auto; text-align: left; }
   .xp-faq-item { border-radius: 22px; background: #f8ead8; box-shadow: 0 0 0 1px rgba(214, 170, 90, .5), 0 0 0 5px #f1dfc3, 0 18px 34px rgba(0, 0, 0, .3), inset 0 2px 3px #fff; }

@@ -142,7 +142,7 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light"><title>{title}</title>
 <meta name="description" content={description}>
 <meta name="robots" content={noindex ? "noindex,follow" : "index,follow,max-image-preview:large,max-snippet:-1"}>
-<link rel="canonical" href={canonical}>
+{!noindex && <link rel="canonical" href={canonical}>}
 <meta name="theme-color" content="#F2EEE4">
 <meta name="application-name" content="Fursat">
 <meta name="apple-mobile-web-app-title" content="Fursat">
@@ -198,6 +198,9 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
 </noscript>
 </head>
 <body>
+<a class="fk-skip" href="#main">Skip to content</a>
+<script is:inline>document.addEventListener("DOMContentLoaded",function(){if(!document.getElementById("main")){var m=document.querySelector("main");if(m){if(!m.id)m.id="main";document.querySelector(".fk-skip").href="#"+m.id;if(!m.hasAttribute("tabindex"))m.tabIndex=-1;}}});</script>
+<style is:global>.fk-skip{position:fixed;left:12px;top:-70px;z-index:100000;min-height:44px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;background:#10261a;color:#f6e6d1;font:600 15px/1 Poppins,system-ui,sans-serif;text-decoration:none;transition:top .2s}.fk-skip:focus{top:12px;outline:2px solid #c99a43;outline-offset:2px}</style>
 <slot />
 <AskFab />
 <InstaFab />
