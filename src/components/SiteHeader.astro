@@ -290,6 +290,13 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
     .sh-lg-el { width: 30px; height: 38px; } .sh-lg-word { height: 24px; }
     .sh-reserve-btn { min-height: 44px; padding: 0 20px; }
   }
+  /* kit 47 bug 5: 320px phones: the burger ended 18px past the screen edge */
+  @media (max-width: 359px) {
+    .sh-inner { gap: 6px; padding: 0 8px; }
+    .sh-logo { gap: 8px; min-width: 0; }
+    .sh-lg-el { height: 32px; } .sh-lg-word { height: 20px; }
+    .sh-reserve-btn { padding: 0 14px; }
+  }
 </style>
 
 <script is:inline>

@@ -148,6 +148,7 @@ const ITEMS: Item[] = [
     let on = !introOn();
     if (on && !phone()) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
       const r = el.getBoundingClientRect();
+      if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
       if (r.right > innerWidth - 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
     root.classList.toggle('is-on', on);
@@ -175,6 +176,7 @@ const ITEMS: Item[] = [
       if (root.contains(el)) continue;
       const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity === 0) continue;
       const r = el.getBoundingClientRect();
+      if (el.matches('[data-fab-avoid]') && el.id !== 'pa-plan' && !ph && r.height > innerHeight * 1.2) continue; // bx: same rule as the buttons: a zone taller than 1.2 screens is the page
       if (r.width && r.top < innerHeight && r.bottom > innerHeight - 340 && r.right > spL && r.left < spR) top = Math.min(top, r.top);
     }
     sd.style.setProperty('--waf-sd-b', Math.max(12, Math.round(innerHeight - top + 12)) + 'px');

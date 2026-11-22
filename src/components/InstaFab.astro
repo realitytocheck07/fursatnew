@@ -65,6 +65,7 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
     if (on) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
       const r = el.getBoundingClientRect();
+      if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
       if ((ph || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
     b.classList.toggle('is-on', on && !inCard);

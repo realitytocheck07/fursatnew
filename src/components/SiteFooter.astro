@@ -127,7 +127,7 @@ const hasLegalDialog = Astro.url.pathname === '/';
   .sf-cols { display:grid; grid-template-columns:1fr 1fr; gap:22px 20px; padding:22px 0; border-top:1px solid rgba(201,154,67,.35); }
   .sf-col { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
   .sf-title { margin:0 0 8px; font:600 .75rem/1.2 var(--sans,"Poppins",sans-serif); letter-spacing:.14em; text-transform:uppercase; color:var(--sf-gold); }
-  .sf-link { position:relative; display:inline-flex; align-items:center; min-height:32px; font-size:.9375rem; overflow-wrap:anywhere; }
+  .sf-link { position:relative; display:inline-flex; align-items:center; min-height:36px; font-size:.9375rem; overflow-wrap:anywhere; }
   .sf-link::after { content:""; position:absolute; left:0; right:0; bottom:4px; height:1.5px; background:var(--sf-gold); transform:scaleX(0); transform-origin:left; transition:transform .2s ease; }
   .sf-link:focus-visible::after { transform:scaleX(1); }
   @media (hover:hover) { .sf-link:hover::after, .sf-order a:hover, .sf-legal a:hover { transform:scaleX(1); } .sf-order a:hover, .sf-legal a:hover { text-decoration:underline; text-decoration-color:var(--sf-gold); text-underline-offset:4px; } }
@@ -136,7 +136,7 @@ const hasLegalDialog = Astro.url.pathname === '/';
   .sf-open::before { content:""; width:8px; height:8px; border-radius:50%; background:#ffb3a8; }
   .sf-open.is-open::before { background:#7fd19a; }
   .sf-order { margin:6px 0 0; font-size:.875rem; white-space:nowrap; }
-  .sf-order a { display:inline-block; padding:8px 2px; }
+  .sf-order a { display:inline-flex; align-items:center; min-height:36px; padding:0 2px; }
   .sf-visit { grid-column:1 / -1; background:#16301f; padding:16px; border-radius:14px; }
   .sf-connect { grid-column:1 / -1; }
   .sf-conn-links { display:flex; flex-wrap:wrap; column-gap:22px; }
@@ -179,7 +179,7 @@ const hasLegalDialog = Astro.url.pathname === '/';
     .sf-connect { grid-column:auto; }
     .sf-conn-links { display:flex; flex-direction:column; align-items:flex-start; }
     .sf-bottom { flex-direction:row; justify-content:space-between; align-items:center; }
-    .sf-legal a { min-height:32px; }
+    .sf-legal a { min-height:36px; }
     .sf-footer.sf-curtain { position:sticky; bottom:0; }
   }
   .sf-curtain-lift { position:relative; z-index:1; }

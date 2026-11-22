@@ -425,11 +425,11 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 }
 
 /* contact fields (name, phone, optional email) — sent with the WhatsApp message and the email copy */
-.pb-contact{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:14px 0 12px}
-.pb-cf{display:flex;flex-direction:column;gap:5px;font:600 .75rem/1.2 var(--fk-sans,"Poppins",sans-serif);letter-spacing:.06em;text-transform:uppercase;color:inherit;opacity:.92}
+.pb-contact{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;margin:14px 0 12px}
+.pb-cf{min-width:0;display:flex;flex-direction:column;gap:5px;font:600 .75rem/1.2 var(--fk-sans,"Poppins",sans-serif);letter-spacing:.06em;text-transform:uppercase;color:inherit;opacity:.92}
 .pb-cf em{font-style:normal;text-transform:none;letter-spacing:0;opacity:.75}
 .pb-cf--w{grid-column:1/-1}
-.pb-cf input{min-height:46px;padding:0 14px;border-radius:12px;border:1px solid rgba(201,154,67,.55);background:rgba(255,250,240,.96);color:#10261a;font:500 1rem/1 var(--fk-sans,"Poppins",sans-serif);text-transform:none;letter-spacing:0}
+.pb-cf input{width:100%;min-width:0;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid rgba(201,154,67,.55);background:rgba(255,250,240,.96);color:#10261a;font:500 1rem/1 var(--fk-sans,"Poppins",sans-serif);text-transform:none;letter-spacing:0}
 .pb-cf input:focus-visible{outline:2px solid #c99a43;outline-offset:2px}
-@media (max-width:420px){.pb-contact{grid-template-columns:1fr}}
+@media (max-width:420px){.pb-contact{grid-template-columns:minmax(0,1fr)}}
 </style>

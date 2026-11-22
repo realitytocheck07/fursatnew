@@ -167,6 +167,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
       if (!h && innerWidth < 768 && (fieldOn() || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) h = true;
       if (!h) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
         const r = el.getBoundingClientRect();
+        if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
         if ((innerWidth < 768 || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { h = true; break; }
       }
       a.toggleAttribute('data-hold', h);
