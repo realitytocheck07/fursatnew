@@ -81,6 +81,13 @@ export function feFlow(cfg) {
   /* steps */
   const LABELS = cfg.labels;
   let step = 1, sending = false;
+  /* card height follows the active step (CSS animates it, 300ms ease); the done screen asks for its own height */
+  const vp = $('.fe-vp'), vcs = getComputedStyle(vp);
+  const fit = () => {
+    let h = steps[step - 1].offsetHeight + parseFloat(vcs.paddingTop) + parseFloat(vcs.paddingBottom);
+    if (!done.hidden) h = Math.max(h, (parseFloat(getComputedStyle(done).getPropertyValue('--fe-done-h')) || 560) - (form.offsetHeight - vp.offsetHeight) + 18);
+    vp.style.height = h + 'px';
+  };
   const go = (n) => {
     if (n === step) return;
     if (n > step && step === 2 && !validate(step2)) return;
@@ -90,6 +97,7 @@ export function feFlow(cfg) {
     stepLabel.textContent = 'Step ' + n + ' of 3 · ' + LABELS[n - 1];
     const s = steps[n - 1]; s.setAttribute('tabindex', '-1'); s.focus({ preventScroll: true });
     const r = card.getBoundingClientRect(); if (r.top < 0 || r.top > innerHeight * .4) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    fit();
     ready();
   };
   const focusFirst = (el) => {
@@ -182,9 +190,17 @@ export function feFlow(cfg) {
     $('#fe-done-wa').href = url;
     const w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (x) {} }
     $('.fe-step[data-step="3"] [data-fe-tk]').classList.add('is-torn');
-    done.hidden = false; void done.offsetWidth; done.classList.add('is-in'); ding();
+    done.hidden = false; void done.offsetWidth; done.classList.add('is-in'); if (innerWidth < 821) card.scrollIntoView({ behavior: 'smooth', block: 'end' }); ding();
   });
   $('#fe-again').addEventListener('click', () => { done.classList.remove('is-in'); done.hidden = true; $$('.fe-tk').forEach((t) => t.classList.remove('is-torn')); sending = false; sendBtn.removeAttribute('aria-busy'); });
+
+  /* height fit: first fit has no transition; later size changes (summary opens, errors, fonts) animate */
+  vp.classList.add('fe-nofit'); fit(); requestAnimationFrame(() => requestAnimationFrame(() => vp.classList.remove('fe-nofit')));
+  if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => fit()); steps.forEach((x) => ro.observe(x)); }
+  new MutationObserver(fit).observe(done, { attributes: true, attributeFilter: ['hidden', 'class'] });
+  /* the welcome elephant nods once when a tile is picked */
+  const nod = () => [$('.fe-masc', steps[0]), document.querySelector('.fe-side-m')].forEach((m) => m && m.animate([{ translate: '0 0' }, { translate: '0 -6px' }, { translate: '0 0' }], { duration: 360, easing: 'cubic-bezier(.34, 1.56, .64, 1)' }));
+  $$('input[name="fe-occ"]').forEach((r) => r.addEventListener('change', nod));
 
   /* tiles rise in once the card scrolls into view */
   form.classList.add('fe-pre');

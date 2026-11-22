@@ -27,6 +27,7 @@ const FE_TIC = ['<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke=
 const FE_M = '/assets/brand/mascot/';
 const FE_W = feHas('public' + FE_M + 'welcome-720.webp');
 const FE_N = feHas('public' + FE_M + 'namaste-720.webp');
+const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 ---
 <Base
   title="Catering & Buffets – Fursat Kitchen & Bar, Hyderabad"
@@ -305,6 +306,7 @@ const FE_N = feHas('public' + FE_M + 'namaste-720.webp');
 
                 <div class="fe-actions fe-actions--col">
                   <span class="fe-ring" id="fe-ring"><FeGo type="submit" label="Get my quote on WhatsApp" id="fe-send" icon="wa" /></span>
+                  {FE_T && <img class="fe-masc-t" src={FE_M + "thumbs-480.webp"} width="720" height="720" alt="" aria-hidden="true" loading="lazy" decoding="async" />}
                   <div class="fe-row2">
                     <button type="button" class="fk-f-btn fk-f-btn--ghost fe-sec2 fe-back" data-go="2" aria-label="Back to date and guests"><span aria-hidden="true">←</span> Back</button>
                     <a class="fk-f-btn fk-f-btn--ghost fe-sec2 fe-sec2--r fe-call" href="tel:+919059670033"><svg viewBox="0 0 24 24" aria-hidden="true" class="fe-call-ic"><path d="M6.6 3.8 8.9 3.3c.5-.1 1 .2 1.2.6l1.2 2.9c.2.5.1 1-.3 1.3L9.5 9.4a11 11 0 0 0 5.1 5.1l1.3-1.5c.3-.4.9-.5 1.3-.3l2.9 1.2c.5.2.7.7.6 1.2l-.5 2.3c-.1.5-.6.9-1.1.9A16.3 16.3 0 0 1 5.7 4.9c0-.5.4-1 .9-1.1Z" fill="currentColor"/></svg>Call Fursat</a>
@@ -321,7 +323,7 @@ const FE_N = feHas('public' + FE_M + 'namaste-720.webp');
               <a class="fe-link" id="fe-done-wa" href="https://wa.me/919059670033" target="_blank" rel="noopener">Not opening? Tap here</a>
               <span class="fe-or" aria-hidden="true">or</span>
               <button type="button" class="fe-link fe-edit" id="fe-again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Edit my request</button>
-              <svg class="fe-swoosh" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fe-sw-g" x1="0" x2="1"><stop offset="0" stop-color="#c21418" stop-opacity="0"/><stop offset=".35" stop-color="#c21418" stop-opacity=".85"/><stop offset="1" stop-color="#92090c"/></linearGradient></defs><path d="M0 90V70C90 72 170 64 250 44S360 8 400 0v90Z" fill="url(#fe-sw-g)"/></svg>
+              <svg class="fe-swoosh" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fe-sw-a" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d81e22"/><stop offset=".6" stop-color="#c3161a"/><stop offset="1" stop-color="#a50d11"/></linearGradient><linearGradient id="fe-sw-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9e0b10"/><stop offset="1" stop-color="#7c070b"/></linearGradient></defs><path d="M0 100 L22 100 C70 86 118 66 166 62 C212 58 244 66 284 56 C328 46 364 22 400 0 L400 100 Z" fill="url(#fe-sw-a)"/><path d="M176 100 C246 96 308 80 344 54 C366 38 384 28 400 24 L400 100 Z" fill="url(#fe-sw-b)"/><path d="M22 100 C70 86 118 66 166 62 C212 58 244 66 284 56 C328 46 364 22 400 0" fill="none" stroke="rgb(255 255 255 / .22)" stroke-width="1.2"/></svg>
             </div>
 
             <template id="fe-tk-tpl">
