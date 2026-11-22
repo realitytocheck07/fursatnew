@@ -18,8 +18,15 @@ import partyData from '../data/party.json';
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN');
 const pkgOpts = (partyData as any).packages.filter((p: any) => p.group === 'banquet').sort((a: any, b: any) => a.price - b.price).map((p: any) => ({ id: p.id, text: `${inr(p.price)} ${p.veg ? 'Veg' : 'Non-veg'} package` }));
 const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Corporate Gala / Seminar', 'Anniversary Celebration', 'Kitty Party / Family Reunion'];
+// FAQ rendered below and sent to Base for FAQPage JSON-LD (kit 48). TODO(client): confirm the 30% advance deposit
+const faq = [
+  { q: 'What is the advance payment to lock a banquet date?', a: 'A 30% advance deposit secures your date on the Fursat banquet calendar. The remaining balance is payable on or before the day of the event.' },
+  { q: 'Is outside decor or photography permitted?', a: 'Yes, you are welcome to bring your preferred decorator or photographer. We also have seasoned in-house empanelled vendors with attractive bundled pricing.' },
+  { q: 'Can alcohol be served at private banquet events?', a: 'Yes! We have full bar license support. For private banquet bookings, we can provide liquor packages or coordinate special event permits (Form-24).' },
+];
 ---
 <Base
+  faq={faq}
   title="Banquet Hall – Fursat Kitchen & Bar, Madhapur Events"
   description="Host your wedding, corporate event, or milestone celebration at Fursat's grand banquet hall in Madhapur. Packages from ₹925 per person."
   canonical="https://fursatind.in/banquet/"
@@ -183,19 +190,12 @@ const occasions = ['Birthday Celebration', 'Wedding / Sangeet / Reception', 'Cor
       <div class="bq-container bq-faq-inner">
         <h2 class="fk-ty-h2 bq-sec-title text-center">Banquet FAQs</h2>
         <div class="bq-faq-list">
-          <details class="bq-faq-item">
-            <summary>What is the advance payment to lock a banquet date?</summary>
-            <!-- TODO(client): confirm the 30% advance deposit -->
-            <p>A 30% advance deposit secures your date on the Fursat banquet calendar. The remaining balance is payable on or before the day of the event.</p>
-          </details>
-          <details class="bq-faq-item">
-            <summary>Is outside decor or photography permitted?</summary>
-            <p>Yes, you are welcome to bring your preferred decorator or photographer. We also have seasoned in-house empanelled vendors with attractive bundled pricing.</p>
-          </details>
-          <details class="bq-faq-item">
-            <summary>Can alcohol be served at private banquet events?</summary>
-            <p>Yes! We have full bar license support. For private banquet bookings, we can provide liquor packages or coordinate special event permits (Form-24).</p>
-          </details>
+          {faq.map((f) => (
+            <details class="bq-faq-item">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
         </div>
       </div>
     </section>

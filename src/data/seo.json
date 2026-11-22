@@ -1,0 +1,102 @@
+{
+  "ogVersion": "v1",
+  "_note": "Per-page SEO. Base.astro looks the page up by pathname and uses these over any title/description a page passes. Tokens: {hours} {food} {drinks} come from site.json / food.json / drinks.json. Real facts only: no ratings, awards or claims. og = real photo in public/ (never people, never AI images).",
+  "pages": {
+    "/": {
+      "label": "Café, Bar & Banquet",
+      "title": "Fursat Kitchen & Bar – Café, Bar & Banquet, Madhapur",
+      "description": "A café, kitchen, bar and banquet space at Capital Park, Madhapur, Hyderabad. Open daily from {opens}. Reserve a table or order on WhatsApp.",
+      "photo": "/assets/interior/fursat_space_01.webp",
+      "alt": "The Fursat entrance corridor with the elephant mural and plants",
+      "focus": "50% 40%"
+    },
+    "/menu/": {
+      "label": "The Menu",
+      "title": "Menu – Fursat Kitchen & Bar, Madhapur, Hyderabad",
+      "description": "{food} kitchen dishes and {drinks} bar drinks at Fursat, Capital Park, Madhapur. Cocktails, mocktails, shakes and coffee. Send your picks on WhatsApp.",
+      "photo": "/assets/dishes/new/chicken-tikka-angara.webp",
+      "alt": "Chicken tikka angara from the Fursat kitchen",
+      "focus": "50% 50%"
+    },
+    "/reserve/": {
+      "label": "Reserve a Table",
+      "title": "Reserve a Table – Fursat Kitchen & Bar, Madhapur",
+      "description": "Request a table at Fursat, Capital Park, Madhapur. Pick a date, time and group size; the team confirms by reply on WhatsApp.",
+      "photo": "/assets/interior/tour-booth.webp",
+      "alt": "A red booth and patterned floor inside Fursat",
+      "focus": "50% 55%"
+    },
+    "/party/": {
+      "label": "Parties & Events",
+      "title": "Parties & Events – Fursat Kitchen & Bar, Madhapur",
+      "description": "Birthdays, corporate gatherings, kitty parties and bar bashes at Fursat, Madhapur. Bar party, elite buffet and banquet packages.",
+      "photo": "/assets/venue/banquet/banquet-stage-01.webp",
+      "alt": "The Fursat banquet hall set up with chairs facing the stage",
+      "focus": "50% 55%"
+    },
+    "/restaurant-bar/": {
+      "label": "Restaurant & Bar",
+      "title": "Restaurant & Bar – Fursat Kitchen & Bar, Madhapur",
+      "description": "The Fursat restaurant and bar at Capital Park, Madhapur: kitchen dishes, cocktails, mocktails and bar drinks. Open {hours}.",
+      "photo": "/assets/interior/bar-back.webp",
+      "alt": "The lit back bar at Fursat with the FURSAT medallions",
+      "focus": "50% 45%"
+    },
+    "/cafe/": {
+      "label": "Café Lounge",
+      "title": "Café Lounge – Fursat Kitchen & Bar, Madhapur",
+      "description": "The Fursat café lounge at Capital Park, Madhapur: coffees, teas, shakes, desserts and all-day breakfast. Open {hours}.",
+      "photo": "/assets/dishes/new/cappuccino.webp",
+      "alt": "A cappuccino with latte art and coffee beans",
+      "focus": "50% 45%"
+    },
+    "/banquet/": {
+      "label": "Banquet Hall",
+      "title": "Banquet Hall – Fursat Kitchen & Bar, Madhapur",
+      "description": "The Fursat banquet hall at Capital Park, Madhapur, Hyderabad, for private and corporate events. Send an enquiry on WhatsApp.",
+      "photo": "/assets/venue/banquet/banquet-hall-01.webp",
+      "alt": "The Fursat banquet hall laid out with rows of chairs",
+      "focus": "50% 55%"
+    },
+    "/catering/": {
+      "label": "Catering & Buffets",
+      "title": "Catering & Buffets – Fursat Kitchen & Bar, Hyderabad",
+      "description": "Catering and buffets from Fursat Kitchen & Bar, Capital Park, Madhapur. Tell the team your event and guest count on WhatsApp.",
+      "photo": "/assets/venue/banquet/banquet-tables-03.webp",
+      "alt": "Long banquet tables set up inside the Fursat hall",
+      "focus": "50% 55%"
+    },
+    "/order/": {
+      "label": "Order Online",
+      "title": "Order Online – Swiggy & Zomato | Fursat Madhapur",
+      "description": "Order Fursat Kitchen & Bar on Swiggy or Zomato, or browse the full menu first. Capital Park, Madhapur, Hyderabad.",
+      "photo": "/assets/dishes/new/guntur-karam-wings.webp",
+      "alt": "Guntur karam wings from the Fursat kitchen",
+      "focus": "50% 50%"
+    },
+    "/ask/": {
+      "label": "Ask Fursat",
+      "title": "Ask Fursat – Find Dishes by Mood | Fursat Madhapur",
+      "description": "Tell Fursat what you feel like eating or drinking, or plan a party or catering in three short steps. Capital Park, Madhapur.",
+      "photo": "/assets/interior/tour-lounge.webp",
+      "alt": "A sofa lounge corner inside Fursat",
+      "focus": "50% 55%"
+    },
+    "/story/": {
+      "label": "Our Story",
+      "title": "Our Story – Fursat Kitchen & Bar, Madhapur, Hyderabad",
+      "description": "Fursat is a café, a kitchen, a bar and banquet spaces under one roof at Capital Park, Madhapur. Read how it came together.",
+      "photo": "/assets/interior/tour-entrance.webp",
+      "alt": "The entrance corridor at Fursat with the elephant mural",
+      "focus": "50% 45%"
+    },
+    "/terms/": {
+      "label": "Terms & Privacy",
+      "title": "Terms & Conditions – Fursat Kitchen & Bar, Hyderabad",
+      "description": "Terms and conditions, privacy policy and booking policies for Fursat Kitchen & Bar, Capital Park, Madhapur, Hyderabad.",
+      "photo": "/assets/interior/fursat_space_19.webp",
+      "alt": "The FURSAT logo wall inside the restaurant",
+      "focus": "50% 40%"
+    }
+  }
+}

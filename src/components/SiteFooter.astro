@@ -211,7 +211,7 @@ const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Par
     var setCurtain = function () {
       var on = window.matchMedia('(min-width: 900px)').matches && !rm && !document.querySelector('.pa-stack, [data-pa-stack]') && !/^\/party/.test(location.pathname) && !!f.previousElementSibling;
       f.classList.toggle('sf-curtain', on);
-      lifted.forEach(function (e) { e.classList.remove('sf-curtain-lift'); if (e.dataset.sfBg) { e.style.backgroundColor = ''; delete e.dataset.sfBg; } });
+      lifted.forEach(function (e) { e.classList.remove('sf-curtain-lift'); if (e.dataset.sfBg) { e.style.backgroundColor = ''; delete e.dataset.sfBg; } if (e.dataset.sfBleed) { e.style.boxShadow = ''; e.style.clipPath = ''; delete e.dataset.sfBleed; } });
       lifted = [];
       if (!on) return;
       var bg = getComputedStyle(document.body).backgroundColor;
@@ -222,7 +222,14 @@ const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Par
         if (e.matches('header, .sh-header, [data-no-curtain]') || cs.position === 'fixed' || cs.position === 'sticky' || z > 1) return;
         e.classList.add('sf-curtain-lift'); lifted.push(e);
         var c = getComputedStyle(e).backgroundColor;
-        if (/rgba\(.*,\s*0\)|transparent/.test(c)) { e.style.backgroundColor = bg; e.dataset.sfBg = '1'; }
+        if (/rgba\(.*,\s*0\)|transparent/.test(c)) { e.style.backgroundColor = bg; e.dataset.sfBg = '1'; c = bg; }
+        // a lifted block narrower than the page (or with margins) left gaps where the dark footer showed through: paint its colour full width and over its own margins
+        var lc = getComputedStyle(e);
+        if (lc.boxShadow === 'none' && lc.clipPath === 'none') {
+          e.style.boxShadow = '0 0 0 100vmax ' + c;
+          e.style.clipPath = 'inset(-' + (parseFloat(lc.marginTop) || 0) + 'px -100vmax -' + (parseFloat(lc.marginBottom) || 0) + 'px -100vmax)';
+          e.dataset.sfBleed = '1';
+        }
       });
     };
     setCurtain(); window.addEventListener('resize', setCurtain);

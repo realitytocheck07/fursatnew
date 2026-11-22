@@ -5,6 +5,9 @@ import WaAgent from '../components/WaAgent.astro';
 import fs from 'node:fs';
 import ld from '../data/ld.json';
 import site from '../data/site.json';
+import seo from '../data/seo.json';
+import foodData from '../data/food.json';
+import drinksData from '../data/drinks.json'; // counts for {food} / {drinks} in seo.json
 import '../styles/01.css';
 import '../styles/02.css';
 import '../styles/03.css';
@@ -21,7 +24,7 @@ import '../styles/fk-wow.css';
 const DOMAIN = site.domain;
 const PUBLIC = `${process.cwd()}/public`;
 
-// Image dimensions from the file header (webp / jpeg), so og:image:width/height are true.
+// Image dimensions from the file header (webp / jpeg / png), so og:image:width/height are true.
 function imgDims(file: string): [number, number] | null {
   try {
     const b = fs.readFileSync(file);
@@ -31,6 +34,7 @@ function imgDims(file: string): [number, number] | null {
       if (t === 'VP8L') return [1 + (((b[22] & 0x3f) << 8) | b[21]), 1 + (((b[24] & 0xf) << 10) | (b[23] << 2) | ((b[22] & 0xc0) >> 6))];
       if (t === 'VP8X') return [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
     }
+    if (b.toString('ascii', 1, 4) === 'PNG') return [b.readUInt32BE(16), b.readUInt32BE(20)];
     if (b[0] === 0xff && b[1] === 0xd8) {
       let i = 2;
       while (i < b.length) {
@@ -74,6 +78,8 @@ const graph = (ld as any[]).map((node: any) => {
     telephone: phones,
     address: { ...node.address, addressRegion: site.address.state, postalCode: site.address.pin },
     openingHoursSpecification: site.hours.schedule.map((h: any) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: h.dayOfWeek, opens: h.opens, closes: h.closes })),
+    geo: { '@type': 'GeoCoordinates', latitude: site.address.geo.lat, longitude: site.address.geo.lng },
+    hasMap: site.address.googleMaps,
     acceptsReservations: true,
     menu: DOMAIN + '/menu/',
   };
@@ -97,22 +103,39 @@ interface Props {
   preloadImage?: PreloadImage;
   preloadImages?: PreloadImage[];
   noindex?: boolean;
+  faq?: { q: string; a: string }[]; // FAQPage JSON-LD, built from the same array the page renders
 }
 
 // Canonical defaults to this page's own URL (with trailing slash), never to the home page.
 const ownUrl = DOMAIN + (Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/');
 
 const {
-  title = 'Fursat Kitchen & Bar – Café, Bar & Banquet in Madhapur',
-  description = 'Fursat Kitchen | Bar at Capital Park, Madhapur, Hyderabad: a café, kitchen, bar and banquet space. Ask Fursat for dishes by mood. Party packages from ₹925 per person, buffets and bar bashes.',
+  title: titleProp = 'Fursat Kitchen & Bar – Café, Bar & Banquet in Madhapur',
+  description: descriptionProp = 'Fursat Kitchen | Bar at Capital Park, Madhapur, Hyderabad: a café, kitchen, bar and banquet space.',
   canonical = ownUrl,
   noindex = false,
-  ogImage = DOMAIN + FALLBACK_OG,
-  ogImageAlt,
+  ogImage: ogImageProp = DOMAIN + FALLBACK_OG,
+  ogImageAlt: ogImageAltProp,
   pageType = 'website',
   preloadImage,
   preloadImages = preloadImage ? [preloadImage] : [],
+  faq,
 } = Astro.props;
+
+// Per-page SEO from src/data/seo.json (looked up by path). It wins over a title, description or og image a page passes.
+// Tokens: {hours} {opens} come from site.json, {food} {drinks} are counted from food.json / drinks.json. A page that is not in seo.json (the 404)
+// keeps what it passes. og images are the 1200x630 PNGs in public/og/ (made by scripts/og-build.mjs).
+const count = (l: any[]) => l.reduce((n, sec) => n + sec.items.length, 0);
+const tokens: Record<string, string> = { hours: site.hours.display, opens: site.hours.schedule[0].open, food: String(count(foodData as any[])), drinks: String(count(drinksData as any[])) };
+const fill = (t: string) => t.replace(/\{(\w+)\}/g, (m, k) => tokens[k] ?? (() => { throw new Error(`[Base] unknown token ${m} in seo.json`); })());
+const seoKey = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : Astro.url.pathname + '/';
+const seoPage: any = (seo as any).pages[seoKey];
+const ogFile = seoPage ? `/og/${seoKey === '/' ? 'home' : seoKey.replace(/\//g, '')}-${(seo as any).ogVersion}.png` : null;
+if (ogFile && !fs.existsSync(PUBLIC + ogFile)) throw new Error(`[Base] og image missing: public${ogFile}. Run: node scripts/og-build.mjs`);
+const title = seoPage ? fill(seoPage.title) : titleProp;
+const description = seoPage ? fill(seoPage.description) : descriptionProp;
+const ogImage = ogFile ? DOMAIN + ogFile : ogImageProp;
+const ogImageAlt = seoPage ? seoPage.alt : ogImageAltProp;
 
 // og:image is always a real file in public/. The alt is the page's own text, except for the shared fallback photo,
 // whose alt always describes what the photo shows (pages that reuse it used to pass an elephant caption that did not match).
@@ -134,6 +157,11 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
       ],
     })
   : '';
+
+// FAQPage JSON-LD from the faq array a page passes (the same array it renders). ExperienceLayout pages emit their own, so they do not pass it.
+const faqLd = faq && faq.length
+  ? JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) })
+  : '';
 ---
 <!doctype html>
 <html lang="en">
@@ -151,7 +179,7 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
 <meta property="og:type" content={pageType}><meta property="og:site_name" content="Fursat Kitchen | Bar">
 <meta property="og:title" content={title}><meta property="og:description" content={description}>
 <meta property="og:url" content={canonical}><meta property="og:locale" content="en_IN">
-<meta property="og:image" content={ogUrl}>{ogDims && <meta property="og:image:width" content={String(ogDims[0])}>}{ogDims && <meta property="og:image:height" content={String(ogDims[1])}>}
+<meta property="og:image" content={ogUrl}>{ogPath.endsWith('.png') && <meta property="og:image:type" content="image/png">}{ogDims && <meta property="og:image:width" content={String(ogDims[0])}>}{ogDims && <meta property="og:image:height" content={String(ogDims[1])}>}
 <meta property="og:image:alt" content={ogAlt}>
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content={title}><meta name="twitter:description" content={description}>
 <meta name="twitter:image" content={ogUrl}><meta name="twitter:image:alt" content={ogAlt}>
@@ -175,6 +203,7 @@ const crumbLd = (!noindex && crumbPath && crumbPath !== '/404')
 <link rel="icon" href="/assets/9a3bba811b.webp">
 <script type="application/ld+json" is:inline set:html={ldJson}></script>
 {crumbLd && <script type="application/ld+json" is:inline set:html={crumbLd}></script>}
+{faqLd && <script type="application/ld+json" is:inline set:html={faqLd}></script>}
 <script is:inline define:vars={{ fkForms: site.forms }}>window.__FK_FORMS = fkForms;</script>
 <script is:inline src="/js/w3f.js" defer></script>
 <script is:inline src="/js/fk-ui.js" defer></script>

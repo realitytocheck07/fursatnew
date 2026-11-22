@@ -7,7 +7,10 @@
 .fx-book .fx-book-x{width:44px;height:44px;right:10px;top:8px}
 .fx-book form input:focus-visible,.fx-book form select:focus-visible,.fx-book form button:focus-visible{outline:3px solid #12803C;outline-offset:2px}
 .fx-book [aria-invalid="true"]{border-color:#C4161C;box-shadow:0 0 0 4px rgba(196,22,28,.12)}
-.fx-book .bk-f{display:grid;gap:6px;align-content:start}
+.fx-book .bk-f{display:grid;gap:6px;align-content:start;min-width:0}
+.fx-book form{grid-template-columns:minmax(0,1fr)} /* v5.96.2: never wider than the dialog (the date input pushed it past the right edge on phones) */
+.fx-book .bk-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fx-book form input,.fx-book form select{min-width:0;width:100%;box-sizing:border-box}
 .fx-book .bk-opt{font-weight:400;color:#6a5f40}
 .fx-book .bk-e{margin:0;font:700 13px/1.4 var(--sans);color:#C4161C}
 .fx-book .bk-go{width:100%;margin-top:4px}

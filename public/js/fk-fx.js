@@ -119,14 +119,30 @@
     var step = level === 3 ? 20 : level === 2 ? 28 : 40;
     while (acc > step) { acc -= step; bubble(e.clientX + rnd(-6, 6), e.clientY + rnd(0, 10)); if (level > 1 && Math.random() < .55) spark(e.clientX, e.clientY, { sp: rnd(14, 44) }); }
   }, { passive: true });
+  function pop(x, y, small) {
+    var n = small ? Math.ceil(T.cb / 3) : T.cb, m = small ? Math.ceil(T.cs / 2) : T.cs, i;
+    for (i = 0; i < n; i++) { var a = (i / n) * 6.2832 + rnd(-.2, .2), sp = rnd(50, small ? 110 : 150); bubble(x, y, { free: 1, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 24, r: rnd(3, small ? 7 : 10), life: rnd(.45, small ? .8 : 1.1) }); }
+    for (i = 0; i < m; i++) spark(x, y, { free: 1, sp: rnd(60, 180) });
+    if (!small) ring(x, y);
+  }
+  // mouse: pop on click
   d.addEventListener('pointerdown', function (e) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    if (e.pointerType !== 'mouse' && level < 2) return;
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
     if (e.target.closest && e.target.closest(SKIP)) return;
-    var x = e.clientX, y = e.clientY, i;
-    for (i = 0; i < T.cb; i++) { var a = (i / T.cb) * 6.2832 + rnd(-.2, .2), sp = rnd(50, 150); bubble(x, y, { free: 1, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 24, r: rnd(3, 10), life: rnd(.55, 1.1) }); }
-    for (i = 0; i < T.cs; i++) spark(x, y, { free: 1, sp: rnd(60, 180) });
-    ring(x, y);
+    pop(e.clientX, e.clientY, false);
+  }, { passive: true });
+  // v5.96.2 touch: every scroll starts with a touch, so popping on pointerdown covered the page in rings while scrolling.
+  // Now a small pop only on a real tap (finger lifted within 10px and 350ms) on a button or link.
+  var td = null;
+  d.addEventListener('pointerdown', function (e) { td = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY, t: e.timeStamp }; }, { passive: true });
+  d.addEventListener('pointercancel', function () { td = null; }, { passive: true });
+  d.addEventListener('pointerup', function (e) {
+    if (!td || e.pointerType === 'mouse' || level < 2) { td = null; return; }
+    var moved = Math.abs(e.clientX - td.x) + Math.abs(e.clientY - td.y), quick = e.timeStamp - td.t < 350; td = null;
+    if (moved > 10 || !quick) return;
+    var t = e.target.closest && e.target.closest('a,button,[role="button"],summary,label');
+    if (!t || t.closest(SKIP)) return;
+    pop(e.clientX, e.clientY, true);
   }, { passive: true });
 
   /* ---------------- hover burst on drinks / dishes ---------------- */

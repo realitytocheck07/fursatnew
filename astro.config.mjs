@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: 'https://fursatind.in',
-  integrations: [sitemap(), react()],
+  integrations: [sitemap({ filter: (page) => !/\/404\/?$/.test(page) }), react()],
   compressHTML: true,
   build: { inlineStylesheets: 'never' },
   devToolbar: { enabled: false },

@@ -94,7 +94,13 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
 .ch[data-labelled] .ch-art { container-type: size; }
 .ch-labs { position: absolute; right: 0; top: 50%; translate: 0 -50%; width: max(100cqw, 100cqh * 1672 / 941); height: max(100cqh, 100cqw * 941 / 1672); pointer-events: none; z-index: 2; }
 .ch-lab { position: absolute; translate: -50% 0; display: inline-flex; align-items: center; min-height: 28px; padding: 0 14px; border-radius: 999px; background: rgba(252,247,240,.94); border: 1px solid #c99a43; box-shadow: 0 4px 10px -4px rgba(42,27,8,.3); font: 600 .75rem/1 var(--fk-sans, Rupee,Poppins, sans-serif); letter-spacing: .04em; color: #4a3410; white-space: nowrap; opacity: 0; transition: opacity 900ms cubic-bezier(.23,1,.32,1); }
-@media (max-width: 820px) { .ch-lab--0 { left: auto !important; right: 8px; top: 87% !important; translate: 0 0; } }
+@media (max-width: 820px) {
+  /* v5.96.2: the labels stay inside the photo, in one row at its bottom-right; only the active set shows */
+  .ch[data-labelled] .ch-art { overflow: hidden; }
+  .ch-labs { inset: auto 10px 10px auto; width: auto; height: auto; translate: none; top: auto; display: flex; gap: 6px; }
+  .ch-lab { position: static; translate: none; display: none; }
+  .ch[data-set="0"] .ch-lab[data-set="0"], .ch[data-set="1"] .ch-lab[data-set="1"], .ch[data-set="2"] .ch-lab[data-set="2"] { display: inline-flex; }
+}
 .ch[data-set="0"] .ch-lab[data-set="0"], .ch[data-set="1"] .ch-lab[data-set="1"], .ch[data-set="2"] .ch-lab[data-set="2"] { opacity: 1; }
 .ch-orn { width: 180px; height: 18px; margin: 18px 0 14px; fill: none; stroke: #c99a43; stroke-width: 1.4; }
 .ch-lead { margin: 0 0 24px; max-width: 46ch; font: 400 clamp(1rem, 1.2vw, 1.12rem)/1.6 var(--fk-sans, Rupee,Poppins, sans-serif); color: #4d4434; }
