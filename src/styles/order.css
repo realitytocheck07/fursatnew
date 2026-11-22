@@ -287,6 +287,20 @@
   .od-strip>svg{display:none}.od-strip p{flex-basis:100%}
 }
 @media (max-width:380px){.od-tiles{grid-template-columns:minmax(0,1fr)}}
+/* sp-: phone stepper fits the screen: three equal columns, number over label, labels may wrap; no sideways scroll */
+@media (max-width:620px){
+  .od-rail{display:block;overflow:visible;padding:8px;border-radius:26px}
+  .od-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%}
+  .od-steps li{min-width:0}
+  .od-steps a{flex-direction:column;justify-content:flex-start;gap:4px;min-height:64px;height:100%;padding:8px 4px;border-radius:20px;white-space:normal;text-align:center;font-size:.78rem;line-height:1.15;text-wrap:balance}
+  .od-steps b{width:28px;height:28px;font-size:.8rem}
+  .od-card{flex-shrink:0}
+}
+@media (max-width:360px){.od-card .od-btn{gap:7px;padding-left:12px;padding-right:12px;font-size:.92rem}}
+/* sp-: option cards share one row height on every layout */
+.od-row{grid-auto-rows:1fr}
+@media (min-width:961px){.od-row>.od-card{height:100%}}
+@media (max-width:960px){.od-row{align-items:stretch}.od-row>.od-card{height:auto;min-width:0}}
 @media (prefers-reduced-motion:reduce){
   .od-btn,.od-btn::before,.od-btn svg,.od-card,.od-tile,.od-route,.od-route-go,.od-tile svg,.od-chip,.od-cat,.od-steps a,.od-dots button::after{transition:none!important}
   .od-btn:hover::before{transform:translateX(-101%)}

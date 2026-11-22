@@ -31,10 +31,12 @@ const legalRows = [
 // Red elephant silhouette traced from the real logo (/assets/c86f49db5a.webp), viewBox 0 0 140 176
 const elephant = 'M109.5 10.2 L108.2 10.8 L100.2 6.0 L94.5 5.0 L93.2 4.0 L81.5 4.0 L70.5 8.0 L64.0 13.2 L61.0 18.5 L60.0 24.2 L62.8 30.5 L66.5 33.8 L68.2 33.8 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L81.2 24.0 L79.5 24.0 L76.2 27.0 L73.5 27.0 L71.8 25.2 L71.8 22.5 L75.5 18.8 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L95.0 37.5 L88.2 44.0 L73.5 52.0 L68.2 56.0 L65.0 56.5 L64.5 58.0 L55.0 67.5 L54.0 71.2 L52.0 72.5 L51.0 74.5 L51.0 76.2 L48.0 83.5 L48.0 98.2 L50.8 104.2 L50.2 105.5 L52.0 106.2 L52.8 107.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L72.2 118.8 L73.5 119.8 L80.2 119.8 L81.5 118.8 L84.5 119.5 L85.5 117.8 L88.2 116.8 L91.8 113.2 L91.8 111.5 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L95.0 115.5 L95.0 117.2 L89.2 123.0 L85.5 124.0 L82.2 126.0 L66.5 126.0 L65.2 125.0 L62.5 125.0 L56.5 122.0 L55.5 120.2 L54.2 120.8 L50.2 118.0 L43.8 110.2 L40.2 102.0 L38.5 102.0 L29.5 107.0 L24.2 112.0 L20.2 114.2 L20.5 116.0 L14.0 123.5 L5.2 139.2 L7.2 140.8 L13.2 138.0 L14.0 138.5 L12.2 141.2 L13.0 142.5 L13.0 150.2 L12.0 151.5 L12.0 160.2 L13.0 161.5 L13.0 166.2 L12.2 167.5 L14.0 168.5 L14.5 170.8 L35.2 170.8 L35.8 163.5 L36.8 162.2 L36.8 160.5 L39.8 157.2 L41.5 157.5 L42.5 155.8 L48.2 155.8 L53.0 160.5 L52.2 162.5 L54.0 163.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L76.8 158.2 L78.2 157.0 L79.5 157.5 L80.5 155.8 L86.2 155.8 L90.0 158.2 L92.0 161.5 L92.5 170.8 L117.8 170.2 L117.8 168.5 L116.8 167.2 L116.8 159.5 L115.8 158.2 L115.8 142.5 L116.8 141.2 L116.8 133.5 L117.8 132.2 L117.8 127.5 L119.8 125.2 L119.2 122.8 L125.8 114.2 L128.8 108.2 L128.8 106.5 L130.8 103.2 L130.8 101.5 L133.8 94.2 L133.8 90.5 L135.5 89.5 L134.8 88.2 L134.8 84.5 L136.5 82.5 L135.8 81.2 L135.8 64.5 L136.5 63.2 L134.8 61.2 L134.8 57.5 L135.5 56.2 L133.8 55.2 L132.8 48.5 L128.8 39.2 L129.5 37.2 L127.8 36.2 L121.8 24.5Z';
 
-// "Inside Fursat" plays in the big hero window (index 1). The 16:9 file is a blurred pillarbox of this same vertical shot, so both views use the vertical file; pos keeps the Hyderabad mural sign and the glasses in frame.
+// "Inside Fursat" plays in the big hero window (index 1). The 16:9 file is a blurred pillarbox of this same vertical shot, so both views use the vertical file.
+// The words "Inside Fursat" are baked into the video's title card (video-src/inside-fursat/index.html, plaque ~90% of the frame width). The oval window is a diagonal blob, so a full-width video cuts the plaque at its edge.
+// Fix (sp- block in the style below): the video sits in the part of the oval that is wide at every row the plaque covers, with soft edges. pos 50% 50% puts the plaque in the middle of the window.
 const heroVid = {
-  d: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 28%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
-  m: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 30%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+  d: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+  m: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
 };
 const P = {
   entrance: { src: '/assets/interior/tour-entrance.webp', alt: 'The Fursat entrance corridor: an elephant mural on the wall that reads Fursat, Aur Kuch Nahi, with potted plants along the glass', w: 1050, h: 1400, pos: '50% 62%', eager: true },
@@ -53,6 +55,28 @@ const wall = [
   { src: '/assets/dishes/new/chicken-tikka-angara-720.webp', w: 720, h: 1080, alt: 'Chicken Tikka Angara' },
   { src: '/assets/interior/fursat_space_14-720.webp', w: 720, h: 540, alt: 'Cane chairs and indoor plants by the window at Fursat' },
 ];
+// sp-: split the wall into equal-height columns (3 desktop, 2 phone) so no column ends short; tiles stretch a little (object-fit: cover) to close the last gap.
+const split = (n: number) => {
+  let best: number[] = []; let bestSpread = Infinity;
+  const total = wall.length; const assign: number[] = new Array(total).fill(0);
+  const hs = wall.map((ph) => ph.h / ph.w);
+  const rec = (i: number) => {
+    if (i === total) {
+      const sums = new Array(n).fill(0); const cnt = new Array(n).fill(0);
+      assign.forEach((c, k) => { sums[c] += hs[k]; cnt[c]++; });
+      const gaps = cnt.map((c) => c - 1); // one gap between tiles; compare in tile-height units plus ~0.05 per gap
+      const eff = sums.map((v, c) => v + gaps[c] * 0.04);
+      const spread = Math.max(...eff) - Math.min(...eff);
+      if (spread < bestSpread - 1e-9) { bestSpread = spread; best = [...assign]; }
+      return;
+    }
+    for (let c = 0; c < n; c++) { assign[i] = c; rec(i + 1); }
+  };
+  rec(0);
+  return Array.from({ length: n }, (_, c) => wall.filter((_, k) => best[k] === c));
+};
+const wall3 = split(3);
+const wall2 = split(2);
 const values = [
   { t: 'Exceptional Food', l: 'Authentic flavours, crafted with care.', i: '<path d="M3 20a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1Z"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4"/><path d="M10 4h4"/>' },
   { t: 'Warm Hospitality', l: 'A welcoming space for everyone.', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
@@ -92,10 +116,6 @@ import InstagramFeed from '../components/InstagramFeed.astro';
         <p class="hy-lead">A café, a kitchen, a bar and banquet spaces under one roof at Capital Park, Madhapur. Come for a coffee, stay for dinner, bring everyone for the celebration.</p>
         <svg class="hy-orn--draw st-rule" viewBox="0 0 260 24" aria-hidden="true" data-fx-draw><path d="M2 12 H120" /><path d="M128 12 C132 6 138 6 142 12 C138 18 132 18 128 12 Z" /></svg>
         <p class="st-tag">Fursat, aur kuch nahi!</p>
-        <div class="st-cta" data-fx-reveal>
-          <a class="fk-btn fk-btn--primary" href="/reserve/">Reserve a table</a>
-          <a class="fk-btn fk-btn--secondary" href="/menu/">See the menu</a>
-        </div>
       </div>
 
       <h2 class="fk-ty-h2 st-vh">Our Values</h2>
@@ -118,6 +138,10 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     </section>
 
     <section class="st-brand" aria-label="The Fursat wall">
+      <div class="st-cta" data-fx-reveal>
+        <a class="fk-btn fk-btn--primary" href="/reserve/">Reserve a table</a>
+        <a class="fk-btn fk-btn--secondary" href="/menu/">See the menu</a>
+      </div>
       <figure class="st-wall" data-fx-reveal>
         <img src="/assets/celebrations/brand-wall-group-640.webp" srcset="/assets/celebrations/brand-wall-group-360.webp 360w, /assets/celebrations/brand-wall-group-640.webp 640w" sizes="(max-width: 767px) 62vw, 300px" alt="A group of friends in blue t-shirts standing in front of the Fursat wall with the brand slogan" width="640" height="853" loading="lazy" decoding="async" />
         <figcaption>Fursat, <em>aur kuch nahi</em></figcaption>
@@ -126,11 +150,24 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
     <section class="sw" aria-labelledby="sw-h">
       <h2 class="fk-ty-h2 sw-h" id="sw-h" data-fx-reveal>A look <em>around</em></h2>
-      <ul class="sw-grid">
-        {wall.map((ph) => (
-          <li class="sw-tile"><img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" /></li>
+      <div class="sw-grid sw-grid--3">
+        {wall3.map((col) => (
+          <ul class="sw-col">
+            {col.map((ph) => (
+              <li class="sw-tile" style={`aspect-ratio:${ph.w} / ${ph.h};flex-grow:${(ph.h / ph.w).toFixed(3)}`}><img src={ph.src} alt={ph.alt} width={ph.w} height={ph.h} loading="lazy" decoding="async" /></li>
+            ))}
+          </ul>
         ))}
-      </ul>
+      </div>
+      <div class="sw-grid sw-grid--2" aria-hidden="true">
+        {wall2.map((col) => (
+          <ul class="sw-col">
+            {col.map((ph) => (
+              <li class="sw-tile" style={`aspect-ratio:${ph.w} / ${ph.h};flex-grow:${(ph.h / ph.w).toFixed(3)}`}><img src={ph.src} alt="" width={ph.w} height={ph.h} loading="lazy" decoding="async" /></li>
+            ))}
+          </ul>
+        ))}
+      </div>
     </section>
 
     <section class="st-go" aria-labelledby="st-go-h">
@@ -181,7 +218,9 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   /* The stage is art that scales with the page width. fk-ty-* gives the scale step; the min() keeps the heading inside the art when the stage is small (tablet, small phones). */
   .st .st-h2 { font-size: min(var(--fk-fs-6), calc(40 * var(--u))); margin-bottom: calc(6 * var(--u)); }
   .st-h2 span { display: block; }
-  .st-craft .hy-lead { font-size: clamp(12.5px, calc(15 * var(--u)), 1.2rem); line-height: 1.58; }
+  /* sp-: 11u gives 60-70 characters a line at 1366-1920 (measured); the clamp keeps tablets readable */
+  .st-craft .hy-lead { font-size: clamp(13px, calc(11 * var(--u)), 1.35rem); line-height: 1.6; }
+  @media (min-width: 1024px) { .st-craft .hy-lead { font-size: clamp(16px, calc(11.5 * var(--u)), 1.35rem); } } /* body text never under 16px on laptop */
   .st-rule { width: calc(150 * var(--u)); min-width: 100px; margin-top: calc(4 * var(--u)); }
   .st-tag { font: italic 500 calc(25 * var(--u)) / 1.2 var(--fk-serif); color: #1b3a26; }
 
@@ -201,7 +240,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-band-orn { width: calc(240 * var(--u)); }
 
   /* Brand photo: the slogan on the wall (0037), sits between the brand line and the photo wall */
-  .st-brand { background: #10261a; padding: clamp(8px, 2vw, 24px) 6vw 0; }
+  .st-brand { background: #10261a; padding: clamp(24px, 4vw, 48px) 6vw 0; }
   .st-wall { margin: 0 auto; width: clamp(220px, 62vw, 300px); text-align: center; }
   .st-wall img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; box-shadow: 0 0 0 1.5px #c99a43, 0 16px 34px rgba(0, 0, 0, .4); background: #0b1c13; }
   .st-wall figcaption { margin-top: 14px; font: italic 500 clamp(20px, 2.4vw, 28px) / 1.25 var(--fk-serif); color: #fbf3e6; }
@@ -210,12 +249,23 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .sw { background: #10261a; padding: clamp(40px, 6vw, 88px) 6vw 0; }
   .sw-h { text-align: center; color: #fbf3e6; font-style: italic; margin-bottom: clamp(20px, 3vw, 36px); }
   .sw-h em { color: #e8c27a; }
-  .sw-grid { max-width: 1100px; margin: 0 auto; columns: 3; column-gap: clamp(10px, 1.6vw, 18px); }
-  .sw-tile { break-inside: avoid; margin: 0 0 clamp(10px, 1.6vw, 18px); border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(232, 194, 122, .45), 0 10px 22px rgba(0, 0, 0, .35); background: #1b3a26; }
-  .sw-tile img { display: block; width: 100%; height: auto; }
-  @media (max-width: 767px) { .sw { padding: 36px 16px 0; } .sw-grid { columns: 2; } .sw-tile { border-radius: 14px; } }
+  /* sp-: equal-height columns (split in the frontmatter); tiles grow in proportion to their ratio and crop a little, so every column ends on the same line */
+  .sw-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 18px); align-items: stretch; }
+  .sw-grid--2 { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sw-col { display: flex; flex-direction: column; gap: clamp(10px, 1.6vw, 18px); }
+  .sw-tile { position: relative; flex: 1 1 auto; min-height: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 1px rgba(232, 194, 122, .45), 0 10px 22px rgba(0, 0, 0, .35); background: #1b3a26; }
+  .sw-tile img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 767px) { .sw { padding: 36px 16px 0; } .sw-grid--3 { display: none; } .sw-grid--2 { display: grid; } .sw-tile { border-radius: 14px; } }
 
-  .st-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  /* sp-: the buttons live in their own strip under the stage, so no breakpoint can push them onto the art */
+  .st-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 auto clamp(24px, 3.5vw, 40px); }
+  .st-cta .fk-btn { min-height: 48px; }
+  .st-cta .fk-btn--primary { background: #c0291f; color: #fff8ee; box-shadow: 0 0 0 1.5px #ffb3a8 inset; } /* the green primary vanishes on the deep-green strip */
+  /* sp-temp: remove after title re-render (the two video rules below; also reset heroVid pos if wanted) */
+  /* sp-temp: remove after title re-render */
+  .st .hy-win.hy-d video.hy-vid { inset: 0 auto 0 16.5%; width: 63%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  /* sp-temp: remove after title re-render */
+  .st .hy-win.hy-m video.hy-vid { inset: 0 auto 0 20%; width: 76%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
   .st-go { background: var(--fk-plaster, #f2eee4); padding: clamp(40px, 6vw, 88px) 6vw; text-align: center; }
   .st-go-h { color: #17200f; margin: 0 0 clamp(20px, 3vw, 36px); }
   .st-go-h em { color: var(--fk-red, #c0291f); }
@@ -236,6 +286,9 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-legal dt { font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--st-label); }
   .st-legal dd { font-size: .9rem; line-height: 1.5; }
 
+  /* sp-: the tagline repeats under the wall photo, and below 1280px (and under 360px) its line meets the "Our Values" heading, so it only shows where it fits */
+  @media (min-width: 768px) and (max-width: 1279px) { .st-tag { display: none; } }
+  @media (max-width: 359px) { .st-tag, .st-rule { display: none; } .st-craft .hy-lead { font-size: 12.5px; line-height: 1.5; } }
   @media (min-width: 768px) and (max-width: 959px) { .st-val p { display: none; } } /* 12px captions do not fit the plates at tablet width (phone hides them too) */
 
   @media (max-width: 767px) {
@@ -249,7 +302,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     .st .st-h2 { font-size: min(var(--fk-fs-5), calc(70 * var(--u))); }
     .st-craft .hy-lead { font-size: 13.5px; line-height: 1.55; }
     .st-tag { font-size: calc(56 * var(--u)); }
-    .st-vh { top: calc(1880 * var(--u)); }
+    .st-vh { top: calc(1846 * var(--u)); }
     .st .st-vh { font-size: min(var(--fk-fs-5), calc(64 * var(--u))); }
     .st-val { left: calc(var(--mx) * var(--u)); top: calc(var(--my) * var(--u)); width: calc(290 * var(--u)); height: calc(290 * var(--u)); gap: 2px; padding: 0 calc(12 * var(--u)); }
     .st-val svg { min-width: 18px; width: calc(48 * var(--u)); }

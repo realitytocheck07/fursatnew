@@ -323,6 +323,29 @@ picture.ah-sl img{display:block;object-position:34% 55%}
  .ah-bg{display:none}
 }
 @media(min-width:1500px){.ah{background-image:url(/assets/ask/ask-bg-1920.webp)}}
+
+/* sp-: phone fixes (320-420). Tabs share the row and wrap inside their pill; the search box drops its decorative leaf so the placeholder shows in full; chips fill each row evenly; the plan-an-event cards share one row height. */
+.eh-tiles{grid-auto-rows:1fr}
+@media(max-width:560px){.eh-tile{min-height:104px;justify-content:center}}
+@media(max-width:520px){
+  .ah-tabs{display:flex;width:100%;border-radius:28px}
+  .ah-tabs button{flex:0 0 auto;padding:0 14px;min-height:48px}
+  .ah-tabs button[data-tab=sree]{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15;padding:0 10px;text-wrap:balance}
+  .ah-chips{gap:8px}
+  .ah-chips li{flex:1 1 auto}
+  .ah-chips button{width:100%;justify-content:center;padding:0 14px}
+}
+@media(max-width:420px){
+  .ah-pill{gap:6px;padding:0 6px 0 16px}
+  .ah-lead-i{display:none}
+  .ah-input{font-size:16px}
+}
+@media(max-width:360px){
+  .ah-pill{padding-left:14px}
+  .ah-mic{display:none!important}
+  .ah-input::placeholder{font-size:15px}
+  .ah-tabs button{padding:0 11px;font-size:.9rem}
+}
 </style>
 <script is:inline type="application/json" id="ask-ok" set:html={JSON.stringify(okMap)} />
 <script is:inline type="application/json" id="ask-host-data" set:html={JSON.stringify(host)}></script>
