@@ -31,6 +31,11 @@ export function feFlow(cfg) {
   const dateEl = $('[data-v="date"]'), gEl = $('[data-v="count"]'), daysEl = $('#fe-days');
   const nameEl = $('[data-v="text"][autocomplete="name"]'), phoneEl = $('[data-v="phone"]'), emailEl = $('input[type="email"]');
   const sendBtn = $('#fe-send'), ring = $('#fe-ring'), done = $('#fe-done');
+  /* F2d: gold sparkles that burst in on open (25ms stagger, spring) and then STAY, drifting gently.
+     [left %, top %, kind (r = 4x9 piece, d = 4px dot), rotation] around the arch; CSS does the rest. */
+  const SPARK = [[8, 30, 'r', -28], [13, 16, 'd', 0], [24, 8, 'r', 22], [37, 3, 'd', 0], [50, 1, 'r', -12], [63, 4, 'd', 0], [75, 8, 'r', 34], [89, 19, 'r', -40], [94, 33, 'd', 0], [86, 44, 'r', 58], [6, 47, 'r', 40], [9, 60, 'd', 0], [94, 56, 'd', 0], [3, 15, 'd', 0], [82, 2, 'd', 0], [31, 14, 'r', -52], [97, 10, 'r', 15], [4, 74, 'r', -50]];
+  const conf = $('.fe-confetti', done);
+  if (conf) SPARK.forEach((p, k) => { const i = document.createElement('i'); i.className = 'fe-sp fe-sp--' + p[2]; i.style.cssText = '--k:' + k + ';--l:' + p[0] + ';--t:' + p[1] + ';--r:' + p[3] + 'deg;--dd:' + (3 + (k % 3) * .5) + 's;--dl:' + (-(k * 0.43) % 3).toFixed(2) + 's'; conf.appendChild(i); });
   const step2 = $$('[data-v]', steps[1]), step3 = $$('[data-v]', steps[2]);
   const gStep = Number(cfg.guestStep), gMin = Number(gEl.min), gMax = Number(gEl.max);
   const tpl = $('#fe-tk-tpl');
@@ -111,11 +116,24 @@ export function feFlow(cfg) {
     if (first) focusFirst(first);
     return !first;
   };
-  $$('[data-go]').forEach((b) => b.addEventListener('click', () => go(Number(b.dataset.go))));
+  /* F2d: Next stays strong red before a tile is picked. It is aria-disabled, never `disabled`, so a tap is never dead:
+     one gentle shake + a hint ("Pick an occasion, or tap Skip"). Same go() path once a tile is picked. */
+  const nudge = document.createElement('p');
+  nudge.className = 'fe-nudge'; nudge.id = 'fe-nudge'; nudge.setAttribute('role', 'status'); nudge.textContent = cfg.nudge || 'Pick an occasion, or tap Skip';
+  next1.closest('.fe-actions').prepend(nudge);
+  /* house style: scale-only press, no ripples or bubble pops on the form (the site's own opt-out hook in fk-fx.js) */
+  card.setAttribute('data-fx', 'off');
+  let nudgeT = 0;
+  const hideNudge = () => { clearTimeout(nudgeT); nudge.classList.remove('is-on'); };
+  const nudgeNext = () => {
+    nudge.classList.add('is-on'); clearTimeout(nudgeT); nudgeT = setTimeout(hideNudge, 3200);
+    next1.animate([{ translate: '0 0' }, { translate: '-5px 0' }, { translate: '5px 0' }, { translate: '-3px 0' }, { translate: '0 0' }], { duration: 320, easing: 'cubic-bezier(.25, 1, .5, 1)' });
+  };
+  $$('[data-go]').forEach((b) => b.addEventListener('click', () => { if (b === next1 && b.getAttribute('aria-disabled') === 'true') { nudgeNext(); return; } go(Number(b.dataset.go)); }));
 
   /* step 1 tiles (radios) -> hidden field with the exact original option text */
-  $$('input[name="fe-occ"]').forEach((r) => r.addEventListener('change', () => { occ.value = r.value; next1.disabled = false; setTk('occ', r.dataset.t); }));
-  $('[data-skip]').addEventListener('click', () => { $$('input[name="fe-occ"]').forEach((r) => { r.checked = false; }); occ.value = ''; next1.disabled = true; setTk('occ', ''); });
+  $$('input[name="fe-occ"]').forEach((r) => r.addEventListener('change', () => { occ.value = r.value; next1.setAttribute('aria-disabled', 'false'); hideNudge(); setTk('occ', r.dataset.t); }));
+  $('[data-skip]').addEventListener('click', () => { $$('input[name="fe-occ"]').forEach((r) => { r.checked = false; }); occ.value = ''; next1.setAttribute('aria-disabled', 'true'); setTk('occ', ''); });
 
   /* step 2: week strip of day chips (green) */
   const start = startDay(); let weekOff = 0;

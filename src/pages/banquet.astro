@@ -139,9 +139,9 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
                   {FE_W && <img class="fe-masc fe-masc-w fe-masc--cell" src={FE_M + "welcome-480.webp"} srcset={`${FE_M}welcome-480.webp 480w, ${FE_M}welcome-720.webp 720w`} sizes="(max-width: 700px) 46vw, 260px" width="720" height="720" alt="" aria-hidden="true" loading="lazy" decoding="async" />}
                 </div>
                 <input type="hidden" id="fe-occ" name="occasion" data-l="Occasion" value="" />
-                <div class="fe-actions">
+                <div class="fe-actions" data-fab-avoid>
                   <button type="button" class="fk-f-btn fk-f-btn--ghost fe-sec2 fe-skip" data-go="2" data-skip>Skip</button>
-                  <FeGo tone="red" label="Next: date &amp; guests" id="fe-next1" data-go="2" disabled />
+                  <FeGo tone="red" label="Next: date &amp; guests" id="fe-next1" data-go="2" aria-disabled="true" aria-describedby="fe-nudge" />
                 </div>
               </section>
 
@@ -182,7 +182,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 
                 <div class="fe-sum" id="fe-sum"><div class="fe-sum-clip"><p class="fe-sum-p" id="fe-sum-p" aria-live="polite"><span data-s="occ" hidden><span class="fe-sw" data-tk="occ"></span></span><span data-s="date" hidden><span class="fe-sw" data-tk="date"></span></span><span data-s="guests" hidden><span class="fe-odo" data-tk="guests">—</span> guests</span></p></div></div>
 
-                <div class="fe-actions">
+                <div class="fe-actions" data-fab-avoid>
                   <button type="button" class="fk-f-btn fk-f-btn--ghost fe-sec2 fe-back" data-go="1" aria-label="Back to occasion"><span aria-hidden="true">←</span> Back</button>
                   <FeGo label="Continue" data-go="3" />
                 </div>
@@ -224,7 +224,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
                 </div>
                 </div>
 
-                <div class="fe-actions fe-actions--col">
+                <div class="fe-actions fe-actions--col" data-fab-avoid>
                   <span class="fe-ring" id="fe-ring"><FeGo type="submit" label="Lock my date on WhatsApp" id="fe-send" icon="wa" /></span>
                   {FE_T && <img class="fe-masc-t" src={FE_M + "thumbs-480.webp"} width="720" height="720" alt="" aria-hidden="true" loading="lazy" decoding="async" />}
                   <div class="fe-row2">
@@ -237,12 +237,12 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
             </div>
 
             <!-- shown after a successful send -->
-            <div class="fe-done" id="fe-done" hidden>
-              <span class="fe-done-arch" aria-hidden="true">{FE_N && <img class="fe-masc-n" src={FE_M + "namaste-480.webp"} srcset={`${FE_M}namaste-480.webp 480w, ${FE_M}namaste-720.webp 720w`} sizes="240px" width="720" height="720" alt="" loading="lazy" decoding="async" />}<span class="fe-confetti"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i><i style="--k:5"></i><i style="--k:6"></i><i style="--k:7"></i><i style="--k:8"></i><i style="--k:9"></i><i style="--k:10"></i><i style="--k:11"></i></span></span>
+            <div class="fe-done" id="fe-done" hidden data-fab-avoid>
+              <span class="fe-done-arch" aria-hidden="true">{FE_N && <img class="fe-masc-n" src={FE_M + "namaste-480.webp"} srcset={`${FE_M}namaste-480.webp 480w, ${FE_M}namaste-720.webp 720w`} sizes="240px" width="720" height="720" alt="" loading="lazy" decoding="async" />}<span class="fe-confetti"></span></span>
               <span class="fe-done-ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2L18.5 7.8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               <p class="fe-done-t" role="status">Opening WhatsApp…</p>
               <a class="fe-link" id="fe-done-wa" href="https://wa.me/919059670033" target="_blank" rel="noopener">Not opening? Tap here</a>
-              <span class="fe-or" aria-hidden="true">or</span>
+              <span class="fe-or" aria-hidden="true"><i></i>or<i></i></span>
               <button type="button" class="fe-link fe-edit" id="fe-again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Edit my enquiry</button>
               <svg class="fe-swoosh" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fe-sw-a" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d81e22"/><stop offset=".6" stop-color="#c3161a"/><stop offset="1" stop-color="#a50d11"/></linearGradient><linearGradient id="fe-sw-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9e0b10"/><stop offset="1" stop-color="#7c070b"/></linearGradient></defs><path d="M0 100 L22 100 C70 86 118 66 166 62 C212 58 244 66 284 56 C328 46 364 22 400 0 L400 100 Z" fill="url(#fe-sw-a)"/><path d="M176 100 C246 96 308 80 344 54 C366 38 384 28 400 24 L400 100 Z" fill="url(#fe-sw-b)"/><path d="M22 100 C70 86 118 66 166 62 C212 58 244 66 284 56 C328 46 364 22 400 0" fill="none" stroke="rgb(255 255 255 / .22)" stroke-width="1.2"/></svg>
             </div>
