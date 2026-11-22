@@ -113,37 +113,6 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
     var sx=a.left+a.width/2-32,sy=a.top+a.height/2-32,ex=t.left+t.width/2-32,ey=t.top+t.height/2-32;
     c.animate([{transform:"translate("+sx+"px,"+sy+"px) scale(1.2)",opacity:1},{transform:"translate("+((sx+ex)/2)+"px,"+(Math.min(sy,ey)-80)+"px) scale(.9)",opacity:1,offset:.5},{transform:"translate("+ex+"px,"+ey+"px) scale(.2)",opacity:.2}],{duration:750,easing:"cubic-bezier(.5,0,.3,1)"}).onfinish=function(){c.remove();window.__fxSparks&&window.__fxSparks(ex+32,ey+32,14,2)};c.style.left="0";c.style.top="0"},30)});
 
-/* ======================= 13. two-tap table booking -> WhatsApp ======================= */
-(function(){var dlg=$("fxbook");if(!dlg)return;var n=$("bk-n"),ph=$("bk-ph"),em=$("bk-em"),d=$("bk-d"),t=$("bk-t"),z=$("bk-z"),c=$("bk-c"),g=2;
-  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(_){}return null}
-  function today(){var x=new Date();x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)}
-  function digits(v){var x=v.replace(/\D/g,"");if(x.length>10&&x.indexOf("91")===0)x=x.slice(2);if(x.length===11&&x[0]==="0")x=x.slice(1);return x}
-  function eok(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
-  function clear(){[n,ph,em,d].forEach(function(e){e.removeAttribute("aria-invalid");$(e.getAttribute("aria-describedby")).textContent=""})}
-  function bad(el,text){clear();el.setAttribute("aria-invalid","true");$(el.getAttribute("aria-describedby")).textContent=text;el.focus()}
-  function open(zone){clear();var iso=today();d.min=iso;d.value=iso;g=2;c.textContent=g;if(zone)z.value=zone;
-    var sn=ls("fz_n"),sm=ls("fz_m");if(sn&&!n.value)n.value=sn;if(sm&&!ph.value)ph.value=sm;var se=ls("fz_e");if(se&&!em.value)em.value=se;
-    if(typeof dlg.showModal==="function")dlg.showModal();else dlg.setAttribute("open","");
-    setTimeout(function(){(n.value?(ph.value?t:ph):n).focus({preventScroll:true})},40)}
-  window.openFursatBook=open;
-  document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest('[data-open="book"]');if(!el)return;e.preventDefault();var m=$("fxmenu");if(m&&!m.hidden)m.hidden=true;open(el.getAttribute("data-pick"))},true);
-  $("bk-m").addEventListener("click",function(){g=Math.max(1,g-1);c.textContent=g});$("bk-p").addEventListener("click",function(){g=Math.min(60,g+1);c.textContent=g});
-  $("fxbook-x").addEventListener("click",function(){dlg.close?dlg.close():dlg.removeAttribute("open")});
-  dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close&&dlg.close()});
-  [n,ph,em,d].forEach(function(e){e.addEventListener("input",clear)});
-  em.addEventListener("blur",function(){var v=em.value.trim();if(v&&!eok(v)){clear();em.setAttribute("aria-invalid","true");$(em.getAttribute("aria-describedby")).textContent="Please check the email address."}});
-  ph.addEventListener("input",function(){var x=ph.value.replace(/[^\d+ ]/g,"");if(x!==ph.value)ph.value=x});
-  $("fxbook-f").addEventListener("submit",function(e){e.preventDefault();var nm=n.value.trim(),x=digits(ph.value);
-    if(nm.length<2)return bad(n,"Please enter your name.");
-    if(!/^[6-9]\d{9}$/.test(x))return bad(ph,"Please enter a valid 10-digit mobile number.");
-    var ev=em.value.trim();if(ev&&!eok(ev))return bad(em,"Please check the email address.");
-    if(!d.value||d.value<today())return bad(d,"Please choose today or a later date.");
-    ls("fz_n",nm);ls("fz_m",x);ls("fz_e",ev);
-    var dt=new Date(d.value+"T00:00").toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
-    var msg=["Hi Fursat! 👋 I would like to reserve a table:","• Name: "+nm,"• Phone: +91 "+x.slice(0,5)+" "+x.slice(5)].concat(ev?["• Email: "+ev]:[],["• Date: "+dt,"• Time: "+t.value,"• Guests: "+g,"• Zone: "+z.value]).join("\n");
-    var ff={name:nm,phone:x,date:dt,time:t.value,guests:String(g),zone:z.value};if(ev)ff.email=ev;if(window.fkForm)window.fkForm.send("restaurant","Table request (home)",ff,document.querySelector("#fxbook-f [name=botcheck]"));var a=document.createElement("a");a.href="https://wa.me/"+WA+"?text="+encodeURIComponent(msg);a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();dlg.close&&dlg.close()});
-})();
-
 /* ======================= 17. Elephant Flow clip (colour + matte packed side by side, composited on a canvas) ======================= */
 
 
