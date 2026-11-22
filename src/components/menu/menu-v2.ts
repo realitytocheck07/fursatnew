@@ -1,12 +1,9 @@
-// /menu client script: picks, side switching, 21+ notice, the one sticky filter bar (toggle, chips, search, Veg / Non-veg, live count), scroll-spy,
-// scroll entrance, phone dish sheet.
-// No framework, no animation library.
-import { reducer, keyOf, money, total, count, waLink, type Line, type MenuItem } from './cart';
-import { rowHtml, type RowRec } from './dish-row';
+// /menu client script: side switching, 21+ notice, the one sticky filter bar (toggle, chips, search, Veg / Non-veg, live count), scroll-spy,
+// lazy rows, row entrance, dish sheet (any screen, "Ask about this dish on WhatsApp"). No framework, no animation library.
+import { rowHtml, esc, type RowRec } from './dish-row';
 
 const $ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s);
 const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 type Side = 'food' | 'drinks';
 
 const root = $('.mv');
@@ -14,128 +11,6 @@ if (root) init(root);
 
 function init(root: HTMLElement) {
   const stage = $('.mv-stage')!;
-
-  /* ── picks ─────────────────────────────────────────────── */
-  const KEY = 'fursat_picks_v2';
-  let lines: Line[] = [];
-  try { lines = JSON.parse(sessionStorage.getItem(KEY) || '[]'); } catch { lines = []; }
-  // spoken status for the picks: "2 items in Picks, subtotal ₹..." after every add / remove (the open dish card has its own status)
-  const live = document.createElement('p');
-  live.className = 'mv-sr'; live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
-  root.append(live);
-  let lastN = count(lines), ready = false;
-  const cnt = $('#mv-cnt')!, sub = $('#mv-sub')!, wa = $<HTMLAnchorElement>('#mv-wa')!, listEl = $('#mv-picks-list')!;
-  const panel = $('#mv-picks-panel')!, toggle = $('#mv-picks-toggle')!, bag = $('#mv-bag')!, picksEl = $('#mv-picks')!;
-  const cntMini = $('#mv-cnt-mini')!, bagMini = $('#mv-bag-mini')!;
-
-  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
-  function render(pop = false) {
-    cnt.textContent = cntMini.textContent = picksEl.dataset.count = String(count(lines));
-    sub.textContent = money(total(lines));
-    if (pop && !reduce) { [cnt, cntMini].forEach((c) => c.classList.add('is-pop')); setTimeout(() => [cnt, cntMini].forEach((c) => c.classList.remove('is-pop')), 90); }
-    const has = lines.length > 0;
-    wa.setAttribute('aria-disabled', has ? 'false' : 'true');
-    wa.href = has ? waLink(lines) : '#';
-    wa.tabIndex = has ? 0 : -1;
-    listEl.innerHTML = has
-      ? lines.map((l) => `<li><span>${esc(l.item.n)}</span><span class="q"><button type="button" data-dec="${esc(l.key)}" aria-label="One less ${esc(l.item.n)}">−</button><b class="num">${l.qty}</b><button type="button" data-inc="${esc(l.key)}" aria-label="One more ${esc(l.item.n)}">+</button></span><b class="num">${money(l.item.p * l.qty)}</b></li>`).join('')
-      : '<li style="grid-template-columns:1fr"><span>Nothing here yet. Tap + on any dish or drink.</span></li>';
-    try { sessionStorage.setItem(KEY, JSON.stringify(lines)); } catch { /* private mode */ }
-    $$<HTMLElement>('.mv-add').forEach((b) => { // card buttons mirror the picks: "+ Add" / "✓ Added"
-      const on = lines.some((l) => l.key === keyOf(itemFrom(b)));
-      if (b.getAttribute('aria-pressed') === String(on)) return;
-      b.setAttribute('aria-pressed', String(on));
-      const nm = b.dataset.n || '';
-      b.setAttribute('aria-label', on ? `Remove ${nm} from picks` : `Add ${nm} to picks`);
-      const tx = $('.mv-add-t', b); if (tx) tx.textContent = on ? '✓ Added' : '+ Add';
-    });
-    root.dispatchEvent(new CustomEvent('mv:picks'));
-    const n = count(lines);
-    if (ready && n !== lastN && !($<HTMLDialogElement>('#mv-sheet')?.open)) live.textContent = n ? `${n} ${n === 1 ? 'item' : 'items'} in Picks, subtotal ${money(total(lines))}` : 'Picks are empty';
-    lastN = n;
-  }
-  render();
-  ready = true;
-
-  const itemFrom = (b: HTMLElement): MenuItem => ({
-    n: b.dataset.n || '', p: Number(b.dataset.p), c: b.dataset.c || '', k: (b.dataset.k as MenuItem['k']) || 'food',
-    v: b.dataset.v, a: b.dataset.a === '1', img: b.dataset.img,
-  });
-
-  const FLY = 450;
-  function fly(from: HTMLElement, item: MenuItem) {
-    if (reduce) return;
-    const r = from.getBoundingClientRect(), t = (picksEl.classList.contains('is-compact') ? bagMini : bag).getBoundingClientRect();
-    if (!t.width) return;
-    const el = document.createElement('div'); el.className = 'mv-fly';
-    const dot = document.createElement('i');
-    if (item.img) dot.style.backgroundImage = `url(${item.img})`; else dot.textContent = item.n.trim()[0] || '';
-    el.appendChild(dot); document.body.appendChild(el);
-    const sx = r.left + r.width / 2 - 22, sy = r.top + r.height / 2 - 22, ex = t.left + t.width / 2 - 22, ey = t.top + t.height / 2 - 22;
-    el.animate([{ transform: `translateX(${sx}px)` }, { transform: `translateX(${ex}px)` }], { duration: FLY, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
-    dot.animate([
-      { transform: `translateY(${sy}px) scale(1)`, opacity: 1 },
-      { transform: `translateY(${Math.min(sy, ey) - 90}px) scale(.9)`, offset: 0.45 },
-      { transform: `translateY(${ey}px) scale(.45)`, opacity: 0.9 },
-    ], { duration: FLY, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' });
-    setTimeout(() => el.remove(), FLY + 40);
-  }
-
-  const closePanel = () => { panel.setAttribute('hidden', ''); toggle.setAttribute('aria-expanded', 'false'); };
-  root.addEventListener('click', (e) => {
-    const t = e.target as HTMLElement;
-    const add = t.closest<HTMLElement>('[data-add]');
-    if (add && Number.isFinite(Number(add.dataset.p))) {
-      const item = itemFrom(add);
-      if (add.classList.contains('mv-add') && add.getAttribute('aria-pressed') === 'true') { // card button: second tap removes it
-        lines = lines.filter((l) => l.key !== keyOf(item)); render(true); return;
-      }
-      lines = reducer(lines, { t: 'add', item });
-      if (add.hasAttribute('data-nofly')) { render(true); return; } // the phone sheet sits above the bag: no flight
-      fly(add, item);
-      setTimeout(() => render(true), reduce ? 0 : FLY);
-      return;
-    }
-    const inc = t.closest<HTMLElement>('[data-inc]'), dec = t.closest<HTMLElement>('[data-dec]');
-    if (inc) { const l = lines.find((x) => x.key === inc.dataset.inc); if (l) lines = reducer(lines, { t: 'add', item: l.item }); render(); }
-    if (dec) { lines = reducer(lines, { t: 'dec', key: dec.dataset.dec! }); render(); }
-    if (t.closest('#mv-clear')) { lines = reducer(lines, { t: 'clear' }); render(); }
-  });
-  toggle.addEventListener('click', () => {
-    const open = panel.hasAttribute('hidden');
-    panel.toggleAttribute('hidden', !open);
-    toggle.setAttribute('aria-expanded', String(open));
-  });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hasAttribute('hidden')) { closePanel(); toggle.focus(); } });
-  document.addEventListener('click', (e) => {
-    // composedPath survives the list re-render that detaches the clicked +/- button
-    const path = e.composedPath();
-    const inside = path.includes(picksEl) || path.some((n) => n instanceof HTMLElement && n.hasAttribute('data-add'));
-    if (!panel.hasAttribute('hidden') && !inside) closePanel();
-  });
-  wa.addEventListener('click', (e) => {
-    if (wa.getAttribute('aria-disabled') === 'true') { e.preventDefault(); return; }
-    (window as any).fkForm?.send('restaurant', 'Menu order', { order: lines.map((l) => `${l.qty} x ${l.item.n}`).join(', '), subtotal: money(total(lines)) });
-  });
-
-  // Collapse the pill to bag + count while the page scrolls; expand 700ms after it stops.
-  // Never while the list panel is open or focus is inside the pill (keyboard users keep the full bar).
-  let compactTimer = 0, lastY = scrollY, holdUntil = 0;
-  const expand = () => picksEl.classList.remove('is-compact');
-  addEventListener('scroll', () => {
-    if (Math.abs(scrollY - lastY) < 6) return;
-    lastY = scrollY;
-    if (performance.now() > holdUntil && panel.hasAttribute('hidden') && !picksEl.matches(':focus-within')) picksEl.classList.add('is-compact');
-    clearTimeout(compactTimer); compactTimer = window.setTimeout(expand, 700);
-  }, { passive: true });
-  picksEl.addEventListener('focusin', expand);
-  $('#mv-picks-mini')!.addEventListener('click', () => { holdUntil = performance.now() + 1500; expand(); });
-
-  // The picks pill is fixed to the viewport; fade it out while the footer is on screen.
-  const footer = $('footer');
-  if (footer && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([en]) => picksEl.classList.toggle('is-hidden', en.isIntersecting), { threshold: 0.05 }).observe(footer);
-  }
 
   /* ── side, rail, chips, 21+ ───────────────────────────── */
   const AGE = 'fursat_age_ok';
@@ -151,6 +26,7 @@ function init(root: HTMLElement) {
     root.dataset.side = side;
     $$('[data-schips]').forEach((d) => d.toggleAttribute('hidden', d.dataset.schips !== side));
     $$('[data-jump]').forEach((d) => d.toggleAttribute('hidden', d.dataset.jump !== side));
+    $$('[data-idx]').forEach((d) => d.toggleAttribute('hidden', d.dataset.idx !== side));
     $$('[data-seg]').forEach((b) => { const on = b.dataset.seg === side; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
     updateCount();
   }
@@ -158,10 +34,11 @@ function init(root: HTMLElement) {
     const box = btn?.parentElement;
     if (!btn || !box || box.scrollWidth <= box.clientWidth) return;
     const left = btn.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft - box.clientWidth / 2 + btn.offsetWidth / 2;
-    box.scrollTo({ left, behavior: reduce ? 'auto' : 'smooth' });
+    box.scrollTo({ left, behavior: 'smooth' });
   }
   function mark(id: string | null) {
     $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); if (on && b.offsetParent) centerIn(b); });
+    $$('.mv-idx-b').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
   }
   // while we scroll the page ourselves (Full food / drinks menu, hotspots, chips) the scroll-spy must not flip the side:
   // passing through the other side's groups used to switch the list and the jump ended in the wrong menu.
@@ -171,7 +48,7 @@ function init(root: HTMLElement) {
     autoUntil = performance.now() + 1600;
     const done = () => { autoUntil = 0; removeEventListener('scrollend', done); };
     addEventListener('scrollend', done, { once: true });
-    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   function need21(side: Side, run: () => void) {
     if (side === 'drinks' && !CAFE && !ageOk()) { pending = run; if (!dlg.open) dlg.showModal(); return; }
@@ -184,7 +61,16 @@ function init(root: HTMLElement) {
   root.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     const sgo = t.closest<HTMLElement>('[data-side-go]');
-    if (sgo) { const s = sgo.dataset.sideGo as Side; go(s === 'drinks' ? 'd-cocktails' : 'f-biryani', s); return; }
+    if (sgo) {
+      const s = sgo.dataset.sideGo as Side;
+      // the doors' "Full food / drinks menu" buttons land on the category tiles; the filter bar's Food | Drinks switch still goes to the first category
+      const tiles = !sgo.closest('#mv-sticky') ? document.getElementById('mc-' + s) : null;
+      if (tiles) need21(s, () => { fillThrough(tiles); setSide(s); mark(null); scrollTo(tiles); });
+      else go(s === 'drinks' ? 'd-cocktails' : 'f-biryani', s);
+      return;
+    }
+    const mc = t.closest<HTMLElement>('[data-mc-go]');
+    if (mc) { pickTile(mc); return; }
     const g = t.closest<HTMLElement>('[data-go]');
     if (g) { go(g.dataset.go!, g.dataset.sideOf as Side | undefined); return; }
   });
@@ -206,7 +92,7 @@ function init(root: HTMLElement) {
   const cats = $('#mv-cats');
   cats?.addEventListener('click', () => {
     const side = root.dataset.side as Side, src = $(`[data-jump="${side}"]`), api = sheetApi();
-    if (!src || !api) { scrollTo($('#mv-jump')); return; }
+    if (!src || !api) { scrollTo($('.mc-tiles:not([hidden])') || $('#mv-jump')); return; }
     const grid = src.cloneNode(true) as HTMLElement;
     grid.removeAttribute('data-jump'); grid.removeAttribute('hidden');
     api.open({ title: side === 'food' ? 'Jump to · Food' : 'Jump to · Drinks', body: grid, opener: cats, onClose: () => { const r = afterSheet; afterSheet = null; r?.(); } });
@@ -219,22 +105,32 @@ function init(root: HTMLElement) {
 
   /* ── scroll-spy: keeps the chips on the group in view ── */
   const groups = $$('.mv-grp');
+  const spied = [...groups, ...$$('.mc-tiles')];
   const seen = new Set<Element>();
   if ('IntersectionObserver' in window) {
-    const spy = new IntersectionObserver((entries) => {
-      entries.forEach((en) => (en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)));
-      if (window.scrollY < stage.offsetHeight * 0.5) return; // stage still in charge
+    const run = () => {
+      // desktop pages scroll the body, not the window (07.css): window.scrollY is 0 there, which kept the spy asleep and the rail on "Cocktails"
+      if ((window.scrollY || document.body.scrollTop || document.documentElement.scrollTop) < stage.offsetHeight * 0.5) return; // stage still in charge
       if (performance.now() < autoUntil) return; // our own jump is running: keep the chosen side
       // the group whose top has passed the sticky offset (largest top <= 200px); else the first one in view
-      const inView = groups.filter((g) => seen.has(g)).map((g) => [g, g.getBoundingClientRect().top] as const);
+      const inView = spied.filter((g) => seen.has(g)).map((g) => [g, g.getBoundingClientRect().top] as const);
       const passed = inView.filter(([, t]) => t <= 200).sort((a, b) => b[1] - a[1])[0];
       const top = (passed || inView[0])?.[0];
       if (!top) return;
+      // a category-tiles block counts as part of its side; no chip is on until a category is chosen
+      if (top.classList.contains('mc-tiles')) { setSide(top.id === 'mc-drinks' ? 'drinks' : 'food'); mark(null); return; }
       const id = top.getAttribute('data-group')!;
       setSide(id.startsWith('d-') ? 'drinks' : 'food');
       mark(id);
+    };
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach((en) => (en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)));
+      run();
     }, { rootMargin: '-140px 0px -62% 0px' });
-    groups.forEach((g) => spy.observe(g));
+    spied.forEach((g) => spy.observe(g));
+    // a group taller than the screen stays "in view" for many scroll steps, so the intersection callback alone is not enough
+    let spyRaf = 0;
+    document.addEventListener('scroll', () => { if (!spyRaf) spyRaf = requestAnimationFrame(() => { spyRaf = 0; run(); }); }, { passive: true, capture: true });
   }
 
   /* ── search (highlight) + diet filters ────────────────── */
@@ -262,11 +158,6 @@ function init(root: HTMLElement) {
       const n = $('.mv-iname', r)!, ds = $('.mv-idesc', r);
       rows.push(r); names.set(r, n); descs.set(r, ds); orig.set(n, n.textContent || ''); if (ds) orig.set(ds, ds.textContent || '');
     });
-    // the soft light that follows the pointer on a card (fk-motion.ts binds it once at start, so rows filled in later get it here)
-    if (matchMedia('(hover: hover) and (pointer: fine)').matches) li.forEach((el) => el.addEventListener('pointermove', (e) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--mx', `${e.clientX - r.left}px`); el.style.setProperty('--my', `${e.clientY - r.top}px`);
-    }, { passive: true }));
     onRows?.(li);
   }
   function fillAll() { $$('.mv-sec').forEach(fillSection); }
@@ -323,21 +214,24 @@ function init(root: HTMLElement) {
     filter();
   }));
 
-  /* ── scroll entrance: rows below the fold fade + rise 8px once (30ms stagger, first 6 of a batch) ── */
-  if (!reduce && 'IntersectionObserver' in window) {
-    const below = rows.filter((r) => r.getBoundingClientRect().top > innerHeight);
-    below.forEach((r) => r.classList.add('mv-pre'));
-    const io = new IntersectionObserver((entries) => {
-      let k = 0;
-      entries.filter((en) => en.isIntersecting).forEach((en) => {
-        const el = en.target as HTMLElement;
-        el.style.transitionDelay = `${Math.min(k++, 6) * 30}ms`;
-        el.classList.add('is-in'); io.unobserve(el);
-        setTimeout(() => { el.classList.remove('mv-pre', 'is-in'); el.style.transitionDelay = ''; }, 500);
+  /* ── row entrance: rows fade up 8px in soft batches (max 8 per batch, 40ms apart); the price settles just after its row ── */
+  const rowIO = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+    entries.filter((en) => en.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
+      .forEach((en, i) => {
+        const el = en.target as HTMLElement; rowIO!.unobserve(el);
+        el.style.setProperty('--d', `${Math.min(i, 7) * 40}ms`);
+        el.classList.add('is-in');
+        setTimeout(() => { el.classList.remove('mv-pre', 'is-in'); el.style.removeProperty('--d'); }, 1000);
       });
-    }, { rootMargin: '0px 0px -6% 0px' });
-    below.forEach((r) => io.observe(r));
+  }, { rootMargin: '0px 0px -4% 0px' }) : null;
+  function watchRows(list: HTMLElement[], first = false) {
+    if (!rowIO) return;
+    list.forEach((r) => { if (first && r.getBoundingClientRect().top < innerHeight) return; r.classList.add('mv-pre'); rowIO.observe(r); });
   }
+  watchRows(rows, true);
+  const prevOnRows = onRows;
+  onRows = (li) => { watchRows(li); prevOnRows?.(li); };
 
   /* ── the filter bar's height, so jumps stop just under it ── */
   const stickyEl = $('#mv-sticky');
@@ -355,29 +249,20 @@ function init(root: HTMLElement) {
     sync();
   }
 
-  /* ── dish detail sheet (phones): tap a dish, drag down / Esc / back / X to close ── */
+  /* ── dish sheet (any screen): tap a row, "See dish", the table or a #dish= link; drag down / Esc / back / X to close ── */
   const sheet = $<HTMLDialogElement>('#mv-sheet');
+  const findRow = (key: string) => $$<HTMLElement>('[data-row]').find((r) => r.dataset.an === key);
   if (sheet) {
     const phone = matchMedia('(max-width: 720px)');
     const panelEl = $('#mv-sheet-panel')!, dragEl = $('#mv-sheet-drag')!, phEl = $('#mv-sheet-ph')!;
     const secEl = $('#mv-sheet-sec')!, nameEl = $('#mv-sheet-name')!, tagsEl = $('#mv-sheet-tags')!, descEl = $('#mv-sheet-desc')!;
-    const noteEl = $('#mv-sheet-note')!, priceEl = $('#mv-sheet-price')!, statEl = $('#mv-sheet-status')!;
-    const addBtn = $<HTMLButtonElement>('#mv-sheet-add')!, xBtn = $('#mv-sheet-x')!;
-    const opens = $$<HTMLButtonElement>('.mv-open');
-    // The row button only opens the sheet on phones. Elsewhere it stays in the accessibility tree (so the dish name is a real heading) but leaves the tab order.
-    const syncOpens = () => opens.forEach((b) => { if (phone.matches) { b.removeAttribute('tabindex'); b.setAttribute('aria-haspopup', 'dialog'); } else { b.tabIndex = -1; b.removeAttribute('aria-haspopup'); } });
-    syncOpens();
-    phone.addEventListener('change', syncOpens);
-    onRows = (li) => { li.forEach((r) => { const b = $<HTMLButtonElement>('.mv-open', r); if (b) opens.push(b); }); syncOpens(); };
-    let opener: HTMLElement | null = null, pushed = false, closing = false, flashing = false, flashT = 0, closeT = 0;
+    const noteEl = $('#mv-sheet-note')!, priceEl = $('#mv-sheet-price')!;
+    const waBtn = $<HTMLAnchorElement>('#mv-sheet-wa')!, xBtn = $('#mv-sheet-x')!;
+    let opener: HTMLElement | null = null, pushed = false, closing = false, closeT = 0;
 
     const el = (tag: string, cls: string, text = '') => { const n = document.createElement(tag); n.className = cls; if (text) n.textContent = text; return n; };
-    function status() {
-      const key = keyOf(itemFrom(addBtn)); const q = lines.find((l) => l.key === key)?.qty || 0;
-      statEl.textContent = q ? `${flashing ? 'Added · ' : ''}${q} in Picks` : '';
-    }
+    const tag = (cls: string, text: string) => el('span', `mv-stag ${cls}`, text);
     function fill(li: HTMLElement) {
-      const row = $<HTMLElement>('[data-add]', li);
       const nm = orig.get(names.get(li)!) || '', ds = descs.get(li) ? orig.get(descs.get(li)!)! : '';
       secEl.textContent = li.dataset.sec || '';
       nameEl.textContent = nm; descEl.textContent = ds; noteEl.textContent = $('.mv-note', li)?.textContent || '';
@@ -390,16 +275,16 @@ function init(root: HTMLElement) {
         const g = el('span', 'mv-ghost', nm.trim()[0] || ''); const o = el('span', 'mv-orn'); o.appendChild(document.createElement('b'));
         c.append(g, o); phEl.appendChild(c);
       }
-      // tags: the row's own chips (Veg / Non-veg, Spicy, Chef's pick)
-      tagsEl.replaceChildren(...$$('.fk-chip', li).map((c) => c.cloneNode(true)));
-      // price(s) exactly as in the list
+      // tags: Veg / Non-veg (food only), Spicy, Chef's pick
+      const tags: HTMLElement[] = [];
+      if (!li.closest('#mv-drinks')) tags.push(tag(li.dataset.veg === '1' ? 'mv-stag--v' : 'mv-stag--n', li.dataset.veg === '1' ? 'Veg' : 'Non-veg'));
+      if (li.dataset.s) tags.push(tag('mv-stag--s', 'Spicy'));
+      if (li.dataset.f) tags.push(tag('mv-stag--f', "Chef's pick"));
+      tagsEl.replaceChildren(...tags);
+      // price(s) exactly as in the list, with their labels (Half / Full, 30 ml ...)
       const pr = $('.mv-item-price', li);
       priceEl.innerHTML = pr ? pr.innerHTML : '';
-      // Add to Picks carries the row's own data (same item, same price, same message line)
-      ['n', 'p', 'c', 'k', 'v', 'a'].forEach((k) => { if (row?.dataset[k] != null) addBtn.dataset[k] = row.dataset[k]; else delete addBtn.dataset[k]; });
-      if (li.dataset.img) addBtn.dataset.img = li.dataset.img; else delete addBtn.dataset.img;
-      addBtn.hidden = !row; addBtn.setAttribute('aria-label', `Add ${row?.dataset.n || nm} to Picks`);
-      addBtn.classList.remove('is-added'); flashing = false; status();
+      waBtn.href = `https://wa.me/${waBtn.dataset.wa}?text=${encodeURIComponent(`Hi Fursat! I have a question about: ${li.dataset.an || nm}`)}`;
     }
     function openSheet(li: HTMLElement) {
       if (sheet!.open || closing) return;
@@ -430,17 +315,20 @@ function init(root: HTMLElement) {
     }
 
     $('#mv-list')?.addEventListener('click', (e) => {
-      if (!phone.matches) return;
       const t = e.target as HTMLElement;
-      if (t.closest('[data-add]') || getSelection()?.toString()) return;
+      if (t.closest('a') || getSelection()?.toString()) return;
       const li = t.closest<HTMLElement>('[data-row]'); if (li) openSheet(li);
     });
-    // the rotating table (menu-doors.ts) opens a dish's sheet by its exact menu name, on any screen
+    // the rotating table (menu-doors.ts) and every "See dish" button open a dish's sheet by its key (name + variant label)
     document.addEventListener('mv:open', (e) => {
-      const name = (e as CustomEvent<string>).detail;
+      const key = (e as CustomEvent<string>).detail;
       fillAll();
-      const li = $$<HTMLElement>('[data-row]').find((r) => $<HTMLElement>('[data-add]', r)?.dataset.n === name);
+      const li = findRow(key);
       if (li) openSheet(li);
+    });
+    root.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-see]');
+      if (b) document.dispatchEvent(new CustomEvent('mv:open', { detail: b.dataset.see }));
     });
     // deep link: /menu#dish=<menu name, URL-encoded> opens that dish card (same mv:open as "See dish"); unknown name = nothing
     const openFromHash = () => {
@@ -451,35 +339,29 @@ function init(root: HTMLElement) {
       fillAll();
       let want = '';
       try { want = decodeURIComponent(m[1]).trim().toLowerCase(); } catch { return; }
-      const ns = $$<HTMLElement>('[data-row]').map((r) => $<HTMLElement>('[data-add]', r)?.dataset.n ?? '');
+      const ns = $$<HTMLElement>('[data-row]').map((r) => r.dataset.an ?? '');
       const hit = ns.find((n) => n.toLowerCase() === want) ?? ns.find((n) => n.replace(/ \([^)]*\)$/, '').toLowerCase() === want);
       if (!hit) return;
       // drinks side: the 21+ check comes first, the drink card opens right after "yes" ("no" goes to food, nothing opens)
-      const row = $$<HTMLElement>('[data-row]').find((r) => $<HTMLElement>('[data-add]', r)?.dataset.n === hit);
+      const row = findRow(hit);
       const side: Side = row?.closest('[data-side-block]')?.getAttribute('data-side-block') === 'drinks' ? 'drinks' : 'food';
       need21(side, () => document.dispatchEvent(new CustomEvent('mv:open', { detail: hit })));
     };
     openFromHash();
     addEventListener('hashchange', openFromHash);
     dragEl.addEventListener('dragstart', (e) => e.preventDefault()); // a native image drag would cancel our pointer drag
-    // explicit focus trap: Tab cycles X <-> Add to Picks instead of leaving for browser chrome
+    // explicit focus trap: Tab cycles X <-> WhatsApp instead of leaving for browser chrome
     sheet.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab') return;
-      const f = [xBtn, addBtn].filter((b) => !b.hidden);
-      const first = f[0], last = f[f.length - 1], cur = document.activeElement;
-      if (e.shiftKey && (cur === first || !f.includes(cur as HTMLButtonElement))) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && (cur === last || !f.includes(cur as HTMLButtonElement))) { e.preventDefault(); first.focus(); }
+      const f: HTMLElement[] = [xBtn, waBtn];
+      const first = f[0], last = f[f.length - 1], cur = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (cur === first || !cur || !f.includes(cur))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (cur === last || !cur || !f.includes(cur))) { e.preventDefault(); first.focus(); }
     });
     xBtn.addEventListener('click', () => closeSheet());
     sheet.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(); }); // Escape
     sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); }); // outside the panel
     addEventListener('popstate', () => { if (sheet.open) closeSheet(true); });      // back button / swipe-back
-    phone.addEventListener('change', () => { syncOpens(); if (!phone.matches && sheet.open) closeSheet(); });
-    root.addEventListener('mv:picks', () => { if (sheet.open) status(); });
-    addBtn.addEventListener('click', () => {
-      flashing = true; addBtn.classList.add('is-added'); clearTimeout(flashT);
-      flashT = window.setTimeout(() => { flashing = false; addBtn.classList.remove('is-added'); status(); }, 1400);
-    });
 
     // drag down from the grabber or the photo; a flick (> 0.11 px/ms) is enough
     let sy = 0, dy = 0, pid = -1, dragging = false, trail: [number, number][] = [];
@@ -512,8 +394,51 @@ function init(root: HTMLElement) {
     setTimeout(() => go('d-coffee', 'drinks'), 250);
   }
 
+  /* ── category tiles: gold + a check that springs in (400ms), then the smooth jump; drinks ask the 21+ question first ── */
+  const tileTimers = new WeakMap<HTMLElement, number>();
+  function pickTile(btn: HTMLElement) {
+    if (btn.classList.contains('is-picked')) return;
+    const id = btn.dataset.mcGo!, side = (btn.dataset.sideOf as Side) || 'food';
+    need21(side, () => {
+      // a search or Veg / Non-veg filter may have hidden that category: clear it so the jump has somewhere to land
+      if (document.getElementById('g-' + id)?.hasAttribute('hidden')) {
+        q.value = ''; diets.clear(); $$('[data-diet]').forEach((b) => b.setAttribute('aria-pressed', 'false')); filter();
+      }
+      btn.classList.add('is-picked');
+      setTimeout(() => go(id, side), 380);
+      tileTimers.set(btn, window.setTimeout(() => btn.classList.remove('is-picked'), 2000));
+    });
+  }
+  // tiles rise 12px and fade in, 50ms apart, once; below-the-fold tiles only (nothing is hidden before this script runs)
+  const tiles = $$<HTMLElement>('.mc-tile');
+  if ('IntersectionObserver' in window) {
+    const tio = new IntersectionObserver((es) => es.filter((e) => e.isIntersecting).forEach((e) => {
+      const el = e.target as HTMLElement; tio.unobserve(el); el.classList.add('is-in');
+      setTimeout(() => el.classList.remove('mc-pre', 'is-in'), 900);
+    }), { rootMargin: '0px 0px -8% 0px' });
+    tiles.forEach((t) => { if (t.getBoundingClientRect().top < innerHeight) return; t.classList.add('mc-pre'); tio.observe(t); });
+  }
+
+  /* ── category banners: wipe in once as each one arrives (JS adds mw-pre below the fold, so no-JS and first-screen banners are never hidden) ── */
+  const bans = $$<HTMLElement>('.mw-ban');
+  if ('IntersectionObserver' in window) {
+    const bio = new IntersectionObserver((es) => es.forEach((en) => {
+      if (!en.isIntersecting) return;
+      bio.unobserve(en.target);
+      en.target.classList.add('is-in');
+      setTimeout(() => en.target.classList.remove('mw-pre', 'is-in'), 900);
+    }), { rootMargin: '0px 0px -12% 0px' });
+    bans.forEach((b) => { if (b.getBoundingClientRect().top < innerHeight) return; b.classList.add('mw-pre'); bio.observe(b); });
+  }
+
+  /* ── phone: the floating Offers / Instagram / Ask buttons step aside while the dish list is on screen (they read [data-fab-avoid]) ── */
+  const listIn = $('.mv-list-in');
+  const phoneMq = matchMedia('(max-width: 767px)');
+  const tuck = () => listIn?.toggleAttribute('data-fab-avoid', phoneMq.matches);
+  tuck(); phoneMq.addEventListener('change', tuck);
+
   /* ── one-time sheen on primary buttons (a transition, removed after it plays) ── */
-  if (!reduce) setTimeout(() => {
+  setTimeout(() => {
     const bs = $$('.mv-btn'); bs.forEach((b) => b.classList.add('is-sheen'));
     setTimeout(() => bs.forEach((b) => b.classList.remove('is-sheen')), 1000);
   }, 700);

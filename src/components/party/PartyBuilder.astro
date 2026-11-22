@@ -133,16 +133,13 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
           <p class="pb-est-s" id="pb-sub">{initGuests} guests &times; {inr(initial.price)} {UNIT} &middot; before taxes</p>
           <p class="pb-sr" id="pb-live" role="status" aria-live="polite"></p>
           <div class="pb-contact">
-            <label class="pb-cf"><span>Your name</span><input type="text" id="pb-name" name="name" autocomplete="name" placeholder="e.g. Priya" /></label>
-            <label class="pb-cf"><span>Mobile / WhatsApp</span><input type="tel" id="pb-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit number" pattern="[0-9 +]{10,14}" /></label>
-            <label class="pb-cf pb-cf--w"><span>Email <em>(optional)</em></span><input type="email" id="pb-email" name="email" autocomplete="email" placeholder="you@example.com" /></label>
+            <label class="pb-cf fl-field"><input class="fk-f-field" type="text" id="pb-name" name="name" autocomplete="name" placeholder="e.g. Priya" /><span class="fl-fl">Your name</span><svg class="fl-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#2a5019" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" pathLength="20"/></svg></label>
+            <label class="pb-cf fl-field"><input class="fk-f-field" type="tel" id="pb-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="10-digit number" pattern="[0-9 +]{10,14}" /><span class="fl-fl">Mobile / WhatsApp</span><svg class="fl-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#2a5019" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" pathLength="20"/></svg></label>
+            <label class="pb-cf pb-cf--w fl-field"><input class="fk-f-field" type="email" id="pb-email" name="email" autocomplete="email" placeholder="you@example.com" /><span class="fl-fl">Email <span class="fl-opt">(optional)</span></span><svg class="fl-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#2a5019" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" pathLength="20"/></svg></label>
           </div>
           <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
-          <a class="fk-btn fk-btn--primary pb-wa" id="pa-wa" href={waHi} target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.9 7L4 20l1.1-3.9A8 8 0 1 1 20 12z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .7a3.5 3.5 0 0 1-1.7-1.7l.7-1-1-2z"/></svg>
-            <span>Continue on WhatsApp</span>
-          </a>
-          <a class="pb-call" href={`tel:+${WA}`}>Call Fursat</a>
+          <span class="fl-ring"><a class="fl-go pb-wa" id="pa-wa" href={waHi} target="_blank" rel="noopener"><span class="fl-roll" aria-hidden="true"><span class="fl-roll-in"><span>Continue on WhatsApp</span><span>Continue on WhatsApp</span></span></span><span class="fl-sr">Continue on WhatsApp</span><span class="fl-chip" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></span>
+          <a class="fl-sec pb-call" href={`tel:+${WA}`}><span>Call Fursat</span></a>
           <p class="pb-fine">Your final quote is confirmed by the Fursat team.</p>
         </div>
 
@@ -432,4 +429,44 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 .pb-cf input{width:100%;min-width:0;box-sizing:border-box;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid rgba(201,154,67,.55);background:rgba(255,250,240,.96);color:#10261a;font:500 1rem/1 var(--fk-sans,"Poppins",sans-serif);text-transform:none;letter-spacing:0}
 .pb-cf input:focus-visible{outline:2px solid #c99a43;outline-offset:2px}
 @media (max-width:420px){.pb-contact{grid-template-columns:minmax(0,1fr)}}
+
+/* ===== F3 light touch patch: contact block + estimate card (white + red + green, MODERN-FINISH) ===== */
+.fl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.pb-est{background:linear-gradient(180deg in oklab,rgba(42,80,25,.08),transparent 140px),#fff;border-left:1px dashed rgba(42,80,25,.35)}
+.pb-est-l{color:#666}.pb-est-s,.pb-est .pb-fine{color:#666}
+/* fields: 52px, 16px, radius 14, float label (input BEFORE label so a sibling selector works everywhere, no :has) */
+.pb-contact{gap:12px}
+.pb-cf{position:relative;display:block;text-transform:none;letter-spacing:0;opacity:1}
+.pb-est .pb-cf .fk-f-field{height:52px;padding:20px 44px 0 16px;font-size:16px;border:1px solid #cfcfcf;border-radius:14px;background:#fff;color:#17140f;box-shadow:none;min-height:0;transition:border-color 200ms ease,box-shadow 200ms ease}
+.pb-est .pb-cf .fk-f-field:focus,.pb-est .pb-cf .fk-f-field:focus-visible{outline:0;border-color:#2a5019;box-shadow:0 0 0 4px rgba(42,80,25,.12)}
+.pb-est .pb-cf .fk-f-field::placeholder{color:transparent}
+.pb-est .pb-cf .fk-f-field:focus::placeholder{color:#666}
+.fl-fl{position:absolute;left:16px;top:0;height:52px;display:flex;align-items:center;font:400 16px/1 var(--fk-sans);color:#666;transform-origin:left center;pointer-events:none;transition:transform 200ms cubic-bezier(.25,1,.5,1),color 200ms ease}
+.fl-opt{margin-left:.3em}
+.pb-cf .fk-f-field:focus~.fl-fl,.pb-cf .fk-f-field:not(:placeholder-shown)~.fl-fl,.pb-cf .fk-f-field:-webkit-autofill~.fl-fl{transform:translateY(-6px) scale(.75)}
+.pb-cf .fk-f-field:focus~.fl-fl{color:#2a5019}
+.fl-ok{position:absolute;right:16px;top:17px;width:18px;height:18px;pointer-events:none}
+.fl-ok path{stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s ease}
+.pb-cf .fk-f-field:not(:placeholder-shown):valid~.fl-ok path{stroke-dashoffset:0}
+/* Continue on WhatsApp = green text-roll pill with arrow chip */
+.fl-ring{display:block;padding:2px;margin:0 -2px;border-radius:999px}
+.fl-go{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:8px 8px 8px 24px;border:0;border-radius:999px;color:#fff;font:600 15px/20px var(--fk-sans);text-decoration:none;-webkit-tap-highlight-color:transparent;background:linear-gradient(180deg in oklab,#2f5a1c,#24461a);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -6px rgba(42,80,25,.45);transition:scale 120ms cubic-bezier(.25,.46,.45,.94)}
+.fl-go:active{scale:.96}
+.fl-go::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.35) 48%,transparent 76%);transform:translateX(-130%)}
+.fl-roll{display:block;height:20px;overflow:hidden;min-width:0}
+.fl-roll-in{display:flex;flex-direction:column;transition:transform 500ms cubic-bezier(.25,1,.5,1)}
+.fl-roll-in>span{display:block;height:20px;white-space:nowrap}
+.fl-chip{flex:none;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#fff;color:#2a5019}
+.fl-chip svg{width:16px;height:16px;transition:transform 500ms cubic-bezier(.25,1,.5,1)}
+.fl-go:focus-visible{outline:2px solid #2a5019;outline-offset:3px}
+.fl-go:focus-visible .fl-roll-in{transform:translateY(-50%)}
+.fl-go:focus-visible .fl-chip svg{transform:rotate(-45deg)}
+@media (hover:hover){.fl-go:hover .fl-roll-in{transform:translateY(-50%)}.fl-go:hover .fl-chip svg{transform:rotate(-45deg)}.fl-go:hover::after{transform:translateX(130%);transition:transform .65s ease}}
+/* Call Fursat = ghost with a sliding green fill */
+.fl-sec{position:relative;isolation:isolate;overflow:hidden;display:grid;place-items:center;min-height:48px;margin-top:10px;padding:0 24px;border:1px solid #2a5019;border-radius:999px;background:#fff;color:#2a5019;font:600 15px/20px var(--fk-sans);text-decoration:none;transition:color .4s cubic-bezier(.22,1,.36,1),scale 120ms cubic-bezier(.25,.46,.45,.94)}
+.fl-sec::before{content:"";position:absolute;inset:0;z-index:-1;background:#2a5019;transform:translateX(-100%);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.fl-sec:active{scale:.96}
+.fl-sec:focus-visible{outline:2px solid #2a5019;outline-offset:3px;color:#fff}
+.fl-sec:focus-visible::before{transform:none}
+@media (hover:hover){.fl-sec:hover{color:#fff}.fl-sec:hover::before{transform:none}}
 </style>

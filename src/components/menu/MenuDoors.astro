@@ -2,7 +2,7 @@
 // /menu first screen (owner's Plan B, 13 Nov): 50/50 Drinks | Food. Tapping a side opens it to 75/25.
 // Drinks = the bar image animated in code (slow zoom, light sweep) with 5 hexagon hotspots that open
 // their drink group. Food = a half-visible rotating table of real dishes; the front dish grows,
-// tapping it opens the dish sheet (Add to Picks). Phone: Drinks on top, Food below.
+// tapping it opens the dish sheet (photo, price, WhatsApp). Phone: Drinks on top, Food below.
 // Real photos only (dish-photos.json). A dish upgrades to its spin clip when menu-table.json lists one.
 import '../../styles/menu-doors.css';
 interface Dish { title: string; label: string; price: string; dn: string; sm: string; w?: number; clip: string }
@@ -79,6 +79,7 @@ const HEX = 'polygon(25% 4%,75% 4%,100% 50%,75% 96%,25% 96%,0 50%)';
       <h2 class="md-hl">Dine. Delight. <span>Repeat.</span></h2>
       <p class="md-sub num">{foodSections} sections · {foodCount} dishes</p>
       <button class="md-btn" type="button" data-side-go="food">Full food menu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      <slot name="food-actions" />
     </div>
   </div>
 

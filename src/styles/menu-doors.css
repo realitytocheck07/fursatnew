@@ -155,7 +155,6 @@
 .md-x[hidden]{display:none}
 
 /* an empty picks pill waits until the guest leaves this screen */
-.mv.md-in .mv-picks[data-count="0"]{opacity:0;visibility:hidden;pointer-events:none}
 .md-ring{position:fixed;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;z-index:81;pointer-events:none;border:2px solid #ffe2a6;background:radial-gradient(closest-side,transparent 55%,rgb(255 190 90 / .45))}
 
 /* ── phones and narrow tablets: Drinks on top, Food below, seam runs across ── */

@@ -12,6 +12,11 @@ const { page, kicker, h1a, h1b, lead, ctas, alt, id = 'ch-h1', sub, subHl, hlCol
 const h = (heroes as any)[page];
 const textRight = h.windows[0][0] < 20; // window on the left (banquet art) -> text on the right
 const src = (w: number, n = 1) => `/assets/heroes/${page}${n > 1 ? '-' + n : ''}-${w}.webp`;
+// phone art (v5.97, kit 49): finished phone images made by the lead dev, used as they are. Real sizes of the 1080 files.
+const phoneWH: Record<string, [number, number]> = { party: [1080, 614], banquet: [1080, 785], bar: [1080, 667], cafe: [1080, 691] };
+const [pw, ph] = phoneWH[page];
+const phoneSrc = (w: number, n = 1) => `/assets/heroes/${page}${n > 1 ? '-' + n : ''}-phone-${w}.webp`;
+const phoneSrcset = (n: number) => `${phoneSrc(780, n)} 780w, ${phoneSrc(1080, n)} 1080w`;
 const sets = Array.from({ length: h.sets || 1 }, (_, i) => i + 1);
 const srcset = (n: number) => `${src(768, n)} 768w, ${src(1024, n)} 1024w, ${src(1536, n)} 1536w`;
 // label pill under ring k: centred on the ring, just below the lowest ring edge (percent of the art)
@@ -19,13 +24,17 @@ const labY = Math.max(...h.windows.map((w: number[]) => w[3])) + 2.4;
 const labX = (k: number) => Math.min(90, (h.windows[k][0] + h.windows[k][2]) / 2);
 const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf(subHl)), subHl, sub.slice(sub.indexOf(subHl) + subHl.length)] : [sub]) : null;
 ---
-<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} data-manual={manual ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
+<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} data-manual={manual ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-par:${pw}/${ph};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
   <div class="ch-art">
+    <picture class="ch-pic">
+    <source media="(max-width: 820px)" srcset={phoneSrcset(1)} sizes="100vw" width={pw} height={ph} />
     <img class="ch-img" src={src(1024)} srcset={`${src(768)} 768w, ${src(1024)} 1024w, ${src(1536)} 1536w`} sizes="100vw"
       width={h.w} height={h.h} alt={alt} fetchpriority="high" loading="eager" decoding="async"
       onload="this.classList.add('is-in')" />
-    {sets.slice(1).map((n) => <img class="ch-img ch-alt" data-srcset={srcset(n)} sizes="100vw" width={h.w} height={h.h} alt="" aria-hidden="true" decoding="async" />)}
+    </picture>
+    {sets.slice(1).map((n) => <img class="ch-img ch-alt" data-srcset={srcset(n)} data-srcset-phone={phoneSrcset(n)} sizes="100vw" width={h.w} height={h.h} alt="" aria-hidden="true" decoding="async" />)}
     <slot name="art" />
+    {!manual && sets.length > 1 && <div class="ch-dots" aria-hidden="true">{sets.map(() => <span class="ch-dot"><i></i></span>)}</div>}
     {labels && (
       <div class="ch-labs">
         {labels.map((set, si) => set.map((t, k) => <span class={`ch-lab ch-lab--${k}`} data-set={si} style={`left:${labX(k)}%;top:${labY}%`}>{t}</span>))}
@@ -54,6 +63,14 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
   document.querySelectorAll('.ch-img:not(.ch-alt)').forEach(function (i) { if (i.complete && i.naturalWidth) i.classList.add('is-in'); });
   /* rotate the photo sets: extra images load when the browser is idle, then cross-fade every 6 s.
      Paused off-screen and in background tabs. Under reduced motion only a labelled hero (party) rotates, as an instant swap. */
+  /* phones (<= 820 px): the rotating photos and the banquet script's Ken-Burns layers read data-srcset / srcset, so on a phone point both at the phone files */
+  var phoneMQ = matchMedia('(max-width: 820px)');
+  document.querySelectorAll('.ch').forEach(function (hero) {
+    if (!phoneMQ.matches) return;
+    hero.querySelectorAll('.ch-alt').forEach(function (im) { if (im.dataset.srcsetPhone) im.dataset.srcset = im.dataset.srcsetPhone; });
+    var first = hero.querySelector('.ch-img:not(.ch-alt)'), so = first && first.parentNode.querySelector('source');
+    if (first && so && so.getAttribute('srcset')) first.setAttribute('srcset', so.getAttribute('srcset'));
+  });
   var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('.ch').forEach(function (hero) {
     if (hero.hasAttribute('data-manual')) return;   /* banquet drives its own 4-slide rotation */
@@ -97,7 +114,7 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
 @media (max-width: 820px) {
   /* v5.96.2: the labels stay inside the photo, in one row at its bottom-right; only the active set shows */
   .ch[data-labelled] .ch-art { overflow: hidden; }
-  .ch-labs { inset: auto 10px 10px auto; width: auto; height: auto; translate: none; top: auto; display: flex; gap: 6px; }
+  .ch-labs { width: auto; height: auto; translate: none; top: auto; display: flex; gap: 6px; }
   .ch-lab { position: static; translate: none; display: none; }
   .ch[data-set="0"] .ch-lab[data-set="0"], .ch[data-set="1"] .ch-lab[data-set="1"], .ch[data-set="2"] .ch-lab[data-set="2"] { display: inline-flex; }
 }
@@ -105,12 +122,48 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
 .ch-orn { width: 180px; height: 18px; margin: 18px 0 14px; fill: none; stroke: #c99a43; stroke-width: 1.4; }
 .ch-lead { margin: 0 0 24px; max-width: 46ch; font: 400 clamp(1rem, 1.2vw, 1.12rem)/1.6 var(--fk-sans, Rupee,Poppins, sans-serif); color: #4d4434; }
 .ch-btns { display: flex; flex-wrap: wrap; gap: 12px; }
+.ch-pic { display: contents; }
+.ch-dots { display: none; }
+/* ---- phones (v5.97, kit 49): the finished phone image at its own ratio, no crop, text block under it. Laptop (>= 821 px) is untouched.
+   Specificity note: doubled .ch / .ch-art selectors beat the older phone overrides in party.astro (.pa-panel--hero ...) without editing that file. ---- */
 @media (max-width: 820px) {
-  .ch { display: block; min-height: 0; padding-top: var(--sh-h, 72px); background-image: none; }
-  .ch-art { position: relative; inset: auto; z-index: auto; aspect-ratio: 16 / 9; background: var(--ch-lqip) right center / cover no-repeat; }
-  .ch-img { object-position: right center; }
-  .ch--right .ch-art { background-position: left center; }
-  .ch-copy, .ch--right .ch-copy { width: auto; margin: 0; padding: 20px clamp(16px, 5vw, 28px) 32px; }
+  .ch { --phh-ease: cubic-bezier(.23, 1, .32, 1); --phh-ease-io: cubic-bezier(.77, 0, .175, 1); }
+  .ch.ch { display: block; padding-top: var(--sh-h, 72px); background-image: none; }
+  .ch .ch-art { position: relative; inset: auto; z-index: auto; width: 100%; height: auto; aspect-ratio: var(--ch-par); margin: 0; overflow: hidden; background: #f6e4c9; }
+  .ch .ch-img { object-fit: cover; object-position: center; transform-origin: 50% 58%; }
+  /* image motion (transform, opacity, clip-path only): soft wipe + the photo settles 1.06 -> 1, then a slow drift while the slide is active.
+     Hidden state first: scale and clip snap back only after the 1.2 s fade-out, so an outgoing slide never pops while it fades. */
+  .ch .ch-img { opacity: 0; scale: 1.06; clip-path: inset(0 0 16% 0); transition: opacity 600ms var(--phh-ease), scale 0s linear 1200ms, clip-path 0s linear 1200ms, transform 6500ms linear; }
+  .ch .ch-alt { transition: opacity 1200ms var(--phh-ease), scale 0s linear 1200ms, clip-path 0s linear 1200ms, transform 6500ms linear; }
+  .ch .ch-img.is-in { opacity: 1; scale: 1; clip-path: inset(0 0 0 0); transition: opacity 600ms var(--phh-ease), scale 1100ms var(--phh-ease), clip-path 1100ms var(--phh-ease-io), transform 6500ms linear; }
+  .ch .ch-alt.is-in { transition: opacity 1200ms var(--phh-ease), scale 1100ms var(--phh-ease), clip-path 1100ms var(--phh-ease-io), transform 6500ms linear; }
+  .ch[data-set="0"] .ch-img.is-in:not(.ch-alt), .ch .ch-img.is-in.is-top { transform: scale(1.03); }
+  /* text rises in a 70 ms stagger */
+  .ch .ch-copy > * { animation: ch-rise 560ms var(--phh-ease) both; animation-delay: calc(var(--ri, 0) * 70ms + 160ms); }
+  .ch .ch-copy > :nth-child(2) { --ri: 1; } .ch .ch-copy > :nth-child(3) { --ri: 2; } .ch .ch-copy > :nth-child(4) { --ri: 3; }
+  .ch .ch-copy > :nth-child(5) { --ri: 4; } .ch .ch-copy > :nth-child(6) { --ri: 5; } .ch .ch-copy > :nth-child(7) { --ri: 6; }
+  /* text block under the image */
+  .ch .ch-copy, .ch.ch--right .ch-copy { width: auto; margin: 0; padding: 20px clamp(16px, 5vw, 20px) 32px; }
+  .ch .ch-kick { margin: 0 0 10px; }
+  .ch .ch-h1 { font-size: clamp(2.125rem, 9.2vw, 2.375rem); line-height: 1.08; letter-spacing: -.01em; }
+  .ch .ch-sub { margin: 10px 0 0; }
+  .ch .ch-orn { width: 150px; margin: 12px 0 10px; }
+  .ch .ch-lead { margin: 0 0 18px; max-width: none; font-size: 1rem; line-height: 1.5; text-wrap: pretty; }
+  /* buttons: main full width 52 px, second one below it as a light outline; press = 0.96 */
+  .ch .ch-btns { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 12px; }
+  .ch .ch-btns .fk-btn { width: 100%; flex: none; min-height: 48px; padding-inline: 18px; white-space: nowrap; touch-action: manipulation; user-select: none; -webkit-user-select: none; transition: transform 150ms var(--phh-ease), background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
+  .ch .ch-btns .fk-btn--primary { min-height: 52px; font-size: 1rem; }
+  .ch .ch-btns .fk-btn--secondary { background: #fffdf8; border: 1.5px solid #c99a43; }
+  .ch .ch-btns .fk-btn:not(:disabled):active { transform: scale(.96); }
+  /* party: labels sit on the photo, bottom right, inside the window */
+  .ch .ch-labs { inset: auto 3.4% 9% auto; }
+  /* progress dots (rotating pages): bottom left of the photo, each fills over the 6 s the slide stays */
+  .ch .ch-dots { position: absolute; left: 4.4%; bottom: 7%; z-index: 2; display: flex; gap: 6px; pointer-events: none; }
+  .ch .ch-dot { width: 26px; height: 4px; border-radius: 4px; overflow: hidden; background: rgba(255, 250, 240, .6); box-shadow: 0 0 0 1px rgba(24, 48, 31, .25); }
+  .ch .ch-dot i { display: block; height: 100%; background: #c99a43; transform: scaleX(0); transform-origin: left center; }
+  .ch[data-set="0"] .ch-dot:nth-child(1) i, .ch[data-set="1"] .ch-dot:nth-child(2) i, .ch[data-set="2"] .ch-dot:nth-child(3) i { transform: scaleX(1); transition: transform 6000ms linear; }
+  .ch[data-set="1"] .ch-dot:nth-child(1) i, .ch[data-set="2"] .ch-dot:nth-child(-n+2) i { transform: scaleX(1); }
 }
+@keyframes ch-rise { from { opacity: 0; transform: translateY(14px); } }
 @media (prefers-reduced-motion: reduce) { .ch-img, .ch-lab { transition: none; } }
 </style>

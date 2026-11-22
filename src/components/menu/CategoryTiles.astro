@@ -1,0 +1,21 @@
+---
+// Big category tiles at the top of each list (Food = "The Table", Drinks = "The Bar"): real group names and real counts from the menu data.
+// Tap one: it turns gold, a check springs in, then the page scrolls to that category (menu-v2.ts). Drinks go through the 21+ check first.
+interface Tile { id: string; label: string; count: number }
+interface Props { side: 'food' | 'drinks'; tiles: Tile[] }
+const { side, tiles } = Astro.props as Props;
+const unit = (n: number) => (side === 'food' ? (n === 1 ? 'dish' : 'dishes') : (n === 1 ? 'drink' : 'drinks'));
+---
+<nav class={`mc-tiles mc-tiles--${side}`} id={`mc-${side}`} aria-label={side === 'food' ? 'Food categories' : 'Drink categories'}>
+  <ul class="mc-grid" role="list">
+    {tiles.map((t, i) => (
+      <li>
+        <button class="mc-tile" type="button" data-mc-go={t.id} data-side-of={side} style={`--i:${i}`}>
+          <span class="mc-n">{t.label}</span>
+          <span class="mc-c num">{t.count} {unit(t.count)}</span>
+          <span class="mc-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5.5 12.5 4.2 4.2 8.8-9.4" /></svg></span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</nav>

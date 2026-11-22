@@ -55,6 +55,7 @@ const OFFER_ENABLED = false;
             <span class="fom-prefix">+91</span>
             <input 
               type="tel" 
+              inputmode="numeric" autocomplete="tel-national" 
               id="fom-phone" 
               class="fom-input" 
               placeholder="Enter 10-digit mobile number" 
@@ -65,8 +66,7 @@ const OFFER_ENABLED = false;
             />
           </div>
           <button type="submit" class="fom-submit-btn" id="fom-submit">
-            <span>Get My Offer</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span class="fl-roll" aria-hidden="true"><span class="fl-roll-in"><span>Get My Offer</span><span>Get My Offer</span></span></span><span class="fl-sr">Get My Offer</span><span class="fl-chip" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </button>
         </form>
         <p class="fom-disclaimer">Your offer opens in WhatsApp. Send the message to claim it.</p>
@@ -103,8 +103,7 @@ const OFFER_ENABLED = false;
 
         <div class="fom-cta-group">
           <a href="/reserve" class="fom-reserve-act" id="fom-book-now" data-open="book">
-            <span>Book a Table Now</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span class="fl-roll" aria-hidden="true"><span class="fl-roll-in"><span>Book a Table Now</span><span>Book a Table Now</span></span></span><span class="fl-sr">Book a Table Now</span><span class="fl-chip" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </a>
           <a href="https://wa.me/919059670033?text=Hi%20Fursat!%20I%20unlocked%20coupon%20code%20FURSAT15%20for%2015%25%20OFF.%20I%20would%20like%20to%20reserve%20a%20table." target="_blank" rel="noopener" class="fom-wa-act">
             <span>Claim via WhatsApp</span>
@@ -578,6 +577,68 @@ const OFFER_ENABLED = false;
     text-align: center;
     margin: 12px 0 0;
   }
+
+  /* ===== F3 light touch (owner 22 Nov): white card, fk-f style field, red claim button. Logic and wiring untouched. ===== */
+  .fom-sr, .fom-modal .fl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .fom-modal::backdrop { background: rgba(16, 38, 26, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .fom-modal .fom-box { background: #fff; border: 0; color: #17140f; border-radius: 24px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 24px 60px -20px rgba(16,38,26,.45); }
+  .fom-modal .fom-box::before { content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; pointer-events: none; background: linear-gradient(160deg, rgba(42,80,25,.28), rgba(42,80,25,.06) 40%, rgba(192,41,31,.18)); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; -webkit-mask-composite: xor; }
+  .fom-modal .fom-close { background: #f5f5f5; color: #17140f; width: 44px; height: 44px; top: 10px; right: 10px; }
+  .fom-modal .fom-close:hover { background: #e6e6e6; transform: none; }
+  .fom-modal .fom-title { color: #17140f; }
+  .fom-modal .fom-sub, .fom-modal .fom-disclaimer, .fom-modal .fom-terms-note { color: #666; }
+  .fom-modal .fom-ele-card { background: #f5f5f5; border: 1px solid #e6e6e6; border-radius: 20px; }
+  .fom-modal .fom-tag, .fom-modal .fom-sparkle { color: #c0291f; }
+  .fom-modal .fom-avatar { border-color: #fff; box-shadow: 0 0 0 2px #c0291f, 0 8px 18px -8px rgba(192,41,31,.5); }
+  .fom-modal .fom-input-group { background: #fff; border: 1px solid #cfcfcf; border-radius: 14px; min-height: 52px; padding: 0 6px 0 16px; box-shadow: none; transition: border-color 200ms ease, box-shadow 200ms ease; }
+  .fom-modal .fom-input-group:focus-within { border-color: #2a5019; box-shadow: 0 0 0 4px rgba(42,80,25,.12); }
+  .fom-modal .fom-prefix { color: #17140f; border-right: 1px solid #e6e6e6; }
+  .fom-modal .fom-input { color: #17140f; font-size: 16px; min-width: 0; width: 100%; }
+  .fom-modal .fom-input::placeholder { color: #666; opacity: 1; }
+  /* text-roll pill (same values as MODERN-FINISH 1). Red = claim, green = book. */
+  .fom-modal .fom-submit-btn, .fom-modal .fom-reserve-act { position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 8px 8px 24px; border-radius: 999px; color: #fff; font: 600 15px/20px var(--fk-sans, "Poppins", system-ui, sans-serif); -webkit-tap-highlight-color: transparent; transition: scale 120ms cubic-bezier(.25,.46,.45,.94); }
+  .fom-modal .fom-submit-btn { background: linear-gradient(180deg in oklab, #c8301f, #b02518); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -6px rgba(192,41,31,.45); }
+  .fom-modal .fom-reserve-act { background: linear-gradient(180deg in oklab, #2f5a1c, #24461a); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -6px rgba(42,80,25,.45); }
+  .fom-modal .fom-submit-btn:active, .fom-modal .fom-reserve-act:active { scale: .96; transform: none; }
+  .fom-modal .fom-submit-btn::after, .fom-modal .fom-reserve-act::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.35) 48%, transparent 76%); transform: translateX(-130%); }
+  .fom-modal .fl-roll { display: block; height: 20px; overflow: hidden; min-width: 0; }
+  .fom-modal .fl-roll-in { display: flex; flex-direction: column; transition: transform 500ms cubic-bezier(.25,1,.5,1); }
+  .fom-modal .fl-roll-in > span { display: block; height: 20px; white-space: nowrap; }
+  .fom-modal .fl-chip { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #fff; }
+  .fom-modal .fom-submit-btn .fl-chip { color: #b02518; }
+  .fom-modal .fom-reserve-act .fl-chip { color: #2a5019; }
+  .fom-modal .fl-chip svg { width: 16px; height: 16px; transition: transform 500ms cubic-bezier(.25,1,.5,1); }
+  .fom-modal .fom-submit-btn:focus-visible, .fom-modal .fom-reserve-act:focus-visible { outline: 2px solid #2a5019; outline-offset: 3px; }
+  .fom-modal .fom-submit-btn:focus-visible .fl-roll-in, .fom-modal .fom-reserve-act:focus-visible .fl-roll-in { transform: translateY(-50%); }
+  .fom-modal .fom-submit-btn:focus-visible .fl-chip svg, .fom-modal .fom-reserve-act:focus-visible .fl-chip svg { transform: rotate(-45deg); }
+  @media (hover: hover) {
+    .fom-modal .fom-submit-btn:hover, .fom-modal .fom-reserve-act:hover { transform: none; }
+    .fom-modal .fom-submit-btn:hover .fl-roll-in, .fom-modal .fom-reserve-act:hover .fl-roll-in { transform: translateY(-50%); }
+    .fom-modal .fom-submit-btn:hover .fl-chip svg, .fom-modal .fom-reserve-act:hover .fl-chip svg { transform: rotate(-45deg); }
+    .fom-modal .fom-submit-btn:hover::after, .fom-modal .fom-reserve-act:hover::after { transform: translateX(130%); transition: transform .65s ease; }
+  }
+  /* reward: the red ticket from the approved mock, white notches, grey code panel */
+  .fom-modal .fom-ticket { background: linear-gradient(180deg in oklab, #c8301f, #b02518); border: 2px dashed rgba(255,255,255,.55); box-shadow: 0 12px 28px -12px rgba(192,41,31,.55); }
+  .fom-modal .fom-ticket::after { display: none; }
+  .fom-modal .fom-ticket-notch { background: #fff; border: 0; }
+  .fom-modal .fom-tk-badge, .fom-modal .fom-tk-flat, .fom-modal .fom-tk-scope { color: #fff; }
+  .fom-modal .fom-tk-percent { color: #fff; text-shadow: none; }
+  .fom-modal .fom-code-box { background: #fff; border: 0; border-radius: 14px; }
+  .fom-modal .fom-cb-label { color: #666; }
+  .fom-modal .fom-code { color: #17140f; }
+  .fom-modal .fom-copy-btn { background: #2a5019; color: #fff; min-height: 36px; }
+  .fom-modal .fom-copy-btn:hover { background: #24461a; }
+  .fom-modal .fom-wa-act { position: relative; isolation: isolate; overflow: hidden; min-height: 48px; background: #fff; border: 1px solid #2a5019; color: #2a5019; font-weight: 600; font-size: 15px; transition: color .4s cubic-bezier(.22,1,.36,1), scale 120ms cubic-bezier(.25,.46,.45,.94); }
+  .fom-modal .fom-wa-act::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #2a5019; transform: translateX(-100%); transition: transform .4s cubic-bezier(.22,1,.36,1); }
+  .fom-modal .fom-wa-act:active { scale: .96; }
+  @media (hover: hover) { .fom-modal .fom-wa-act:hover { color: #fff; } .fom-modal .fom-wa-act:hover::before { transform: none; } }
+  .fom-modal .fom-wa-act:focus-visible { outline: 2px solid #2a5019; outline-offset: 3px; }
+  /* trigger: white bubble, green ring; on phones it clears the bottom nav (it was hidden under it) */
+  .fom-bubble { background: #fff; color: #17140f; border: 0; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 32px -12px rgba(16,38,26,.3); }
+  .fom-bubble b { color: #c0291f; }
+  .fom-bubble::after { background: #fff; border-right: 0; border-bottom: 0; }
+  .fom-mascot-btn { background: #fff; border: 2.5px solid #2a5019; box-shadow: 0 8px 20px -8px rgba(16,38,26,.45); }
+  @media (max-width: 767px) { .fom-trigger { bottom: calc(var(--mb-clear, 76px) + 12px); } }
 </style>
 
 <script is:inline>

@@ -1,0 +1,178 @@
+---
+// FURSAT menu book (kit 40d, prefix mb-). Button + full-screen dialog. Pages are built in the browser by book.ts
+// from the real menu data embedded below (src/data/food.json, dish-photos.json, site.json). Nothing is invented here.
+import food from '../../../data/food.json';
+import drinks from '../../../data/drinks.json';
+import photos from '../../../data/dish-photos.json';
+import site from '../../../data/site.json';
+import focus from '../../../data/photo-focus.json';
+import { FOOD_GROUPS, DRINK_GROUPS } from '../menuGroups';
+import '../../../styles/menu-book.css';
+
+interface Props { label?: string }
+const { label = 'Open the menu book' } = Astro.props;
+
+// Photos of hands or a person are for menu rows only (dish-photos.json note): they get a small row thumb, never the big plate.
+const NO_PLATE = new Set(['Chicken Fry Piece Pulao', 'LIFE FURSAT BHAI', 'Classic Paneer Tikka', 'Tiramisu']);
+const FOC = focus as Record<string, { cx: number; cy: number; z: number }>;
+const P = (photos as { photos: Record<string, { src: string; sm: string; xs: string }> }).photos;
+
+// Sections of the book = the live menu's groups (FOOD_GROUPS: "Starters", "Mains", ...), each holding its member sections' dishes in menu order.
+// Same display rename as menu.astro (TODO(client): the data names one section after a person).
+const SHOWN_SECTION: Record<string, string> = { "Sreemukhi's special menu": 'Special menu' };
+const bySection = new Map((food as { section: string; items: any[] }[]).map((s) => [SHOWN_SECTION[s.section] ?? s.section, s.items]));
+// Full and Half are two choices only where the data has both prices: description "Half ₹599 | Full ₹999".
+const HF = /Half\s*₹?\s*([\d,]+)\s*\|\s*Full\s*₹?\s*([\d,]+)/i;
+const num = (s: string) => Number(s.replace(/,/g, ''));
+const secs = FOOD_GROUPS.map((g) => ({ id: g.id, name: g.label, items: g.sections.flatMap((n) => bySection.get(n) ?? []) }));
+const placed = secs.reduce((n, s) => n + s.items.length, 0);
+if (placed !== (food as any[]).reduce((n, s) => n + s.items.length, 0)) throw new Error('menu book: a food section is not in any FOOD_GROUPS group');
+
+// Drinks follow the live menu: same groups (DRINK_GROUPS), same variants and the same main price rule as menu.astro (a second price shows only when there are two or more).
+const titleCase = (t: string) => (t === t.toUpperCase() && /[A-Z]/.test(t) ? t.toLowerCase().replace(/(^|[\s(/&-])([a-z])/g, (_m, a, b) => a + b.toUpperCase()) : t);
+const VARIANTS: [string, string][] = [['price30ml', '30 ml'], ['priceGlass', 'Glass'], ['price330ml', '330 ml'], ['price500ml', '500 ml'], ['pricePitcher', 'Pitcher'], ['priceBucket', 'Bucket'], ['priceTower', 'Tower'], ['priceBottle', 'Bottle']];
+const drinkBySection = new Map((drinks as { section: string; items: any[] }[]).map((s) => [s.section, s.items]));
+const allNames = [...(food as any[]), ...(drinks as any[])].flatMap((s) => s.items.map((i: any) => i.name as string));
+const nameCount = new Map<string, number>();
+for (const n of allNames) nameCount.set(n, (nameCount.get(n) || 0) + 1);
+const usedDrinks = DRINK_GROUPS.reduce((n, g) => n + g.sections.reduce((m, sn) => m + (drinkBySection.get(sn)?.length ?? 0), 0), 0);
+if (usedDrinks !== (drinks as any[]).reduce((n, s) => n + s.items.length, 0)) throw new Error('menu book: a drink section is not in any DRINK_GROUPS group');
+const bar = DRINK_GROUPS.map((g) => {
+  const multi = g.sections.length > 1;
+  let last = '';
+  const its = g.sections.flatMap((sn) => (drinkBySection.get(sn) ?? []).map((it: any) => ({ it, sn })));
+  const labels = new Set(its.map(({ it, sn }) => it.subCategory || (multi ? sn : '')));
+  const items = its.map(({ it, sn }) => {
+    const lab = it.subCategory || (multi ? sn : '');
+    const sub = labels.size > 1 && lab !== last ? lab || sn : '';
+    last = lab;
+    const vv = VARIANTS.filter(([k]) => typeof it[k] === 'number').map(([k, l]) => [l, it[k]] as [string, number]);
+    const nm = titleCase(it.name as string);
+    const ph = P[it.name];
+    return {
+      n: nm,
+      ln: (nameCount.get(it.name) || 0) > 1 ? `${nm} (${titleCase(sn)})` : nm, // the same name twice in the data (Canned Juice, B52): the section tells them apart
+      k: `${sn}|${it.name}`,
+      p: (it.price ?? null) as number | null,
+      v: false, x: true, // every drink is marked vegetarian in the data, which says nothing for a bar menu: no veg mark on drinks
+      h: false,
+      d: [it.description, it.note].filter(Boolean).join(' · ') as string,
+      vs: vv.length > 1 ? vv : null,
+      ph: ph?.xs ?? null, big: ph?.src ?? null,
+      f: FOC[it.name] ? [FOC[it.name].cx, FOC[it.name].cy, FOC[it.name].z] : null,
+      pl: !!ph && !NO_PLATE.has(it.name),
+      sub,
+      alc: !!it.alc,
+    };
+  });
+  return { id: g.id, name: g.label, alc: items.some((i) => i.alc), items };
+});
+
+const data = {
+  secs: secs.map((s) => ({
+    id: s.id,
+    name: s.name,
+    items: s.items.map((it) => {
+      const m = HF.exec(it.description || '');
+      const vs = m && num(m[2]) === it.price ? ([['Half', num(m[1])], ['Full', num(m[2])]] as [string, number][]) : null;
+      return {
+        n: it.name as string,
+        p: (it.price ?? null) as number | null,
+        v: !!it.veg,
+        h: !!it.spicy,
+        d: ((it.description || '') as string).replace(HF, '').trim(), // "Half | Full" prices become the two choices, not text
+        vs,
+        ph: P[it.name]?.xs ?? null,
+        big: P[it.name]?.src ?? null,
+        f: FOC[it.name] ? [FOC[it.name].cx, FOC[it.name].cy, FOC[it.name].z] : null,
+        pl: !!P[it.name] && !NO_PLATE.has(it.name),
+      };
+    }),
+  })),
+  bar,
+  wa: (site as any).whatsapp as string,
+  dotpe: (site as any).order.dotpe as string,
+};
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+---
+
+<button type="button" class="mb-open" data-mb-open aria-haspopup="dialog">
+  <svg class="mb-open-ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5C4.7 19 4 18.3 4 17.5v-12Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5v-12Z"/></svg>
+  <span>{label}</span>
+</button>
+
+<dialog class="mb-root" id="mb-root" aria-label="FURSAT menu book" data-mb>
+  <div class="mb-bd"></div>
+  <div class="mb-top">
+    <img class="mb-brand" src="/assets/brand/fursat-wordmark.svg" alt="FURSAT" width="132" height="26" />
+    <button type="button" class="mb-x" data-mb-close aria-label="Close the menu book">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="mb-stage">
+    <div class="mb-intro"><div class="mb-tilt"><div class="mb-shift"><div class="mb-book" id="mb-book"></div></div></div></div>
+    <nav class="mb-tabs" id="mb-tabs" aria-label="Menu sections"></nav>
+  </div>
+
+  <div class="mb-dock">
+    <button type="button" class="mb-nav mb-prev" id="mb-prev" aria-label="Previous page">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </button>
+    <p class="mb-where" id="mb-where"></p>
+    <button type="button" class="mb-nav mb-next" id="mb-next" aria-label="Next page">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+    </button>
+  </div>
+  <p class="mb-live" id="mb-live" aria-live="polite"></p>
+
+  <button type="button" class="mb-picks-bar" id="mb-picks-bar" aria-expanded="false" aria-controls="mb-drawer">
+    <span class="mb-pb-t">My picks</span>
+    <span class="mb-pb-n" id="mb-pb-n">0</span>
+    <span class="mb-pb-s" id="mb-pb-s">₹0</span>
+  </button>
+
+  <div class="mb-dr-bd" id="mb-dr-bd" hidden></div>
+  <section class="mb-drawer" id="mb-drawer" aria-label="My picks" hidden>
+    <div class="mb-dr-h"><span class="mb-dr-grip" aria-hidden="true"></span><h2>My picks</h2><button type="button" class="mb-dr-x" id="mb-dr-x" aria-label="Close my picks"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button></div>
+    <ul class="mb-dr-l" id="mb-dr-l"></ul>
+    <p class="mb-dr-empty" id="mb-dr-empty">Tap + on any dish to add it here.</p>
+    <p class="mb-dr-t"><span>Total</span><b id="mb-dr-total">₹0</b></p>
+    <div class="mb-dr-a">
+      <a class="mb-btn mb-roll mb-wa" id="mb-wa" target="_blank" rel="noopener">
+        <span class="mb-roll-w"><span class="mb-roll-in"><span>Send on WhatsApp</span><span aria-hidden="true">Send on WhatsApp</span></span></span>
+        <span class="mb-chip" aria-hidden="true">
+          <svg class="mb-arr" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <i class="mb-ok"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7.5" pathLength="20"/></svg></i>
+        </span>
+      </a>
+      <button type="button" class="mb-btn mb-fill mb-fill-l" id="mb-show"><span>Show to waiter</span><span class="mb-fill-p" aria-hidden="true">Show to waiter</span></button>
+      <a class="mb-btn mb-fill mb-fill-r" id="mb-order" href={data.dotpe} target="_blank" rel="noopener"><span>Order online</span><span class="mb-fill-p" aria-hidden="true">Order online</span></a>
+    </div>
+  </section>
+
+  <section class="mb-waiter" id="mb-waiter" aria-label="My picks for the waiter" hidden>
+    <button type="button" class="mb-x mb-w-x" id="mb-w-x" aria-label="Back to the menu book"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <h2>My picks</h2>
+    <ul id="mb-w-l"></ul>
+    <p class="mb-w-t"><span>Total</span><b id="mb-w-total">₹0</b></p>
+  </section>
+
+  <dialog class="mb-age" id="mb-age" aria-labelledby="mb-age-t" aria-describedby="mb-age-p">
+    <form method="dialog" class="mb-age-in">
+      <h2 id="mb-age-t">The bar menu is for guests 21 and over</h2>
+      <p id="mb-age-p">Alcohol is served only to guests aged 21 or older, with valid ID on request. Please drink responsibly.</p>
+      <div class="mb-age-a">
+        <button class="mb-btn mb-pri" value="yes" id="mb-age-yes">I'm 21 or older</button>
+        <button class="mb-btn" value="no" id="mb-age-no">Show me food</button>
+      </div>
+    </form>
+  </dialog>
+</dialog>
+
+
+<script type="application/json" id="mb-data" set:html={json}></script>
+<script>
+  import { initMenuBook } from './book';
+  initMenuBook();
+</script>

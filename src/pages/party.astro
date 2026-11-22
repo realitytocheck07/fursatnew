@@ -55,7 +55,7 @@ const WA = '919059670033';
 const waHi = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi Fursat! I would like to plan a party.');
 import InstagramFeed from '../components/InstagramFeed.astro';
 ---
-<Base title="Parties & Events – Fursat Kitchen & Bar, Madhapur" description="Birthdays, corporate gatherings, kitty parties and bar bashes at Fursat, Madhapur. Bar party, elite buffet and banquet packages." canonical="https://fursatind.in/party/" preloadImages={[{ href: '/assets/heroes/party-768.webp', media: '(max-width: 820px)', type: 'image/webp' }, { href: '/assets/heroes/party-1536.webp', media: '(min-width: 821px)', type: 'image/webp' }]}>
+<Base title="Parties & Events – Fursat Kitchen & Bar, Madhapur" description="Birthdays, corporate gatherings, kitty parties and bar bashes at Fursat, Madhapur. Bar party, elite buffet and banquet packages." canonical="https://fursatind.in/party/" preloadImages={[{ href: '/assets/heroes/party-phone-780.webp', media: '(max-width: 820px)', type: 'image/webp' }, { href: '/assets/heroes/party-1536.webp', media: '(min-width: 821px)', type: 'image/webp' }]}>
 <a class="skip" href="#pk-main">Skip to main content</a>
 <div class="pa">
   <SiteHeader active="celebrate" variant="plaster" />
@@ -170,9 +170,6 @@ html[data-daypart="evening"] .pa-panel--packs::before{opacity:1;background:radia
 @media (max-width:767px){
   .pa{--pa-bar:calc(76px + env(safe-area-inset-bottom,0px))}
   .pa-panel--hero .ch{min-height:100svh;box-sizing:border-box}
-  .pa-panel--hero .ch-btns{flex-wrap:nowrap;gap:10px}
-  .pa-panel--hero .ch-btns .fk-btn{flex:1 1 0;min-width:0;padding-inline:10px;white-space:nowrap;justify-content:center}
-  .pa-panel--hero .ch-art{aspect-ratio:auto;height:clamp(88px,calc(100svh - var(--pa-hero-x,540px) - var(--pa-bar)),56.25vw)}
 }
 
 /* push-back: the panel that gets covered shrinks to .94 and dims (transform + opacity only). Driven by the NEXT panel's view timeline (CSS scroll-driven animations). */

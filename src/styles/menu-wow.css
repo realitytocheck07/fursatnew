@@ -38,16 +38,6 @@
 .mv-side[data-side-block="drinks"] .mv-grp-h .num{color:#f1c98d}
 .mv-side[data-side-block="drinks"] .mv-grp-h::before{background:#e8301f;box-shadow:0 0 12px #e8301f}
 .mv-side[data-side-block="drinks"] .mv-sec-h{background:rgb(232 48 31 / .18);color:#ffb3a6}
-.mv-side[data-side-block="drinks"] .mv-card{background:linear-gradient(160deg,rgb(255 255 255 / .08),rgb(255 255 255 / .02));border-color:rgb(230 194 122 / .28);box-shadow:0 18px 30px -20px #000,inset 0 1px 0 rgb(255 255 255 / .08);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:box-shadow 250ms ease,border-color 250ms ease}
-@media(hover:hover) and (pointer:fine){.mv-side[data-side-block="drinks"] .mv-card:hover{border-color:#e6c27a;box-shadow:0 18px 30px -20px #000,0 0 30px -8px rgb(232 48 31 / .6)}}
-.mv-side[data-side-block="drinks"] .mv-card .mv-item-name{color:#fbf3e6}
-.mv-side[data-side-block="drinks"] .mv-card .mv-idesc,.mv-side[data-side-block="drinks"] .mv-card .mv-note{color:rgb(251 243 230 / .74)}
-.mv-side[data-side-block="drinks"] .mv-pp{background:rgb(232 48 31 / .16);border-color:rgb(255 138 120 / .55);color:#ffe3dc}
-.mv-side[data-side-block="drinks"] .mv-pp small{color:rgb(255 227 220 / .75)}
-.mv-side[data-side-block="drinks"] .mv-card .fk-chip{background:rgb(255 255 255 / .08);color:#fbf3e6;border-color:rgb(255 255 255 / .12)}
-.mv-side[data-side-block="drinks"] .mv-card .mv-add{background:linear-gradient(180deg,#f03a27,#b61f13);border-color:#ff8a78;box-shadow:0 0 22px -4px rgb(232 48 31 / .75)}
-.mv-side[data-side-block="drinks"] .mv-card .mv-add[aria-pressed="true"]{background:#fbf3e6;color:#a91e12;border-color:#fbf3e6}
-.mv-side[data-side-block="drinks"] .mv-card :focus-visible{outline-color:#f1c98d}
 .mv-side[data-side-block="drinks"] .mv-fine,.mv-side[data-side-block="drinks"] .mv-empty{color:rgb(251 243 230 / .75)}
 
 /* ── giant outlined numerals behind every group heading (Food green, Drinks gold) ── */
@@ -81,9 +71,6 @@
 .mv{overflow-x:clip}
 .mv-side[data-side-block="drinks"]{overflow-x:clip}
 .mv-side[data-side-block="food"] .mv-grp,.mv-side[data-side-block="drinks"] .mv-grp{padding-top:48px}
-.mv-side[data-side-block="drinks"] .mv-card .mv-add{background:linear-gradient(180deg,#cf2b1a,#a91e12)}
-.dk-add{background:linear-gradient(180deg,#cf2b1a,#a91e12)}
-.dk-add[aria-pressed="true"]{background:#fff}
 /* group heading: split-word spans must sit together (not spread by space-between); the count stays right */
 .mv-grp-h{justify-content:flex-start;flex-wrap:wrap;column-gap:.28em;align-items:baseline}
 .mv-grp-h .num{margin-left:auto}
@@ -103,8 +90,6 @@
 .dk-ph{position:relative;clip-path:url(#fk-wave);margin-bottom:-18px}
 .dk-card-b{padding-top:30px}
 /* list thumbnails use the same cut; the shadow moves to the wrapper so the clip does not hide it */
-.mv-c-thumb{filter:drop-shadow(0 8px 10px rgb(0 0 0 / .28))}
-.mv-c-thumb img{clip-path:url(#fk-wave);border-radius:0;box-shadow:none}
 @media(min-width:768px){.fg--ph .fg-tile{aspect-ratio:auto}}
 
 /* ── v2 wavy cut, measured from the reference (Design DNA): small rounded top corners, flat bottom edge for the first ~58%,
@@ -116,7 +101,6 @@
 .dk-ph{aspect-ratio:4/5;clip-path:url(#fk-wave-t);margin-bottom:-22.8%}
 .dk-card-b{padding-top:12px}
 .dk-card-s,.dk-card-n{padding-right:30%}
-.mv-c-thumb img{clip-path:url(#fk-wave-q)}
 
 /* ── v3: portrait-aware photo frames. Frames are 4:5 (photos are 2:3), images are placed by photoFit.ts so the dish is always in view ── */
 .mv img.fk-fit{position:absolute;display:block;max-width:none;max-height:none;object-fit:fill;outline:0;border-radius:0;box-shadow:none;transition:none}
@@ -125,8 +109,6 @@
 .fg--ph[data-n="1"] .fg-tile{flex-basis:min(70vw,260px)}
 @media(min-width:768px){.fg--ph[data-n="2"] .fg-tile,.fg--ph[data-n="3"] .fg-tile{flex:1 1 0;max-width:290px}}
 .dk-ph{overflow:hidden}
-.mv .mv-c-thumb img.fk-fit{clip-path:none}
-.mv-c-clip{position:relative;display:block;width:104px;height:104px;overflow:hidden;clip-path:url(#fk-wave-q)}
 /* flat edge lowered to 88% so the dish is never trimmed; overlap with the text panel follows: (1 - .88) / .8 = 15% */
 .fg-img,.fg--ph[data-n="1"] .fg-img{margin-bottom:-15%}
 .dk-ph{margin-bottom:-15%}
@@ -150,21 +132,9 @@
 .mv-side[data-side-block="food"] .mv-fine,.mv-side[data-side-block="food"] .mv-empty{color:var(--fsub)}
 
 /* round "+" (the label is hidden, the script still swaps the text, the glyph comes from CSS; aria-label keeps the name) */
-.mv-add-t{font-size:0;line-height:0}
-.mv-add-t::before{content:"+";font:400 28px/1 var(--fk-sans)}
-.mv-add[aria-pressed="true"] .mv-add-t::before{content:"\2713";font:700 18px/1 var(--fk-sans)}
 /* gold on the food cards */
-.mv-card .mv-add{width:40px;height:40px;min-width:40px;padding:0;border-radius:50%;background:linear-gradient(180deg,#f6dc9a,#c99a43);border:1px solid #a8782a;color:#2b1d05;box-shadow:0 8px 16px -8px rgb(120 80 10 / .75),inset 0 1px 0 rgb(255 255 255 / .55)}
-.mv-card .mv-add[aria-pressed="true"]{background:#16301a;border-color:#16301a;color:#f1c98d}
-@media(hover:hover) and (pointer:fine){.mv-card .mv-add:not([aria-pressed="true"]):hover{background:linear-gradient(180deg,#fbe7b0,#d6a84d)}}
-.mv-c-thumb:not(:has(img)) .mv-add{min-width:44px;width:44px;height:44px}
 /* red option on the Drinks side: red button, gold ring and gold plus */
-.mv-side[data-side-block="drinks"] .mv-card .mv-add,.dk-add{background:linear-gradient(180deg,#cf2b1a,#a91e12);border:1px solid #f1c98d;color:#f1c98d;box-shadow:0 0 18px -4px rgb(232 48 31 / .7)}
-.mv-side[data-side-block="drinks"] .mv-card .mv-add[aria-pressed="true"],.dk-add[aria-pressed="true"]{background:#fbf3e6;border-color:#fbf3e6;color:#a91e12}
-.dk-add{width:44px;height:44px;min-width:44px;padding:0;border-radius:50%}
-@media(hover:hover) and (pointer:fine){.mv-side[data-side-block="drinks"] .mv-card .mv-add:not([aria-pressed="true"]):hover,.dk-add:not([aria-pressed="true"]):hover{background:linear-gradient(180deg,#e0382a,#b82418)}}
 /* food cards stay solid warm cream on any theme (no see-through grey on the dark ones) */
-.mv-side[data-side-block="food"] .mv-card{background:linear-gradient(180deg,#fffaf0,#f8ecd6);-webkit-backdrop-filter:none;backdrop-filter:none}
 
 /* ══════════════════════════════════════════════════════════════════════════
    FINAL (v5.41): Drinks "Mix" palette = bright elephant-red header fading into a charcoal list, plus gold "+" buttons everywhere.
@@ -183,11 +153,5 @@
 .dk-rail-wrap,.dk-cats{background:transparent}
 .dk-in{background:linear-gradient(170deg,#2a2424,#121010)}
 .dk-card-s{color:#ff9b8a}
-.mv-side[data-side-block="drinks"] .mv-card{background:linear-gradient(160deg,rgb(255 255 255 / .07),rgb(255 255 255 / .02))}
 
 /* gold "+" buttons: Food cards, Drinks cards and the Drinks photo rail share one look (visible on cream, charcoal and red) */
-.mv-add-t::before{font-weight:600}
-.mv-card .mv-add,.mv-side[data-side-block="drinks"] .mv-card .mv-add,.dk-add{background:linear-gradient(180deg,var(--btn-gold-1),var(--btn-gold-2));border:1px solid #f6dc9a;color:var(--btn-ink);box-shadow:0 8px 16px -8px rgb(0 0 0 / .6),0 0 18px -6px rgb(246 220 154 / .55),inset 0 1px 0 rgb(255 255 255 / .55)}
-.mv-side[data-side-block="food"] .mv-card .mv-add{border-color:#a8782a;box-shadow:0 8px 16px -8px rgb(120 80 10 / .75),inset 0 1px 0 rgb(255 255 255 / .55)}
-.mv-side[data-side-block="drinks"] .mv-card .mv-add[aria-pressed="true"],.dk-add[aria-pressed="true"]{background:#fbf3e6;border-color:#fbf3e6;color:#8a170f}
-@media(hover:hover) and (pointer:fine){.mv-card .mv-add:not([aria-pressed="true"]):hover,.mv-side[data-side-block="drinks"] .mv-card .mv-add:not([aria-pressed="true"]):hover,.dk-add:not([aria-pressed="true"]):hover{background:linear-gradient(180deg,#fbe7b0,#d6a84d)}}

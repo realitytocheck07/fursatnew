@@ -1,0 +1,389 @@
+/* /menu, layout A: the "printed menu" list (mark · Name ····· price), the dish sheet's WhatsApp action, row entrance.
+   Imported last in menu.astro so it wins over menu-v2 / menu-wow / menu-drinks. Transform and opacity only. */
+.mv{--a-ink:#10261a;--a-mut:#5b5346;--a-ld:rgb(201 154 67 / .85);--a-gold:#c99a43;--a-gold-d:#a8782a;--a-line:rgb(168 115 28 / .2);--a-red:#c0291f;--a-green:#2a5019;--a-deep:#10261a;--a-cream:#f6e6d1;
+  --a-out:cubic-bezier(.23,1,.32,1)}
+.mv .mv-list{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+html:has(.mv){scroll-padding-bottom:24px}
+
+/* ── the list: 1 column on phones, 2 from 768, 3 from 1280 ── */
+.mv .mv-items{display:grid;grid-template-columns:minmax(0,1fr);gap:0 clamp(24px,2.6vw,44px);max-width:none;margin:0;padding:0 0 6px}
+@media(min-width:768px){.mv .mv-items{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1280px){.mv .mv-items{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mv .mv-items[data-lazy]{min-height:calc(var(--n,1) * 54px)}
+@media(min-width:768px){.mv .mv-items[data-lazy]{min-height:calc(var(--n,1) * 23px)}}
+@media(min-width:1280px){.mv .mv-items[data-lazy]{min-height:calc(var(--n,1) * 15px)}}
+
+/* ── one dish = one line ── */
+.mv .mv-row{position:relative;display:block;min-height:52px;padding:8px 0;border-bottom:1px solid var(--a-line);cursor:pointer;color:var(--a-ink);
+  transition:background-color 150ms ease-out;-webkit-tap-highlight-color:transparent}
+@media(min-width:768px){.mv .mv-row{min-height:44px;padding:5px 2px}}
+.mv .mv-rl{display:flex;align-items:center;gap:8px;min-height:30px}
+.mv .mv-mk{position:relative;flex:none;width:12px;height:12px;border:1.5px solid var(--mk);border-radius:2px}
+.mv .mv-mk::after{content:"";position:absolute;inset:2px;border-radius:50%;background:var(--mk)}
+.mv .mv-mk--n::after{border-radius:0;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mv .mv-mk--v{--mk:#2e8b3a}.mv .mv-mk--n{--mk:var(--a-red)}
+#mv-drinks .mv-mk{display:none}
+.mv .mv-th{position:relative;flex:none;width:32px;height:32px;border-radius:50%;overflow:hidden;background:#efdcba;box-shadow:0 0 0 1px rgb(201 154 67 / .6)}
+.mv .mv-th img{position:absolute;display:block;max-width:none}
+.mv .mv-item-name{flex:0 1 auto;min-width:0;margin:0;font:600 15.5px/1.3 var(--mv-serif);letter-spacing:0;color:var(--a-ink)}
+.mv .mv-open{all:unset;display:block;min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mv .mv-open::after{content:"";position:absolute;inset:0;z-index:1}
+.mv .mv-iname{position:relative;display:block;padding-bottom:2px;overflow-wrap:break-word;text-wrap:pretty}
+@media(min-width:768px){.mv .mv-iname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-wrap:nowrap}}
+/* gold underline draws on the name (transform only) */
+.mv .mv-iname::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1.5px;background:var(--a-gold);transform:scaleX(0);transform-origin:left center;transition:transform 260ms var(--a-out)}
+.mv .mv-row:has(.mv-open:focus-visible){outline:2px solid var(--a-green);outline-offset:-2px;border-radius:6px}
+.mv .mv-open:focus-visible{outline:0}
+.mv .mv-tg{position:relative;z-index:0;flex:none;display:inline-flex;width:14px;height:14px}
+.mv .mv-tg svg{width:14px;height:14px}
+.mv .mv-tg--s{color:var(--a-red)}.mv .mv-tg--f{color:var(--a-gold-d)}
+.mv .mv-chips{flex:none;display:inline-flex;gap:4px;margin:0}
+.mv .mv-chips:empty{display:none}
+.mv .mv-chips .fk-chip{min-height:0;padding:3px 7px;font:500 11px/1 var(--mv-sans);white-space:nowrap}
+.mv .mv-row[data-soldout] .mv-iname,.mv .mv-row[data-soldout] .mv-item-price{opacity:.55}
+.mv .mv-ld{flex:1 1 10px;min-width:10px;height:0;align-self:center;border-bottom:1.5px dotted var(--a-ld);transform:translateY(5px)}
+.mv .mv-item-price{flex:none;font:600 14.5px/1.3 var(--mv-sans);font-variant-numeric:tabular-nums;color:var(--a-ink);white-space:nowrap}
+.mv .mv-row .mv-pp{display:inline;padding:0;border:0;background:none;border-radius:0;font:inherit;color:inherit}
+.mv .mv-row .mv-pp+.mv-pp::before{content:" / ";font-weight:400;color:var(--a-mut);white-space:pre}
+.mv .mv-vl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mv .mv-idesc,.mv .mv-row .mv-note{margin:0 0 0 20px;font:400 13px/1.35 var(--mv-sans);color:var(--a-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:1}
+.mv .mv-row:has(.mv-th) .mv-idesc,.mv .mv-row:has(.mv-th) .mv-note{margin-left:60px}
+.mv .mv-row mark{background:rgb(227 171 74 / .35);color:inherit;border-radius:2px;padding:0}
+.mv .mv-row:active{background-color:rgb(255 250 240 / .7)}
+@media(hover:hover) and (pointer:fine){
+  .mv .mv-row:hover{background-color:rgb(255 250 240 / .6)}
+  .mv .mv-row:hover .mv-iname::after{transform:scaleX(1)}
+}
+/* ── entrance: rows rise 8px in soft batches, the price settles just after ── */
+.mv .mv-row.mv-pre{opacity:0;transform:translateY(8px)}
+.mv .mv-row.mv-pre .mv-item-price{opacity:0;transform:translateY(4px)}
+.mv .mv-row.mv-pre.is-in{opacity:1;transform:none;transition:opacity 320ms var(--a-out) var(--d,0ms),transform 320ms var(--a-out) var(--d,0ms),background-color 150ms ease-out}
+.mv .mv-row.mv-pre.is-in .mv-item-price{opacity:1;transform:none;transition:opacity 360ms var(--a-out) calc(var(--d,0ms) + 140ms),transform 360ms var(--a-out) calc(var(--d,0ms) + 140ms)}
+
+/* ── dish sheet: photo, tags, name, price, WhatsApp ── */
+.mv .mv-stag,.mv-sheet .mv-stag{display:inline-flex;align-items:center;min-height:26px;padding:4px 11px;border-radius:999px;font:500 12px/1.2 var(--mv-sans);background:rgb(255 255 255 / .75);border:1px solid rgb(0 0 0 / .08);color:var(--a-ink)}
+.mv-sheet .mv-meta{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.mv-sheet .mv-stag--v::before,.mv-sheet .mv-stag--n::before{content:"";width:9px;height:9px;margin-right:6px;border:1.5px solid var(--mk);border-radius:2px;background:radial-gradient(circle,var(--mk) 0 1.8px,transparent 2.2px)}
+.mv-sheet .mv-stag--v{--mk:#2e8b3a}.mv-sheet .mv-stag--n{--mk:#c0291f}
+.mv-sheet .mv-stag--s{color:#b3261e}.mv-sheet .mv-stag--f{color:#8a6410}.mv-sheet .mv-stag--f::before{content:"★";margin-right:5px}.mv-sheet .mv-stag--s::before{content:"•";margin-right:5px}
+.mv-sheet-price{align-items:baseline;gap:6px 14px;font:700 24px/1.2 var(--mv-sans);font-variant-numeric:tabular-nums;color:#1b3a26}
+.mv-sheet-price .mv-pp{display:inline-flex;align-items:baseline;gap:6px;padding:0;border:0;background:none;font:inherit;color:inherit}
+.mv-sheet-price .mv-vl{position:static;width:auto;height:auto;overflow:visible;clip:auto;font:500 12px/1 var(--mv-sans);color:var(--a-mut)}
+.mv-sheet-foot{display:block}
+.mv-sheet-foot .mv-sheet-wa{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-width:0;min-height:48px;padding:0 18px;border-radius:999px;font:600 15px/1.2 var(--mv-sans);text-decoration:none;text-align:center}
+.mv-sheet-wa svg{flex:none;width:20px;height:20px}
+.mv-sheet-wa:active{transform:scale(.96)}
+
+/* ── contrast fix: cream plaster list (Food), deep-green band with cream rows (Drinks) ── */
+.mv.mv{--fbase:var(--fk-plaster);--fwash:radial-gradient(60% 100% at 50% 0,rgb(201 154 67 / .14),transparent 72%);--fh:#10261a;--fsub:#5b5346;--frule:#c99a43;--fnum:rgb(16 38 26 / .10);--fpill-bg:rgb(201 154 67 / .18);--fpill-c:#10261a;--fcount:#5b5346}
+.mv .mv-list{background:var(--fk-plaster);background-blend-mode:multiply}
+.mv .mv-side[data-side-block="food"]{background-blend-mode:multiply}
+.mv .mv-side[data-side-block="food"] .mv-grp-h{border-bottom-color:var(--a-line)}
+.mv .mv-fine,.mv .mv-empty{color:#5b5346}
+.mv .mv-jump-h{color:#74501a}
+.mv .mv-side[data-side-block="drinks"],.mv .mv-dark{--a-ink:#f6e6d1;--a-mut:#d6c8b0;--a-ld:rgb(201 154 67 / .9);--a-line:rgb(201 154 67 / .38);--a-gold-d:#e0b25a;--a-red:#ffb3a8}
+.mv .mv-side[data-side-block="drinks"]{position:relative;margin:0 calc(-1 * clamp(16px,2.5vw,40px));padding:0 clamp(16px,2.5vw,40px) 56px;overflow-x:clip}
+.mv .mv-side[data-side-block="drinks"] .mv-sec-h{background:rgb(201 154 67 / .18);color:#f1c98d}
+.mv .mv-side[data-side-block="drinks"] .mv-grp-h,.mv .mv-side[data-side-block="drinks"] .mv-grp-h .num{color:#f6e6d1}
+.mv .mv-side[data-side-block="drinks"] .mv-grp-h{border-bottom-color:rgb(201 154 67 / .38)}
+.mv .mv-side[data-side-block="drinks"] .mv-row:active,.mv .mv-dark .mv-row:active{background-color:rgb(246 230 209 / .08)}
+@media(hover:hover) and (pointer:fine){.mv .mv-side[data-side-block="drinks"] .mv-row:hover,.mv .mv-dark .mv-row:hover{background-color:rgb(246 230 209 / .06)}}
+.mv .mv-side[data-side-block="drinks"] .mv-row mark{background:rgb(227 171 74 / .4);color:#fff}
+.mv .mv-side[data-side-block="drinks"] .mv-row:has(.mv-open:focus-visible){outline-color:#f1c98d}
+
+/* ── featured photo cards: a centred row of up to 4 compact cards (photo 4:3, name, price, See dish); a swipe rail on phones ── */
+.mv .fg--ph{justify-content:safe center;align-items:stretch;gap:12px;padding:2px 2px 10px}
+.mv .fg--ph .fg-tile{flex:0 0 min(58vw,210px);max-width:none;display:flex;flex-direction:column;border-radius:16px;background:#fffaf0;box-shadow:0 0 0 1px rgb(201 154 67 / .6),0 14px 24px -18px rgb(60 40 10 / .55)}
+.mv .fg--ph .fg-img,.mv .fg--ph[data-n] .fg-img{aspect-ratio:4/3;clip-path:none;margin-bottom:0;border-radius:15px 15px 0 0}
+.mv .fg--ph .fg-meta{display:grid;justify-items:start;gap:2px;padding:10px 12px 2px}
+.mv .fg--ph .fg-meta b{font:600 .9375rem/1.25 var(--mv-serif);color:#10261a;text-wrap:balance;overflow-wrap:anywhere}
+.mv .fg--ph .fg-meta i{font:600 .875rem/1.2 var(--mv-sans);font-variant-numeric:tabular-nums;color:#10261a}
+.mv .fg-see{all:unset;box-sizing:border-box;margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:0 12px;cursor:pointer;font:600 .8125rem/1 var(--mv-sans);color:#2a5019;-webkit-tap-highlight-color:transparent}
+.mv .fg-see::after{content:"→";transition:transform 200ms var(--a-out)}
+.mv .fg-see:focus-visible{outline:2px solid #2a5019;outline-offset:-3px;border-radius:0 0 15px 15px}
+@media(hover:hover) and (pointer:fine){.mv .fg-see:hover::after{transform:translateX(3px)}}
+.mv .fg--ph .fg-badge{width:30px;height:30px;left:8px;top:8px}.mv .fg--ph .fg-badge svg{width:17px;height:17px}
+@media(min-width:768px){.mv .fg--ph{overflow-x:visible}.mv .fg--ph .fg-tile{flex:1 1 0;min-width:0;max-width:240px}}
+
+/* ── phone: section chips are one scrolling row under the top bar (the active one is centred by mark()) ── */
+@media(max-width:720px){.mv .mv-sticky .mv-schips{order:5;flex:1 1 100%;scroll-snap-type:x proximity}.mv .mv-schip{scroll-snap-align:center}}
+
+/* ── laptop (>=1100px): slim index rail on the left, sticky, gold dot on the current section ── */
+.mv .mv-idx{display:none}
+@media(min-width:1100px){
+  .mv .mv-idx{display:block;position:sticky;top:calc(var(--mv-top,0px) + var(--mv-stk,64px) + 14px);height:0;z-index:6}
+  .mv .mv-idx-in{position:absolute;left:0;top:0;width:158px;max-height:calc(100dvh - var(--mv-top,0px) - var(--mv-stk,64px) - 32px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:8px 6px;border-radius:16px;background:rgb(255 250 240 / .94);box-shadow:0 0 0 1px rgb(201 154 67 / .6),0 14px 28px -18px rgb(0 0 0 / .5)}
+  .mv .mv-idx-in[hidden]{display:none}
+  .mv .mv-idx ul{display:grid;gap:0;margin:0;padding:0;list-style:none}
+  .mv .mv-idx-b{all:unset;box-sizing:border-box;position:relative;display:flex;align-items:center;width:100%;min-height:44px;padding:0 10px 0 24px;cursor:pointer;font:500 .8125rem/1.2 var(--mv-sans);color:#10261a;border-radius:10px;-webkit-tap-highlight-color:transparent;transition:background-color 150ms ease-out}
+  .mv .mv-idx-b::before{content:"";position:absolute;left:9px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#c99a43;transform:scale(0);transition:transform 220ms var(--a-out)}
+  .mv .mv-idx-b.is-on{font-weight:700;background:rgb(201 154 67 / .16)}
+  .mv .mv-idx-b.is-on::before{transform:scale(1)}
+  .mv .mv-idx-b:focus-visible{outline:2px solid #2a5019;outline-offset:-2px}
+  .mv .mv-idx-b:hover{background:rgb(201 154 67 / .12)}
+  .mv .mv-side,.mv #mv-food.mv-side,.mv #mv-drinks.mv-side{padding-left:calc(clamp(16px,2.5vw,40px) + 178px)} /* drinks has its own padding rule in menu-drinks.css: match it so the rail never covers a column */
+  .mv .mv-fine,.mv .mv-empty{padding-left:178px}
+}
+
+/* ══ MENU WOW (kit 40c): hover photo, section banner, Chef's specials, Food looks. Prefix mw-. Transform, opacity, clip-path only. ══ */
+.mv{--mw-ease:cubic-bezier(.16,1,.3,1)}
+
+/* ── hover photo card (laptop mouse only; the element is appended outside .mv) ── */
+.mw-cam{display:none}
+.mw-hv{display:none}
+@media(hover:hover) and (pointer:fine){
+  .mw-cam{display:inline-flex;flex:none;width:13px;height:13px;color:#a8782a;opacity:.85}
+  .mw-cam svg{width:13px;height:13px}
+  .mv .mv-side[data-side-block="drinks"] .mw-cam,.mv .mv-side[data-side-block="food"] .mw-cam{color:#e0b25a}
+  .mw-hv{display:block;position:fixed;left:0;top:0;width:220px;height:280px;z-index:60;pointer-events:none;transform:translate3d(-400px,0,0)}
+  .mw-hv.is-live{will-change:transform}
+  .mw-hv-in{width:100%;height:100%;border-radius:18px;overflow:hidden;background:#efdcba;opacity:0;transform:scale(.92);transform-origin:50% 60%;
+    box-shadow:0 0 0 1px rgb(201 154 67 / .7),0 22px 44px -14px rgb(10 20 12 / .6);
+    transition:opacity 140ms ease-out,transform 140ms ease-out}
+  .mw-hv.is-on .mw-hv-in{opacity:1;transform:none;transition:opacity 220ms var(--mw-ease),transform 220ms var(--mw-ease)}
+  .mw-hv-ph{position:relative;width:100%;height:100%;overflow:hidden}
+  .mw-hv-ph img{position:absolute;display:block;max-width:none;max-height:none;object-fit:fill}
+}
+
+/* ── category banner ── */
+.mv .mv-grp::before{display:none}
+.mv .mv-grp{padding-top:28px}
+.mv .mw-ban{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:120px;margin:0 0 14px;padding:0 0 4px;overflow:hidden;isolation:isolate}
+@media(min-width:768px){.mv .mw-ban{min-height:180px;margin-bottom:18px}}
+.mv .mw-ban-img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;transform:scale(1.08);max-width:none}
+.mv .mw-ban[data-has-ph]::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgb(8 20 12 / .5),rgb(8 20 12 / .88))}
+.mv .mw-ban[data-has-ph]{padding:0 clamp(14px,2vw,26px) 4px;border-radius:14px}
+.mv .mw-ban-no{position:absolute;right:clamp(8px,1.6vw,22px);top:2px;z-index:0;font:800 clamp(4.25rem,11vw,8.5rem)/1 var(--fk-serif);font-variant-numeric:tabular-nums;color:transparent;-webkit-text-stroke:1.2px rgb(22 48 26 / .22);pointer-events:none}
+.mv .mv-side[data-side-block="drinks"] .mw-ban-no{-webkit-text-stroke-color:rgb(230 194 122 / .3)}
+.mv .mw-ban[data-has-ph] .mw-ban-no{-webkit-text-stroke-color:rgb(246 230 209 / .42)}
+.mv .mw-ban-h{position:relative;z-index:1;width:100%;margin:0;padding:0 0 12px;font:600 clamp(1.75rem,1.15rem + 2.4vw,3.1rem)/1.05 var(--fk-serif);letter-spacing:-.01em;text-wrap:balance;border-bottom:0}
+.mv .mw-ban-h .num{margin-left:auto;padding-left:16px;font:500 .8125rem/1.2 var(--mv-sans);font-variant-numeric:tabular-nums}
+.mv.mv .mw-ban .mv-grp-h::after{transform:none;transition:none}
+.mv .mw-ban[data-has-ph] .mw-ban-h,.mv .mw-ban[data-has-ph] .mw-ban-h .num{color:#f6e6d1}
+.mv .mw-ban[data-has-ph] .mw-ban-h{text-shadow:0 1px 14px rgb(0 0 0 / .45)}
+/* reveal once: wipe + title rises 12px (JS adds mw-pre to banners below the fold, is-in when they arrive) */
+.mv .mw-ban.mw-pre{clip-path:inset(0 100% 0 0)}
+.mv .mw-ban.mw-pre .mw-ban-h{transform:translateY(12px)}
+.mv .mw-ban.mw-pre.is-in{clip-path:inset(0 0 0 0);transition:clip-path 500ms var(--mw-ease)}
+.mv .mw-ban.mw-pre.is-in .mw-ban-h{transform:none;transition:transform 500ms var(--mw-ease) 80ms}
+
+/* ── Chef's specials: compact cards. Phone = one swipe row; 768+ = the same columns as the dish list (2, then 3) ── */
+.mv .mw-sp{margin:0 0 16px}
+.mv .mw-sp-h{display:flex;align-items:center;gap:12px;margin:0 0 8px;font:600 .75rem/1.2 var(--mv-sans);letter-spacing:.16em;text-transform:uppercase;color:#74501a}
+.mv .mw-sp-h::after{content:"";flex:1;height:1px;background:rgb(201 154 67 / .55)}
+.mv .mw-sp-rail{display:flex;gap:12px;margin:0;padding:2px 2px 8px;list-style:none;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none;align-items:stretch}
+.mv .mw-sp-rail::-webkit-scrollbar{display:none}
+@media(min-width:768px){.mv .mw-sp-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px clamp(24px,2.6vw,44px);overflow:visible;padding:2px 0 4px}}
+@media(min-width:1280px){.mv .mw-sp-rail{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mv .mw-card{flex:0 0 min(80vw,300px);scroll-snap-align:start;display:flex;min-height:128px;border-radius:16px;overflow:hidden;background:#fffaf0;color:#10261a;box-shadow:0 0 0 1px rgb(201 154 67 / .6),0 12px 22px -18px rgb(60 40 10 / .55)}
+@media(min-width:768px){.mv .mw-card{flex:none}}
+.mv .mw-card-ph{position:relative;flex:none;width:102px;aspect-ratio:4/5;overflow:hidden;background:#ecdcc5}
+.mv .mw-card-r{flex:1;min-width:0;display:flex;flex-direction:column;padding:10px 4px 0 12px}
+.mv .mw-card-n{margin:0;font:600 .9375rem/1.25 var(--mv-serif);color:#10261a;text-wrap:balance;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mv .mw-card-m{display:flex;align-items:center;gap:8px;margin:4px 0 0}
+.mv .mw-card-p{font:600 .875rem/1.2 var(--mv-sans);font-variant-numeric:tabular-nums;color:#10261a}
+.mv .mw-card .fg-see{margin-top:auto;padding:0 8px 0 0}
+/* type card: the dish name is the picture. Soft gold pattern on the section colour, never a fake photo */
+.mv .mw-card--ty{background:radial-gradient(circle at 1px 1px,rgb(201 154 67 / .34) 1.1px,transparent 1.6px) 0 0/13px 13px,repeating-linear-gradient(135deg,rgb(201 154 67 / .12) 0 1px,transparent 1px 15px),#efdcba}
+.mv .mw-card--ty .mw-card-r{padding-left:14px;border-left:3px solid #c99a43}
+.mv .mw-card--ty .mw-card-n{font:600 clamp(1.1rem,.95rem + .5vw,1.3rem)/1.15 var(--fk-serif);-webkit-line-clamp:3}
+.mv .mw-card img.fk-fit{transition:transform 900ms var(--mw-ease)}
+@media(hover:hover) and (pointer:fine){
+  .mv .mw-card:hover img.fk-fit{transform:scale(1.07)}
+}
+
+/* ── Food = deep Fursat green (owner, 22 Nov). Cream look removed. Prices gold. ── */
+.mv .mv-side[data-side-block="food"]{--a-ink:#f6e6d1;--a-mut:#d6c8b0;--a-ld:rgb(201 154 67 / .9);--a-line:rgb(201 154 67 / .38);--a-gold-d:#e0b25a;--a-red:#ffb3a8;
+  position:relative;margin:0 calc(-1 * clamp(16px,2.5vw,40px));padding:0 clamp(16px,2.5vw,40px) 56px;background:radial-gradient(120% 60% at 50% 0%,#1d3f24,#14301c 55%,#10261a);overflow-x:clip}
+@media(min-width:1100px){.mv #mv-food.mv-side{padding-left:calc(clamp(16px,2.5vw,40px) + 178px)}}
+.mv .mv-side[data-side-block="food"] .mv-side-h h2,.mv .mv-side[data-side-block="food"] .mv-side-h>span,.mv .mv-side[data-side-block="food"] .mv-grp-h,.mv .mv-side[data-side-block="food"] .mv-grp-h .num{color:#f6e6d1}
+.mv .mv-side[data-side-block="food"] .mv-side-h{border-bottom-color:rgb(201 154 67 / .38)}
+.mv .mv-side[data-side-block="food"] .mv-sec-h{background:rgb(201 154 67 / .18);color:#f1c98d}
+.mv .mv-side[data-side-block="food"] .mv-mk--v{--mk:#5cc46c}
+.mv .mv-side[data-side-block="food"] .mv-th{background:#17352a}
+.mv .mv-side[data-side-block="food"] .mv-row:active{background-color:rgb(246 230 209 / .08)}
+.mv .mv-side[data-side-block="food"] .mv-row mark{background:rgb(227 171 74 / .4);color:#fff}
+.mv .mv-side[data-side-block="food"] .mv-row:has(.mv-open:focus-visible){outline-color:#f1c98d}
+.mv .mv-side[data-side-block="food"] .mw-ban:not([data-has-ph]) .mw-ban-no{-webkit-text-stroke-color:rgb(246 230 209 / .22)}
+.mv .mv-side[data-side-block="food"] .mw-sp-h{color:#e0b25a}
+.mv .mv-side[data-side-block="food"] .mw-card--ty{color:#f6e6d1;background:radial-gradient(circle at 1px 1px,rgb(201 154 67 / .34) 1.1px,transparent 1.6px) 0 0/13px 13px,repeating-linear-gradient(135deg,rgb(201 154 67 / .13) 0 1px,transparent 1px 15px),#17352a;box-shadow:inset 0 0 0 1px rgb(201 154 67 / .5)}
+.mv .mv-side[data-side-block="food"] .mw-card--ty .mw-card-n,.mv .mv-side[data-side-block="food"] .mw-card--ty .mw-card-p{color:#f6e6d1}
+.mv .mv-side[data-side-block="food"] .mw-card--ty .fg-see{color:#f1c98d}
+@media(hover:hover) and (pointer:fine){.mv .mv-side[data-side-block="food"] .mv-row:hover{background-color:rgb(246 230 209 / .06)}}
+
+/* ── phone: floating buttons step aside while the dish list is on screen (menu.ts sets data-fab-avoid on the list); the list keeps room at its end ── */
+@media(max-width:767px){.mv .mv-list{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}}
+.mv .mw-card--ph{--a-red:#c0291f}
+.mv .mw-card--ph .mv-mk--v{--mk:#2e8b3a}
+.mv .mv-side[data-side-block="food"] .mv-item-price{color:#e0b25a}
+.mv .mv-side[data-side-block="food"] .mw-card .mw-card-p{color:#10261a}
+.mv .mv-side[data-side-block="food"] .mw-card--ty .mw-card-p{color:#e0b25a}
+
+/* ── Drinks = wine-red, continuing the red Drinks screen above (tokens of menu-drinks.css, which is not edited). No black. ── */
+.mv .mv-side[data-side-block="drinks"]{background:radial-gradient(70% 40% at 12% 0%,rgb(192 42 26 / .35),transparent 70%),linear-gradient(180deg,var(--dk-wine-2,#531209),#3d0d07)}
+
+/* phone banner: smaller number so long names never run under it; no-photo banners are shorter */
+@media(max-width:767px){
+  .mv .mw-ban{min-height:112px}
+  .mv .mw-ban:not([data-has-ph]){min-height:92px}
+  .mv .mw-ban-no{top:4px;right:10px;font-size:3.25rem}
+  .mv .mw-ban-h{padding-right:0}
+}
+
+/* ══ Category tiles (kit 40e). Prefix mc-. Press .96 in 120ms; check springs in .4s; gold = a layer fading in (opacity). ══ */
+.mv .mc-tiles{margin:6px 0 10px;scroll-margin-top:calc(var(--mv-top,0px) + var(--mv-stk,64px) + 8px)}
+.mv .mc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+@media(min-width:768px){.mv .mc-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}}
+.mv .mc-tile{all:unset;box-sizing:border-box;position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;gap:6px;width:100%;min-height:84px;padding:14px 44px 12px 14px;
+  border-radius:16px;overflow:hidden;cursor:pointer;color:#f6e6d1;background:rgb(246 230 209 / .06);box-shadow:inset 0 0 0 1px rgb(201 154 67 / .5);-webkit-tap-highlight-color:transparent;
+  transition:transform 120ms cubic-bezier(.25,.46,.45,.94),color 200ms ease}
+.mv .mc-tile::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:#e0b25a;opacity:0;transition:opacity 200ms ease}
+.mv .mc-tile:active{transform:scale(.96)}
+.mv .mc-tile:focus-visible{outline:2px solid #f1c98d;outline-offset:2px}
+.mv .mc-n{font:600 1.0625rem/1.2 var(--fk-serif);text-wrap:balance;overflow-wrap:anywhere}
+.mv .mc-c{font:500 .8125rem/1.2 var(--mv-sans);font-variant-numeric:tabular-nums;color:#e0b25a;transition:color 200ms ease}
+.mv .mc-tiles--drinks .mc-c{color:#f1c98d}
+.mv .mc-tick{position:absolute;top:10px;right:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#10261a;color:#e0b25a;transform:scale(0);opacity:0}
+.mv .mc-tiles--drinks .mc-tick{background:#3d0d07}
+.mv .mc-tick svg{width:15px;height:15px}
+.mv .mc-tile.is-picked{color:#10261a}
+.mv .mc-tile.is-picked::before{opacity:1}
+.mv .mc-tile.is-picked .mc-c{color:#3b2a08}
+.mv .mc-tile.is-picked .mc-tick{transform:scale(1);opacity:1;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity 120ms ease-out}
+@media(hover:hover) and (pointer:fine){
+  .mv .mc-tile{transition:transform 150ms cubic-bezier(.19,1,.22,1),color 200ms ease}
+  .mv .mc-tile:hover{transform:translateY(-3px)}
+  .mv .mc-tile:active{transform:scale(.96);transition-duration:120ms}
+}
+/* appear: rise 12px + fade, 50ms apart (JS adds mc-pre to tiles below the fold) */
+.mv .mc-tile.mc-pre{opacity:0;transform:translateY(12px)}
+.mv .mc-tile.mc-pre.is-in{opacity:1;transform:none;transition:opacity 320ms cubic-bezier(.19,1,.22,1) calc(var(--i) * 50ms),transform 320ms cubic-bezier(.19,1,.22,1) calc(var(--i) * 50ms)}
+
+/* harden (40e part 4): the "See all →" link in the Featured drink card was 20px tall; give it a 44px target */
+.mv .mv-link{display:inline-flex;align-items:center;min-height:44px}
+
+/* owner 22 Nov: readability pass (contrast already 7:1+, sizes were too small on the dark colours) */
+.mv .mc-tile{min-height:96px;padding:16px 46px 14px 16px}
+.mv .mc-n{font-size:1.25rem;line-height:1.15}
+.mv .mc-c{font-size:.9375rem}
+.mv .mv-row .mv-iname{font-size:1.0625rem}
+.mv .mv-row .mv-price{font-size:1rem}
+.mv .mv-idesc,.mv .mv-row .mv-note{font-size:14px;line-height:1.4}
+.mv .mv-side .mv-sec-h{font-size:13px;letter-spacing:.08em}
+/* owner 22 Nov: the new category tiles replace the old cream "jump" grid (same job, shown twice) */
+.mv #mv-jump{display:none}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   KIT 40f · "Instagram terracotta" menu list (owner 22 Nov). ONE BLOCK, prefix ka-. Everything above is untouched.
+   Warm-white list (#faf7f2) · coloured panels (green Food / terracotta Drinks) · checkerboard tiles · gold glow on the picked tile.
+   Transform, opacity and clip-path only. No reduced-motion code (owner). The red BAR screen (.dk, menu-drinks.css) is not touched.
+   Contrast (measured, see NOTES): text on a panel gradient only sits over the darker part (the gradients are shifted with
+   background-size/position so the light #d66634 / #2f5a1c corner is never behind text).
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.mv{--ka-paper:#faf7f2;--ka-card:#fffdf9;--ka-ink:#1f2a1a;--ka-mut:#4d5646;--ka-green:#2a5019;--ka-terra-d:#a83f16;--ka-gold:#e0b25a;
+  --ka-hair:rgb(31 42 26 / .14);--ka-out:cubic-bezier(.22,1,.36,1);--ka-spring:cubic-bezier(.34,1.56,.64,1);
+  --ka-leaf:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 260 260%22%3E%3Cg fill=%22black%22%3E%3Cpath d=%22M24 236Q44 96 226 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%225%22 stroke-linecap=%22round%22/%3E%3Cellipse cx=%2218.9%22 cy=%22188.7%22 rx=%2219.1%22 ry=%224.6%22 transform=%22rotate(-129.7 18.9 188.7)%22/%3E%3Cellipse cx=%2249.4%22 cy=%22197.8%22 rx=%2219.1%22 ry=%224.6%22 transform=%22rotate(-17.0 49.4 197.8)%22/%3E%3Cellipse cx=%2227.7%22 cy=%22164.1%22 rx=%2220.9%22 ry=%224.6%22 transform=%22rotate(-122.3 27.7 164.1)%22/%3E%3Cellipse cx=%2259.3%22 cy=%22177.4%22 rx=%2220.9%22 ry=%224.6%22 transform=%22rotate(-12.0 59.3 177.4)%22/%3E%3Cellipse cx=%2239.4%22 cy=%22140.5%22 rx=%2222.6%22 ry=%224.6%22 transform=%22rotate(-115.0 39.4 140.5)%22/%3E%3Cellipse cx=%2271.4%22 cy=%22158.2%22 rx=%2222.6%22 ry=%224.6%22 transform=%22rotate(-7.1 71.4 158.2)%22/%3E%3Cellipse cx=%2253.9%22 cy=%22118.1%22 rx=%2224.4%22 ry=%224.6%22 transform=%22rotate(-107.8 53.9 118.1)%22/%3E%3Cellipse cx=%2285.6%22 cy=%22140.3%22 rx=%2224.4%22 ry=%224.6%22 transform=%22rotate(-2.2 85.6 140.3)%22/%3E%3Cellipse cx=%2271.0%22 cy=%2296.8%22 rx=%2226.1%22 ry=%224.6%22 transform=%22rotate(-100.9 71.0 96.8)%22/%3E%3Cellipse cx=%22102.0%22 cy=%22123.5%22 rx=%2226.1%22 ry=%224.6%22 transform=%22rotate(2.4 102.0 123.5)%22/%3E%3Cellipse cx=%2290.9%22 cy=%2278.5%22 rx=%2226.2%22 ry=%224.6%22 transform=%22rotate(-94.3 90.9 78.5)%22/%3E%3Cellipse cx=%22118.8%22 cy=%22107.6%22 rx=%2226.2%22 ry=%224.6%22 transform=%22rotate(6.6 118.8 107.6)%22/%3E%3Cellipse cx=%22112.8%22 cy=%2263.3%22 rx=%2224.4%22 ry=%224.6%22 transform=%22rotate(-88.1 112.8 63.3)%22/%3E%3Cellipse cx=%22136.1%22 cy=%2292.2%22 rx=%2224.4%22 ry=%224.6%22 transform=%22rotate(10.4 136.1 92.2)%22/%3E%3Cellipse cx=%22136.5%22 cy=%2249.4%22 rx=%2222.7%22 ry=%224.6%22 transform=%22rotate(-82.4 136.5 49.4)%22/%3E%3Cellipse cx=%22155.6%22 cy=%2277.3%22 rx=%2222.7%22 ry=%224.6%22 transform=%22rotate(13.8 155.6 77.3)%22/%3E%3Cellipse cx=%22162.0%22 cy=%2236.5%22 rx=%2221.0%22 ry=%224.6%22 transform=%22rotate(-77.1 162.0 36.5)%22/%3E%3Cellipse cx=%22177.4%22 cy=%2262.9%22 rx=%2221.0%22 ry=%224.6%22 transform=%22rotate(16.8 177.4 62.9)%22/%3E%3Cellipse cx=%22189.2%22 cy=%2224.6%22 rx=%2219.2%22 ry=%224.6%22 transform=%22rotate(-72.2 189.2 24.6)%22/%3E%3Cellipse cx=%22201.5%22 cy=%2249.3%22 rx=%2219.2%22 ry=%224.6%22 transform=%22rotate(19.3 201.5 49.3)%22/%3E%3Cellipse cx=%22218.4%22 cy=%2213.7%22 rx=%2217.5%22 ry=%224.6%22 transform=%22rotate(-67.6 218.4 13.7)%22/%3E%3Cellipse cx=%22228.0%22 cy=%2236.3%22 rx=%2217.5%22 ry=%224.6%22 transform=%22rotate(21.5 228.0 36.3)%22/%3E%3C/g%3E%3C/svg%3E");}
+
+/* ── 1. the list is warm white for BOTH sides; colour comes in as panels ── */
+.mv .mv-list{background:var(--ka-paper);background-image:none;background-blend-mode:normal}
+.mv .mv-side[data-side-block]{background:none;--a-ink:var(--ka-ink);--a-mut:var(--ka-mut);--a-ld:rgb(31 42 26 / .4);--a-line:var(--ka-hair);--a-red:#c0291f;--a-gold-d:#8a5f1a}
+.mv .mv-side[data-side-block="food"]{--ka-acc:var(--ka-green);--ka-price:var(--ka-green);
+  --ka-pan:linear-gradient(160deg,#2f5a1c,#1f3f16) 0 100%/100% 190%;--ka-pan-t:#f6efe3;--ka-pan-p:#f0c97a;--ka-pan-l:#f6efe3;--ka-lab-bg:#2a5019;--ka-lab-c:#f6efe3}
+.mv .mv-side[data-side-block="drinks"]{--ka-acc:var(--ka-terra-d);--ka-price:var(--ka-terra-d);
+  --ka-pan:linear-gradient(160deg,#c0501e 0%,#b8481a 45%,#a83f16 100%) 0 100%/100% 190%;--ka-pan-t:#fff;--ka-pan-p:#fff;--ka-pan-l:#fff;--ka-lab-bg:#a83f16;--ka-lab-c:#fff3ea}
+.mv .mv-side[data-side-block="food"] .mv-side-h h2,.mv .mv-side[data-side-block="food"] .mv-side-h>span{color:var(--ka-ink)}
+.mv .mv-side[data-side-block="food"] .mv-side-h{border-bottom-color:var(--ka-hair)}
+.mv .mv-side[data-side-block="food"] .mv-mk--v{--mk:#2e8b3a}
+.mv .mv-side[data-side-block="food"] .mv-th{background:#e6e2d9}
+.mv .mv-side[data-side-block="food"] .mv-item-price,.mv .mv-side[data-side-block="drinks"] .mv-item-price{color:var(--ka-price)}
+.mv .mv-side[data-side-block] .mv-row:active{background-color:rgb(31 42 26 / .05)}
+@media(hover:hover) and (pointer:fine){.mv .mv-side[data-side-block] .mv-row:hover{background-color:rgb(31 42 26 / .04)}}
+.mv .mv-side[data-side-block] .mv-row mark{background:rgb(224 178 90 / .4);color:var(--ka-ink)}
+.mv .mv-side[data-side-block] .mv-row:has(.mv-open:focus-visible){outline-color:var(--ka-ink)}
+.mv .mv-side[data-side-block] .mw-cam{color:var(--ka-acc)}
+.mv .mv-side[data-side-block] .mv-grp-h,.mv .mv-side[data-side-block] .mv-grp-h .num{color:var(--ka-ink)}
+/* no tinted wash behind a category (menu-wow.css --fwash) */
+.mv .mv-side[data-side-block] .mv-grp{background:none}
+/* section labels (Appetizers, Tandoor …): small solid pills in the panel colour */
+.mv .mv-side[data-side-block] .mv-sec-h{display:inline-block;background:var(--ka-lab-bg);color:var(--ka-lab-c)}
+
+/* the red BAR screen keeps its own wine background now that the list under it is warm white (menu-wow.css made these two transparent, relying on the old red list) */
+.mv .mv-side[data-side-block="drinks"] .dk{margin-bottom:22px}
+.mv .mv-side[data-side-block="drinks"] .dk-rail-wrap{background:linear-gradient(180deg,var(--dk-wine),var(--dk-wine-2))}
+.mv .mv-side[data-side-block="drinks"] .dk-cats{background:var(--dk-wine-2);border-top:1px solid rgb(230 194 122 / .25)}
+
+/* ── banners = coloured panels with a soft palm-leaf shadow (drawn in code, blurred 18px, black 12%, top-right) ── */
+.mv .mv-side[data-side-block] .mw-ban{--ka-ph:clamp(96px,34%,330px);min-height:118px;margin:0 0 14px;padding:16px clamp(16px,2vw,26px);border-radius:22px;background:var(--ka-pan);justify-content:flex-end}
+@media(min-width:768px){.mv .mv-side[data-side-block] .mw-ban{min-height:180px;margin-bottom:18px}}
+.mv .mv-side[data-side-block] .mw-ban[data-has-ph]{padding:16px clamp(16px,2vw,26px);border-radius:22px}
+.mv .mv-side[data-side-block] .mw-ban[data-has-ph]::before{content:none}
+.mv .mw-ban::after{content:"";position:absolute;z-index:1;top:-34px;right:-26px;width:min(260px,70%);aspect-ratio:1;background:var(--ka-leaf) center/contain no-repeat;opacity:.12;filter:blur(18px);pointer-events:none}
+.mv .mw-ban[data-has-ph]::after{right:calc(var(--ka-pan-ph,0px) + 0px);right:calc(var(--ka-ph) - 90px)}
+.mv .mw-ban-img{inset:auto;right:10px;top:10px;bottom:10px;width:var(--ka-ph);height:calc(100% - 20px);z-index:0;transform:none;border-radius:12px;object-fit:cover;outline:1px solid rgb(0 0 0 / .1);outline-offset:-1px}
+.mv .mw-ban[data-has-ph] .mw-ban-no{display:none}
+.mv .mv-side[data-side-block] .mw-ban .mw-ban-no{-webkit-text-stroke-color:rgb(255 255 255 / .34);z-index:0}
+.mv .mv-side[data-side-block] .mw-ban .mw-ban-h{z-index:2;padding:0;color:var(--ka-pan-t);font-family:var(--fk-serif);font-style:italic;font-weight:600;text-shadow:none;border-bottom:0}
+.mv .mv-side[data-side-block] .mw-ban[data-has-ph] .mw-ban-h{padding-right:calc(var(--ka-ph) + 14px)}
+.mv .mv-side[data-side-block] .mw-ban .mw-ban-h .num{color:var(--ka-pan-l);font-style:normal}
+.mv .mw-ban .mw-ban-h::before{display:none}
+.mv.mv .mw-ban .mw-ban-h::after{display:none}
+@media(max-width:767px){.mv .mv-side[data-side-block] .mw-ban{min-height:112px}.mv .mv-side[data-side-block] .mw-ban:not([data-has-ph]){min-height:92px}}
+
+/* ── Chef's specials: coloured / warm-white / coloured … like the reference grid (phone row, 3 cols, 2 cols = checkerboard) ── */
+.mv .mv-side[data-side-block="food"] .mw-sp-h,.mv .mv-side[data-side-block="drinks"] .mw-sp-h{color:var(--ka-acc)}
+.mv .mv-side[data-side-block] .mw-sp-h::after{background:var(--ka-hair)}
+.mv .mv-side[data-side-block] .mw-card{--kc-bg:var(--ka-pan);--kc-n:var(--ka-pan-t);--kc-p:var(--ka-pan-p);--kc-s:var(--ka-pan-l);--kc-mk:var(--ka-paper);--kc-sh:0 12px 20px -16px rgb(31 42 26 / .6);
+  background:var(--kc-bg);color:var(--kc-n);box-shadow:var(--kc-sh)}
+.mv .mv-side[data-side-block] .mw-sp-rail>.mw-card:nth-child(even){--kc-bg:var(--ka-card);--kc-n:var(--ka-ink);--kc-p:var(--ka-acc);--kc-s:var(--ka-acc);--kc-mk:transparent;--kc-sh:0 0 0 1px var(--ka-hair),0 12px 20px -16px rgb(31 42 26 / .5)}
+@media(min-width:768px) and (max-width:1279px){
+  .mv .mv-side[data-side-block] .mw-sp-rail>.mw-card:nth-child(4n+3){--kc-bg:var(--ka-card);--kc-n:var(--ka-ink);--kc-p:var(--ka-acc);--kc-s:var(--ka-acc);--kc-mk:transparent;--kc-sh:0 0 0 1px var(--ka-hair),0 12px 20px -16px rgb(31 42 26 / .5)}
+  .mv .mv-side[data-side-block] .mw-sp-rail>.mw-card:nth-child(4n+4){--kc-bg:var(--ka-pan);--kc-n:var(--ka-pan-t);--kc-p:var(--ka-pan-p);--kc-s:var(--ka-pan-l);--kc-mk:var(--ka-paper);--kc-sh:0 12px 20px -16px rgb(31 42 26 / .6)}
+}
+.mv .mv-side[data-side-block] .mw-card .mw-card-n{color:var(--kc-n)}
+.mv .mv-side[data-side-block] .mw-card .mw-card-p,.mv .mv-side[data-side-block] .mw-card--ty .mw-card-p,.mv .mv-side[data-side-block] .mw-card--ph .mw-card-p{color:var(--kc-p);font-weight:600}
+.mv .mv-side[data-side-block] .mw-card .fg-see{color:var(--kc-s)}
+.mv .mv-side[data-side-block] .mw-card .fg-see:focus-visible{outline-color:currentColor}
+.mv .mv-side[data-side-block] .mw-card .mv-mk{box-sizing:content-box;padding:2px;border-radius:4px;background:var(--kc-mk)}
+.mv .mv-side[data-side-block] .mw-card--ty .mw-card-r{padding-left:14px;border-left:0}
+.mv .mv-side[data-side-block] .mw-card--ty .mw-card-n{font-style:italic}
+.mv .mv-side[data-side-block] .mw-card--ph .mw-card-n{font-style:italic}
+
+/* ── 2. category tiles: checkerboard (coloured / warm white) + the glow on the picked one ── */
+.mv .mc-tiles .mc-grid>li{--kt-bg:var(--ka-pan);--kt-n:var(--ka-pan-t);--kt-c:var(--ka-pan-p);--kt-ring:0 0 0 0 transparent}
+/* phone, 2 columns: row 1 = coloured, white · row 2 = white, coloured */
+.mv .mc-tiles .mc-grid>li:nth-child(4n+2),.mv .mc-tiles .mc-grid>li:nth-child(4n+3){--kt-bg:var(--ka-card);--kt-n:var(--ka-ink);--kt-c:var(--ka-acc);--kt-ring:inset 0 0 0 1px var(--ka-hair)}
+/* 768+, 4 columns: coloured at 1,3 · 6,8 */
+@media(min-width:768px){
+  .mv .mc-tiles .mc-grid>li:nth-child(4n+2),.mv .mc-tiles .mc-grid>li:nth-child(4n+3){--kt-bg:var(--ka-pan);--kt-n:var(--ka-pan-t);--kt-c:var(--ka-pan-p);--kt-ring:0 0 0 0 transparent}
+  .mv .mc-tiles .mc-grid>li:nth-child(8n+2),.mv .mc-tiles .mc-grid>li:nth-child(8n+4),.mv .mc-tiles .mc-grid>li:nth-child(8n+5),.mv .mc-tiles .mc-grid>li:nth-child(8n+7){--kt-bg:var(--ka-card);--kt-n:var(--ka-ink);--kt-c:var(--ka-acc);--kt-ring:inset 0 0 0 1px var(--ka-hair)}
+}
+.mv .mc-tiles .mc-tile{overflow:visible;background:var(--kt-bg);color:var(--kt-n);box-shadow:var(--kt-ring);
+  transition:transform 120ms cubic-bezier(.25,.46,.45,.94),color 200ms ease}
+.mv .mc-tiles .mc-tile .mc-n{font-style:italic}
+.mv .mc-tiles .mc-tile .mc-c{color:var(--kt-c)}
+/* gold fill (opacity layer) + the halo (its own layer, blooms in once: opacity 0→1, 300ms) */
+.mv .mc-tiles .mc-tile::before{background:var(--ka-gold)}
+.mv .mc-tiles .mc-tile::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;
+  box-shadow:0 0 0 2px #e0b25a,0 0 28px 6px rgb(224 178 90 / .7),0 0 12px 3px rgb(214 150 40 / .75),0 12px 26px -8px rgb(31 42 26 / .45);transition:opacity 200ms ease-out}
+/* lift the picked tile (and its grid cell) above its neighbours so the halo is not painted under the next tile */
+.mv .mc-tiles .mc-grid>li:has(.mc-tile.is-picked){position:relative;z-index:5}
+.mv .mc-tiles .mc-tile.is-picked{position:relative;z-index:2;color:var(--ka-ink);transform:translateY(-2px);transition:transform 220ms var(--ka-out),color 200ms ease}
+.mv .mc-tiles .mc-tile.is-picked::after{opacity:1;transition:opacity 300ms var(--ka-out)}
+.mv .mc-tiles .mc-tile.is-picked .mc-c{color:#3f2c06}
+.mv .mc-tiles .mc-tile.is-picked:active{transform:translateY(-2px) scale(.96);transition-duration:120ms}
+.mv .mc-tiles .mc-tile:active{transform:scale(.96)}
+.mv .mc-tiles .mc-tile .mc-tick{background:var(--ka-ink);color:var(--ka-gold)}
+.mv .mc-tiles .mc-tile:focus-visible{outline:2px solid var(--ka-ink);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){
+  .mv .mc-tiles .mc-tile:hover{transform:none}
+  .mv .mc-tiles .mc-tile:hover:not(.is-picked)::after{opacity:.38;transition:opacity 150ms ease-out}
+  .mv .mc-tiles .mc-tile.is-picked:hover{transform:translateY(-2px)}
+  .mv .mc-tiles .mc-tile:active{transform:scale(.96)}
+  .mv .mc-tiles .mc-tile.is-picked:active{transform:translateY(-2px) scale(.96)}
+}
+/* ════ end of KIT 40f block ════ */
+/* v5.111 tile finish (owner mock): same tile size, gold divider, soft corner wave, warm light tiles, gold rim on the picked tile */
+.mv .mc-tiles .mc-tile{background:radial-gradient(120% 95% at 118% 128%,rgb(255 255 255/.13) 0 40%,transparent 40.6%),radial-gradient(150% 120% at 125% 140%,rgb(255 255 255/.07) 0 52%,transparent 52.6%),var(--kt-bg);box-shadow:var(--kt-ring),0 12px 22px -16px rgb(31 42 26/.5)}
+.mv .mc-tiles .mc-grid>li:nth-child(4n+2)>.mc-tile,.mv .mc-tiles .mc-grid>li:nth-child(4n+3)>.mc-tile{background:radial-gradient(120% 95% at 118% 128%,rgb(196 150 80/.10) 0 40%,transparent 40.6%),radial-gradient(150% 120% at 125% 140%,rgb(196 150 80/.06) 0 52%,transparent 52.6%),linear-gradient(160deg,#fffdf8,#fbf5ea)}
+.mv .mc-tiles .mc-tile .mc-c::before{content:"";display:block;width:30px;height:2px;border-radius:2px;background:#e0b25a;margin:6px 0 5px}
+.mv .mc-tiles .mc-tile.is-picked{box-shadow:0 0 0 2px #e0b25a,0 16px 26px -14px rgb(150 100 20/.55)}

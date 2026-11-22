@@ -20,7 +20,7 @@ function init(md: HTMLElement) {
   const narrow = matchMedia('(max-width: 820px)');
   const xBtn = document.getElementById('md-x') as HTMLButtonElement;
 
-  /* doors in view: menu-v2 keeps an empty picks pill out of the way */
+  /* doors in view (the .md-in class pauses the page's idle effects) */
   if ('IntersectionObserver' in window) new IntersectionObserver(([en]) => root.classList.toggle('md-in', en.isIntersecting), { threshold: 0.35 }).observe(md);
 
   /* ── the seam: ONE rAF loop eases `cur` toward `target` (the cursor, or the 25 / 50 / 75 rest) ──
@@ -117,7 +117,7 @@ function init(md: HTMLElement) {
   md.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     const door = t.closest<HTMLElement>('[data-door]');
-    if (!door || t.closest('[data-side-go], #md-x') || performance.now() - dragged < 350) return;
+    if (!door || t.closest('[data-side-go], [data-mb-open], #mb-root, #md-x') || performance.now() - dragged < 350) return;
     const side = door.dataset.door as Side;
     if (open !== side) {
       e.stopPropagation(); e.preventDefault();

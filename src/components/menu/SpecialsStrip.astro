@@ -1,0 +1,23 @@
+---
+// "Chef's specials": a short row at the top of a category, built only from dishes flagged chefSpecial in food.json / drinks.json.
+// A dish with a real photo gets a photo card (4:5 photo); a dish without one gets a type card (name, price, veg mark, gold pattern). No fake photos, no claims.
+interface Card { key: string; name: string; price: string; veg: boolean; photo: { sm: string; fit: string } | null }
+interface Props { cards: Card[] }
+const { cards } = Astro.props as Props;
+const mk = (veg: boolean) => `mv-mk ${veg ? 'mv-mk--v' : 'mv-mk--n'}`;
+---
+<section class="mw-sp" aria-label="Chef's specials">
+  <h4 class="mw-sp-h"><span>Chef's specials</span></h4>
+  <ul class="mw-sp-rail" role="list">
+    {cards.map((c) => (
+      <li class={`mw-card ${c.photo ? 'mw-card--ph' : 'mw-card--ty'}`}>
+        {c.photo && <div class="mw-card-ph"><img class="fk-fit" src={c.photo.sm} alt={c.name} width="320" height="400" loading="lazy" decoding="async" style={c.photo.fit} /></div>}
+        <div class="mw-card-r">
+          <p class="mw-card-n">{c.name}</p>
+          <p class="mw-card-m"><i class={mk(c.veg)} role="img" aria-label={c.veg ? 'Vegetarian' : 'Non-vegetarian'}></i>{c.price && <span class="mw-card-p num">{c.price}</span>}</p>
+          <button class="fg-see" type="button" data-see={c.key}>See dish<span class="mv-vl"> {c.name}</span></button>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>

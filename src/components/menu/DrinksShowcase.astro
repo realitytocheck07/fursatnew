@@ -1,9 +1,9 @@
 ---
 // Start of the Drinks side of /menu: red elephant mark, bar photo, swipe rail of real drink photos, category pills.
-// Rail cards are not [data-row], so the search and the live count ignore them; their Add buttons use the same [data-add] hooks.
+// Rail cards are not [data-row], so the search and the live count ignore them; the name is a [data-see] button that opens the dish sheet.
 import { DRINK_GROUPS, GROUP_ICONS } from './menuGroups';
-import { money } from './cart';
-interface Photo { fit: string; icon: string; name: string; section: string; price: number | null; sm: string; w: number; h: number; attrs: Record<string, string> }
+import { money } from './dish-row';
+interface Photo { fit: string; icon: string; name: string; section: string; price: number | null; sm: string; w: number; h: number; key: string }
 interface Props { photos: Photo[]; count: number; sections: number; bar: { image: string; alt: string } }
 const { photos, count, sections, bar } = Astro.props as Props;
 ---
@@ -29,10 +29,9 @@ const { photos, count, sections, bar } = Astro.props as Props;
             <div class="dk-ph"><img class="fk-fit" src={p.sm} alt={p.name} width={Math.round(480 * p.w / p.h)} height="480" loading="lazy" decoding="async" style={p.fit} /><span class="dk-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d={p.icon} /></svg></span></div>
             <div class="dk-card-b">
               <p class="dk-card-s">{p.section}</p>
-              <h3 class="dk-card-n">{p.name}</h3>
+              <h3 class="dk-card-n"><button class="dk-see" type="button" data-see={p.key}>{p.name}</button></h3>
               <div class="dk-card-r">
                 <span class="dk-price num">{p.price != null ? money(p.price) : ''}</span>
-                {p.price != null && <button class="dk-add mv-add" type="button" aria-pressed="false" aria-label={`Add ${p.name} to picks`} {...p.attrs} data-img={p.sm}><span class="mv-add-t" aria-hidden="true">+ Add</span></button>}
               </div>
             </div>
           </div></li>

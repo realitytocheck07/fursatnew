@@ -9,7 +9,7 @@ export const FOOD_GROUPS: Group[] = [
   { id: 'f-breads', side: 'food', label: 'Breads & sides', sections: ['Indian Breads', 'Extras/Sides'] },
   { id: 'f-soups', side: 'food', label: 'Soups & salads', sections: ['Soups', 'Healthy Salads', 'Healthy bowls'] },
   { id: 'f-breakfast', side: 'food', label: 'Breakfast & South Indian', sections: ['All day breakfast', 'South Indian'] },
-  { id: 'f-more', side: 'food', label: 'Burgers, kids & specials', sections: ['Sandwiches & burgers', 'Kids menu', "Sreemukhi's special menu"] },
+  { id: 'f-more', side: 'food', label: 'Burgers, kids & specials', sections: ['Sandwiches & burgers', 'Kids menu', 'Special menu'] },
   { id: 'f-desserts', side: 'food', label: 'Desserts & cookies', sections: ['Desserts', 'Cookies'] },
 ];
 

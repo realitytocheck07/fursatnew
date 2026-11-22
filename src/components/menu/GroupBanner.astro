@@ -1,0 +1,12 @@
+---
+// Wide banner that opens each category: section number, big name, dish count. A real dish photo of the category (dish-photos.json) is its
+// darkened background; with no photo it is type only on the page colour. No stock or invented images. Not [data-row]: search ignores it.
+interface Photo { sm: string; w: number; h: number; pos: string }
+interface Props { no: string; label: string; count: number; photo: Photo | null }
+const { no, label, count, photo } = Astro.props as Props;
+---
+<header class="mw-ban" data-has-ph={photo ? '' : undefined}>
+  {photo && <img class="mw-ban-img" src={photo.sm} alt="" width={photo.w > 0 ? Math.round(640 * photo.w / photo.h) : 640} height="640" loading="lazy" decoding="async" style={`object-position:${photo.pos}`} />}
+  <span class="mw-ban-no num" aria-hidden="true">{no}</span>
+  <h3 class="mv-grp-h mw-ban-h">{label}<span class="num" data-one={count === 1 ? '' : undefined}>{count}</span></h3>
+</header>

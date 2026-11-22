@@ -1,0 +1,21 @@
+/* Pick your spot: always-loaded CSS (dialog shell + loader). Everything is prefixed ps-. */
+.ps-dlg{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#10261a;color:#f8eee2;overflow:hidden;overscroll-behavior:contain;font-family:Poppins,system-ui,sans-serif}
+.ps-dlg:not([open]){display:none}
+.ps-dlg::backdrop{background:#10261a}
+.ps-dlg[open]{animation:ps-in .32s cubic-bezier(.23,1,.32,1)}
+@keyframes ps-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+.ps-root{position:absolute;inset:0}
+.ps-stage{position:absolute;inset:0;overflow:hidden;background:#efe3c8}
+.ps-stage canvas{display:block;outline:none}
+.ps-host{position:absolute;inset:0}
+.ps-boot{position:absolute;inset:0;z-index:2;background:#efe3c8;transition:opacity .5s cubic-bezier(.23,1,.32,1);pointer-events:none}
+.ps-boot.is-gone{opacity:0}
+.ps-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ps-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 22px;border-radius:20px;background:rgba(16,38,26,.9);border:1px solid rgba(201,154,67,.6);color:#f8eee2;font:500 13px/1.2 Poppins,system-ui,sans-serif;transition:opacity .25s cubic-bezier(.23,1,.32,1);pointer-events:none}
+.ps-load img{height:54px;width:auto;animation:ps-pulse 1.6s ease-in-out infinite}
+@keyframes ps-pulse{0%,100%{opacity:.55}50%{opacity:1}}
+.ps-nogl{position:absolute;inset:0;overflow:auto;background:#f8eee2;color:#2b2416;padding:calc(72px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.ps-x0{position:absolute;z-index:7;right:calc(14px + env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));width:48px;height:48px;border-radius:50%;border:1.5px solid #c99a43;background:#10261a;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+.ps-x0 svg{width:20px;height:20px;fill:none;stroke:#f8eee2;stroke-width:2.2;stroke-linecap:round}
+.ps-x0:focus-visible{outline:3px solid #ffd98a;outline-offset:2px}
+.ps-nogl h2{font:600 22px/1.2 'Playfair Display',Georgia,serif;margin:0 0 6px}.ps-nogl p{margin:0 0 12px;font:400 14px/1.45 Poppins,system-ui,sans-serif}

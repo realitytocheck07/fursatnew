@@ -8,23 +8,27 @@ import foodData from '../data/food.json';
 import drinksData from '../data/drinks.json';
 import featured from '../data/menu-featured.json';
 import dishPhotos from '../data/dish-photos.json';
+import photoFocus from '../data/photo-focus.json';
 import tableData from '../data/menu-table.json';
 import barData from '../data/menu-bar.json';
 import { FOOD_GROUPS, DRINK_GROUPS, GROUP_ICONS, type Group } from '../components/menu/menuGroups';
-import { money } from '../components/menu/cart';
 import MenuDoors from '../components/menu/MenuDoors.astro';
+import MenuBook from '../components/menu/book/MenuBook.astro';
 import DishRow from '../components/menu/DishRow.astro';
-import type { RowRec } from '../components/menu/dish-row';
+import { money, type RowRec } from '../components/menu/dish-row';
 import TableLanding from '../components/menu/TableLanding.astro';
 import DrinksIntro from '../components/menu/DrinksIntro.astro';
 import { fitStyle } from '../components/menu/photoFit';
-import FoodGroupHead from '../components/menu/FoodGroupHead.astro';
+import GroupBanner from '../components/menu/GroupBanner.astro';
+import SpecialsStrip from '../components/menu/SpecialsStrip.astro';
+import CategoryTiles from '../components/menu/CategoryTiles.astro';
 import DrinksShowcase from '../components/menu/DrinksShowcase.astro';
 import '../styles/fk-tokens.css';
 import '../styles/menu-v2.css';
 import '../styles/menu-drinks.css';
 import '../styles/menu-food.css';
 import '../styles/menu-wow.css';
+import '../styles/menu-a.css';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type Raw = {
@@ -37,7 +41,10 @@ type Raw = {
 type Item = Raw & { kind: 'food' | 'drink' };
 type Section = { section: string; items: Item[] };
 
-const food: Section[] = (foodData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'food' as const })) }));
+// TODO(client): confirm. The data names one section after a person; the site shows it as "Special menu" (display only, food.json is not changed here).
+const SHOWN_SECTION: Record<string, string> = { "Sreemukhi's special menu": 'Special menu' };
+const shown = (n: string) => SHOWN_SECTION[n] ?? n;
+const food: Section[] = (foodData as { section: string; items: Raw[] }[]).map((s) => ({ section: shown(s.section), items: s.items.map((i) => ({ ...i, section: shown(i.section), kind: 'food' as const })) }));
 const drinks: Section[] = (drinksData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'drink' as const })) }));
 // real dish photos by exact menu name (dish-photos.json); the build fails on a missing file or name
 type DishPhoto = { src: string; sm: string; xs: string; w: number; h: number; todo?: string };
@@ -87,21 +94,29 @@ const jump = ([['food', FOOD_GROUPS], ['drinks', DRINK_GROUPS]] as ['food' | 'dr
   side,
   tiles: groups.flatMap((g) => groupSections(g).map((sec) => ({ id: `s-${slug(sec.section)}`, name: titleCase(sec.section), count: sec.items.length, icon: GROUP_ICONS[g.id] }))),
 }));
-// Food group openers: real photos of that group (never ask/dishes, never repeats), else sample dish names for a banner
-const groupHead = (g: Group) => {
-  const its = groupSections(g).flatMap((s) => s.items);
-  const seen = new Set<string>();
-  const photos = its.filter((i) => PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/') && !seen.has(PHOTOS[i.name].sm) && seen.add(PHOTOS[i.name].sm))
-    .slice(0, 3).map((i) => ({ name: titleCase(i.name).replace(/\s*\((Veg|Egg|Chicken|Mix)\)$/, ''), sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), price: i.price != null ? money(i.price) : '' }));
-  return { photos, sample: its.slice(0, 3).map((i) => titleCase(i.name)) };
+// Category banner photo: the first real dish photo in the category (never ask/dishes), else no photo and the banner is type only.
+const bannerPhoto = (g: Group) => {
+  const ph = groupSections(g).flatMap((s) => s.items).filter((i) => PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/'));
+  const it = ph.find((i) => i.chefSpecial) ?? ph[0]; // a chef-special dish's photo first, else the first dish with a photo
+  const f = it ? (photoFocus as Record<string, { cx: number; cy: number }>)[it.name] : undefined;
+  return it ? { sm: PHOTOS[it.name].sm, w: PHOTOS[it.name].w, h: PHOTOS[it.name].h, pos: `${Math.round((f?.cx ?? 0.5) * 100)}% ${Math.round((f?.cy ?? 0.55) * 100)}%` } : null;
 };
-const addAttrs = (i: Item) => {
-  const lab = mainLabel(i);
-  return {
-    'data-add': '', 'data-n': titleCase(i.name) + (lab ? ` (${lab})` : ''), 'data-p': String(i.price ?? ''),
-    'data-c': i.section, 'data-k': i.kind, 'data-v': i.veg ? 'v' : 'n', ...(i.alc ? { 'data-a': '1' } : {}),
-  };
+// "Chef's specials": only dishes flagged chefSpecial in the data, only when a category has 3 or more, photo dishes first, at most 6.
+const specialsOf = (g: Group) => {
+  const sp = groupSections(g).flatMap((s) => s.items).filter((i) => i.chefSpecial);
+  if (sp.length < 3) return [];
+  const withPh = (i: Item) => !!PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/');
+  return [...sp.filter(withPh), ...sp.filter((i) => !withPh(i))].slice(0, 6).map((i) => {
+    const vs = variants(i), ph = PHOTOS[i.name];
+    return {
+      key: dishKey(i), name: titleCase(i.name), veg: !!i.veg,
+      price: vs.length > 1 ? vs.map((v) => money(v.value)).join(' / ') : i.price != null ? money(i.price) : '',
+      photo: withPh(i) ? { sm: ph.sm, fit: fitStyle(i.name, ph.w / ph.h, 4 / 5, 0.5, 0.45) } : null,
+    };
+  });
 };
+// The key the rotating table, #dish= links and the "See dish" buttons use to find a dish: name + (variant label).
+const dishKey = (i: Item) => { const lab = mainLabel(i); return titleCase(i.name) + (lab ? ` (${lab})` : ''); };
 // Compact record of one dish row (see dish-row.ts). Only the first group is rendered into the HTML; the others ship as these
 // records in one JSON block and menu-v2.ts renders them when they are near the screen, searched, jumped to or opened by a link.
 const recOf = (i: Item): RowRec => {
@@ -112,7 +127,7 @@ const recOf = (i: Item): RowRec => {
     v: i.veg ? 1 : 0, ...(i.spicy ? { s: 1 } : {}), ...(i.chefSpecial ? { f: 1 } : {}), ...(i.alc ? { a: 1 } : {}),
     p: i.price ?? null, ...(vs.length > 1 ? { vs: vs.map((v) => [v.label, v.value] as [string, number]) } : {}),
     ...(i.image ? { g: i.image } : {}),
-    ...(ph ? { ph: [ph.sm, Math.round(640 * ph.w / ph.h), 640, fitStyle(i.name, ph.w / ph.h, 1, 0.5, 0.45)] as [string, number, number, string] } : {}),
+    ...(ph ? { ph: [ph.sm, Math.round(640 * ph.w / ph.h), 640, fitStyle(i.name, ph.w / ph.h, 1, 0.5, 0.45), fitStyle(i.name, ph.w / ph.h, 4 / 5, 0.5, 0.45)] as [string, number, number, string, string] } : {}),
   };
 };
 const EAGER_GROUP = FOOD_GROUPS[0].id; // the group at the top of the list; every other group is filled in by menu-v2.ts
@@ -123,15 +138,14 @@ for (const g of [...FOOD_GROUPS, ...DRINK_GROUPS]) {
 }
 // Drinks showcase: every bar item that has a real photo (dish-photos.json), in menu order
 const showcase = drinks.flatMap((s) => s.items).filter((i) => PHOTOS[i.name]).map((i) => ({
-  name: titleCase(i.name), section: i.section, price: i.price, icon: GROUP_ICONS[(DRINK_GROUPS.find((g) => g.sections.includes(i.section)) ?? DRINK_GROUPS[0]).id], sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 0.8), attrs: addAttrs(i),
+  name: titleCase(i.name), section: i.section, price: i.price, icon: GROUP_ICONS[(DRINK_GROUPS.find((g) => g.sections.includes(i.section)) ?? DRINK_GROUPS[0]).id], sm: PHOTOS[i.name].sm, w: PHOTOS[i.name].w, h: PHOTOS[i.name].h, fit: fitStyle(i.name, PHOTOS[i.name].w / PHOTOS[i.name].h, 4 / 3), key: dishKey(i),
 }));
 // rotating table (menu-table.json): every dish must exist and have a real photo
 const tableDishes = tableData.dishes.map((d) => {
   const it = all.find((i) => i.name === d.name);
   const ph = PHOTOS[d.name];
   if (!it || !ph) throw new Error(`menu-table.json: "${d.name}" needs a menu item and a photo`);
-  const a = addAttrs(it);
-  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: a['data-n'], sm: ph.sm, w: Math.round(640 * ph.w / ph.h), clip: (d as { clip?: string }).clip ?? '' };
+  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: dishKey(it), sm: ph.sm, w: Math.round(640 * ph.w / ph.h), clip: (d as { clip?: string }).clip ?? '' };
 });
 const vegMark = (veg?: boolean) => (veg ? 'mv-vm mv-vm--v' : 'mv-vm mv-vm--n');
 
@@ -168,7 +182,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 
 <Base
   title="Menu – Fursat Kitchen & Bar, Madhapur, Hyderabad"
-  description={`The Fursat menu: ${foodCount} kitchen dishes and ${drinkCount} bar drinks, cocktails, whisky, wine, mocktails, shakes and coffee. Build your picks and send them on WhatsApp.`}
+  description={`The Fursat menu: ${foodCount} kitchen dishes and ${drinkCount} bar drinks, cocktails, whisky, wine, mocktails, shakes and coffee. Tap any dish for its photo and details, and ask us about it on WhatsApp.`}
   canonical="https://fursatind.in/menu/"
   ogImage="https://fursatind.in/assets/fursat_space_07.webp"
   ogImageAlt="Fursat Kitchen | Bar dining room"
@@ -181,7 +195,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
 
   <main class="mv" id="main" tabindex="-1" data-side="drinks" data-food-theme="forest">
     <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute"><defs><clipPath id="fk-wave-s" clipPathUnits="objectBoundingBox"><path d="M0,0.1371C0,0.0617 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0617 1,0.1371L1,0.8903C1,0.9657 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8457 0,0.7703Z"/></clipPath><clipPath id="fk-wave-w" clipPathUnits="objectBoundingBox"><path d="M0,0.2133C0,0.096 0.054,0 0.12,0L0.88,0C0.946,0 1,0.096 1,0.2133L1,0.8293C1,0.9467 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.8267 0,0.7093Z"/></clipPath><clipPath id="fk-wave-t" clipPathUnits="objectBoundingBox"><path d="M0,0.096C0,0.0432 0.054,0 0.12,0L0.88,0C0.946,0 1,0.0432 1,0.096L1,0.9232C1,0.976 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.856 0,0.8032Z"/></clipPath><clipPath id="fk-wave-q" clipPathUnits="objectBoundingBox"><path d="M0,0.12C0,0.054 0.054,0 0.12,0L0.88,0C0.946,0 1,0.054 1,0.12L1,0.904C1,0.97 0.964,1 0.904,1L0.91,1C0.88,1 0.72,0.86 0.58,0.88L0.096,0.88C0.036,0.88 0,0.85 0,0.784Z"/></clipPath></defs></svg>
-    <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData} />
+    <MenuDoors foodCount={foodCount} drinkCount={drinkCount} foodSections={food.length} drinkSections={drinks.length} dishes={tableDishes} bar={barData}><MenuBook slot="food-actions" /></MenuDoors>
     <TableLanding dishes={tableDishes} count={foodCount} />
     <DrinksIntro />
 
@@ -198,7 +212,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
             <p class="mv-meta"><span class={vegMark(drink.veg)} role="img" aria-label={drink.veg ? 'Vegetarian' : 'Non-vegetarian'}></span>{drink.section}</p>
             <div class="mv-chef-row">
               <p class="mv-price num">{money(drink.price!)}</p>
-              <button class="mv-btn mv-btn--cream" type="button" {...addAttrs(drink)} data-img={featured.featuredDrink.image}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button class="mv-btn mv-btn--cream" type="button" data-see={dishKey(drink)}>See dish</button>
             </div>
             <div class="mv-more">
               <div class="mv-more-top"><span class="mv-more-h">More from {drink.section}</span><button class="mv-link" type="button" data-go="d-shakes" data-side-of="drinks">See all →</button></div>
@@ -223,7 +237,7 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
             </p>
             <div class="mv-chef-row">
               <p class="mv-price num">{money(picks[0].price!)}</p>
-              <button class="mv-btn" type="button" {...addAttrs(picks[0])}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+              <button class="mv-btn" type="button" data-see={dishKey(picks[0])}>See dish</button>
             </div>
           </div>
           <div class="mv-chef-second">
@@ -240,36 +254,13 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
               </div>
               <div class="mv-chef-row">
                 <p class="mv-price mv-price--sm num">{money(picks[1].price!)}</p>
-                <button class="mv-btn mv-btn--sm" type="button" {...addAttrs(picks[1])}>Add to Picks <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button class="mv-btn mv-btn--sm" type="button" data-see={dishKey(picks[1])}>See dish</button>
               </div>
             </div>
           </div>
         </section>
       </div>
 
-      <!-- Picks pill (fixed at the bottom; opens the list, sends it on WhatsApp) -->
-        <div class="mv-picks" id="mv-picks" data-count="0">
-          <div class="mv-picks-bar" id="mv-picks-bar">
-            <button class="mv-picks-btn" type="button" id="mv-picks-toggle" aria-expanded="false" aria-controls="mv-picks-panel">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" id="mv-bag"><path d="M5 8h14l-1 12H6L5 8zM9 8a3 3 0 0 1 6 0"/></svg>
-              <span class="mv-picks-lbl">Your Picks (<b class="num" id="mv-cnt">0</b>)</span>
-            </button>
-            <span class="mv-sep" aria-hidden="true"></span>
-            <a class="mv-wa" id="mv-wa" href="#" aria-disabled="true" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z"/></svg>
-              <span class="mv-wa-txt"><span class="mv-wa-long">Send on </span>WhatsApp</span><span class="mv-wa-arr" aria-hidden="true">→</span>
-            </a>
-          </div>
-          <!-- Collapsed form while the page scrolls: bag + count. Pointer-only; the bar above holds the real controls. -->
-          <span class="mv-picks-mini" id="mv-picks-mini" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" id="mv-bag-mini"><path d="M5 8h14l-1 12H6L5 8zM9 8a3 3 0 0 1 6 0"/></svg>
-            <b class="num" id="mv-cnt-mini">0</b>
-          </span>
-          <div class="mv-picks-panel" id="mv-picks-panel" hidden>
-            <ul id="mv-picks-list"></ul>
-            <div class="mv-picks-foot"><span>Subtotal <b class="num" id="mv-sub">₹0</b> <small>taxes extra</small></span><button type="button" class="mv-link" id="mv-clear">Clear all</button></div>
-          </div>
-        </div>
     </section>
 
     <!-- Full menu: every item server-rendered (works without JS) -->
@@ -315,6 +306,13 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
         </div>
       </div>
       <div class="mv-list-in">
+      <div class="mv-idx" id="mv-idx">
+        {[{ side: 'food', groups: FOOD_GROUPS, label: 'Food sections' }, { side: 'drinks', groups: DRINK_GROUPS, label: 'Drink sections' }].map(({ side, groups, label }) => (
+          <nav class="mv-idx-in" data-idx={side} aria-label={label} hidden={side !== 'food'}>
+            <ul>{groups.map((g) => (<li><button class="mv-idx-b" type="button" data-go={g.id} data-side-of={side}>{g.label}</button></li>))}</ul>
+          </nav>
+        ))}
+      </div>
       <nav class="mv-jump" id="mv-jump" aria-labelledby="mv-jump-h">
         <h3 class="mv-jump-h" id="mv-jump-h">Jump to</h3>
         {jump.map(({ side, tiles }) => (
@@ -333,10 +331,11 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
           <div class="mv-side" id={`mv-${side}`} data-side-block={side}>
             <header class="mv-side-h"><h2>{title}</h2><span>{blurb}</span></header>
             {side === 'drinks' && <DrinksShowcase photos={showcase} count={drinkCount} sections={drinks.length} bar={{ image: barData.image, alt: barData.alt }} />}
-            {groups.map((g) => (
+            <CategoryTiles side={side as 'food' | 'drinks'} tiles={groups.map((g) => ({ id: g.id, label: g.label, count: groupCount(g) }))} />
+            {groups.map((g, gi) => (
               <div class="mv-grp" id={`g-${g.id}`} data-group={g.id}>
-                <h3 class="mv-grp-h">{g.label}<span class="num" data-one={groupCount(g) === 1 ? '' : undefined}>{groupCount(g)}</span></h3>
-                {side === 'food' && <FoodGroupHead icon={GROUP_ICONS[g.id]} count={groupCount(g)} {...groupHead(g)} />}
+                <GroupBanner no={String(gi + 1).padStart(2, '0')} label={g.label} count={groupCount(g)} photo={bannerPhoto(g)} />
+                {specialsOf(g).length > 0 && <SpecialsStrip cards={specialsOf(g)} />}
                 {groupSections(g).map((sec) => (
                   <section class="mv-sec" id={`s-${slug(sec.section)}`}>
                     {g.sections.length > 1 && <p class="mv-sec-h">{sec.section}</p>}
@@ -374,14 +373,10 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
           <p class="mv-sheet-price num" id="mv-sheet-price"></p>
         </div>
         <div class="mv-sheet-foot">
-          <button class="mv-btn" type="button" id="mv-sheet-add" data-add data-nofly>
-            <span class="mv-ic" aria-hidden="true">
-              <svg class="mv-ic-a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-              <svg class="mv-ic-b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-            </span>
-            <span>Add to Picks</span>
-          </button>
-          <p class="mv-sheet-status" id="mv-sheet-status" role="status" aria-live="polite"></p>
+          <a class="mv-btn mv-sheet-wa" id="mv-sheet-wa" href={`https://wa.me/${site.whatsapp}`} data-wa={site.whatsapp} target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z"/></svg>
+            <span>Ask about this dish on WhatsApp</span>
+          </a>
         </div>
       </div>
     </dialog>
@@ -401,11 +396,15 @@ if (ldItems !== totalItems) throw new Error(`menu schema item count ${ldItems} !
     </form>
   </dialog>
 
+  <!-- Hover photo (laptop mouse only): one card that follows the cursor over rows that have a real photo (menu-hover.ts) -->
+  <div class="mw-hv" id="mw-hv" aria-hidden="true"><div class="mw-hv-in"><div class="mw-hv-ph"><img class="fk-fit" alt="" width="220" height="280" decoding="async" /></div></div></div>
+
   <SiteFooter />
 </Base>
 
 <script>
   import '../components/menu/menu-v2';
+  import '../components/menu/menu-hover';
   import '../scripts/fk-motion';
   // The wow layer (scroll parallax, reveals, tilt) only enhances what is already visible: it loads when the browser is idle, not with the first screen.
   const wow = () => import('../components/menu/menu-wow');
