@@ -1,240 +1,124 @@
 ---
 /**
  * MarqueeStrip.astro — Fursat Kitchen | Bar
- * Horizontal CSS marquee strip. No JS required for animation.
- * Pauses on hover and focus-within for accessibility.
- *
- * Props:
- *   items     — Array of strings to display
- *   speed     — Animation duration in seconds (default 32)
- *   direction — 'left' (default) | 'right'
- *
- * CSS prefix: mq-
+ * 2026 ribbon: two thin counter-scrolling rows, tilted -2deg across the full width, edge-faded.
+ * Row 1: zone names, Playfair italic, cream on deep green, 3D-elephant separators (left, 56 px/s).
+ * Row 2: Poppins caps, gold on elephant red (right, 40 px/s, a little slower).
+ * Motion is a CSS transform animation (compositor, no per-frame JS); a tiny idle script sets the duration so the speed is a constant px/s at any width.
+ * It pauses on hover / keyboard focus and while off screen or the tab is hidden.
+ * Each zone links to its page. CSS prefix: mq-
  */
-interface Props {
-  items?: string[];
-  speed?: number;
-  direction?: 'left' | 'right';
-}
-
+interface Zone { label: string; href: string }
+interface Props { items?: Zone[] }
 const {
   items = [
-    'Kitchen',
-    'Bar',
-    'Social Club',
-    'Bites & Buffet',
-    'Banquets',
+    { label: 'Café', href: '/cafe' },
+    { label: 'Bar & Kitchen', href: '/restaurant-bar' },
+    { label: 'Social Club', href: '/restaurant-bar' },
+    { label: 'Bites & Buffet', href: '/catering' },
+    { label: 'Banquets', href: '/banquet' },
   ],
-  speed = 32,
-  direction = 'left',
 } = Astro.props;
-
-// Only a few short words: repeat them so one half of the track is wider than the screen (seamless loop at 1920px).
-const half = Array.from({ length: 3 }, () => items).flat();
-
-const animDir = direction === 'right' ? 'mq-scroll-right' : 'mq-scroll-left';
+// repeat the zones so one group is wider than a 1920px screen; a second identical group makes the loop seamless
+const group = Array.from({ length: 4 }, () => items).flat();
+// owner 22 Nov (taste + motion review): ONE calm row. The hero video is the focal motion; two counter-moving rows competed with it.
+const rows = [
+  { cls: 'mq-r1', dir: -1, speed: 40 },
+];
 ---
 
-<div class="mq-strip mot-marquee" aria-hidden="true">
-  <div class="mq-skew-wrap">
-    <!-- Two copies of items for seamless loop -->
-    <div class:list={['mq-track', animDir]} style={`--mq-speed:${speed}s`}>
-      {half.map(item => (
-        <span class="mq-item">
-          <span class="mq-dot" aria-hidden="true"><svg class="mq-star" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2c.6 5.4 4.6 9.4 10 10-5.4.6-9.4 4.6-10 10-.6-5.4-4.6-9.4-10-10 5.4-.6 9.4-4.6 10-10Z"/></svg></span>
-          {item}
-        </span>
-      ))}
-      {/* Duplicate for seamless wrap */}
-      {half.map(item => (
-        <span class="mq-item" aria-hidden="true">
-          <span class="mq-dot"><svg class="mq-star" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2c.6 5.4 4.6 9.4 10 10-5.4.6-9.4 4.6-10 10-.6-5.4-4.6-9.4-10-10 5.4-.6 9.4-4.6 10-10Z"/></svg></span>
-          {item}
-        </span>
-      ))}
-    </div>
+<nav class="mq-strip" aria-label="Zones at Fursat">
+  <div class="mq-band">
+    {rows.map((r) => (
+      <div class={`mq-row ${r.cls}`} data-dir={r.dir} data-speed={r.speed}>
+        <div class="mq-track">
+          {[0, 1].map((copy) => (
+            <div class="mq-group" aria-hidden={copy ? 'true' : undefined}>
+              {group.map((z) => (
+                <a class="mq-item" href={z.href} tabindex={copy ? -1 : undefined}>
+                  <span>{z.label}</span>
+                  {r.cls === 'mq-r1'
+                    ? <img class="mq-el" src="/assets/brand/fursat-elephant-3d-v1.webp" width="14" height="18" alt="" loading="lazy" decoding="async" />
+                    : <svg class="mq-star" viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 2c.6 5.4 4.6 9.4 10 10-5.4.6-9.4 4.6-10 10-.6-5.4-4.6-9.4-10-10 5.4-.6 9.4-4.6 10-10z"/></svg>}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
   </div>
-</div>
+</nav>
 
 <style>
-  /* ── Keyframes ─────────────────────────────────────────────────────────── */
-  @keyframes mq-scroll-left {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+  .mq-strip { position: relative; width: 100%; height: calc(48px + 3.6vw); overflow: hidden; pointer-events: none; }
+  /* landing page: sits on the bottom edge of the first screen, inside .fxhero */
+  :global(.fxhero) > .mq-strip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; }
+  @media (max-width: 899px) { :global(html .fxhero) { padding-bottom: calc(48px + 3.6vw); } }
+  /* Desktop: the hero stage scales with --u, so on short screens (1366x768, 1280x720) the "Last table" card ends only ~50-60px above the hero's bottom edge.
+     The band slides down (the hero clips it, like a ribbon tucked under the fold) so its top edge stays at least 24px clear of the card.
+     (.fxhero redefines --u as 1, so the script copies the page's real --u into --mq-u.) Drop in px = (0.945 - u) * 174, clamped to 0-60; at u >= 0.945 (1920x1080) nothing moves. */
+  @media (min-width: 900px) {
+    :global(.fxhero) > .mq-strip { overflow: visible; --mq-drop: calc(clamp(0, (0.945 - var(--mq-u, 1)) * 174, 60) * 1px); }
+    .mq-band { transform: translateY(var(--mq-drop, 0px)); }
   }
-  @keyframes mq-scroll-right {
-    from { transform: translateX(-50%); }
-    to   { transform: translateX(0); }
+  /* owner 22 Nov: on laptop-height screens (1280x720, 1366x768) the ribbon sat on the "Last table" card and the video.
+     There it sits just under the hero (the next section moves down to make room), so it never covers anything. */
+  @media (min-width: 900px) and (max-height: 860px) {
+    :global(.fxhero) { overflow-x: clip; overflow-y: visible; }
+    :global(.fxhero) > .mq-strip { top: 100%; bottom: auto; overflow-x: clip; overflow-y: visible; }
+    :global(.fxhero + *) { margin-top: calc(72px + 3.6vw); }
+    .mq-band { transform: none; }
   }
-
-  /* ── Strip Container ───────────────────────────────────────────────────── */
-  .mq-strip {
-    width: 100%;
-    overflow: hidden;
-    /* Elephant red (same as the logo / Reserve buttons: --ui2-red #c02a1a, --ui2-red-hi #a82216) */
-    background: linear-gradient(135deg, var(--ui2-red, #c02a1a) 0%, var(--ui2-red-hi, #a82216) 100%);
-    border-top: 1px solid rgba(243, 201, 107, 0.45);
-    border-bottom: 1px solid rgba(243, 201, 107, 0.45);
-    padding: 11px 0;
-    /* Pause on hover */
-  }
-  /* Landing page: the ribbon sits on the bottom edge of the first screen (inside .fxhero), not below the fold. */
-  :global(.fxhero) > .mq-strip {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 6;
-  }
-  @media (max-width: 899px) {
-    :global(html .fxhero) { padding-bottom: 52px; }
-  }
-  .mq-strip:hover .mq-track,
-  .mq-strip:focus-within .mq-track,
-  .mq-strip.mq-off .mq-track {
-    animation-play-state: paused;
-  }
-
-  /* ── Skew Wrapper (Driven by scroll velocity) ─────────────────────────── */
-  .mq-skew-wrap {
-    display: block;
-    width: 100%;
-    transform: skewX(var(--mq-skew, 0deg));
-    transform-origin: 50% 50%;
-    will-change: transform;
-  }
-
-  /* ── Scrolling Track ───────────────────────────────────────────────────── */
-  .mq-track {
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-    white-space: nowrap;
-    will-change: transform;
-  }
-  .mq-track.mq-scroll-left {
-    animation: mq-scroll-left var(--mq-speed, 32s) linear infinite;
-  }
-  .mq-track.mq-scroll-right {
-    animation: mq-scroll-right var(--mq-speed, 32s) linear infinite;
-  }
-
-  /* ── Individual Items ──────────────────────────────────────────────────── */
-  .mq-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 28px;
-    font-family: var(--sans, 'Manrope', system-ui, sans-serif);
-    font-size: clamp(0.8125rem, 1.2vw, 1rem);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: #fff7e6;
-    text-transform: uppercase;
-  }
-
-  .mq-dot {
-    color: #f3c96b;
-    font-size: 0.75rem;
-    flex-shrink: 0;
-    display: inline-flex;
-  }
-  .mq-star { display: block; }
-
-  /* ── Reduced Motion: Stop animation ───────────────────────────────────── */
-  @media (prefers-reduced-motion: reduce) {
-    .mq-skew-wrap {
-      transform: none !important;
-    }
-    .mq-track {
-      animation: none !important;
-    }
-    /* Show items wrapped instead */
-    .mq-strip {
-      overflow: visible;
-    }
-    .mq-track {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      padding: 0 24px;
-    }
-  }
+  .mq-band { position: absolute; left: -4%; right: -4%; top: 50%; height: 40px; margin-top: -20px; transform: none; display: flex; flex-direction: column; box-shadow: 0 8px 20px -10px rgba(20, 10, 5, .55); }
+  .mq-row { position: relative; height: 40px; overflow: hidden; pointer-events: auto;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .mq-r1 { background: #14301c; color: #f6ead3; box-shadow: inset 0 1px 0 rgba(201,154,67,.55), inset 0 -1px 0 rgba(201,154,67,.55); }
+  .mq-r2 { background: linear-gradient(135deg, var(--ui2-red, #c02a1a), var(--ui2-red-hi, #a82216)); color: #f3c96b; }
+  .mq-track { display: flex; width: max-content; height: 100%; will-change: transform; animation: mq-move var(--mq-dur, 50s) linear infinite; }
+  /* two identical groups: moving the track by -50% is exactly one group, so the loop is seamless; row 2 runs the other way */
+  .mq-r2 .mq-track { animation-direction: reverse; }
+  @keyframes mq-move { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+  .mq-strip:hover .mq-track, .mq-strip:focus-within .mq-track, .mq-strip.mq-off .mq-track, .mq-strip.mq-hidden .mq-track { animation-play-state: paused; }
+  .mq-group { display: flex; flex: none; }
+  .mq-item { display: inline-flex; align-items: center; gap: 26px; height: 40px; padding-right: 26px; color: inherit; text-decoration: none; white-space: nowrap; }
+  .mq-r1 .mq-item { font: italic 500 1.125rem/1 var(--fk-serif, 'Playfair Display', Georgia, serif); }
+  .mq-r2 .mq-item { font: 600 .75rem/1 var(--fk-sans, Poppins, system-ui, sans-serif); letter-spacing: .05em; text-transform: uppercase; }
+  .mq-el { display: block; width: 14px; height: 18px; }
+  .mq-star { display: block; flex: none; }
+  .mq-item:focus-visible { outline: none; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .mq-item span { transition: color .2s cubic-bezier(.25,.46,.45,.94); }
+  @media (hover: hover) and (pointer: fine) { .mq-item:hover span { color: #e8c27a; }
+  @media (hover: hover) and (pointer: fine) { .mq-item:hover span { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; } }
 </style>
 
 <script is:inline>
-  // ── BATCH 1.1: Velocity-skewed kinetic marquee ─────────────────────────
-  (function initVelocityMarquee() {
-    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (calm) return;
-
+  /* The scrolling itself is a CSS animation (transform only, runs on the compositor, no JS per frame).
+     This script only sets each row's duration once (group width / px-per-second keeps the speed constant at any width)
+     and pauses the animation while the ribbon is off screen or the tab is hidden. It runs when the browser is idle. */
+  (function initRibbon() {
     var strip = document.querySelector('.mq-strip');
-    if (!strip) return;
-
-    var inView = false;
-    var lastY = window.scrollY || window.pageYOffset;
-    var currentSkew = 0;
-    var targetSkew = 0;
-    var rAFId = null;
-
-    // Run only while the strip is on screen and the tab is visible:
-    // the CSS scroll and the velocity skew both pause otherwise.
-    function sync() {
-      var run = inView && !document.hidden;
-      strip.classList.toggle('mq-off', !run);
-      if (run) {
-        lastY = window.scrollY || window.pageYOffset;
-      } else {
-        if (rAFId) { cancelAnimationFrame(rAFId); rAFId = null; }
-        currentSkew = 0;
-        targetSkew = 0;
-        strip.style.setProperty('--mq-skew', '0deg');
-      }
+    if (!strip || strip.dataset.init) return;
+    strip.dataset.init = '1';
+    var rows = Array.prototype.slice.call(strip.querySelectorAll('.mq-row'));
+    function measure() {
+      rows.forEach(function (row) {
+        var w = row.querySelector('.mq-group').offsetWidth, v = +row.dataset.speed;
+        if (w && v) row.style.setProperty('--mq-dur', (w / v).toFixed(2) + 's');
+      });
     }
-
-    // Start paused; the observer reports the real state right away.
-    strip.classList.add('mq-off');
-    var obs = new IntersectionObserver(function (entries) {
-      inView = entries[entries.length - 1].isIntersecting;
-      sync();
-    }, { threshold: 0.05 });
-    obs.observe(strip);
-    document.addEventListener('visibilitychange', sync);
-
-    function onScroll() {
-      if (!inView || document.hidden) return;
-      var curY = window.scrollY || window.pageYOffset;
-      var delta = curY - lastY;
-      lastY = curY;
-
-      // Clamped skewX between -8deg and +8deg
-      targetSkew = Math.max(-8, Math.min(8, delta * -0.18));
-
-      if (!rAFId) {
-        rAFId = requestAnimationFrame(tick);
-      }
+    // the hero resets --u to 1 on itself; read the page-level value so the band knows how much room the stage leaves (runs now: no visible jump)
+    function syncU() { var u = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u')); if (u > 0) strip.style.setProperty('--mq-u', u); }
+    syncU();
+    var t = 0;
+    function later() { clearTimeout(t); t = setTimeout(function () { syncU(); measure(); }, 100); }
+    function setup() {
+      measure();
+      window.addEventListener('resize', later);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (en) { strip.classList.toggle('mq-off', !en[en.length - 1].isIntersecting); }, { threshold: 0.05 }).observe(strip);
+      document.addEventListener('visibilitychange', function () { strip.classList.toggle('mq-hidden', document.hidden); });
     }
-
-    function tick() {
-      rAFId = null;
-      if (!inView || document.hidden) return;
-
-      // Smooth ease back
-      currentSkew += (targetSkew - currentSkew) * 0.12;
-      // Decay targetSkew towards 0 on every tick
-      targetSkew *= 0.85;
-
-      if (Math.abs(currentSkew) < 0.02 && Math.abs(targetSkew) < 0.02) {
-        currentSkew = 0;
-        targetSkew = 0;
-        strip.style.setProperty('--mq-skew', '0deg');
-        return;
-      }
-
-      strip.style.setProperty('--mq-skew', currentSkew.toFixed(2) + 'deg');
-      rAFId = requestAnimationFrame(tick);
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
+    if ('requestIdleCallback' in window) requestIdleCallback(setup, { timeout: 1500 }); else setTimeout(setup, 300);
   })();
 </script>

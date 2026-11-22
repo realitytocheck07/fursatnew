@@ -69,10 +69,9 @@ function icon(path: string): SVGElement {
 const PLAY = 'M8 5v14l11-7z';
 const STACK = 'M7 3h12a2 2 0 0 1 2 2v12h-2V5H7zM3 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z';
 /* Which posts are shown (B9). A post is hidden when
-   1) it is older than 30 days, or
+   1) (removed: an age cut emptied the grid for quiet accounts)
    2) its caption names a date (e.g. "22 Nov", "Nov 22th", "22/11", "22.11.2026") and the latest such date is before today (India time): a finished event.
    A date without a year uses the post's year (next year if that would fall more than a week before the post). Captions without a date are only judged by rule 1. */
-const IG_MAX_AGE_DAYS = 30, IG_MIN_FRESH = 4;
 const MONTHS = 'jan feb mar apr may jun jul aug sep oct nov dec'.split(' ');
 const DAY = 86400000;
 function captionDates(c: string, postTs: number): number[] {
@@ -96,7 +95,6 @@ function captionDates(c: string, postTs: number): number[] {
 }
 function isFresh(p: IgPost): boolean {
   const ts = parseTs(p.timestamp), now = Date.now();
-  if (ts && now - ts > IG_MAX_AGE_DAYS * DAY) return false;
   const ds = captionDates(p.caption || '', ts || now);
   if (!ds.length) return true;
   const ist = new Date(now + 5.5 * 3600000), today = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate());
@@ -140,6 +138,7 @@ function reveal(grid: HTMLElement) {
   // Reveals when the grid enters view, or at once if it is already above the viewport (hash link, restored scroll). The observer is never dropped early.
   const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting || e.boundingClientRect.bottom < 0)) { io.disconnect(); go(); } }, { rootMargin: '0px 0px -8% 0px' });
   io.observe(grid);
+  setTimeout(() => { io.disconnect(); go(); }, 2500); // safety net: posts must never stay invisible
 }
 
 /* ---------- lightbox (native <dialog>: focus trap + Escape; FLIP grows out of the tapped tile) ---------- */
@@ -223,6 +222,16 @@ function closeLightbox() {
   a.finished.then(() => { a.cancel(); done(); }, done);
 }
 
+
+function normalizePost(raw: any): IgPost | null {
+  if (!raw) return null;
+  const kid = Array.isArray(raw.children?.data) ? raw.children.data[0] : Array.isArray(raw.children) ? raw.children[0] : null;
+  const image = raw.image || (raw.media_type === 'VIDEO' || raw.type === 'VIDEO' ? raw.thumbnail_url || raw.media_url : raw.media_url || raw.thumbnail_url) || kid?.media_url || kid?.thumbnail_url;
+  const permalink = raw.permalink || raw.href;
+  if (!image || !permalink) return null;
+  return { ...raw, image, permalink, type: raw.type || raw.media_type || 'IMAGE' } as IgPost;
+}
+
 /* ---------- one feed ---------- */
 async function initFeed(root: HTMLElement) {
   const account = (root.dataset.account || 'all') as 'all' | IgAcct;
@@ -237,15 +246,17 @@ async function initFeed(root: HTMLElement) {
   const okAccts: IgAcct[] = [];
   results.forEach((r, i) => {
     if (r.status !== 'fulfilled') return;
-    const posts = r.value.posts.filter((p) => p && p.image && p.permalink);
+    // Image field: the Worker sends `image`; if it ever sends the raw Graph fields, VIDEO uses thumbnail_url and the others media_url
+    // (a CAROUSEL_ALBUM falls back to its first child). Posts without any picture or link are skipped.
+    const posts = r.value.posts.map(normalizePost).filter((p): p is IgPost => !!p);
     if (!posts.length) return;
     okAccts.push(targets[i]);
     posts.forEach((p) => pool.push({ ...p, acct: targets[i] }));
   });
   pool.sort((a, b) => parseTs(b.timestamp) - parseTs(a.timestamp));
-  // old posts and finished events are dropped; with fewer than IG_MIN_FRESH left the grid is replaced by the "Follow us" card (see isFresh)
+  // Finished events (a caption date in the past) are dropped. The old 30-day age cut and the "fewer than 4 left, show buttons" rule are gone:
+  // together they emptied the grid whenever an account had not posted for a month, which is why the live section showed no posts.
   for (let i = pool.length - 1; i >= 0; i--) if (!isFresh(pool[i])) pool.splice(i, 1);
-  if (pool.length < IG_MIN_FRESH) pool.length = 0;
 
   if (!pool.length) { root.dataset.state = 'fallback'; return; }  // all failed or empty: buttons, no error text
 
@@ -277,8 +288,16 @@ async function initFeed(root: HTMLElement) {
 }
 
 export function initInstagramFeeds() {
+  // The feed sits far below the first screen: do not fetch, parse or build tiles at page load.
+  // Each feed starts when it is within ~900px of the viewport (or immediately where IntersectionObserver is missing).
+  const start = (el: HTMLElement) => { initFeed(el).catch(() => { el.dataset.state = 'fallback'; }); };
+  const io = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (!e.isIntersecting) return; io!.unobserve(e.target); start(e.target as HTMLElement); });
+      }, { rootMargin: '900px 0px' })
+    : null;
   document.querySelectorAll<HTMLElement>('[data-igfeed]').forEach((el) => {
     if (el.dataset.igInit) return; el.dataset.igInit = '1';
-    initFeed(el).catch(() => { el.dataset.state = 'fallback'; });
+    if (io) io.observe(el); else start(el);
   });
 }

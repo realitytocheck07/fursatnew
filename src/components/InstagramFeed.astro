@@ -78,8 +78,9 @@ const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
   .igfeed-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; overflow: hidden; border-radius: 18px; cursor: pointer; touch-action: manipulation; background: #e3d3b6; color: inherit; isolation: isolate;
     box-shadow: 0 0 0 1px var(--ig-gold), 0 10px 22px -14px rgb(60 40 10 / .55), inset 0 1px 0 rgb(255 244 214 / .55); transition: transform 150ms var(--ig-ease), box-shadow 200ms var(--ig-ease); }
   .igfeed--dark .igfeed-tile { background: #1b2a1c; box-shadow: 0 0 0 1px var(--ig-gold), 0 12px 24px -14px rgb(0 0 0 / .8); }
-  .igfeed-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 260ms var(--ig-ease); }
+  .igfeed-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 260ms var(--ig-ease), transform 400ms var(--ig-ease); }
   .igfeed-tile img.is-loaded { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) { .igfeed-tile:hover img { transform: scale(1.06); } }
   .igfeed-tile:active { transform: scale(1.04); box-shadow: 0 0 0 1px var(--ig-gold), 0 18px 30px -12px rgb(60 40 10 / .6); }
   .igfeed-tag { position: absolute; left: 8px; bottom: 8px; z-index: 2; max-width: calc(100% - 16px); padding: 5px 10px; border-radius: 999px; font: 600 .6875rem/1 var(--fk-sans, Rupee,Poppins, system-ui, sans-serif); color: #fbf3e6; background: rgb(14 34 20 / .78); box-shadow: inset 0 0 0 1px rgb(230 184 92 / .55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .igfeed-kind { position: absolute; right: 8px; top: 8px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: #fbf3e6; background: rgb(14 34 20 / .78); box-shadow: inset 0 0 0 1px rgb(230 184 92 / .55); }
@@ -145,17 +146,7 @@ const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
     .igfeed-lb-body { padding: 56px 24px 24px; }
   }
 
-  /* ---- v5.65 bento: first post is the featured 2x2 tile, rest flow densely around it (>=640px). Layout only; live fetch/fallback/lightbox untouched ---- */
-  .igfeed { width: 100%; max-width: 1240px; margin-inline: auto; }
+  /* ---- plain grid: 4 equal columns on desktop, 3 on tablet, 2 on phones (the old featured 2x2 first tile made it 5 columns) ---- */
+  .igfeed { width: 100%; max-width: 1240px; margin-inline: auto; box-sizing: border-box; }
   .igfeed-grid { width: 100%; }
-  @media (min-width: 640px) {
-    .igfeed-grid { grid-auto-flow: dense; }
-    .igfeed-grid > .igfeed-li:first-child { grid-column: span 2; grid-row: span 2; }
-    .igfeed-grid > .igfeed-li:first-child :is(.igfeed-wave, .igfeed-tile, .igfeed-sq) { height: 100%; }
-    .igfeed-grid > .igfeed-li:first-child .igfeed-tile { aspect-ratio: auto; border-radius: 26px; }
-    .igfeed-grid > .igfeed-li:first-child .igfeed-sq { aspect-ratio: auto; border-radius: 26px; }
-    .igfeed-grid > .igfeed-li:first-child .igfeed-wave { animation-name: none; }
-  }
-  @media (min-width: 1100px) { .igfeed-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-  @media (max-width: 639px) { .igfeed-grid > .igfeed-li:first-child { grid-column: 1 / -1; } .igfeed-grid > .igfeed-li:first-child .igfeed-tile { aspect-ratio: 16 / 11; border-radius: 22px; } .igfeed-grid > .igfeed-li:first-child .igfeed-sq { aspect-ratio: 16 / 11; } }
 </style>

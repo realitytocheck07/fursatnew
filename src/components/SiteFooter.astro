@@ -14,6 +14,8 @@ const insta = [
   { h: 'fursatsocialclub', l: 'Social Club' },
 ];
 const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Park, Madhapur'];
+// The legal dialog (LegalDialog.astro) only exists on Home, so the opener button only renders there.
+const hasLegalDialog = Astro.url.pathname === '/';
 ---
 <footer class="sf-footer" id="visit" data-sf>
   <div class="sf-marquee" aria-hidden="true">
@@ -85,7 +87,7 @@ const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Par
 
       <div class="sf-bottom">
         <p class="sf-copy">© {year} Fursat Kitchen | Bar · {site.legal.name} · GSTIN {site.legal.gstin} · FSSAI {site.legal.fssai}</p>
-        <p class="sf-legal"><a href="/terms">Terms</a><a href="/terms#privacy">Privacy</a><a href="/terms#refund">Refund</a></p>
+        <p class="sf-legal">{hasLegalDialog && <button class="sf-legal-btn" type="button" id="lbopen" aria-haspopup="dialog" aria-controls="fxlegal">Legal information</button>}<a href="/terms">Terms</a><a href="/terms#privacy">Privacy</a><a href="/terms#refund">Refund</a><a class="sf-by" href="https://bjnexusai.com" target="_blank" rel="noopener">Website by BJNexus AI</a></p>
       </div>
     </div>
   </div>
@@ -151,7 +153,11 @@ const marquee = ['Café', 'Kitchen', 'Bar', 'Banquets', 'Catering', 'Capital Par
   .sf-copy { margin:0; color:var(--sf-cream); line-height:1.5; }
   .sf-legal { margin:0; display:flex; gap:4px; }
   .sf-legal a { display:inline-flex; align-items:center; min-height:44px; padding:0 10px 0 0; font-size:.8125rem; }
-  .sf-legal a + a { padding-left:10px; border-left:1px solid rgba(243,236,217,.3); }
+  .sf-legal a + a, .sf-legal-btn + a { padding-left:10px; border-left:1px solid rgba(243,236,217,.3); }
+  .sf-legal { flex-wrap:wrap; }
+  .sf-legal-btn { all:unset; cursor:pointer; box-sizing:border-box; display:inline-flex; align-items:center; min-height:44px; padding:0 10px 0 0; font-size:.8125rem; text-decoration:underline; text-decoration-color:var(--sf-gold); text-underline-offset:.2em; }
+  .sf-legal-btn:focus-visible { outline:2px solid var(--sf-gold); outline-offset:2px; border-radius:4px; }
+  .sf-legal .sf-by { font-size:.75rem; opacity:.8; }
 
   /* entrance (once) */
   .sf-js .sf-giant { opacity:0; transform:translateY(24px); transition:opacity .6s ease-out, transform .6s ease-out; }

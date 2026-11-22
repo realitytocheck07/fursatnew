@@ -67,24 +67,27 @@ const IG = { 'kitchen-bar': 'fursatind.in', 'social-club': 'fursatsocialclub', '
 .hw-eyebrow{margin:0 0 6px;text-align:center;font:600 .8125rem/1.2 var(--fk-sans,'Poppins',sans-serif);letter-spacing:.14em;text-transform:uppercase;color:#6b5a2c}
 .hw h2{margin:0 0 clamp(16px,2.4vw,26px);text-align:center}
 .hw-tabs--seg{display:grid;margin:0 auto clamp(18px,2.4vw,28px);width:max-content;max-width:100%}
-.hw-tabs--rail{display:none}
-.hw-panels{max-width:1100px;margin:0 auto}
+/* .fk-rail (loaded later) forced the phone tab rail to display:flex on desktop too, so two tab rows showed at once: one row per breakpoint */
+.hw .hw-tabs--rail{display:none}
+.hw-panels{max-width:1180px;margin:0 auto}
 .hw .hw-panel[hidden]{display:none!important}
 /* .fk-card--glass sets display:flex / overflow:visible at (0,2,0): this selector is stronger */
-.hw .hw-panel.fk-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:center;gap:clamp(18px,3.4vw,44px);padding:0}
-.hw-ph{display:block;aspect-ratio:16/10;max-height:380px;min-height:0;overflow:hidden;border-radius:24px;box-shadow:0 20px 40px -22px rgba(22,48,26,.55)}
+.hw .hw-panel.fk-card{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch;gap:clamp(18px,3.4vw,48px);padding:clamp(10px,1.2vw,16px);border-radius:30px;background:linear-gradient(180deg,#fffaf0,#f7ecd5) !important;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 0 0 1px rgba(196,154,84,.38),0 22px 36px -24px rgba(70,45,10,.5) !important}
+.hw-ph{display:block;aspect-ratio:4/3;max-height:440px;min-height:0;overflow:hidden;border-radius:24px;box-shadow:0 20px 40px -22px rgba(22,48,26,.55)}
 .hw-ph img{display:block;width:100%;height:100%;object-fit:cover}
 .hw-ig{grid-column:1/-1;padding:0 clamp(18px,3vw,36px) clamp(16px,2.4vw,28px)}
 .hw-ig .igf{margin:0}
-.hw-info{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px;padding:clamp(18px,3vw,36px)}
-.hw-name{margin:0;font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(1.375rem,2.2vw,1.75rem);line-height:1.2;color:#1b3a26}
-.hw-line{margin:0;font-size:1rem;line-height:1.55;color:#3a3220}
+.hw-ig:empty{display:none}
+.hw-info{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:14px;padding:clamp(12px,2vw,28px) clamp(12px,3vw,40px) clamp(12px,2vw,28px) 0}
+.hw-name{margin:0;font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(1.5rem,3vw,2.375rem);line-height:1.1;letter-spacing:-.01em;color:#1b3a26}
+.hw-line{margin:0;max-width:40ch;font-size:clamp(1rem,1.3vw,1.1875rem);line-height:1.55;color:#3a3220;text-wrap:pretty}
 @media(max-width:767px){
   .hw{padding-inline:0}
   .hw .hw-tabs--seg{display:none}
-  .hw-tabs--rail{display:flex;padding:2px 16px 12px;scroll-padding-inline:16px;margin:0 0 4px}
+  .hw .hw-tabs--rail{display:flex;padding:2px 16px 12px;scroll-padding-inline:16px;margin:0 0 4px}
   .hw-panels{padding:0 16px}
   .hw .hw-panel.fk-card{grid-template-columns:minmax(0,1fr);gap:16px}
+  .hw-info{padding:4px 10px 12px}
   .hw-ph{aspect-ratio:4/3;max-height:none}
 }
 </style>
