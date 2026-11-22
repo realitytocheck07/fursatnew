@@ -1,0 +1,111 @@
+---
+// InstaPostTile (kit 38c, prefix bw-): one @fursat_bitesandbuffet post as a tile. Shared by the Café wall, the Catering strip and the Party gallery.
+// Usage: <InstaPostTile n="05" />  (the post number from bites/). Renders one <li>: put it inside a <ul class="bw-...">.
+// The posts are the brand's own designed Instagram posts, many with captions on the image, so they're shown as they are (no crop).
+// Every tile opens the account (not the single post: the post links aren't known), new tab, rel=noopener.
+// Images: public/assets/bites/bw-NN-360.webp and -720.webp (new names only, /assets is cached for a year).
+// Never name the person in post 09. Alt text describes the dish.
+interface Props { n: keyof typeof POSTS; sizes?: string; eager?: boolean; phoneHide?: boolean }
+
+const POSTS = {
+  '01': { r: 'p', alt: 'Apricot delight dessert in a glass with pistachio on top, captioned "Creamy, dreamy, apricotty"' },
+  '02': { r: 'p', alt: 'Spicy prawns on a white plate beside a red mocktail with a berry garnish, captioned "Spicy bites, refreshing sips"' },
+  '03': { r: 'p', alt: 'Red rose-piped cake with white frosting on a gold stand' },
+  '04': { r: 'p', alt: 'A hand lifting saucy noodles with chopsticks from a plate' },
+  '05': { r: 'p', alt: 'Three tacos with lettuce on a green plate, captioned "Taco time"' },
+  '06': { r: 'p', alt: 'Golden yellow mocktail with a mint garnish, captioned "Golden hour"' },
+  '09': { r: 'p', alt: 'A smiling woman holding a plate of creamy mango-topped dessert' },
+  '10': { r: 'p', alt: 'A sesame-bun burger held in one hand, with a Telugu caption' },
+  '12': { r: 'p', alt: 'Tall stacked club sandwich with fries, captioned "More layered than your HR"' },
+  '14': { r: 'p', alt: 'Momos on a plate with a red dip, picked up with chopsticks' },
+  '15': { r: 'p', alt: 'A slice of olive-topped pizza lifted from a wooden board, with a Telugu caption' },
+  '16': { r: 'p', alt: 'Creamy sauce being poured over a dessert in a white bowl' },
+  '19': { r: 'p', alt: 'A hand holding a grilled sandwich over a tray with fries and dips, captioned "Bite into happiness"' },
+  '20': { r: 's', alt: 'Fursat elephant mascot in sunglasses holding a coffee, in a "Breaking news" style post' },
+  '21': { r: 's', alt: 'Blue frosted cake on a gold stand' },
+} as const;
+
+const { n, sizes = '(max-width: 767px) 46vw, (max-width: 1099px) 30vw, 290px', eager = false, phoneHide = false } = Astro.props;
+const p = POSTS[n];
+const H = p.r === 'p' ? 900 : 720; // height at the 720 width (4:5 = 900, 1:1 = 720)
+const base = `/assets/bites/bw-${n}`;
+---
+<li class={`bw-tile bw-tile--${p.r}${phoneHide ? ' bw-tile--ph' : ''}`}>
+  <a class="bw-a" href="https://www.instagram.com/fursat_bitesandbuffet/" target="_blank" rel="noopener">
+    <img
+      src={`${base}-720.webp`}
+      srcset={`${base}-360.webp 360w, ${base}-720.webp 720w`}
+      sizes={sizes}
+      width="720"
+      height={H}
+      alt={p.alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+    <span class="bw-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5.5" /><circle cx="12" cy="12" r="4.2" /><circle cx="17.4" cy="6.6" r="1.1" class="bw-dot" /></svg>
+    </span>
+    <span class="bw-over" aria-hidden="true">
+      <span class="bw-over-in">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5.5" /><circle cx="12" cy="12" r="4.2" /><circle cx="17.4" cy="6.6" r="1.1" class="bw-dot" /></svg>
+        <span>View on Instagram</span>
+      </span>
+    </span>
+    <span class="bw-sr">View on Instagram, opens in a new tab</span>
+  </a>
+</li>
+
+<style is:global>
+/* ---- bw- tile (shared) ---- */
+.bw-tile { --bw-ease: cubic-bezier(.23, 1, .32, 1); list-style: none; margin: 0; min-width: 0; transition-property: transform, opacity; transition-duration: .45s, .35s; transition-timing-function: var(--bw-ease), ease-out; transition-delay: var(--bw-d, 0ms); }
+/* Visible by default (nothing hides if the script fails). The script arms only tiles that start below the fold. */
+.bw-tile.bw-pre { opacity: 0; transform: translateY(24px); }
+.bw-tile.bw-pre.bw-in { opacity: 1; transform: none; }
+.bw-a { position: relative; display: block; border-radius: 14px; overflow: hidden; background: #1a3626; color: #fbf3e6; text-decoration: none; transition: transform .25s var(--bw-ease, cubic-bezier(.23, 1, .32, 1)); -webkit-tap-highlight-color: transparent; }
+.bw-a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1px solid transparent; box-shadow: inset 0 0 0 1px oklch(1 0 0 / .1); pointer-events: none; }
+.bw-a img { display: block; width: 100%; height: auto; aspect-ratio: 720 / 900; object-fit: cover; }
+.bw-tile--s .bw-a img { aspect-ratio: 1 / 1; }
+/* a small Instagram mark in the corner, always there, so touch screens know the tile is a link */
+.bw-badge { position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: #fbf3e6; background: rgb(16 38 26 / .62); pointer-events: none; }
+.bw-badge svg, .bw-over svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.bw-dot { fill: currentColor; stroke: none; }
+.bw-over { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 0 12px 16px; background: linear-gradient(to top, rgb(16 38 26 / .88) 0%, rgb(16 38 26 / .5) 28%, rgb(16 38 26 / 0) 56%); opacity: 0; transition: opacity .25s ease-out; pointer-events: none; }
+.bw-over-in { display: inline-flex; align-items: center; gap: 8px; font: 600 .875rem/1.2 Rupee, Poppins, system-ui, sans-serif; color: #fbf3e6; transform: translateY(8px); transition: transform .3s cubic-bezier(.16, 1, .3, 1); }
+.bw-over svg { width: 20px; height: 20px; }
+.bw-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.bw-a:focus-visible { outline: 3px solid #e8c27a; outline-offset: 3px; }
+.bw-a:focus-visible .bw-over { opacity: 1; }
+.bw-a:focus-visible .bw-over-in { transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  .bw-a:hover { transform: translateY(-4px); }
+  .bw-a:hover .bw-over { opacity: 1; }
+  .bw-a:hover .bw-over-in { transform: none; }
+  .bw-a:hover .bw-badge { opacity: 0; }
+  .bw-badge { transition: opacity .2s ease-out; }
+}
+/* press comes last so it beats the hover lift for mouse users too */
+.bw-a:active, .bw-a:hover:active { transform: scale(.96); transition-duration: .15s; transition-timing-function: ease-out; }
+</style>
+
+<script>
+// One observer for every .bw-tile on the page. Tiles that scroll in together rise 60 ms apart (max 8 steps).
+// Tiles already on screen (or scrolled past) are never hidden; only tiles below the fold are armed, so nothing stays invisible if this script fails.
+// Scroll gotcha: the desktop scrolls the body, not the window; an IntersectionObserver on the viewport still works, so no scroll listener is needed.
+const tiles = Array.from(document.querySelectorAll<HTMLElement>('.bw-tile')).filter((t) => t.offsetParent !== null && t.getBoundingClientRect().top > window.innerHeight);
+if ('IntersectionObserver' in window && tiles.length) {
+  tiles.forEach((t) => t.classList.add('bw-pre'));
+  const io = new IntersectionObserver((entries) => {
+    const seen = entries
+      .filter((e) => e.isIntersecting || e.boundingClientRect.top < 0)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left);
+    seen.forEach((e, i) => {
+      const t = e.target as HTMLElement;
+      io.unobserve(t);
+      t.style.setProperty('--bw-d', e.isIntersecting ? `${Math.min(i, 7) * 60}ms` : '0ms');
+      t.classList.add('bw-in');
+      setTimeout(() => t.style.removeProperty('--bw-d'), 1200);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  tiles.forEach((t) => io.observe(t));
+}
+</script>

@@ -145,6 +145,7 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
         <details class="xp-faq-item"><summary>{f.q}</summary><p>{f.a}</p></details>
       ))}
     </div>
+    <slot name="after-faq" />
     {p.insta && LIVE[p.insta] && <InstagramFeed account={LIVE[p.insta]} layout="page" tone="dark" title="Latest from our Instagram" />}
     {p.insta && <InstaFollow handle={p.insta} tone="dark" />}
   </section>
