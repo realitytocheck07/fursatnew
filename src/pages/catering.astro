@@ -1,7 +1,6 @@
 ---
 // catering.astro - Outdoor Catering by Fursat
 // TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500), "weddings", "bar service", delivery area and the "Catering Director" role are unconfirmed. Kept as the owner decided.
-import InstaFollow from '../components/InstaFollow.astro';
 import Base from '../layouts/Base.astro';
 import '../styles/fk-tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -9,6 +8,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import MobileBar from '../components/MobileBar.astro';
 import MascotOfferModal from '../components/MascotOfferModal.astro';
 import InstagramFeed from '../components/InstagramFeed.astro';
+import InstaPostTile from '../components/InstaPostTile.astro';
 ---
 <Base
   title="Catering & Buffets – Fursat Kitchen & Bar, Hyderabad"
@@ -20,18 +20,94 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   <SiteHeader active="celebrate" variant="plaster" />
 
   <main class="ct-page" id="main">
-    <!-- Hero Section -->
-    <section class="ct-hero">
-      <div class="ct-hero-wrap">
-        <span class="fk-ty-label ct-kicker">GOURMET EXPERIENCES AT YOUR VENUE</span>
-        <h1 class="fk-ty-hero ct-title mot-headline">Fursat Outdoor Catering</h1>
-        <p class="ct-sub">
+    <!-- Hero Section (kit 43): Banquet-style framed photo window, mirrored. Text left, rotating real dish photos right. -->
+    <section class="ct-hero ch-hero" aria-labelledby="ch-h1">
+      <div class="ch-art">
+        <div class="ch-box">
+          <div class="ch-win" role="group" aria-label="Dishes from the Fursat kitchen">
+            <!-- Photos: Guntur Karam Wings, Classic Paneer Tikka and the veg rice dish, all from public/assets/dishes/new (resized to /assets/catering). No guests, no faces. -->
+            <div class="ch-ph is-on"><img src="/assets/catering/ct-hero-wings-800.webp" srcset="/assets/catering/ct-hero-wings-800.webp 800w, /assets/catering/ct-hero-wings-1400.webp 1400w" sizes="(max-width: 820px) 86vw, 38vw" width="800" height="1000" alt="Guntur karam wings on a green leaf with a slice of lime" fetchpriority="high" decoding="async" /></div>
+            <div class="ch-ph"><img src="/assets/catering/ct-hero-paneer-800.webp" srcset="/assets/catering/ct-hero-paneer-800.webp 800w, /assets/catering/ct-hero-paneer-1400.webp 1400w" sizes="(max-width: 820px) 86vw, 38vw" width="800" height="1000" alt="Classic paneer tikka with green chutney" fetchpriority="low" decoding="async" /></div>
+            <div class="ch-ph"><img src="/assets/catering/ct-hero-rice-800.webp" srcset="/assets/catering/ct-hero-rice-800.webp 800w, /assets/catering/ct-hero-rice-1400.webp 1400w" sizes="(max-width: 820px) 86vw, 38vw" width="800" height="1000" alt="Spicy coriander rice with a flower garnish" fetchpriority="low" decoding="async" /></div>
+            <i class="ch-shade" aria-hidden="true"></i>
+          </div>
+          <img class="ch-frame" src="/assets/catering/ct-frame-1536.webp" srcset="/assets/catering/ct-frame-768.webp 768w, /assets/catering/ct-frame-1536.webp 1536w" sizes="100vw" width="1536" height="864" alt="" aria-hidden="true" fetchpriority="high" decoding="async" />
+          <svg class="ch-leaf" viewBox="0 0 96 120" aria-hidden="true">
+            <defs><linearGradient id="ch-lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c7a2e" /><stop offset="1" stop-color="#2a5019" /></linearGradient></defs>
+            <path d="M12 114 C 30 88 46 58 66 12" fill="none" stroke="#c99a43" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M40 74 C 20 70 10 52 14 36 C 32 38 46 54 40 74Z" fill="url(#ch-lg)" />
+            <path d="M52 52 C 70 52 84 38 84 22 C 66 22 52 34 52 52Z" fill="url(#ch-lg)" />
+            <path d="M28 98 C 14 96 6 84 8 72 C 22 72 32 84 28 98Z" fill="url(#ch-lg)" />
+            <path d="M62 14 C 62 4 68 -2 76 -2 C 78 6 72 14 62 14Z" fill="url(#ch-lg)" />
+          </svg>
+          <span class="ch-badge" aria-hidden="true"><img src="/assets/brand/fursat-elephant.webp" alt="" width="40" height="40" decoding="async" /></span>
+          <div class="ch-segs" role="group" aria-label="Choose a photo">
+            <button class="ch-seg is-act" type="button" data-i="0" aria-label="Show photo 1 of 3"><span aria-hidden="true"><b></b></span></button>
+            <button class="ch-seg" type="button" data-i="1" aria-label="Show photo 2 of 3"><span aria-hidden="true"><b></b></span></button>
+            <button class="ch-seg" type="button" data-i="2" aria-label="Show photo 3 of 3"><span aria-hidden="true"><b></b></span></button>
+          </div>
+          <p class="ch-cap"><span class="ch-w" style="--i:4">Fursat</span> <span class="ch-w" style="--i:5">dining,</span> <span class="ch-w" style="--i:6">at</span> <span class="ch-w" style="--i:7">your</span> <span class="ch-w" style="--i:8">venue</span></p>
+        </div>
+      </div>
+
+      <div class="ch-copy">
+        <p class="fk-ty-label ch-kick ch-in" style="--d:0ms">Outdoor catering · Hyderabad</p>
+        <h1 class="fk-ty-hero ch-h1" id="ch-h1"><span class="ch-w" style="--i:0">Fursat</span> <span class="ch-w" style="--i:1">Outdoor</span> <span class="ch-w" style="--i:2">Catering</span></h1>
+        <svg class="ch-orn ch-in" style="--d:260ms" viewBox="0 0 260 24" aria-hidden="true"><path d="M2 12 H104" /><path d="M156 12 H258" /><path d="M130 3 C122 9 122 15 130 21 C138 15 138 9 130 3 Z" /></svg>
+        <p class="ch-sub ch-in" style="--d:300ms">
           Bring the flavors and hospitality of Fursat to your farmhouse, villa, convention hall, or corporate campus across Hyderabad.
         </p>
-        <div class="ct-hero-btns">
-          <a href="#quote" class="fk-btn fk-btn--primary">Request a quote</a>
-          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary">Call us: +91 90596 70033</a>
+        <div class="ch-btns ch-in" style="--d:380ms">
+          <a href="#quote" class="fk-btn fk-btn--primary" data-ch-quote><span>Request a quote</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+          <a href="tel:+919059670033" class="fk-btn fk-btn--secondary" aria-label="Call us on +91 90596 70033"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></svg><span>Call us</span></a>
         </div>
+        <!-- TODO(client): guest-count tiers (30–80 / 80–300 / 300–1500) are client-reviewed numbers; unconfirmed. Same tiers as the scale section below. -->
+        <ul class="ch-stats ch-in" style="--d:460ms" role="list">
+          <li><b class="ch-num">30–80</b><span>guests</span></li>
+          <li><b class="ch-num">80–300</b><span>guests</span></li>
+          <li><b class="ch-num">300–1500</b><span>guests</span></li>
+        </ul>
+      </div>
+
+      <script is:inline>
+      (function () {
+        var hero = document.querySelector('.ch-hero'); if (!hero) return;
+        var ph = [].slice.call(hero.querySelectorAll('.ch-ph')), segs = [].slice.call(hero.querySelectorAll('.ch-seg'));
+        var DUR = 5000, cur = 0, timer = 0, t0 = 0, remain = DUR, running = false, vis = true, started = false;
+        function paint(n) { segs.forEach(function (s, i) { s.classList.toggle('is-done', i < n); s.classList.remove('is-act'); void s.offsetWidth; if (i === n) s.classList.add('is-act'); }); }
+        function go(n) {
+          if (n === cur) return;
+          var out = ph[cur], inn = ph[n];
+          ph.forEach(function (p) { if (p !== out && p !== inn) p.classList.remove('is-on', 'is-out'); });
+          out.classList.remove('is-on'); out.classList.add('is-out');
+          inn.classList.remove('is-out'); inn.classList.add('is-on');
+          setTimeout(function () { out.classList.remove('is-out'); }, 1300);
+          cur = n; paint(n); remain = DUR; t0 = performance.now();
+        }
+        function tick() { go((cur + 1) % ph.length); clearTimeout(timer); timer = setTimeout(tick, DUR); t0 = performance.now(); }
+        function pause() { if (!running) return; remain = Math.max(0, remain - (performance.now() - t0)); running = false; clearTimeout(timer); hero.classList.add('is-paused'); }
+        function play() { if (running || !started) return; running = true; hero.classList.remove('is-paused'); t0 = performance.now(); clearTimeout(timer); timer = setTimeout(tick, remain); }
+        function sync() { if (vis && !document.hidden) play(); else pause(); }
+        started = ph.length > 1; paint(0);
+        segs.forEach(function (s) { s.addEventListener('click', function () { pause(); go(+s.dataset.i); remain = DUR; sync(); }); });
+        if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { vis = e[0].isIntersecting; sync(); }).observe(hero);
+        document.addEventListener('visibilitychange', sync);
+        sync();
+        var q = hero.querySelector('[data-ch-quote]');
+        if (q) q.addEventListener('click', function (e) { var t = document.getElementById('quote'); if (!t) return; e.preventDefault(); t.style.scrollMarginTop = 'calc(var(--sh-h, 84px) + 12px)'; t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      })();
+      </script>
+    </section>
+    <!-- 38c: kitchen strip goes here -->
+
+    <!-- 38c step 9: "From our kitchen" (4 posts from @fursat_bitesandbuffet). The 38c comment wasn't in this code, so it sits right after the .ct-hero closing tag. -->
+    <section class="bwk" aria-labelledby="bwk-h">
+      <div class="ct-container">
+        <h2 class="fk-ty-h2 bwk-h" id="bwk-h">From our kitchen</h2>
+        <p class="bwk-sub">Dishes from our Instagram, @fursat_bitesandbuffet.</p>
+        <ul class="bwk-grid">
+          {(['12', '14', '15', '19'] as const).map((n) => <InstaPostTile n={n} sizes="(max-width: 767px) 46vw, 260px" />)}
+        </ul>
       </div>
     </section>
 
@@ -152,7 +228,6 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   </main>
 
 <InstagramFeed account="bites" layout="page" title="Latest from Bites & Buffet" />
-<InstaFollow handle="fursat_bitesandbuffet" />
   <MascotOfferModal />
   <SiteFooter />
 <MobileBar active="celebrate" />
@@ -211,35 +286,87 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     max-width: 1300px;
     margin: 0 auto;
     padding: 0 clamp(16px, 4vw, 40px)}
-  .ct-hero {
-    position: relative;
-    background: url('/assets/interior/fursat_space_14.webp') center/cover no-repeat;
-    padding: clamp(60px, 8vw, 100px) 0;
-    text-align: center;
-    border-bottom: 1px solid rgba(201,154,67,0.40)}
-  .ct-hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(238,212,178,.82) 0%, rgba(238,212,178,.95) 100%)}
-  .ct-hero-wrap {
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-    z-index: 1}
-  
-  
-  .ct-sub {
-    font-size: 1.05rem;
-    color: #4a4232;
-    line-height: 1.6;
-    margin: 0 0 32px}
-  .ct-hero-btns {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px}
+  /* ===== Catering hero (kit 43, prefix ch-): the Banquet look, mirrored. Plaster + gold frame art (transparent window) over rotating real photos. ===== */
+  .ct-hero { box-sizing: border-box; --ch-cx: 82%; --ch-cy: 47%; margin-top: calc(-1 * clamp(92px, 9.5vw, 148px)); position: relative; isolation: isolate; display: grid; align-items: center; min-height: min(100svh, calc(var(--sh-h, 84px) + 100vw * 941 / 1672)); padding-top: var(--sh-h, 84px); overflow: hidden; background: #f6e4c9; border-bottom: 1px solid rgba(201,154,67,.40) }
+  .ch-art { position: absolute; inset: var(--sh-h, 84px) 0 0 0; z-index: -1; container-type: size }
+  /* the box copies how the art is cropped (cover, right-aligned): the percentages below land on the art window */
+  .ch-box { position: absolute; right: 0; top: 47%; translate: 0 -47%; width: max(100cqw, 100cqh * 1672 / 941); height: max(100cqh, 100cqw * 941 / 1672); animation: ch-iris 1600ms cubic-bezier(.16, 1, .3, 1) 60ms both }
+  @keyframes ch-iris { from { clip-path: circle(0% at var(--ch-cx) var(--ch-cy)) } to { clip-path: circle(150% at var(--ch-cx) var(--ch-cy)) } }
+  .ch-frame { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; display: block; pointer-events: none }
+  /* photo stack: a bit larger than the window; the frame art hides the overhang */
+  .ch-win { z-index: 0; isolation: isolate; position: absolute; left: 62%; top: 13%; width: 38%; height: 69%; overflow: hidden; background: #2b1d10 }
+  .ch-ph { position: absolute; inset: 0; opacity: 0; transition: opacity 1200ms cubic-bezier(.2, 0, 0, 1) }
+  .ch-ph.is-on { opacity: 1; z-index: 2 }
+  .ch-ph.is-out { opacity: 1; z-index: 1 }
+  .ch-ph img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 80%; transform-origin: 55% 72%; filter: saturate(1.08) contrast(1.05) }
+  @keyframes ch-kb { from { transform: scale(1) } to { transform: scale(1.09) } }
+  .ch-ph.is-on img, .ch-ph.is-out img { animation: ch-kb 7s linear both }
+  .ch-shade { position: absolute; inset: 0; z-index: 3; background: linear-gradient(to top, rgba(8,20,13,.92) 0%, rgba(8,20,13,.88) 30%, rgba(8,20,13,.55) 46%, rgba(8,20,13,0) 64%) }
+  .ch-leaf { display: none }
+  .ch-badge { display: none }
+  /* caption on the photo: words rise in, 60 ms apart */
+  .ch-cap { position: absolute; z-index: 3; left: 70%; bottom: 30%; width: 27%; margin: 0; font: italic 500 clamp(1.05rem, 1.9vw, 1.75rem)/1.2 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #fbf0de; text-shadow: 0 1px 10px rgba(0,0,0,.5); text-wrap: balance }
+  .ch-w { display: inline-block; animation: ch-rise 720ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(240ms + var(--i, 0) * 60ms) }
+  .ch-h1 .ch-w { animation-delay: calc(120ms + var(--i, 0) * 60ms) }
+  .ch-cap .ch-w { animation-delay: calc(900ms + var(--i, 0) * 60ms) }
+  .ch-in { animation: ch-rise 720ms cubic-bezier(.16, 1, .3, 1) both; animation-delay: var(--d, 0ms) }
+  @keyframes ch-rise { from { opacity: 0; transform: translate3d(0, 16px, 0) } to { opacity: 1; transform: none } }
+  /* progress segments: 3 thin gold bars, each button is a 44 px target */
+  .ch-segs { position: absolute; z-index: 3; left: 68.5%; top: 21%; display: flex }
+  .ch-seg { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent }
+  .ch-seg span { display: block; width: 34px; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(251,240,222,.45); box-shadow: 0 0 6px rgba(0,0,0,.35) }
+  .ch-seg b { display: block; height: 100%; background: #e8c27a; transform: scaleX(0); transform-origin: left center }
+  .ch-seg.is-done b { transform: scaleX(1) }
+  .ch-seg.is-act b { animation: ch-fill 5s linear both }
+  @keyframes ch-fill { to { transform: scaleX(1) } }
+  .ch-seg:focus-visible { outline: 2px solid #e8c27a; outline-offset: -6px; border-radius: 8px }
+  .ch-hero.is-paused .ch-ph img, .ch-hero.is-paused .ch-seg b { animation-play-state: paused }
+  /* text column */
+  .ch-copy { position: relative; z-index: 2; width: min(54%, 720px); margin-left: clamp(20px, 6vw, 120px); padding: clamp(16px, 2.4vw, 32px) 0; color: #1f2a1a; text-align: left }
+  .ch-kick { margin: 0 0 12px; color: #74501a }
+  .ch-h1 { color: #18301f; font-size: clamp(2.5rem, 4.5vw, 4.9rem); line-height: 1.05; letter-spacing: -.015em; text-wrap: balance; margin: 0 }
+  .ch-orn { display: block; width: 180px; height: 18px; margin: 14px 0 10px; fill: none; stroke: #c99a43; stroke-width: 1.4 }
+  .ch-sub { margin: 0 0 20px; max-width: 46ch; font: 400 clamp(1rem, 1.2vw, 1.12rem)/1.6 var(--fk-sans, Rupee, Poppins, sans-serif); color: #4a4232; text-wrap: pretty }
+  .ch-btns { display: flex; flex-wrap: wrap; gap: 12px }
+  .ch-btns .fk-btn { gap: 10px; white-space: nowrap }
+  .ch-btns .fk-btn:active { transform: scale(.97) }
+  .ch-stats { list-style: none; margin: 22px 0 0; padding: 0; display: flex }
+  .ch-stats li { flex: 1 1 0; min-width: 0; padding: 0 16px; border-left: 1px solid #c99a43; display: flex; flex-direction: column; gap: 4px }
+  .ch-stats li:first-child { padding-left: 0; border-left: 0 }
+  .ch-num { font: 700 clamp(1.6rem, 2.4vw, 2.3rem)/1 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #a81f16; font-variant-numeric: tabular-nums; white-space: nowrap }
+  .ch-stats span { font: 500 .8125rem/1.35 var(--fk-sans, Rupee, Poppins, sans-serif); color: #4a4232 }
+  @media (min-width: 1600px) { .ch-copy { width: min(56%, 900px); margin-left: clamp(80px, 6vw, 140px) } .ch-h1 { font-size: clamp(4.9rem, 4.6vw, 6rem) } .ch-sub { max-width: 50ch; font-size: 1.25rem } .ch-num { font-size: 2.7rem } }
+  @media (min-width: 821px) and (max-height: 720px) { .ch-h1 { font-size: clamp(2.4rem, 4vw, 3.3rem) } .ch-orn { margin: 10px 0 8px } .ch-sub { margin-bottom: 16px } .ch-stats { margin-top: 16px } }
+  /* phone + small tablet: photo window on top (4:5), then text, full-width buttons, numbers in a row of 3 */
+  @media (max-width: 820px) {
+    .ct-hero { --ch-cx: 50%; --ch-cy: 50%; display: block; min-height: 0; padding-top: calc(var(--sh-h, 72px) + 14px); background: #f6e4c9 url(/assets/catering/ct-plaster-600.webp) center / cover no-repeat }
+    .ch-art { position: relative; inset: auto; z-index: auto; container-type: normal; width: min(calc(100% - 48px), 380px); margin: 0 auto }
+    .ch-box { position: relative; right: auto; top: auto; translate: none; width: 100%; height: auto; aspect-ratio: 10 / 11 }
+    .ch-frame { display: none }
+    /* owner 22 Nov: copy of the owner's reference card (DNA-measured): one cream card, photo on top cut by the
+       reference path (wavy top, straight bottom-left, rounded tongue down the right side), text inside the card */
+    .ct-hero::before { content: ""; position: absolute; z-index: 0; left: 16px; right: 16px; top: calc(var(--sh-h, 72px) + 14px + 150px); bottom: calc(var(--mb-clear, 76px) - 2px); border-radius: 0 0 25px 25px; background: #f8ecd8; border: 1px solid #e3cfa8; border-top: 0; box-shadow: 0 18px 32px -20px rgba(70,45,10,.35) }
+    .ch-art { z-index: 1; width: calc(100% - 32px); max-width: none; margin-top: 0 }
+    .ch-badge { display: grid; place-items: center; position: absolute; z-index: 4; left: 7%; top: 7%; width: 16.7%; aspect-ratio: 1; border-radius: 50%; background: #f8ecd8; box-shadow: 0 2px 8px rgba(40,25,5,.22) }
+    .ch-badge img { width: 62%; height: auto }
+    .ch-box { aspect-ratio: 228 / 199 }
+    .ch-win { inset: 0; left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M1.32 12.23 1.97 10.80 2.63 9.65 3.95 7.04 5.26 5.33 6.58 4.02 7.89 3.02 9.21 2.21 10.53 1.51 11.84 1.01 13.16 0.60 14.47 0.30 15.79 0.10 17.11 0.00 18.42 0.00 19.74 0.00 21.05 0.00 22.37 0.10 23.68 0.20 25.00 0.40 26.32 0.60 27.63 0.90 28.95 1.11 30.26 1.41 31.58 1.61 32.89 1.91 34.21 2.11 35.53 2.41 36.84 2.61 38.16 2.91 39.47 3.12 40.79 3.32 42.11 3.42 43.42 3.62 44.74 3.72 46.05 3.82 47.37 3.92 48.68 4.02 50.00 3.92 51.32 3.82 52.63 3.72 53.95 3.52 55.26 3.32 56.58 3.22 57.89 3.02 59.21 2.81 60.53 2.61 61.84 2.41 63.16 2.21 64.47 2.01 65.79 1.81 67.11 1.71 68.42 1.61 69.74 1.51 71.05 1.51 72.37 1.51 73.68 1.51 75.00 1.61 76.32 1.71 77.63 1.91 78.95 2.11 80.26 2.41 81.58 2.71 82.89 3.12 84.21 3.52 85.53 4.12 86.84 4.72 88.16 5.43 89.47 6.23 90.79 7.14 92.11 8.04 93.42 9.15 94.74 10.45 96.05 12.16 97.37 15.68 98.42 18.99 99.21 22.31 99.74 25.53 100.00 28.44 100.00 29.65 100.00 31.16 100.00 32.66 100.00 34.17 99.91 35.68 99.82 37.19 99.82 38.69 99.82 40.20 99.82 41.71 99.91 43.22 100.00 44.72 100.00 46.23 100.00 47.74 100.00 49.25 99.91 50.75 99.82 52.26 99.82 53.77 99.82 55.28 99.82 56.78 99.91 58.29 100.00 59.80 100.00 61.31 100.00 62.81 100.00 64.32 100.00 65.83 100.00 67.34 100.00 68.84 100.00 70.35 100.00 71.86 100.00 73.37 100.00 74.87 100.00 76.38 100.00 77.89 100.00 79.40 100.00 80.90 100.00 82.41 100.00 83.92 100.00 85.43 100.00 86.93 100.00 88.44 100.00 89.95 100.00 91.46 99.74 92.96 99.21 94.47 98.25 95.98 98.16 96.38 97.81 96.78 97.46 97.19 97.11 97.49 96.93 97.59 95.61 98.59 94.30 99.30 92.98 99.60 91.67 99.60 90.35 99.40 89.04 98.89 87.72 98.09 86.40 97.09 85.09 95.88 83.77 94.57 82.46 93.27 81.14 92.06 79.82 90.85 78.51 89.85 77.19 88.84 75.88 87.84 74.56 86.93 73.25 86.13 71.93 85.33 70.61 84.62 69.30 84.12 67.98 83.62 66.67 83.32 65.35 83.02 64.04 82.81 62.72 82.51 61.40 82.31 60.09 82.11 58.77 82.01 57.46 81.91 56.14 81.91 54.82 81.91 53.51 81.91 52.19 81.91 50.88 81.91 49.56 81.91 48.25 81.91 46.93 81.91 45.61 81.91 44.30 81.91 42.98 81.91 41.67 81.91 40.35 81.91 39.04 81.91 37.72 81.91 36.40 81.91 35.09 81.91 33.77 81.91 32.46 81.91 31.14 81.91 29.82 81.91 28.51 81.91 27.19 81.91 25.88 81.91 24.56 81.91 23.25 81.91 21.93 81.91 20.61 81.91 19.30 81.91 17.98 81.91 16.67 81.91 15.35 81.91 14.04 81.91 12.72 81.91 11.40 81.91 10.09 81.81 8.77 81.81 7.46 81.81 6.14 81.81 4.82 81.81 3.51 81.81 2.28 81.61 1.32 81.11 0.61 80.30 0.18 79.20 0.00 77.89 0.00 76.38 0.00 74.87 0.00 73.37 0.00 71.86 0.00 70.35 0.00 68.84 0.00 67.34 0.00 65.83 0.00 64.32 0.00 62.81 0.00 61.31 0.00 59.80 0.00 58.29 0.00 56.78 0.00 55.28 0.00 53.77 0.00 52.26 0.00 50.75 0.00 49.25 0.00 47.74 0.00 46.23 0.00 44.72 0.00 43.22 0.00 41.71 0.00 40.20 0.00 38.69 0.00 37.19 0.00 35.68 0.00 34.17 0.00 32.66 0.00 31.16 0.00 29.65 0.00 28.14 0.00 26.63 0.00 25.13 0.00 23.62 0.00 22.11 0.00 20.60 0.00 19.85 0.00 19.10Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M1.32 12.23 1.97 10.80 2.63 9.65 3.95 7.04 5.26 5.33 6.58 4.02 7.89 3.02 9.21 2.21 10.53 1.51 11.84 1.01 13.16 0.60 14.47 0.30 15.79 0.10 17.11 0.00 18.42 0.00 19.74 0.00 21.05 0.00 22.37 0.10 23.68 0.20 25.00 0.40 26.32 0.60 27.63 0.90 28.95 1.11 30.26 1.41 31.58 1.61 32.89 1.91 34.21 2.11 35.53 2.41 36.84 2.61 38.16 2.91 39.47 3.12 40.79 3.32 42.11 3.42 43.42 3.62 44.74 3.72 46.05 3.82 47.37 3.92 48.68 4.02 50.00 3.92 51.32 3.82 52.63 3.72 53.95 3.52 55.26 3.32 56.58 3.22 57.89 3.02 59.21 2.81 60.53 2.61 61.84 2.41 63.16 2.21 64.47 2.01 65.79 1.81 67.11 1.71 68.42 1.61 69.74 1.51 71.05 1.51 72.37 1.51 73.68 1.51 75.00 1.61 76.32 1.71 77.63 1.91 78.95 2.11 80.26 2.41 81.58 2.71 82.89 3.12 84.21 3.52 85.53 4.12 86.84 4.72 88.16 5.43 89.47 6.23 90.79 7.14 92.11 8.04 93.42 9.15 94.74 10.45 96.05 12.16 97.37 15.68 98.42 18.99 99.21 22.31 99.74 25.53 100.00 28.44 100.00 29.65 100.00 31.16 100.00 32.66 100.00 34.17 99.91 35.68 99.82 37.19 99.82 38.69 99.82 40.20 99.82 41.71 99.91 43.22 100.00 44.72 100.00 46.23 100.00 47.74 100.00 49.25 99.91 50.75 99.82 52.26 99.82 53.77 99.82 55.28 99.82 56.78 99.91 58.29 100.00 59.80 100.00 61.31 100.00 62.81 100.00 64.32 100.00 65.83 100.00 67.34 100.00 68.84 100.00 70.35 100.00 71.86 100.00 73.37 100.00 74.87 100.00 76.38 100.00 77.89 100.00 79.40 100.00 80.90 100.00 82.41 100.00 83.92 100.00 85.43 100.00 86.93 100.00 88.44 100.00 89.95 100.00 91.46 99.74 92.96 99.21 94.47 98.25 95.98 98.16 96.38 97.81 96.78 97.46 97.19 97.11 97.49 96.93 97.59 95.61 98.59 94.30 99.30 92.98 99.60 91.67 99.60 90.35 99.40 89.04 98.89 87.72 98.09 86.40 97.09 85.09 95.88 83.77 94.57 82.46 93.27 81.14 92.06 79.82 90.85 78.51 89.85 77.19 88.84 75.88 87.84 74.56 86.93 73.25 86.13 71.93 85.33 70.61 84.62 69.30 84.12 67.98 83.62 66.67 83.32 65.35 83.02 64.04 82.81 62.72 82.51 61.40 82.31 60.09 82.11 58.77 82.01 57.46 81.91 56.14 81.91 54.82 81.91 53.51 81.91 52.19 81.91 50.88 81.91 49.56 81.91 48.25 81.91 46.93 81.91 45.61 81.91 44.30 81.91 42.98 81.91 41.67 81.91 40.35 81.91 39.04 81.91 37.72 81.91 36.40 81.91 35.09 81.91 33.77 81.91 32.46 81.91 31.14 81.91 29.82 81.91 28.51 81.91 27.19 81.91 25.88 81.91 24.56 81.91 23.25 81.91 21.93 81.91 20.61 81.91 19.30 81.91 17.98 81.91 16.67 81.91 15.35 81.91 14.04 81.91 12.72 81.91 11.40 81.91 10.09 81.81 8.77 81.81 7.46 81.81 6.14 81.81 4.82 81.81 3.51 81.81 2.28 81.61 1.32 81.11 0.61 80.30 0.18 79.20 0.00 77.89 0.00 76.38 0.00 74.87 0.00 73.37 0.00 71.86 0.00 70.35 0.00 68.84 0.00 67.34 0.00 65.83 0.00 64.32 0.00 62.81 0.00 61.31 0.00 59.80 0.00 58.29 0.00 56.78 0.00 55.28 0.00 53.77 0.00 52.26 0.00 50.75 0.00 49.25 0.00 47.74 0.00 46.23 0.00 44.72 0.00 43.22 0.00 41.71 0.00 40.20 0.00 38.69 0.00 37.19 0.00 35.68 0.00 34.17 0.00 32.66 0.00 31.16 0.00 29.65 0.00 28.14 0.00 26.63 0.00 25.13 0.00 23.62 0.00 22.11 0.00 20.60 0.00 19.85 0.00 19.10Z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat }
+    .ch-leaf { display: none }
+    .ch-cap { left: 7%; bottom: 26%; width: 86%; font-size: clamp(.9rem, 4.3vw, 1.08rem); text-align: left; white-space: nowrap }
+    .ch-shade { background: linear-gradient(to top, rgba(8,20,13,.78) 18%, rgba(8,20,13,.45) 32%, rgba(8,20,13,0) 46%) }
+    .ch-ph img { object-position: 50% 74% }
+    .ch-segs { left: auto; right: 4%; top: 6% }
+    .ch-copy { z-index: 1; width: auto; margin: 0; padding: 10px 36px calc(var(--mb-clear, 76px) + 22px) }
+    .ch-orn { display: none }
+    .ch-h1 { font-size: clamp(2.1rem, 9.4vw, 2.6rem); margin-bottom: 12px }
+    .ch-sub { font-size: .95rem; margin-bottom: 16px }
+    .ch-btns { flex-direction: column; gap: 10px }
+    .ch-btns .fk-btn { width: 100%; min-height: 48px }
+    .ch-stats { margin-top: 24px }
+    .ch-stats li { padding: 0 8px 0 10px; align-items: flex-start }
+    .ch-stats li:first-child { padding-left: 0 }
+    .ch-num { font-size: clamp(1.15rem, 5.6vw, 1.6rem) }
+  }
   
   
 
@@ -350,11 +477,9 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   
 /* Phase 4B: layout + colour only. Type = fk-ty-*, buttons = fk-btn, cards = fk-card. */
   .ct-kicker { display: block; margin-bottom: 10px; color: #74501a }
-  .ct-title { margin: 0 0 16px; color: #1f2a1a }
   .ct-sec-title { margin: 0 0 40px; color: #1f2a1a }
   .ct-fc-head h2 { margin: 6px 0 10px; color: #1f2a1a }
   .ct-form .fk-btn { width: 100% }
-  .ct-hero-btns .fk-btn { max-width: 100%; height: auto; padding-block: 12px; white-space: normal; line-height: 1.25 }
   .ct-scale-grid.fk-rail--m { display: flex; grid-template-columns: none; gap: 12px}
   @media (min-width: 768px) {
     .ct-scale-grid.fk-rail--m { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px}
@@ -365,4 +490,10 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .ct-stat-label { font-weight: 600; color: #1f2a1a; margin-top: 4px }
   .ct-gallery-cap { margin: 8px 0 0; padding: 0 clamp(16px, 4vw, 40px); font-size: 0.875rem; color: #4a4232 }
   .ct-field select { text-overflow: ellipsis }
+  /* 38c "From our kitchen" strip (prefix bwk-; tile styles come from InstaPostTile) */
+  .bwk { padding: clamp(36px, 5vw, 64px) 0 clamp(8px, 2vw, 24px) }
+  .bwk-h { margin: 0 0 8px; text-align: center; color: #1f2a1a }
+  .bwk-sub { margin: 0 auto clamp(20px, 3vw, 32px); max-width: 40ch; text-align: center; font-size: .9375rem; line-height: 1.5; color: #4a4232; text-wrap: balance; overflow-wrap: anywhere }
+  .bwk-grid { list-style: none; margin: 0 auto; padding: 0; max-width: 1100px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px }
+  @media (max-width: 767px) { .bwk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px } }
 </style>

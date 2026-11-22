@@ -9,6 +9,7 @@ import CornerHero from '../components/CornerHero.astro';
 import PartyPackages from '../components/party/PartyPackages.astro';
 import PartyBuilder from '../components/party/PartyBuilder.astro';
 import CelebrationViewer from '../components/CelebrationViewer.astro';
+import InstaPostTile from '../components/InstaPostTile.astro';
 import pDesk from '../../scripts/bg-specs/party-desk.out.json';
 import '../styles/fk-tokens.css';
 // v5.36 redesign: hero (CornerHero + labels) -> Our Party Packages (4 cards) -> Build Your Celebration -> closing panel.
@@ -31,7 +32,7 @@ const celebTabs = [
     cg('birthday-amma-led-screen', 'A birthday greeting for Amma on the big LED screen above the stage set'),
     cg('birthday-flower-arch-stage', 'A family birthday on stage with a flower arch and a cake'),
     cg('birthday-cake-dad', 'A birthday cake with the word Dad written on it'),
-  ] },
+  ], cakes: ['03', '21'] as const }, // 38c step 10: "Celebration cakes" = Instagram posts 03 and 21 (InstaPostTile)
   { id: 'kids', t: 'Kids', items: [
     cg('kids-party-stage-dance', 'Kids dancing on a stage at a party, with balloons around'),
     cg('mascot-dancing-kids', 'The Fursat elephant mascot dancing with kids, seen from behind'),
@@ -90,6 +91,14 @@ import InstagramFeed from '../components/InstagramFeed.astro';
                   </li>
                 ))}
               </ul>
+              {c.cakes && (
+                <>
+                  <h3 class="bwp-h">Celebration cakes</h3>
+                  <ul class="bwp-grid">
+                    {c.cakes.map((n) => <InstaPostTile n={n} sizes="(max-width: 767px) 62vw, 270px" />)}
+                  </ul>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -270,6 +279,18 @@ html[data-daypart="evening"] .pa-panel--packs::before{opacity:1;background:radia
   .cg-li:nth-child(3n+2){margin-top:0}
   .cg-li:nth-child(4n+2),.cg-li:nth-child(4n+4){margin-top:30px}
 }
+/* 38c step 10: Birthdays tab "Celebration cakes" (InstaPostTile). Same sizes as .cg-li so the tiles line up with the photos above. */
+.bwp-h{margin:clamp(20px,3vw,32px) 0 12px;text-align:center;color:#18301f;font:500 clamp(1.25rem,2.2vw,1.5rem)/1.2 "Playfair Display",Georgia,serif}
+.bwp-grid{list-style:none;margin:0;padding:0;display:flex;justify-content:center;gap:14px}
+.cg-pre .bw-tile{opacity:0}
+@media(max-width:767px){
+  .bwp-h{padding-inline:16px}
+  .bwp-grid{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;overscroll-behavior-x:contain;scrollbar-width:none;padding:6px 16px 18px}
+  .bwp-grid::-webkit-scrollbar{display:none}
+  .bwp-grid .bw-tile{flex:0 0 min(64vw,260px);scroll-snap-align:start}
+}
+@media(min-width:768px){.bwp-grid{gap:18px}.bwp-grid .bw-tile{width:calc((100% - 36px)/3)}}
+@media(min-width:1000px){.bwp-grid{gap:20px}.bwp-grid .bw-tile{width:calc((100% - 60px)/4)}}
 /* hero: second button = cream with a gold rim */
 .pa .ch-btns .fk-btn--secondary{border-color:#c99a43;background:#fcf7f0}
 /* phone: leave room for the summary bar so it never covers the footer links */
@@ -285,7 +306,7 @@ if (cgRoot) {
   let current = 0, token = 0;
   const rise = (panel: HTMLElement) => {
     panel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: EASE });
-    panel.querySelectorAll<HTMLElement>('.cvt').forEach((t, i) => {
+    panel.querySelectorAll<HTMLElement>('.cvt, .bw-tile').forEach((t, i) => {
       t.animate([{ opacity: 0, transform: 'translateY(22px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, delay: Math.min(i, 6) * 55, easing: EASE, fill: 'backwards' });
     });
   };
