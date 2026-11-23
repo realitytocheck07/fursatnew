@@ -424,7 +424,7 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
     S.busy = true; send.setAttribute('aria-busy', 'true'); send.style.width = send.offsetWidth + 'px'; send.classList.add('is-busy');
     ls('fz_n', nm); ls('fz_m', x); ls('fz_e', ev); ls('fk-me', JSON.stringify({ name: nm, phone: x, email: ev }));
     var dt = new Date(S.day + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    var msg = ['Hi Fursat! 👋 I would like to reserve a table:', '• Name: ' + nm, '• Phone: +91 ' + x.slice(0, 5) + ' ' + x.slice(5)].concat(ev ? ['• Email: ' + ev] : [], ['• Date: ' + dt, '• Time: ' + S.time, '• Guests: ' + S.guests, '• Zone: ' + S.zone]).join('\n');
+    var msg = window.fkWa.format({ kind: 'table', name: nm, phone: x, date: S.day, time: S.time, guests: S.guests, lines: [['Email', ev], ['Seating', S.zone]], offer: true });
     var ff = { name: nm, phone: x, date: dt, time: S.time, guests: String(S.guests), zone: S.zone };
     if (ev) ff.email = ev;
     if (window.fkForm && window.fkForm.send) window.fkForm.send('restaurant', 'Table request (home)', ff, document.querySelector('#bk-f [name=botcheck]'));

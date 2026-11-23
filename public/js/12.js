@@ -132,11 +132,12 @@ if(f.name.trim().length<2)return bad("#pk-n","Please tell us your name so we can
 if(!(g>=1&&g<=2000))return bad("#pk-g","Enter the number of guests (1\u20132000).");
 if(f.date&&f.date<today())return bad("#pk-d","That date has passed \u2014 pick an upcoming date.");
 if(t&&!/^[6-9]\d{9}$/.test(t))return bad("#pk-m","Enter a valid 10-digit mobile number, or leave it blank.");return true}
-function msg(){var p=st.pkg,f=st.f,e=est(),sel=st.sel[p.id],t=digits(f.tel),L=["Hi Fursat! \uD83C\uDF89 I\u2019d like to plan a "+(p.k==="party"?"party with the *"+p.t+"* package ("+inr(p.price)+" + taxes per person)":"buffet: *"+p.t+"* ("+inr(p.price)+" per person"+(p.veg?", veg":"")+")")+"."];
-L.push("Name: "+f.name.trim(),"Guests: "+e.g);if(f.date){var d=f.date.split("-");L.push("Date: "+new Date(d[0],d[1]-1,d[2]).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}))}if(f.occ)L.push("Occasion: "+f.occ);
-p.sec.forEach(function(s,i){var c=sel[i];L.push("\u2022 "+s.t.replace(" \u00B7 "," ")+": "+(c.length?c.join(", "):"(to decide with the team)")+(c.length&&c.length<s.n?" (+"+(s.n-c.length)+" to decide)":""))});
-var ad=Object.keys(st.add).filter(function(i){return st.add[i]}).map(function(i){return AD[i][0].replace(" \u00B7 "," ")});if(ad.length)L.push("Extras: "+ad.join(", "));
-L.push("Estimate: "+inr(e.lo)+(e.ex?" \u2013 "+inr(e.hi):"")+(p.k==="party"?" + taxes":""));if(f.note.trim())L.push("Notes: "+f.note.trim().replace(/\s+/g," "));if(t)L.push("My number: +91 "+t.slice(0,5)+" "+t.slice(5));return L.join("\n")}
+function msg(){var p=st.pkg,f=st.f,e=est(),sel=st.sel[p.id],t=digits(f.tel),
+L=[["Package",p.k==="party"?p.t+" ("+inr(p.price)+" + taxes per person)":p.t+" ("+inr(p.price)+" per person"+(p.veg?", veg":"")+")"],["Occasion",f.occ]];
+p.sec.forEach(function(s,i){var c=sel[i];L.push([s.t.replace(" \u00B7 "," "),c.length?c.join(", ")+(c.length<s.n?" (+"+(s.n-c.length)+" to decide)":""):"(to decide with the team)"])});
+var ad=Object.keys(st.add).filter(function(i){return st.add[i]}).map(function(i){return AD[i][0].replace(" \u00B7 "," ")});if(ad.length)L.push(["Extras",ad.join(", ")]);
+L.push(["Estimate",inr(e.lo)+(e.ex?" \u2013 "+inr(e.hi):"")+(p.k==="party"?" + taxes":"")]);
+return window.fkWa.format({kind:p.k==="party"?"party":"catering",name:f.name.trim(),phone:t,date:f.date,guests:e.g,lines:L,note:f.note.trim()})}
 /* ---------- entry points ---------- */
 function mount(){var card=document.querySelector("#ask-fursat .af-card"),c=card&&card.querySelector(".af-contact");if(card&&!card.querySelector(".pk-open")){var b=document.createElement("button");b.type="button";b.className="pk-open";b.innerHTML="\uD83C\uDF89 Party &amp; banquet packages <small>from "+inr(925)+"</small>";b.addEventListener("click",function(){open({tab:"party"})});card.insertBefore(b,c||null)}
 var g=$("wz-g");if(g&&!g.querySelector('input[value="Party Packages"]')&&g.firstElementChild){var n=g.firstElementChild.cloneNode(true);n.style.setProperty("--c","#C4161C");n.querySelector("input").value="Party Packages";n.querySelector("b").textContent="Party Packages";n.querySelector("small").textContent="Platinum \u00B7 Gold \u00B7 buffets";var pa=n.querySelector(".wz-ic svg");if(pa)pa.innerHTML='<path d="M5 21l4-12 8 8-12 4zM14 4l1 3M18 8l3-1M17 3l-1 2M9 9l6 6"/>';g.appendChild(n);}}

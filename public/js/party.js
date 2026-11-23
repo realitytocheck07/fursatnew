@@ -86,8 +86,8 @@
       sub.textContent = inr(p.price) + ' ' + D.unit + ' \u00b7 before taxes';
       countTo(0, 'Enter the number of guests'); live.textContent = 'Enter the number of guests.';
     }
-    var msg = ['Hi Fursat! I would like to plan a party:', '\u2022 Package: ' + p.label, '\u2022 Price: ' + inr(p.price) + ' + taxes per guest', '\u2022 Guests: ' + (ok ? g : 'to be confirmed')].concat(ok ? ['\u2022 Estimate: ' + inr(sum) + ' + taxes'] : []).join('\n');
-    var who = contact(); if (who.length) msg += '\n' + who.join('\n');
+    var msg = window.fkWa.format({ kind: 'party', name: cv('pb-name'), phone: cv('pb-phone'), guests: ok ? g : 'to be confirmed',
+      lines: [['Package', p.label], ['Price', inr(p.price) + ' + taxes per guest'], ['Estimate', ok ? inr(sum) + ' + taxes' : ''], ['Email', cv('pb-email')]] });
     var href = 'https://wa.me/' + D.wa + '?text=' + encodeURIComponent(msg);
     wa.href = href; if (barWa) barWa.href = href;
     if (barT) barT.textContent = p.label + ' \u00b7 ' + (ok ? g : '?') + ' \u00b7 ' + (ok ? inr(sum) : 'add guests');
@@ -96,7 +96,6 @@
 
   /* contact fields (optional email): added to the WhatsApp text and the email copy */
   function cv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-  function contact() { var a = []; if (cv('pb-name')) a.push('\u2022 Name: ' + cv('pb-name')); if (cv('pb-phone')) a.push('\u2022 Phone: ' + cv('pb-phone')); if (cv('pb-email')) a.push('\u2022 Email: ' + cv('pb-email')); return a; }
   function setGroup(id, keepPkg) {
     if (id !== st.group) { st.group = id; var cur = pkgOf(st.pkg); if (!cur || cur.group !== id || !keepPkg) st.pkg = D.pkgs.filter(function (p) { return p.group === id; })[0].id; }
   }

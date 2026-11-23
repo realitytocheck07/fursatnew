@@ -354,7 +354,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 <script>
   import { feFlow } from '../scripts/fe-flow.js';
   feFlow({
-    form: 'form[data-wa-form]', subject: 'Catering enquiry', nudge: 'Pick a cuisine, or tap Skip', guestStep: 25, guestFirst: 50,
+    form: 'form[data-wa-form]', subject: 'Catering enquiry', kind: 'catering', nudge: 'Pick a cuisine, or tap Skip', guestStep: 25, guestFirst: 50,
     labels: ['Cuisine', 'Date, guests & area', 'Your details'],
     /* WhatsApp text order, as before: Name, Phone, Email (if filled), Area, Guests, Date, Cuisine (if picked) */
     order: ['ct-f1', 'ct-f2', 'ct-email', 'ct-f3', 'ct-f4', 'ct-f5', 'fe-occ'],

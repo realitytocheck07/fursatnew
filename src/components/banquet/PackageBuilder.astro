@@ -186,17 +186,16 @@ const iconFor = (h: string) => /drink/i.test(h) ? ICON.drink : /soup/i.test(h) ?
   q('#pb-plus').addEventListener('click', function () { step(5); });
   guests.addEventListener('input', refresh);
   function send() {
-    var price = +cur.dataset.price, g = Math.max(1, parseInt(guests.value, 10) || 0), L = [], fields = { package: inr(price) + ' ' + cur.dataset.kind + ' (per guest + taxes)', guests: g };
-    L.push('Hi Fursat! 👋 I would like to plan a banquet.');
-    L.push('• Package: ' + inr(price) + ' ' + cur.dataset.kind + ' (per guest + taxes)');
-    L.push('• Guests: ' + g);
-    if (date.value) { var d = new Date(date.value + 'T00:00'); fields.date = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); L.push('• Date: ' + fields.date); }
-    L.push('• Estimate: ' + inr(price * g) + ' + taxes');
+    var price = +cur.dataset.price, g = Math.max(1, parseInt(guests.value, 10) || 0), lines = [], fields = { package: inr(price) + ' ' + cur.dataset.kind + ' (per guest + taxes)', guests: g };
+    lines.push(['Package', inr(price) + ' ' + cur.dataset.kind + ' (per guest + taxes)']);
+    if (date.value) { var d = new Date(date.value + 'T00:00'); fields.date = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
+    lines.push(['Estimate', inr(price * g) + ' + taxes']);
     courses().forEach(function (c) {
-      if (+c.dataset.pick > 0) { var n = chosen(c).map(function (b) { return b.dataset.item; }); fields[c.dataset.h] = n.length ? n.join(', ') : 'please suggest'; L.push('• ' + c.dataset.h + ': ' + fields[c.dataset.h]); }
+      if (+c.dataset.pick > 0) { var n = chosen(c).map(function (b) { return b.dataset.item; }); fields[c.dataset.h] = n.length ? n.join(', ') : 'please suggest'; lines.push([c.dataset.h, fields[c.dataset.h]]); }
     });
+    var text = window.fkWa.format({ kind: 'banquet', date: date.value, guests: g, lines: lines });
     if (window.fkForm) window.fkForm.send('events', 'Banquet menu builder', fields, q('[name=botcheck]'));
-    window.open('https://wa.me/' + root.dataset.wa + '?text=' + encodeURIComponent(L.join('\n')), '_blank', 'noopener');
+    window.open('https://wa.me/' + root.dataset.wa + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
   }
   q('#pb-send').addEventListener('click', send);
   q('#pb-dock-send').addEventListener('click', send);

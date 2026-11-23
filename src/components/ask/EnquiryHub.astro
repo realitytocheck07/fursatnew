@@ -393,25 +393,18 @@ const ico: Record<string, string> = {
   });
   back.addEventListener('click', function () { show(step - 1, true); });
 
-  function fmtDate(v) {
-    var p = v.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-    return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  }
   function message() {
-    var t = tiles[cur], L = ['Hi Fursat! \ud83d\udc4b I would like to plan ' + t.plan + '.'];
-    L.push('\u2022 Occasion: ' + t.name, '\u2022 Guests: ' + guests.value.trim(), '\u2022 Date: ' + fmtDate(date.value), '\u2022 Time: ' + time.value);
+    var t = tiles[cur], L = [['Occasion', t.name]];
     if (t.group === 'catering') {
       var cu = form.querySelector('input[name=cuisine]:checked');
-      L.push('\u2022 Quote: per-head quote please');
-      if (cu && cu.value !== 'Not sure yet') L.push('\u2022 Cuisine: ' + cu.value);
+      L.push(['Quote', 'per-head quote please']);
+      if (cu && cu.value !== 'Not sure yet') L.push(['Cuisine', cu.value]);
     } else if (hasPkg()) {
       var r = form.querySelector('.eh-pk:not([hidden]) input[name=pkg]:checked');
-      if (r) L.push('\u2022 Package: ' + r.getAttribute('data-name') + ' ' + inr(r.getAttribute('data-price')) + ' + taxes per guest');
+      if (r) L.push(['Package', r.getAttribute('data-name') + ' ' + inr(r.getAttribute('data-price')) + ' + taxes per guest']);
     }
-    L.push('\u2022 Name: ' + name.value.trim(), '\u2022 Mobile: ' + digits());
-    var em = form.querySelector('#eh-email'); if (em && em.value.trim()) L.push('\u2022 Email: ' + em.value.trim());
-    if (note.value.trim()) L.push('\u2022 Note: ' + note.value.trim().replace(/\s+/g, ' '));
-    return L.join('\n');
+    var em = form.querySelector('#eh-email'); if (em && em.value.trim()) L.push(['Email', em.value.trim()]);
+    return window.fkWa.format({ kind: t.group === 'catering' ? 'catering' : t.group === 'banquet' ? 'banquet' : 'party', name: name.value.trim(), phone: digits(), date: date.value, time: time.value, guests: guests.value.trim(), lines: L, note: note.value.trim() });
   }
   form.addEventListener('submit', function (e) {
     e.preventDefault();

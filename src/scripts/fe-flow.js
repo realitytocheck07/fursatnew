@@ -195,21 +195,22 @@ export function feFlow(cfg) {
     if (first) { if (step2.includes(first)) go(2); focusFirst(first); return; }
     sending = true; sendBtn.setAttribute('aria-busy', 'true');
     sendBtn.style.width = sendBtn.offsetWidth + 'px'; sendBtn.classList.add('is-busy'); setSendLab('Opening WhatsApp…');
-    /* same fields, same order, same text as before the redesign */
-    const lines = [form.dataset.waIntro], sent = {};
+    /* one shared WhatsApp format (public/js/fk-wa.js); the Web3Forms payload (sent) is unchanged */
+    const core = {}, extra = [], sent = {};
     cfg.order.forEach((id) => {
       const el = document.getElementById(id), t = el.dataset.v; let v = el.value.trim();
       if (el.type === 'email' && !v) return; // optional: only sent when filled
       if (el.type === 'hidden' && !v) return; // occasion / cuisine step skipped
       if (t === 'phone') { const x = digits(v); v = '+91 ' + x.slice(0, 5) + ' ' + x.slice(5); }
       else if (t === 'date') v = new Date(v + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-      else if (el.tagName === 'SELECT') v = el.selectedOptions[0].textContent.trim();
-      lines.push('\u2022 ' + el.dataset.l + ': ' + v);
-      sent[el.dataset.l] = v;
+      else if (el.tagName === 'SELECT') v = (!el.value && el.dataset.empty) ? el.dataset.empty : el.selectedOptions[0].textContent.trim();
+      const l = el.dataset.l;
+      if (l === 'Name') core.name = el.value.trim(); else if (l === 'Phone') core.phone = el.value.trim(); else if (l === 'Date') core.date = el.value.trim(); else if (l === 'Guests') core.guests = el.value.trim(); else extra.push([l, v]);
+      sent[l] = v;
     });
     window.fkForm?.send('events', cfg.subject, sent, $('[name=botcheck]'));
     try { localStorage.setItem('fk-me', JSON.stringify({ name: nameEl.value.trim(), phone: phoneEl.value.trim(), email: emailEl.value.trim() })); } catch (x) {}
-    const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(lines.join('\n'));
+    const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(window.fkWa.format({ kind: cfg.kind, name: core.name, phone: core.phone, date: core.date, guests: core.guests, lines: extra }));
     $('#fe-done-wa').href = url;
     const w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (x) {} }
     /* the tick pops in the chip, then the tear and the done screen play together */

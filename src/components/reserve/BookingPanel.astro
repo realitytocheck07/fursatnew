@@ -656,7 +656,7 @@ const conditions: string[] = [];
     }
     clearErr();
     const date = friendly(booking.date), seating = booking.zone || 'No preference', occasion = booking.occasion || 'Dining';
-    const msg = 'Hi Fursat! I would like to reserve a table:\n\n• Name: ' + name + '\n• Phone: ' + phone + (email ? '\n• Email: ' + email : '') + '\n• Guests: ' + booking.guests + ' Guests' + '\n• Date: ' + date + '\n• Time: ' + booking.time + '\n• Seating: ' + seating + '\n• Occasion: ' + occasion + (booking.table ? '\n• Table: ' + booking.table : '') + (offerOf() ? '\n• Offer: ' + offerOf() : '');
+    const msg = window.fkWa.format({ kind: 'table', name, phone, date: booking.date, time: booking.time, guests: booking.guests, lines: [['Email', email], ['Seating', seating], ['Occasion', occasion], ['Table', booking.table]], offer: true });
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
     window.fkForm?.send('restaurant', 'Table booking', { name, phone, ...(email ? { email } : {}), guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
     const w = window.open(url, '_blank');

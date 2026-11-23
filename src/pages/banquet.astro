@@ -166,7 +166,8 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
                 <p class="fk-f-err fe-err fe-guests-err" id="eq-guests-e" role="alert"></p>
 
                 <div class="fe-sechead fe-gap"><label class="fe-lab" for="eq-package">Interested package <span class="fk-f-opt">(optional)</span></label></div>
-                <select id="eq-package" name="package" class="fk-f-field" data-l="Package" data-fk-sheet>
+                <select id="eq-package" name="package" class="fk-f-field" data-l="Package" data-empty="not chosen yet" data-fk-sheet>
+                  <option value="" selected>Not chosen yet</option>
                   {pkgOpts.map((o: any) => <option value={o.text} data-pkg={o.id}>{o.text}</option>)}
                   <option value="Customized Menu">Customized Menu Requirements</option>
                 </select>
@@ -331,7 +332,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 <script>
   import { feFlow } from '../scripts/fe-flow.js';
   feFlow({
-    form: 'form[data-wa-form]', subject: 'Banquet enquiry', guestStep: 10, guestFirst: 50,
+    form: 'form[data-wa-form]', subject: 'Banquet enquiry', kind: 'banquet', guestStep: 10, guestFirst: 50,
     labels: ['Occasion', 'Date & guests', 'Your details'],
     /* WhatsApp text order, as before: Name, Phone, Email (if filled), Date, Occasion (if picked), Guests, Package */
     order: ['eq-name', 'eq-phone', 'eq-email', 'eq-date', 'fe-occ', 'eq-guests', 'eq-package'],
