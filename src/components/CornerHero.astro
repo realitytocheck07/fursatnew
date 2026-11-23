@@ -6,25 +6,32 @@ import heroes from '../data/heroes.json';
 interface Cta { label: string; href: string; primary?: boolean; book?: boolean; external?: boolean; film?: boolean }
 // Optional props (party page): sub = italic line under the h1 (subHl = the word in it that gets the highlight colour),
 // hlColor = highlight colour for the h1 word, labels = small pills under the rings, one list per photo set, one name per ring.
-interface Props { page: 'cafe' | 'bar' | 'party' | 'banquet'; kicker: string; h1a: string; h1b?: string; lead: string; ctas: Cta[]; alt: string; id?: string; sub?: string; subHl?: string; hlColor?: string; labels?: string[][]; manual?: boolean }
+// ss (kit HS, optional): iris slideshow inside the photo window. See the SlideShow type below. Pages that do not pass it render exactly as before.
+type Box = [number, number, number, number];
+interface Slide { cap: [string, string]; alt: string; full: string; fw: number; fh: number; d?: string; p?: string; cat?: string }
+interface SS { label: string; mask: { d: string; p: string }; win: { d: Box; p: Box }; ui: { d: Box; p: Box }; ui_pos?: 'top' | 'bottom'; slides: Slide[]; cats?: { id: string; label: string }[]; chipsAt?: number }
+interface Props { page: 'cafe' | 'bar' | 'party' | 'banquet'; kicker: string; h1a: string; h1b?: string; lead: string; ctas: Cta[]; alt: string; id?: string; sub?: string; subHl?: string; hlColor?: string; labels?: string[][]; manual?: boolean; ss?: SS }
 // manual (banquet): the page runs its own rotation (4 slides incl. the sneak-peek loop); slots 'art' (inside the art) and 'after' (under the buttons) are optional.
-const { page, kicker, h1a, h1b, lead, ctas, alt, id = 'ch-h1', sub, subHl, hlColor, labels, manual } = Astro.props;
+const { page, kicker, h1a, h1b, lead, ctas, alt, id = 'ch-h1', sub, subHl, hlColor, labels, manual, ss } = Astro.props;
 const h = (heroes as any)[page];
 const textRight = h.windows[0][0] < 20; // window on the left (banquet art) -> text on the right
 const src = (w: number, n = 1) => `/assets/heroes/${page}${n > 1 ? '-' + n : ''}-${w}.webp`;
 // phone art (v5.97, kit 49): finished phone images made by the lead dev, used as they are. Real sizes of the 1080 files.
-const phoneWH: Record<string, [number, number]> = { party: [1080, 614], banquet: [1080, 785], bar: [1080, 667], cafe: [1080, 691] };
+const phoneWH: Record<string, [number, number]> = { party: [1080, 785], banquet: [1080, 785], bar: [1080, 667], cafe: [1080, 691] };
 const [pw, ph] = phoneWH[page];
 const phoneSrc = (w: number, n = 1) => `/assets/heroes/${page}${n > 1 ? '-' + n : ''}-phone-${w}.webp`;
 const phoneSrcset = (n: number) => `${phoneSrc(780, n)} 780w, ${phoneSrc(1080, n)} 1080w`;
-const sets = Array.from({ length: h.sets || 1 }, (_, i) => i + 1);
+const sets = Array.from({ length: ss ? 1 : (h.sets || 1) }, (_, i) => i + 1);
+const bx = (b: number[]) => `${b[0]},${b[1]},${b[2]},${b[3]}`;
+const ssVars = ss ? (['d', 'p'] as const).map((k) => { const w = ss.win[k], u = ss.ui[k]; return `--${k}wx:${w[0]};--${k}wy:${w[1]};--${k}ww:${+(w[2] - w[0]).toFixed(2)};--${k}wh:${+(w[3] - w[1]).toFixed(2)};--${k}ux:${u[0]};--${k}uy:${u[1]};--${k}uw:${+(u[2] - u[0]).toFixed(2)};--${k}uh:${+(u[3] - u[1]).toFixed(2)};`; }).join('') : '';
+const chipY = ss ? Math.max(ss.win.d[3], 0) + 2.4 : 0;
 const srcset = (n: number) => `${src(768, n)} 768w, ${src(1024, n)} 1024w, ${src(1536, n)} 1536w`;
 // label pill under ring k: centred on the ring, just below the lowest ring edge (percent of the art)
 const labY = Math.max(...h.windows.map((w: number[]) => w[3])) + 2.4;
 const labX = (k: number) => Math.min(90, (h.windows[k][0] + h.windows[k][2]) / 2);
 const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf(subHl)), subHl, sub.slice(sub.indexOf(subHl) + subHl.length)] : [sub]) : null;
 ---
-<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} data-manual={manual ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-par:${pw}/${ph};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
+<section class:list={['ch', { 'ch--right': textRight }]} aria-labelledby={id} data-set="0" data-labelled={labels ? '' : undefined} data-manual={manual ? '' : undefined} data-ss={ss ? '' : undefined} style={`--ch-ar:${h.w}/${h.h};--ch-par:${pw}/${ph};--ch-lqip:url('${h.lqip}');${hlColor ? `--ch-hl:${hlColor};` : ''}`}>
   <div class="ch-art">
     <picture class="ch-pic">
     <source media="(max-width: 820px)" srcset={phoneSrcset(1)} sizes="100vw" width={pw} height={ph} />
@@ -34,6 +41,38 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
     </picture>
     {sets.slice(1).map((n) => <img class="ch-img ch-alt" data-srcset={srcset(n)} data-srcset-phone={phoneSrcset(n)} sizes="100vw" width={h.w} height={h.h} alt="" aria-hidden="true" decoding="async" />)}
     <slot name="art" />
+    {ss && (
+      <div class="ch-sb" style={`${ssVars}--ch-mask-d:url('${ss.mask.d}');--ch-mask-p:url('${ss.mask.p}');`} data-n={ss.slides.length}>
+        <div class="ch-ss" aria-hidden="true">
+          <div class="ch-win">
+            {ss.slides.map((sl, i) => (
+              <div class="ch-sl" data-i={i}>
+                {i === 0 ? <img class="ch-s0" alt="" decoding="async" /> : <img alt="" decoding="async" data-d={sl.d} data-p={sl.p} />}
+              </div>
+            ))}
+            <i class={`ch-shade ch-shade--${ss.ui_pos || 'bottom'}`}></i>
+          </div>
+        </div>
+        <button type="button" class="ch-hit" aria-label="Open this photo full screen" tabindex="-1"></button>
+        <div class="ch-ui" role="region" aria-roledescription="carousel" aria-label={ss.label}>
+          <div class={`ch-cap ch-cap--${ss.ui_pos || 'bottom'}`} aria-hidden="true">
+            {ss.slides.map((sl, i) => <p class={`ch-ci${i === 0 ? ' is-on' : ''}`}><span class="ch-ct">{sl.cap[0]}</span><span class="ch-cn">{sl.cap[1]}</span></p>)}
+          </div>
+          <div class={`ch-pg ch-pg--${ss.ui_pos || 'bottom'}`} role="group" aria-label="Choose a photo">
+            {ss.slides.map((sl, i) => <button type="button" class="ch-pd" data-i={i} aria-label={`Show photo ${i + 1} of ${ss.slides.length}: ${sl.cap[1]}`}><span aria-hidden="true"><b></b></span></button>)}
+          </div>
+          <p class="ch-live" aria-live="off" aria-atomic="true">{ss.slides[0].cap[1]}</p>
+          <div class="ch-cvs" data-cv-group="hero-slides">
+            {ss.slides.map((sl) => <button type="button" class="ch-cvb" data-cv-full={sl.full} data-cv-alt={sl.alt} data-cv-w={sl.fw} data-cv-h={sl.fh} data-cat={sl.cat || ''} aria-haspopup="dialog" tabindex="-1">{`View photo: ${sl.cap[1]}`}</button>)}
+          </div>
+        </div>
+        {ss.cats && (
+          <div class="ch-chips" role="group" aria-label="Celebration types" style={`--chy:${chipY.toFixed(1)}`}>
+            {ss.cats.map((c) => <button type="button" class="ch-chip" data-cat={c.id} aria-pressed="false">{c.label}</button>)}
+          </div>
+        )}
+      </div>
+    )}
     {!manual && sets.length > 1 && <div class="ch-dots" aria-hidden="true">{sets.map(() => <span class="ch-dot"><i></i></span>)}</div>}
     {labels && (
       <div class="ch-labs">
@@ -89,6 +128,107 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
     function run() { clearInterval(timer); if (vis && !document.hidden) timer = setInterval(next, 6000); }
     if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { vis = e[0].isIntersecting; run(); }).observe(hero);
     document.addEventListener('visibilitychange', run); run();
+  });
+})();
+</script>
+<script is:inline>
+/* kit HS: iris slideshow inside the hero photo window. First slide = the baked photo (LCP untouched). The rest load after window load + idle.
+   3.2 s per slide, 700 ms iris (clip-path circle 0 -> 75 % from the window centre, photo settles 1.08 -> 1, old one eases to .98), slow drift 1 -> 1.04.
+   Paused: hero off screen (IntersectionObserver on the HERO), hidden tab, hover on laptop. Dots jump, chips jump, swipe on phone, tap opens the viewer. */
+(function () {
+  var HOLD = 3200, IRIS = 700, EASE = 'cubic-bezier(.22,1,.36,1)';
+  document.querySelectorAll('.ch[data-ss]').forEach(function (hero) {
+    var sb = hero.querySelector('.ch-sb'); if (!sb || !hero.animate) return;
+    var phone = matchMedia('(max-width: 820px)').matches;
+    var slides = [].slice.call(sb.querySelectorAll('.ch-sl')), n = slides.length;
+    var dots = [].slice.call(sb.querySelectorAll('.ch-pd')), caps = [].slice.call(sb.querySelectorAll('.ch-ci'));
+    var chips = [].slice.call(sb.querySelectorAll('.ch-chip')), cvb = [].slice.call(sb.querySelectorAll('.ch-cvb'));
+    var hit = sb.querySelector('.ch-hit'), live = sb.querySelector('.ch-live'), ss = sb.querySelector('.ch-ss'), ui = sb.querySelector('.ch-ui');
+    var cats = [], cur = 0, z = 1, ready = false, vis = true, hov = false, held = false, want = -1, user = false, fillA = null, tick = 0;
+    slides.forEach(function (sl, i) { cats[i] = (cvb[i] && cvb[i].getAttribute('data-cat')) || ''; });
+    function pauseAll() { ss.getAnimations({ subtree: true }).concat(ui.getAnimations({ subtree: true })).forEach(function (a) { if (a.playState === 'running') a.pause(); }); }
+    function playAll() { ss.getAnimations({ subtree: true }).concat(ui.getAnimations({ subtree: true })).forEach(function (a) { if (a.playState === 'paused') a.play(); }); }
+    function sync() { if (!ready) return; if (vis && !document.hidden && !hov && !held) playAll(); else pauseAll(); }
+    function drift(sl, withSettle) {
+      var img = sl.firstElementChild;
+      img.getAnimations().forEach(function (a) { a.cancel(); });
+      if (withSettle) img.animate([{ transform: 'scale(1.08)', offset: 0, easing: EASE }, { transform: 'scale(1)', offset: IRIS / (IRIS + HOLD), easing: 'linear' }, { transform: 'scale(1.04)', offset: 1 }], { duration: IRIS + HOLD, fill: 'forwards' });
+      else img.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }], { duration: HOLD + IRIS, easing: 'linear', fill: 'forwards' });
+    }
+    function bar(i) {
+      if (fillA) { fillA.onfinish = null; fillA.cancel(); fillA = null; }
+      dots.forEach(function (d, k) { d.classList.toggle('is-done', k < i); d.classList.toggle('is-act', k === i); if (k === i) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current'); });
+      var b = dots[i].querySelector('b');
+      fillA = b.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: HOLD, easing: 'linear', fill: 'forwards' });
+      fillA.onfinish = function () { go((cur + 1) % n, false); };
+      sync();
+    }
+    function chipState() { chips.forEach(function (c) { c.setAttribute('aria-pressed', String(cats[cur] === c.getAttribute('data-cat'))); }); }
+    function roll(from, to) {
+      var o = caps[from], w = caps[to];
+      o.getAnimations().forEach(function (a) { a.cancel(); }); w.getAnimations().forEach(function (a) { a.cancel(); });
+      o.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-110%)', opacity: 0 }], { duration: 260, easing: 'ease', fill: 'forwards' }).onfinish = function () { o.classList.remove('is-on'); this.cancel(); };
+      w.classList.add('is-on'); w.animate([{ transform: 'translateY(110%)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], { duration: 260, easing: 'ease' });
+    }
+    function loaded(i) { var im = slides[i].firstElementChild; return i === 0 || (im.complete && im.naturalWidth); }
+    function go(i, byUser) {
+      if (i === cur) return;
+      if (!ready) { if (byUser) want = i; return; }
+      if (!loaded(i)) {
+        if (!byUser) { clearTimeout(tick); tick = setTimeout(function () { go(i, false); }, 500); return; }
+        /* a dot, chip or swipe asked for a photo that is not here yet: fetch it now, keep showing the current slide, start the iris when it has loaded */
+        var im = slides[i].firstElementChild; want = i;
+        if (!im.getAttribute('src')) im.src = phone ? im.getAttribute('data-p') : im.getAttribute('data-d');
+        im.addEventListener('load', function () { if (want === i) { want = -1; go(i, true); } }, { once: true });
+        return;
+      }
+      want = -1;
+      var from = slides[cur], to = slides[i], old = cur;
+      slides.forEach(function (s, k) { if (k !== old && k !== i) { s.classList.remove('is-on'); s.getAnimations().forEach(function (a) { a.cancel(); }); } });
+      to.getAnimations().forEach(function (a) { a.cancel(); }); to.style.transform = '';
+      to.style.zIndex = ++z; to.classList.add('is-on');
+      to.animate([{ clipPath: 'circle(0% at 50% 50%)' }, { clipPath: 'circle(75% at 50% 50%)' }], { duration: IRIS, easing: EASE, fill: 'forwards' });
+      drift(to, true);
+      var fa = from.animate([{ transform: 'scale(1)' }, { transform: 'scale(.98)' }], { duration: IRIS, easing: EASE, fill: 'forwards' });
+      fa.onfinish = function () { if (cur !== old) { from.classList.remove('is-on'); fa.cancel(); from.firstElementChild.getAnimations().forEach(function (a) { a.cancel(); }); } };
+      cur = i; roll(old, i); bar(i); chipState();
+      if (byUser) { user = true; live.setAttribute('aria-live', 'polite'); }
+      live.textContent = caps[i].querySelector('.ch-cn').textContent;
+    }
+    function start() {
+      var base = hero.querySelector('.ch-img:not(.ch-alt)'), s0 = slides[0].firstElementChild;
+      s0.src = base.currentSrc || base.src;
+      var begin = function () {
+        hero.classList.add('is-ssr'); slides[0].classList.add('is-on'); slides[0].style.zIndex = 1; drift(slides[0], false);
+        ready = true; chipState(); bar(0); if (want > -1) go(want, true);
+      };
+      if (s0.decode) s0.decode().then(begin, begin); else begin();
+    }
+    function load() {
+      slides.forEach(function (sl, i) { if (!i) return; var im = sl.firstElementChild; im.src = phone ? im.getAttribute('data-p') : im.getAttribute('data-d'); });
+      start();
+    }
+    function whenIdle() { (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(load, { timeout: 4000 }); }
+    if (document.readyState === 'complete') whenIdle(); else addEventListener('load', whenIdle);
+    /* controls */
+    dots.forEach(function (d) { d.addEventListener('click', function () { go(+d.getAttribute('data-i'), true); }); });
+    chips.forEach(function (c) { c.addEventListener('click', function () { var k = cats.indexOf(c.getAttribute('data-cat')); if (k > -1) go(k, true); }); });
+    var sx = 0, sy = 0, sid = -1, moved = false;
+    hit.addEventListener('pointerdown', function (e) { sx = e.clientX; sy = e.clientY; sid = e.pointerId; moved = false; });
+    hit.addEventListener('pointermove', function (e) { if (e.pointerId === sid && Math.abs(e.clientX - sx) > 10) moved = true; });
+    hit.addEventListener('pointerup', function (e) {
+      if (e.pointerId !== sid) return; sid = -1; var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) { moved = true; go((cur + (dx < 0 ? 1 : n - 1)) % n, true); }
+    });
+    hit.addEventListener('pointercancel', function () { sid = -1; });
+    hit.addEventListener('click', function (e) { if (moved) { moved = false; e.preventDefault(); return; } if (ready && cvb[cur]) cvb[cur].click(); });
+    sb.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') go((cur + 1) % n, true); else if (e.key === 'ArrowLeft') go((cur + n - 1) % n, true); });
+    sb.addEventListener('mouseenter', function (e) { if (matchMedia('(hover: hover)').matches) { hov = true; sync(); } });
+    sb.addEventListener('mouseleave', function () { hov = false; sync(); });
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { vis = e[0].isIntersecting; sync(); }).observe(hero);
+    document.addEventListener('visibilitychange', sync);
+    hero.addEventListener('bq:hold', function () { held = true; sync(); }); hero.addEventListener('bq:release', function () { held = false; sync(); });
+    hero.__ss = { go: go, state: function () { return { cur: cur, ready: ready }; } };
   });
 })();
 </script>
@@ -163,6 +303,60 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
   .ch .ch-dot i { display: block; height: 100%; background: #c99a43; transform: scaleX(0); transform-origin: left center; }
   .ch[data-set="0"] .ch-dot:nth-child(1) i, .ch[data-set="1"] .ch-dot:nth-child(2) i, .ch[data-set="2"] .ch-dot:nth-child(3) i { transform: scaleX(1); transition: transform 6000ms linear; }
   .ch[data-set="1"] .ch-dot:nth-child(1) i, .ch[data-set="2"] .ch-dot:nth-child(-n+2) i { transform: scaleX(1); }
+}
+
+/* ---- kit HS: iris slideshow in the photo window. The box copies how the art is cropped (cover), so percentages land on the window. ---- */
+.ch[data-ss] .ch-art { container-type: size; }
+.ch-sb { --wx: var(--dwx); --wy: var(--dwy); --ww: var(--dww); --wh: var(--dwh); --ux: var(--dux); --uy: var(--duy); --uw: var(--duw); --uh: var(--duh); --mask: var(--ch-mask-d);
+  position: absolute; right: 0; top: 50%; translate: 0 -50%; width: max(100cqw, 100cqh * 1672 / 941); height: max(100cqh, 100cqw * 941 / 1672); pointer-events: none; }
+.ch--right .ch-sb { right: auto; left: 0; }
+.ch-ss { display: none; position: absolute; inset: 0; z-index: 1; -webkit-mask-image: var(--mask); mask-image: var(--mask); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.ch.is-ssr .ch-ss { display: block; }
+.ch-win { position: absolute; left: calc(var(--wx) * 1%); top: calc(var(--wy) * 1%); width: calc(var(--ww) * 1%); height: calc(var(--wh) * 1%); overflow: hidden; background: #2a1c10; }
+.ch-sl { position: absolute; inset: 0; visibility: hidden; overflow: hidden; }
+.ch-sl.is-on { visibility: visible; }
+.ch-sl > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; will-change: transform; }
+/* slide 1 = the baked art itself, placed so the window area lines up exactly with the visible window */
+.ch-sl > img.ch-s0 { inset: auto; left: calc(-100% * var(--wx) / var(--ww)); top: calc(-100% * var(--wy) / var(--wh)); width: calc(10000% / var(--ww)); height: calc(10000% / var(--wh)); object-fit: fill; }
+.ch-shade { position: absolute; left: calc((var(--ux) - var(--wx)) / var(--ww) * 100%); top: calc((var(--uy) - var(--wy)) / var(--wh) * 100%); width: calc(var(--uw) / var(--ww) * 100%); height: calc(var(--uh) / var(--wh) * 100%); z-index: 99; pointer-events: none; }
+.ch-shade--bottom { background: radial-gradient(130% 110% at 0% 100%, rgba(8,20,13,.8) 0%, rgba(8,20,13,.45) 45%, rgba(8,20,13,0) 78%); }
+.ch-shade--top { background: radial-gradient(130% 130% at 0% 0%, rgba(8,20,13,.8) 0%, rgba(8,20,13,.45) 45%, rgba(8,20,13,0) 78%); }
+.ch-hit { position: absolute; left: calc(var(--wx) * 1%); top: calc(var(--wy) * 1%); width: calc(var(--ww) * 1%); height: calc(var(--wh) * 1%); z-index: 3; padding: 0; border: 0; background: none; cursor: zoom-in; pointer-events: none; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+.ch.is-ssr .ch-hit { pointer-events: auto; }
+.ch-hit:focus-visible { outline: 2px solid #e8c27a; outline-offset: -4px; }
+.ch-ui { position: absolute; left: calc(var(--ux) * 1%); top: calc(var(--uy) * 1%); width: calc(var(--uw) * 1%); height: calc(var(--uh) * 1%); z-index: 4; pointer-events: none; }
+.ch-cap { position: absolute; left: 6%; max-width: 88%; overflow: hidden; display: grid; padding-block: 2px; }
+.ch-cap--bottom { bottom: 40px; } .ch-cap--top { top: 6px; }
+.ch-ci { grid-area: 1 / 1; margin: 0; display: grid; gap: 4px; opacity: 0; }
+.ch-ci.is-on { opacity: 1; }
+.ch-ct { font: italic 500 clamp(.95rem, 1.7vw, 1.55rem)/1.15 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #f6e6d1; text-shadow: 0 1px 10px rgba(0,0,0,.5); }
+.ch-cn { font: 600 .75rem/1.3 var(--fk-sans, Rupee, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #e8c27a; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.ch-pg { position: absolute; left: calc(6% - 12px); display: flex; pointer-events: auto; }
+.ch-pg--bottom, .ch-pg--top { bottom: 0; }
+.ch-pd { display: grid; place-items: center; width: 26px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; opacity: 0; -webkit-tap-highlight-color: transparent; }
+.ch.is-ssr .ch-pd { opacity: 1; transition: opacity 300ms ease; }
+.ch-pd span { display: block; width: 20px; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(246,230,209,.45); box-shadow: 0 0 5px rgba(0,0,0,.4); }
+.ch-pd b { display: block; height: 100%; background: #e8c27a; transform: scaleX(0); transform-origin: left center; }
+.ch-pd.is-done b { transform: scaleX(1); }
+.ch-pd:focus-visible { outline: 2px solid #e8c27a; outline-offset: -6px; border-radius: 8px; }
+.ch-live, .ch-cvs { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ch-chips { position: absolute; left: calc((var(--wx) + var(--ww) / 2) * 1%); top: calc(var(--chy) * 1%); translate: -50% 0; z-index: 5; display: flex; gap: 8px; pointer-events: none; }
+.ch-chip { position: relative; display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border-radius: 999px; background: rgba(252,247,240,.94); border: 1px solid #c99a43; box-shadow: 0 4px 10px -4px rgba(42,27,8,.3); font: 600 .75rem/1 var(--fk-sans, Rupee, Poppins, sans-serif); letter-spacing: .04em; color: #4a3410; white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 200ms ease, color 200ms ease, transform 120ms ease-out; }
+.ch-chip::after { content: ""; position: absolute; inset: -6px -3px; }
+.ch.is-ssr .ch-chip { pointer-events: auto; }
+.ch-chip:active { transform: scale(.96); }
+.ch-chip[aria-pressed="true"] { background: #10261a; color: #e6c27a; border-color: #c99a43; }
+.ch-chip:focus-visible { outline: 2px solid #8a5a14; outline-offset: 2px; }
+@media (hover: hover) { .ch-chip[aria-pressed="false"]:hover { background: #fff; } }
+@media (max-width: 820px) {
+  .ch-sb { --wx: var(--pwx); --wy: var(--pwy); --ww: var(--pww); --wh: var(--pwh); --ux: var(--pux); --uy: var(--puy); --uw: var(--puw); --uh: var(--puh); --mask: var(--ch-mask-p); left: 0; right: auto; top: 0; translate: none; width: 100%; height: 100%; }
+  .ch-ct { font-size: 1rem; } .ch-cn { font-size: .6875rem; letter-spacing: .08em; }
+  .ch-cap { left: 7%; } .ch-pg { left: calc(7% - 10px); }
+  .ch-pd { width: 22px; } .ch-pd span { width: 16px; }
+  .ch-sb[data-n="8"] .ch-pd { width: 18px; } .ch-sb[data-n="8"] .ch-pd span { width: 13px; }
+  /* HS3: no chips on phone (they covered the photo); the dots stay */
+  .ch-chips { display: none; }
+  .ch[data-ss] .ch-img { transform: none !important; }
 }
 @keyframes ch-rise { from { opacity: 0; transform: translateY(14px); } }
 @media (prefers-reduced-motion: reduce) { .ch-img, .ch-lab { transition: none; } }

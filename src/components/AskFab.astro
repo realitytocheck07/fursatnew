@@ -1,8 +1,7 @@
 ---
-// AskFab — the "Ask Fursat" mascot button on every page (not on /ask). Plays a lively Super-Mario routine (more hops, spin and back-flip jumps, triple coins + sparkles, a power jump every 3rd section): drops in on Home after the intro,
-// hops now and then, hops when scrolling starts, jumps + coin + a tiny hint when a new main section arrives, and jumps big on tap.
-// Page-aware: opens /ask with a starting question that fits the page the guest is on.
-// Motion is CSS transform only. Reduced motion: static, no bubbles except on tap. No sound.
+// AskFab: the "Ask Fursat" mascot, always with the guest (not on /ask). It never hides for a button or a field: it DOCKS (44px avatar) at the nearest free spot,
+// and only steps away while a dialog is open. One hint bubble per [data-ask-hint] section (3 s, once per visit). Page-aware: opens /ask with a question that fits.
+// Motion: float, blink, hop when scrolling stops, lean while scrolling, wave on a new section, tap sparkles, sleepy after 25 s. WAAPI, transform/opacity only. No sound.
 import slots from '../data/slots.json';
 import site from '../data/site.json';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -22,18 +21,14 @@ const show = path !== '/ask' && path !== '/404';
 const disc = Math.max(0, ...slots.map((x: { discount?: number }) => x.discount || 0));
 const waOffers = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent('Hi Fursat, what offers are on today?')}`;
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
-// the hint bubble each kind of section gets (the page's own default comes from its path)
-const BUBBLES = { menu: 'Hungry? 🍛', party: 'Party plans? 🎉', bar: 'Cricket tonight? 🏏' /* TODO(client): confirm the cricket line */, cafe: 'Coffee break? ☕', any: 'Ask me anything!' };
-const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/banquet': 'party', '/party': 'party', '/restaurant-bar': 'bar', '/cafe': 'cafe' };
 ---
 {show && (
-  <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined} data-page-key={PAGE_KEY[path] || 'any'} data-bubbles={JSON.stringify(BUBBLES)}>
-    <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" data-cheer="/assets/ask-mascot-cheer-sm.webp" />
+  <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined}>
+    <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" />
     <span class="afab-eq" aria-hidden="true"><i style="--a:-72deg;--b:var(--fk-b3,0)"></i><i style="--a:-60deg;--b:var(--fk-b1,0)"></i><i style="--a:-48deg;--b:var(--fk-b0,0)"></i><i style="--a:-36deg;--b:var(--fk-b2,0)"></i><i style="--a:-24deg;--b:var(--fk-b4,0)"></i><i style="--a:24deg;--b:var(--fk-b4,0)"></i><i style="--a:36deg;--b:var(--fk-b2,0)"></i><i style="--a:48deg;--b:var(--fk-b0,0)"></i><i style="--a:60deg;--b:var(--fk-b1,0)"></i><i style="--a:72deg;--b:var(--fk-b3,0)"></i></span>
     <span class="afab-t"><b>Ask</b> <span translate="no">Fursat</span></span>
     {q && <span class="afab-q">{q}</span>}
-    <span class="afab-coin" aria-hidden="true"></span><span class="afab-coin c2" aria-hidden="true"></span><span class="afab-coin c3" aria-hidden="true"></span>
-    <span class="afab-spk" aria-hidden="true"><i style="--sx:-30px;--sy:-34px"></i><i style="--sx:0px;--sy:-46px"></i><i style="--sx:30px;--sy:-34px"></i><i style="--sx:-42px;--sy:-8px"></i><i style="--sx:42px;--sy:-8px"></i><i style="--sx:0px;--sy:-24px"></i></span>
+    <span class="afab-spk" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
     <span class="afab-bub" aria-hidden="true"></span>
   </a>
   <button class="afab-ear" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="afab-offers" aria-label="Offers" data-fk-ear hidden><span aria-hidden="true">🎁</span><span class="afab-ear-t">Offers</span></button>
@@ -49,367 +44,221 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
   (() => {
     const a = document.querySelector('[data-fk-ask]');
     if (!a) return;
-    const img = a.querySelector('.afab-img'), bub = a.querySelector('.afab-bub');
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-    const B = JSON.parse(a.dataset.bubbles || '{}');
-    const home = a.hasAttribute('data-home');
-    let live = !home;                  // Home waits for the intro; other pages are live straight away
-    let inFooter = false, lastHop = 0, lastJump = 0, lastBubble = -1e9, lastSection = '', bt = 0, idleT = 0, scrolling = 0, cheerOn = false, combo = 0;
+    const R = document.documentElement, img = a.querySelector('.afab-img'), bub = a.querySelector('.afab-bub'), spk = [...a.querySelectorAll('.afab-spk i')];
+    const base = a.getAttribute('href'), home = a.hasAttribute('data-home'), ph = () => R.clientWidth < 768, now = () => performance.now();
+    const SP = 'cubic-bezier(.34,1.56,.64,1)', OUT = 'cubic-bezier(.19,1,.22,1)';
     const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {} };
     const typing = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
-    const visible = () => !document.hidden && !a.hasAttribute('data-hold') && getComputedStyle(a).visibility !== 'hidden' && !typing() && !document.querySelector('dialog[open]');
-    const swap = (cheer) => { if (!img || cheerOn === cheer) return; cheerOn = cheer; if (cheer) { img.dataset.src = img.src; img.src = img.dataset.cheer; } else img.src = img.dataset.src || img.src; };
-    // play one move: drop | hop | jump | big | tilt | spin | flip | power. Class is removed when it ends so the next one can restart.
-    const play = (name, cheer) => {
-      if (reduce.matches && name !== 'big') return;
-      a.classList.remove('m-drop', 'm-hop', 'm-jump', 'm-big', 'm-tilt', 'm-spin', 'm-flip', 'm-power'); void a.offsetWidth;
-      a.classList.add('m-' + name); lastHop = performance.now();
-      swap(!!cheer);
-      const L = LAND[name]; if (L) L.forEach((ms) => setTimeout(() => dust(), ms));
-    };
-    // landing: when the feet touch the ground two small dust puffs roll outwards (transform + opacity, WAAPI, removed when done)
-    const LAND = { hop: [390], jump: [440], big: [500], spin: [620], flip: [690], power: [570, 930], drop: [600, 960] };
-    const dust = () => {
-      if (reduce.matches || !a.isConnected || getComputedStyle(a).visibility === 'hidden') return;
-      const r = a.getBoundingClientRect(); const y = r.bottom - 6;
-      [-1, 1].forEach((d) => {
-        const p = document.createElement('i'); p.className = 'afab-dust'; p.style.cssText = 'left:' + (r.left + r.width / 2 + d * r.width * .28) + 'px;top:' + y + 'px';
-        document.body.appendChild(p);
-        const an = p.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: .55 }, { transform: 'translate(calc(-50% + ' + (d * 26) + 'px),-120%) scale(1.5)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.23,1,.32,1)' });
-        an.onfinish = () => p.remove();
-      });
-    };
-    a.addEventListener('animationend', (e) => { if (e.target !== a) return; a.className = a.className.replace(/\bm-\w+/g, '').trim(); swap(false); });
-    const coin = () => { if (reduce.matches) return; a.classList.remove('m-coin'); void a.offsetWidth; a.classList.add('m-coin'); setTimeout(() => a.classList.remove('m-coin'), 1100); };
-    // is the strip where the hint bubble would open free of text, fields, buttons and images? (phone: bubble opens left of the mascot, else right)
-    const bubbleFree = (text) => {
-      const r = a.getBoundingClientRect(), w = Math.min(220, 28 + String(text).length * 7.2), h = 34, cy = r.top + r.height / 2;
-      const L = innerWidth < 768 ? r.left - 8 - w : r.right + 10, T = cy - h / 2, R = L + w, B = T + h;
-      if (L < 4 || R > innerWidth - 4) return false;
-      const hit = (q) => q.width > 0 && q.height > 0 && q.right > L - 4 && q.left < R + 4 && q.bottom > T - 2 && q.top < B + 2;
-      for (const el of document.querySelectorAll('h1,h2,h3,h4,h5,p,li,label,legend,dt,dd,td,th,figcaption,summary,input,textarea,select,button,a,img,video')) {
-        if (el === a || a.contains(el) || el.closest('[data-fk-ask],[data-ifab],.afab-ear,.afab-offers')) continue;
-        const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
-        if (/^(P|H[1-5]|LI|LABEL|LEGEND|DT|DD|TD|TH|FIGCAPTION|SUMMARY)$/.test(el.tagName)) {
-          const rg = document.createRange(); rg.selectNodeContents(el);
-          for (const q of rg.getClientRects()) if (hit(q)) return false;
-        } else if (hit(el.getBoundingClientRect())) return false;
+    let live = !home, dock = 0, cur = null, pt = 0, lastPlace = 0, lastHop = -1e9, lastAct = now(), sleep = null, bt = 0, st = 0, tilt = 0, moved = 0, natW = 0, natH = 0, lastSec = '';
+    const seen = new Set(), ly = new WeakMap(), pend = new Map();
+
+    // ---- where is Ask free? Hit-test a few points of a box: the top thing there must not be a button, field, tile or bar ----
+    const BLK = 'button,input,textarea,select,summary,label,[role=button],[class*=btn],[class*=fl-go],.fe-actions,.mb-bar,#pb-bar,#pb-dock,#fxsticky,.ifab.is-on,.waf-fab';
+    const hit = (x, y) => { for (const el of document.elementsFromPoint(x, y)) { if (a.contains(el) || el.closest('.afab-ear,.afab-offers')) continue; const m = el.closest(BLK); if (!m) return false; const q = m.getBoundingClientRect(); return !(q.width > R.clientWidth * .6 && q.height > R.clientHeight * .45); } return false; };   // a "button" as big as the screen (a Menu door) is the page, not a control
+    const score = (x, y, w, h) => {
+      const W = R.clientWidth, H = R.clientHeight, c = Math.min(9, Math.ceil(w / 14) + 1), r = Math.ceil(h / 14) + 1; let n = 0;   // a point every ~14px, so a thin chip or bar cannot slip between samples
+      for (let i = 0; i < c; i++) for (let j = 0; j < r; j++) {
+        const px = x - 6 + (w + 12) * i / (c - 1), py = y - 6 + (h + 12) * j / (r - 1);   // 6px safety margin around the box
+        if (px >= 0 && py >= 0 && px < W && py < H && hit(px, py)) n++;
       }
-      return true;
+      return n;
     };
-    const say = (text, force) => {
-      const now = performance.now();
-      if (!force && (reduce.matches || now - lastBubble < 6000 || typing())) return;
-      if (!bubbleFree(text)) return;   // never over text, inputs or buttons: skip when there is no free space
-      lastBubble = now; bub.textContent = text; a.classList.add('m-say'); clearTimeout(bt);
-      bt = setTimeout(() => a.classList.remove('m-say'), 2000);
-    };
-    // --- Home: drop in once the intro is gone (heli / intro / gate / lcap are the intro's elements) ---
-    const introOn = () => document.documentElement.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((i) => document.getElementById(i));
-    // During the intro the pill sits at the left in elephant red (is-intro). When the intro ends it hops from there to its normal place (FLIP, transform only).
-    const inIntro = home && introOn();
-    if (inIntro) a.classList.add('is-intro');
-    const enter = () => {
-      live = true; a.setAttribute('data-early', '');
-      if (inIntro) {
-        const f = a.getBoundingClientRect(); a.classList.remove('is-intro'); const l = a.getBoundingClientRect();
-        const dx = f.left - l.left, dy = f.top - l.top; store('fk-ask-drop', '1');
-        if (!reduce.matches && (dx || dy)) a.animate([
-          { transform: `translate(${dx}px, ${dy}px) scale(1, 1)`, offset: 0 },
-          { transform: `translate(${dx * .5}px, ${dy * .5 - 70}px) scale(.94, 1.08)`, offset: .45, easing: 'cubic-bezier(.77,0,.175,1)' },
-          { transform: 'translate(0, 0) scale(1.1, .88)', offset: .85, easing: 'cubic-bezier(.23,1,.32,1)' },
-          { transform: 'translate(0, 0) scale(1, 1)', offset: 1 },
-        ], { duration: 950, easing: 'cubic-bezier(.23,1,.32,1)' });
-      } else if (store('fk-ask-drop') !== '1' && !reduce.matches) { store('fk-ask-drop', '1'); play('drop'); }
-      else store('fk-ask-drop', '1');
-      arm();
-    };
-    if (home) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); enter(); } }, 400); } else arm();
-    // --- idle hop / tilt every 8-10 s ---
-    function idle() {
-      clearTimeout(idleT);
-      idleT = setTimeout(() => { if (live && visible() && performance.now() - lastHop > 3000) { const r = Math.random(); play(r < .35 ? 'hop' : r < .6 ? 'spin' : r < .8 ? 'flip' : 'tilt'); if (r > .6 && r < .8) coin(); } idle(); }, 4000 + Math.random() * 2000);
-    }
-    function arm() {
-      if (arm.done) return; arm.done = true;
-      if (!reduce.matches) idle();
-      // scroll start: one small hop
-      document.addEventListener('scroll', () => {
-        if (!scrolling && live && visible() && performance.now() - lastHop > 900 && performance.now() - lastJump > 900) play(Math.random() < .5 ? 'hop' : 'spin');
-        scrolling = 1; clearTimeout(arm.st); arm.st = setTimeout(() => { scrolling = 0; }, 200);
-      }, { passive: true, capture: true });
-      // a new main section comes into view: jump + coin + hint (one hint per 12 s)
-      if (!('IntersectionObserver' in window)) return;
-      const keyOf = (s) => {
-        const t = ((s.id || '') + ' ' + (s.getAttribute('aria-labelledby') || '') + ' ' + s.className).toLowerCase();
-        if (/season|menu|dish|food|biryani/.test(t)) return 'menu';
-        if (/celebr|banquet|party|event/.test(t)) return 'party';
-        if (/\bbar\b|cricket|social|cocktail/.test(t)) return 'bar';
-        if (/caf[eé]|coffee|dessert/.test(t)) return 'cafe';
-        return a.dataset.pageKey || 'any';
-      };
-      const io = new IntersectionObserver((es) => {
-        for (const e of es) {
-          if (!e.isIntersecting || !live) continue;
-          const id = e.target.id || e.target.className;
-          if (id === lastSection) continue;
-          const first = !lastSection; lastSection = id;
-          if (first || !visible() || performance.now() - lastJump < 900) continue; // the section already on screen at load does not count
-          lastJump = performance.now(); combo++; play(combo % 3 === 0 ? 'power' : combo % 2 ? 'jump' : 'flip', true); coin(); say(B[keyOf(e.target)] || B.any);
+    const scan = (list) => { let best = null, bs = 1e9; for (const [x, y] of list) { const s = score(x, y, 44, 44); if (s < bs) { bs = s; best = { x, y }; if (!s) break; } } return best; };
+    // a dialog is open (it traps focus): the only time Ask steps away completely
+    const hidden = () => R.classList.contains('lock') || R.classList.contains('fk-sheet-open') || !!document.querySelector('dialog[open]') || [...document.querySelectorAll('[aria-modal="true"]')].some((e) => !e.hidden && e.getClientRects().length);
+
+    const place = () => {
+      pt = 0; if (!live || a.classList.contains('is-intro')) return;
+      const off = hidden(); a.toggleAttribute('data-hide', off); if (off) { earPlace(); return; }
+      const W = R.clientWidth, H = R.clientHeight, cs = getComputedStyle(a), P = ph(), vv = window.visualViewport;
+      if (!dock) { natW = a.offsetWidth; natH = a.offsetHeight; }
+      const nw = natW || (P ? 48 : 190), nh = natH || (P ? 48 : 56), nx = P ? W - parseFloat(cs.right) - nw : parseFloat(cs.left), ny = H - parseFloat(cs.bottom) - nh, by = ny + nh - 44, L = [];
+      let t = null;
+      if (P && typing()) {                                    // phone + a field has focus: small, top-right edge, away from the keyboard and the field
+        const x = (vv ? vv.offsetLeft + vv.width : W) - 52, y0 = (vv ? vv.offsetTop : 0) + 8;
+        if (cur && cur.top && !score(cur.x, cur.y, 44, 44)) t = cur;
+        else { for (let k = 0; k < 18; k++) L.push([x, y0 + k * 16]); t = scan(L); if (t) t.top = 1; }
+      } else if (score(nx, ny, nw, nh)) {                     // the natural corner has a button / field / bar in it: dock
+        if (cur && !cur.top && !score(cur.x, cur.y, 44, 44)) t = cur;
+        else {
+          if (P) for (let k = 0; k < 40; k++) L.push([W - 56, by - k * 16]);                     // up the side edge, just above the bar
+          else { for (let k = 1; k < 26; k++) L.push([nx + k * 16, by]); for (let k = 1; k < 40; k++) L.push([nx, by - k * 16]); }
+          t = scan(L);
         }
-      }, { rootMargin: '-35% 0px -35% 0px' });
-      document.querySelectorAll('main > section, main section[id]').forEach((s) => io.observe(s));
-    }
-    // --- hold while the footer is in view or a sticky panel sits in the corner (same rule as the Instagram button) ---
-    const fieldOn = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
-    const hold = () => {
-      let h = inFooter;
-      if (!h && innerWidth < 768 && (fieldOn() || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) h = true;
-      if (!h) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
-        const r = el.getBoundingClientRect();
-        if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
-        if ((innerWidth < 768 || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { h = true; break; }
       }
-      a.toggleAttribute('data-hold', h);
+      if (!t) { if (dock) { dock = 0; cur = null; a.removeAttribute('data-dock'); a.style.setProperty('--wx', '0px'); a.style.setProperty('--wy', '0px'); } }
+      else { if (!dock) { dock = 1; a.setAttribute('data-dock', ''); } cur = t; a.style.setProperty('--wx', t.x - a.offsetLeft + 'px'); a.style.setProperty('--wy', t.y - a.offsetTop + 'px'); }
+      earPlace();
     };
-    addEventListener('scroll', hold, { passive: true }); document.addEventListener('scroll', hold, { passive: true, capture: true }); addEventListener('resize', hold, { passive: true });
-    addEventListener('focusin', hold); addEventListener('focusout', () => setTimeout(hold, 60));
-    const foot = document.querySelector('.sf-footer');
-    if (foot && 'IntersectionObserver' in window) new IntersectionObserver((es) => { inFooter = es[es.length - 1].isIntersecting; hold(); }, { rootMargin: '0px 0px -150px 0px' }).observe(foot);
-    // --- Mario routine: one rAF loop (runs only while a move plays). Walk along the bottom edge and back, sit, or peek off the edge.
-    //     The pill moves with --wx (CSS `translate`); bob / lean / flip / squash go on the image. Transform only. Static under reduced motion. ---
-    const img2 = img, rnd = (x, y) => x + Math.random() * (y - x), phone = () => innerWidth < 768;
-    const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2), cl = (v, x, y) => Math.max(x, Math.min(y, v));
-    let st = null, wx = 0, nextAt = performance.now() + rnd(8000, 15000), raf = 0, prev = 0, lastScroll = -1e9, face = 1, phase = 0, chk = 0;
-    document.addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true, capture: true });
-    const paused = () => !live || reduce.matches || document.hidden || a.hasAttribute('data-hold') || a.classList.contains('is-intro') || !(a.classList.contains('is-on') || a.hasAttribute('data-early'))
-      || typing() || !!document.querySelector('dialog[open], [aria-modal="true"]') || document.documentElement.classList.contains('fk-sheet-open') || document.documentElement.classList.contains('lock')
-      || document.documentElement.classList.contains('fk-music') || /\bm-/.test(a.className) || a.matches(':active') || performance.now() - lastScroll < 600;
-    // is the strip the mascot would cover at offset dx free of links / buttons?
-    const spotFree = (dx, r) => {
-      const bl = r.left - wx, L = bl + dx - 6, R = bl + dx + r.width + 6, T = r.top - 6, B = r.bottom + 6;
-      for (const el of document.querySelectorAll('a, button')) {
-        if (el === a || a.contains(el)) continue;
-        const q = el.getBoundingClientRect();
-        if (!q.width || !q.height || q.right < L || q.left > R || q.bottom < T || q.top > B) continue;
-        if (getComputedStyle(el).visibility === 'hidden') continue;
+    const req = () => { if (!pt) pt = setTimeout(() => { lastPlace = now(); place(); }, Math.max(0, 140 - (now() - lastPlace))); };
+
+    const tryHints = () => { for (const [el, t0] of pend) { const [t, q] = el.dataset.askHint.split('|'); if (seen.has(t)) pend.delete(el); else if (say(t, q, now() - t0 > 1400)) { pend.delete(el); break; } } };
+    // ---- hint bubble: once per section per visit, 3 s, never while typing; the tap opens Ask with that question ----
+    const unsay = () => { clearTimeout(bt); a.classList.remove('m-say'); a.setAttribute('href', base); };
+    const say = (txt, q, force) => {
+      if (seen.has(txt) || typing() || a.hasAttribute('data-hide')) return false;
+      const r = a.getBoundingClientRect(), n = Math.ceil((txt.length * 6.8 + 24) / 168), w = n > 1 ? 168 : 24 + txt.length * 6.8, h = 14 + n * 15, P = ph(), W = R.clientWidth;
+      // above the avatar first (right-aligned on phones), then the flipped side, then beside it; never over a heading, text or mascot, always inside the viewport
+      const H = R.clientHeight, up = [P ? r.right - w : r.left, r.top - 8 - h, 1], flip = [P ? r.left : r.right - w, r.top - 8 - h, 2], side = [P ? r.left - 8 - w : r.right + 10, r.top + (r.height - h) / 2, 0];
+      const c = [up, flip, side].filter(([x, y]) => x >= 4 && x + w <= W - 4 && y >= 4 && y + h <= H - 4);
+      const TXT = 'h1,h2,h3,h4,h5,h6,p,li,figcaption,blockquote,.fe-masc,.fe-side-m,[class*="masc"]', MASC = '.fe-masc,.fe-side-m,[class*="masc"]';
+      const txtHit = (x, y) => {
+        const bx = x - 6, by = y - 6, bw = w + 12, bh = h + 12;
+        for (const m of document.querySelectorAll(MASC)) { if (a.contains(m) || m.closest('.afab-ear,.afab-offers')) continue; const q = m.getBoundingClientRect(); if (q.width && q.height && x - 12 < q.right && x + w + 12 > q.left && y - 12 < q.bottom && y + h + 12 > q.top) return true; }
+        const c2 = Math.min(9, Math.ceil(bw / 14) + 1), r2 = Math.ceil(bh / 14) + 1;
+        for (let i = 0; i < c2; i++) for (let j = 0; j < r2; j++) {
+          const px = bx + bw * i / (c2 - 1), py = by + bh * j / (r2 - 1); if (px < 0 || py < 0 || px >= W || py >= H) continue;
+          for (const el of document.elementsFromPoint(px, py)) { if (a.contains(el) || el.closest('.afab-ear,.afab-offers')) continue; if (el.closest(TXT)) return true; }
+        }
         return false;
-      }
-      return true;
+      };
+      let s = c.find(([x, y]) => !txtHit(x, y) && !score(x, y, w, h)), soft = 0;
+      if (!s && force) { s = c.find(([x, y]) => !txtHit(x, y)); soft = 1; }    // no free strip after ~1.4 s: show it click-through, but only where it covers no heading, text or mascot
+      if (!s) return false;
+      seen.add(txt); bub.textContent = txt; a.classList.toggle('m-up', s[2] > 0); a.classList.toggle('m-flip', s[2] === 2); a.classList.toggle('m-soft', !!soft); a.setAttribute('href', '/ask?q=' + encodeURIComponent(q || txt));
+      a.classList.add('m-say'); clearTimeout(bt); bt = setTimeout(unsay, 3000); wave(); return true;
     };
-    const pathFree = (to, r) => { const n = Math.max(1, Math.ceil(Math.abs(to - wx) / 48)); for (let i = 1; i <= n; i++) if (!spotFree(wx + (to - wx) * i / n, r)) return false; return true; };
-    const draw = (bob, lean, sx, sy, ty) => {
-      a.style.setProperty('--wx', wx.toFixed(1) + 'px');
-      img2.style.transform = `translateY(${(ty + bob).toFixed(1)}px) rotate(${lean.toFixed(1)}deg) scale(${(face * sx).toFixed(3)}, ${sy.toFixed(3)})`;
-    };
-    const rest = () => { wx = 0; a.style.removeProperty('--wx'); img2.style.transform = ''; a.classList.remove('is-roam'); st = null; nextAt = performance.now() + rnd(8000, 15000); };
-    const plan = () => {
-      const r = a.getBoundingClientRect(), side = phone() ? -1 : 1, roll = Math.random();           // base is at the right on phones, at the left on desktop: walk toward the middle
-      if (roll < .55) {
-        let d = phone() ? Math.min(rnd(110, 220), innerWidth * .55) : Math.min(rnd(260, Math.max(300, innerWidth - r.width - 80)), innerWidth - r.width - 80);
-        while (d > 70 && !pathFree(side * d, r)) d *= .75;
-        if (d <= 70 || !pathFree(side * d, r)) { nextAt = performance.now() + 3000; return; }
-        const dur = phone() ? rnd(2000, 3000) : rnd(2400, 4000);
-        st = { k: 'walk', legs: [{ f: 0, t: side * d, dur }, { f: side * d, t: side * d, dur: 500 }, { f: side * d, t: 0, dur }], i: 0, t: 0, dir: side };
-      } else if (roll < .8) st = { k: 'sit', t: 0, dur: rnd(6000, 10000) };
-      else st = { k: 'peek', t: 0, dur: 2400, out: (phone() ? 1 : -1) * (r.width / 2 + 14) };
-      a.classList.add('is-roam'); prev = 0; raf = requestAnimationFrame(frame);
-    };
-    function frame(now) {
-      if (!st) return;
-      const dt = prev ? Math.min(now - prev, 50) : 0; prev = now;
-      if (paused()) { raf = requestAnimationFrame(frame); return; }                                   // freeze in place while typing / dialog / sheet / footer
-      st.t += dt;
-      if (st.k === 'walk') {
-        let g = st.legs[st.i];
-        if (st.t >= g.dur) { st.i++; st.t = 0; if (st.i > 2) { rest(); return; } g = st.legs[st.i]; }
-        const p = ease(cl(st.t / g.dur, 0, 1)); wx = g.f + (g.t - g.f) * p;
-        const moving = g.f !== g.t; if (moving) { phase += dt / 260; face = (g.t - g.f) > 0 ? 1 : -1; }
-        draw(moving ? -Math.abs(Math.sin(phase * Math.PI)) * 4 : 0, moving ? face * 3 : 0, 1, 1, 0);
-        if (moving && now - chk > 300) { chk = now; const r = a.getBoundingClientRect(), ahead = wx + face * 70; if (st.i === 0 && !spotFree(ahead, r)) { st.legs[2] = { f: wx, t: 0, dur: Math.max(900, Math.abs(wx) / Math.abs(st.legs[0].t) * st.legs[0].dur) }; st.i = 2; st.t = 0; } }
-      } else if (st.k === 'sit') {
-        const e = Math.min(1, st.t / 300, (st.dur - st.t) / 300);                                        // squash down, swing, stand up
-        draw(0, Math.sin(st.t / 650) * 4 * e, 1 + .06 * e, 1 - .12 * e, 4 * e);
-        if (st.t >= st.dur) { rest(); play('power'); coin(); return; }
-      } else {
-        const u = st.t / st.dur, o = u < .19 ? ease(u / .19) : u < .73 ? 1 : 1 - ease((u - .73) / .27);   // slide half off the edge, hold, peek back in
-        wx = st.out * o; face = st.out > 0 ? -1 : 1;
-        draw(0, (u > .73 ? -st.out / Math.abs(st.out) * 5 * (1 - o) : 0), 1, 1, 0);
-        if (st.t >= st.dur) { rest(); return; }
-      }
-      raf = requestAnimationFrame(frame);
+
+    // ---- motion (Web Animations: transform / rotate / scale / opacity only; no layout) ----
+    const wake = () => { lastAct = now(); if (sleep) { sleep.cancel(); sleep = null; } };
+    const wave = () => { wake(); img.animate([{ rotate: '0deg' }, { rotate: '-10deg', offset: .3 }, { rotate: '8deg', offset: .65 }, { rotate: '0deg' }], { duration: 600, easing: SP }); };
+    const hop = () => { lastHop = now(); a.animate([{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(-8px) scale(.96,1.06)', offset: .35 }, { transform: 'translateY(0) scale(1.06,.94)', offset: .7 }, { transform: 'translateY(0) scale(1,1)' }], { duration: 420, easing: SP }); };
+    const blink = () => img.animate([{ scale: '1 1' }, { scale: '1.03 .94' }, { scale: '1 1' }], { duration: 190, easing: OUT });
+    const SK = [[-30, -34], [0, -46], [30, -34], [-42, -8], [42, -8], [0, -24]];
+    const spark = () => spk.forEach((i, k) => i.animate([{ opacity: 1, transform: 'translate(0,0) scale(.4)' }, { opacity: 0, transform: `translate(${SK[k][0]}px,${SK[k][1]}px) scale(1.2) rotate(90deg)` }], { duration: 700, delay: k * 20, easing: OUT }));
+    const live2 = () => live && !document.hidden && !a.hasAttribute('data-hide');
+    (function bl() { setTimeout(() => { if (live2() && !sleep) blink(); bl(); }, 5000 + Math.random() * 2000); })();
+    setInterval(() => { if (live2() && !sleep && now() - lastAct > 25000) sleep = img.animate([{ rotate: '-5deg', translate: '0 1px' }, { rotate: '5deg', translate: '0 3px' }], { duration: 2600, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' }); }, 3000);
+    addEventListener('visibilitychange', () => { a.classList.toggle('is-paused', document.hidden); if (sleep) document.hidden ? sleep.pause() : sleep.play(); });
+    ['pointerdown', 'keydown'].forEach((e) => addEventListener(e, wake, { passive: true, capture: true }));
+
+    // one passive scroll listener (capture: the desktop pages scroll the BODY): lean with the page, hop when it stops
+    document.addEventListener('scroll', (e) => {
+      const t = e.target.scrollingElement || e.target, y = t.scrollTop, p = ly.get(t); ly.set(t, y);
+      if (p === undefined || p === y) return;
+      wake(); moved += Math.abs(y - p);
+      const d = y > p ? 1 : -1; if (d !== tilt) { tilt = d; img.style.setProperty('--tl', d * 4 + 'deg'); }
+      req(); clearTimeout(st);
+      st = setTimeout(() => { img.style.setProperty('--tl', '0deg'); tilt = 0; if (live2() && moved > 160 && now() - lastHop > 1200 && !typing()) hop(); moved = 0; req(); }, 160);
+    }, { passive: true, capture: true });
+    addEventListener('resize', req, { passive: true });
+    addEventListener('focusin', () => { unsay(); req(); }); addEventListener('focusout', () => setTimeout(req, 60));
+    if (window.visualViewport) visualViewport.addEventListener('resize', req);
+    setInterval(() => { if (!document.hidden) { req(); if (pend.size) tryHints(); } }, 700);          // catches bars and dialogs that open on their own
+
+    // ---- a new section arrives: wave, and its hint bubble if it has one ([data-ask-hint="line|question to pre-fill"]) ----
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => es.forEach((e) => {
+        if (!e.isIntersecting) { pend.delete(e.target); return; }
+        if (!live) return;
+        const el = e.target, id = el.id || el.className, h = el.dataset.askHint;
+        if (h) { if (!pend.has(el)) pend.set(el, now()); setTimeout(tryHints, 420); }   // after the dock spring settles; retried while the section stays in view
+        if (id === lastSec) return; const first = !lastSec; lastSec = id;
+        if (!first && live2()) wave();
+      }), { rootMargin: '-35% 0px -35% 0px' });
+      document.querySelectorAll('main > section, main section[id], [data-ask-hint]').forEach((s) => io.observe(s));
     }
-    if (!reduce.matches) setInterval(() => { if (!st && performance.now() >= nextAt) { if (paused() || document.querySelector('.afab-bub') && a.classList.contains('m-say')) { nextAt = performance.now() + 3000; } else plan(); } }, 1000);
-    // --- tap: big jump + "Ask me anything!", then open Ask as today ---
+
+    // ---- tap: press (css .94), sparkles, then open Ask ----
     a.addEventListener('click', (e) => {
       if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.dataset.go) return;
-      e.preventDefault(); a.dataset.go = '1'; st = null;
-      play('big', true); coin(); say(B.any, true);
-      setTimeout(() => { location.href = a.href; }, 260);
+      e.preventDefault(); a.dataset.go = '1'; wake(); spark(); setTimeout(() => { location.href = a.href; }, 240);
     });
-    // --- Offers ear: a small gold tab on the Ask pill; it follows the pill (which hops and walks) and opens a small real-offers card ---
+    addEventListener('pageshow', () => { delete a.dataset.go; });
+
+    // ---- Offers ear: a small gold tab on the pill (hidden while docked); positions come from the pill's layout box, so it never needs a frame loop ----
     const ear = document.querySelector('[data-fk-ear]'), card = document.getElementById('afab-offers');
+    let open = false;
+    function earPlace() {
+      if (!ear || !card) return;
+      const P = ph(), pth = location.pathname.replace(/\/$/, '') || '/', H = R.clientHeight;
+      const show = (!P || pth === '/' || pth === '/reserve') && live && !a.classList.contains('is-intro') && !a.hasAttribute('data-hide') && !dock;   // phones: only Home and Reserve
+      if (!show) { if (!ear.hidden) { R.classList.remove('fk-ear-on'); ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
+      if (ear.hidden) { ear.hidden = false; if (P) { if (store('fk-ear-seen')) ear.classList.add('is-compact'); else { store('fk-ear-seen', '1'); setTimeout(() => ear.classList.add('is-compact'), 5000); } } }
+      R.classList.toggle('fk-ear-on', !P);
+      const w = ear.offsetWidth || 74, left = P ? a.offsetLeft + a.offsetWidth - w : a.offsetLeft, top = a.offsetTop - ear.offsetHeight - (P ? -7 : 10) - (R.classList.contains('fk-music') ? 30 : 0);
+      ear.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      if (open) { card.style.left = P ? 'auto' : Math.max(12, left) + 'px'; card.style.right = P ? '12px' : 'auto'; card.style.bottom = H - a.offsetTop + ear.offsetHeight + 4 + 'px'; }
+    }
     if (ear && card) {
-      let open = false, lastKey = '', nudgeT = 0;
-      const place = () => {
-        requestAnimationFrame(place);
-        const cs = getComputedStyle(a), r = a.getBoundingClientRect();
-        const pth = location.pathname.replace(/\/$/, '') || '/', earPage = !phone() || pth === '/' || pth === '/reserve';   // phones: the Offers ear shows only on Home and Reserve
-        const show = earPage && !a.classList.contains('is-intro') && cs.visibility !== 'hidden' && !a.hasAttribute('data-hold') && parseFloat(cs.opacity) > .5 && r.width > 0;
-        if (!show) { if (!ear.hidden) { document.documentElement.classList.remove('fk-ear-on'); ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
-        if (ear.hidden) { ear.hidden = false; if (phone()) { const seen = store('fk-ear-seen'); if (seen) ear.classList.add('is-compact'); else { store('fk-ear-seen', '1'); setTimeout(() => ear.classList.add('is-compact'), 5000); } } }
-        document.documentElement.classList.toggle('fk-ear-on', !phone());
-        const w = ear.offsetWidth || 74, left = phone() ? r.right - w : r.left, top = r.top - ear.offsetHeight - (phone() ? -7 : 10) - (document.documentElement.classList.contains('fk-music') ? 30 : 0);   // rises above the dancing bars while music plays
-        const key = left.toFixed(0) + ',' + top.toFixed(0);
-        if (key !== lastKey) { lastKey = key; ear.style.transform = `translate3d(${left.toFixed(1)}px, ${top.toFixed(1)}px, 0)`; }
-        if (open) { card.style.left = phone() ? 'auto' : Math.max(12, r.left) + 'px'; card.style.right = phone() ? '12px' : 'auto'; card.style.bottom = (innerHeight - r.top + ear.offsetHeight + 4) + 'px'; }
-      };
-      requestAnimationFrame(place);
-      const set = (v) => { open = v; card.hidden = !v; ear.setAttribute('aria-expanded', String(v)); ear.classList.toggle('is-open', v); };
+      const set = (v) => { open = v; card.hidden = !v; ear.setAttribute('aria-expanded', String(v)); ear.classList.toggle('is-open', v); earPlace(); };
       ear.addEventListener('click', (e) => { e.stopPropagation(); set(!open); });
       document.addEventListener('click', (e) => { if (open && !card.contains(e.target)) set(false); });
       addEventListener('keydown', (e) => { if (open && e.key === 'Escape') { set(false); ear.focus(); } });
-      // a tiny wiggle every ~14 s so the tab is noticed (transform only, not under reduced motion)
-      if (!reduce.matches) setInterval(() => { if (!ear.hidden && !open && visible()) { ear.classList.remove('is-nudge'); void ear.offsetWidth; ear.classList.add('is-nudge'); } }, 14000);
+      setInterval(() => { if (!ear.hidden && !open && live2()) { ear.classList.remove('is-nudge'); void ear.offsetWidth; ear.classList.add('is-nudge'); } }, 14000);   // a tiny wiggle so the tab is noticed
     }
-    // --- Dance: while the mood music plays (html.fk-music, with --fk-beat / --fk-bdir from 06.js) Ask Fursat stays put and dances to the beat ---
-    addEventListener('pageshow', () => { delete a.dataset.go; });
+
+    // ---- Home: the pill is red at the left during the intro; when the intro ends it hops to its place (FLIP, transform only) ----
+    const introOn = () => R.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((i) => document.getElementById(i));
+    const inIntro = home && introOn();
+    if (inIntro) a.classList.add('is-intro');
+    const enter = () => {
+      const f = a.getBoundingClientRect(); a.classList.remove('is-intro'); live = true; const l = a.getBoundingClientRect();
+      const dx = f.left - l.left, dy = f.top - l.top;
+      if (inIntro && (dx || dy)) a.animate([
+        { transform: `translate(${dx}px, ${dy}px) scale(1, 1)`, offset: 0 },
+        { transform: `translate(${dx * .5}px, ${dy * .5 - 70}px) scale(.94, 1.08)`, offset: .45, easing: 'cubic-bezier(.77,0,.175,1)' },
+        { transform: 'translate(0, 0) scale(1.1, .88)', offset: .85, easing: OUT },
+        { transform: 'translate(0, 0) scale(1, 1)', offset: 1 },
+      ], { duration: 950, easing: OUT });
+      place();
+    };
+    if (home) { const iv = setInterval(() => { if (!introOn()) { clearInterval(iv); enter(); } }, 400); } else place();
   })();
   </script>
 )}
 <style>
-.afab { position: fixed; left: 20px; bottom: calc(20px + var(--fab-lift, 0px)); z-index: 8500; display: none; align-items: center; gap: 10px; padding: 6px 18px 6px 6px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Rupee,Poppins, system-ui, sans-serif; transform-origin: 50% 100%; transition-property: transform, box-shadow, opacity, translate, visibility; transition-duration: 200ms, 200ms, 300ms, 300ms, 0s; transition-timing-function: cubic-bezier(.23,1,.32,1); -webkit-tap-highlight-color: transparent; }
-.afab-img { width: 44px; height: 44px; border-radius: 50%; background: #f6e4c9; object-fit: cover; }
-.afab-t b { color: #f3c56b; font-weight: 600; }
-.afab-q { display: block; max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0; color: #d9c9a6; font-size: .78rem; transition-property: max-width, opacity, margin; transition-duration: 320ms; transition-timing-function: cubic-bezier(.23,1,.32,1); }
+/* Ask Fursat: tokens from the F2c motion spec; transform / opacity / rotate / scale only */
+.afab { --ease: cubic-bezier(.25,1,.5,1); --out: cubic-bezier(.19,1,.22,1); --spring: cubic-bezier(.34,1.56,.64,1);
+  position: fixed; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); z-index: 8500; display: inline-flex; align-items: center; gap: 0; padding: 2px; border-radius: 999px; background: linear-gradient(180deg, #1f4129 0%, #13301d 100%); color: #f6ecd8; text-decoration: none; box-shadow: 0 14px 30px -14px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(243 197 107 / .35); font: 500 .9rem/1.1 Rupee,Poppins, system-ui, sans-serif; transform-origin: 50% 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  translate: var(--wx, 0px) var(--wy, 0px);
+  transition: translate 200ms var(--out), scale 120ms ease-out, box-shadow 200ms ease-out, opacity 200ms ease-out, visibility 0s linear 0s; }
+/* docked: a 44px round avatar that springs to the free spot (entry 360 ms); leaving the dock and hiding are faster (200 ms) */
+.afab[data-dock] { padding: 0; gap: 0; box-shadow: 0 10px 22px -10px rgb(10 30 18 / .7), 0 0 0 1.5px rgb(243 197 107 / .6); transition-duration: 360ms, 120ms, 200ms, 200ms, 0s; transition-timing-function: var(--spring), ease-out, ease-out, ease-out, linear; }
+.afab[data-hide] { opacity: 0; visibility: hidden; pointer-events: none; transition-delay: 0s, 0s, 0s, 0s, 200ms; }
+.afab:active { scale: .94; }
 .afab:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
-.afab:active { transform: scale(.96); }
-/* phones: the mascot alone, on the right (the left corner is the Instagram button), above the bottom bar */
-.afab { display: inline-flex; left: auto; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom) + var(--fab-lift, 0px)); padding: 2px; gap: 0; }
+.afab-img { width: 44px; height: 44px; border-radius: 50%; background: #f6e4c9; object-fit: cover; flex: none; transform-origin: 50% 100%; rotate: var(--tl, 0deg); transition: rotate 320ms var(--ease); animation: afab-float 3.2s ease-in-out infinite; }
+@keyframes afab-float { 0%, 100% { translate: 0 -3px; } 50% { translate: 0 3px; } }
+.afab.is-paused .afab-img { animation-play-state: paused; }
+.afab-t b { color: #f3c56b; font-weight: 600; }
 .afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-@media (min-width: 768px) { .afab { left: 20px; right: auto; bottom: calc(20px + var(--fab-lift, 0px)); padding: 6px 18px 6px 6px; gap: 10px; } .afab-t { position: static; width: auto; height: auto; overflow: visible; clip-path: none; } .afab-q { position: static; width: auto; height: auto; clip-path: none; } }
-/* tablet: just the mascot, so it covers less of the page (the label stays for screen readers) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .afab { padding: 4px; gap: 0; }
-  .afab-t, .afab-q { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.afab-q { display: block; color: #d9c9a6; font-size: .78rem; }
+/* desktop: the full pill (label shows); tablet keeps the mascot alone */
+@media (min-width: 1024px) {
+  .afab { left: 20px; right: auto; bottom: calc(20px + var(--fab-lift, 0px)); padding: 6px 18px 6px 6px; gap: 10px; }
+  .afab[data-dock] { padding: 0; gap: 0; }
+  .afab-t { position: static; display: block; width: auto; height: auto; max-width: 140px; overflow: hidden; clip-path: none; transition: max-width 360ms var(--ease), opacity 200ms ease-out; }
+  .afab[data-dock] .afab-t { max-width: 0; opacity: 0; }
+  .afab-q { position: static; width: auto; height: auto; clip-path: none; max-width: 0; opacity: 0; transition: max-width 320ms var(--out), opacity 200ms ease-out; }
 }
-/* shows once the guest scrolls past the first screen (the InstaFab script sets is-on), so it never covers a hero's buttons; it fades out again while the footer is in view.
-   On Home it is live from the end of the intro (data-early) and only steps aside for the footer / a sticky panel (data-hold). */
-:global(html.fab-js) .afab:not(.is-on) { opacity: 0; visibility: hidden; pointer-events: none; translate: 0 12px; transition-delay: 0s, 0s, 0s, 0s, 300ms; }
-:global(html.fab-js) .afab[data-early]:not([data-hold]) { opacity: 1; visibility: visible; pointer-events: auto; translate: var(--wx, 0px) 0; transition-delay: 0s; }
-.afab { translate: var(--wx, 0px) 0; }
-.afab.is-roam { transition-property: transform, box-shadow, opacity, visibility; } /* no easing lag on translate while walking */
-.afab-img { will-change: auto; transform-origin: 50% 100%; }
+@media (min-width: 768px) and (max-width: 1023px) { .afab { left: 20px; right: auto; bottom: calc(20px + var(--fab-lift, 0px)); padding: 4px; } .afab[data-dock] { padding: 0; } }
 @media (hover: hover) and (pointer: fine) {
-  .afab:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
-  .afab:hover .afab-q, .afab:focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
+  .afab:hover { box-shadow: 0 18px 34px -14px rgb(10 30 18 / .75), inset 0 0 0 1px rgb(243 197 107 / .55); }
+  .afab:not([data-dock]):hover .afab-q, .afab:not([data-dock]):focus-visible .afab-q { max-width: 220px; opacity: 1; margin-left: 2px; }
 }
 @media (hover: hover) and (pointer: fine) and (max-width: 1023px) { .afab:hover .afab-q { max-width: 0; opacity: 0; margin-left: 0; } }
 
 /* ---- in the intro (Home, before the site opens): red pill at the left with the label, above the intro layers; never over Enter / Skip / Sound ---- */
-.afab::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #c02a1a; opacity: 0; pointer-events: none; transition: opacity 600ms cubic-bezier(.23,1,.32,1); }
-:global(html.fab-js) .afab.is-intro { display: inline-flex; left: 14px; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 2147482998; padding: 5px 18px 5px 5px; gap: 8px; opacity: 1; visibility: visible; pointer-events: auto; translate: none; color: #f6ecd8; }
+:global(html.fab-js) .afab.is-intro { display: inline-flex; left: 14px; right: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 2147482998; padding: 5px 18px 5px 5px; gap: 8px; opacity: 1; visibility: visible; pointer-events: auto; translate: none; box-shadow: 0 14px 30px -14px rgb(10 0 0 / .7), inset 0 0 0 1.5px rgb(246 236 216 / .6); }
 @media (max-width: 767px) { :global(html.fab-js) .afab.is-intro { bottom: calc(11svh + 90px + env(safe-area-inset-bottom, 0px)); } } /* phones: in the band above the Enter button, clear of the nav bar */
-.afab.is-intro::before { opacity: 0; } /* stays forest green on the red intro (no red wash) */
-.afab.is-intro { box-shadow: 0 14px 30px -14px rgb(10 0 0 / .7), inset 0 0 0 1.5px rgb(246 236 216 / .6); }
-.afab.is-intro .afab-t { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+.afab.is-intro .afab-t { position: static; display: block; width: auto; height: auto; max-width: none; overflow: visible; clip-path: none; }
 .afab.is-intro .afab-t b { color: #f6ecd8; }
 .afab.is-intro .afab-q { display: none; }
 
-/* ---- Mario moves: transform only, origin at the feet. Curves from the motion tokens (ease-out; ease-in-out for the fall) ---- */
-.afab.m-drop { animation: afab-drop 1150ms both; }
-.afab.m-hop { animation: afab-hop 480ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-jump { animation: afab-jump 560ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-big { animation: afab-big 620ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-tilt { animation: afab-tilt 700ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-spin { animation: afab-spin 760ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-flip { animation: afab-flip 820ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-spin .afab-img { animation: afab-spin-art 760ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-flip .afab-img { animation: afab-flip-art 820ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-power { animation: afab-power 1100ms cubic-bezier(.23,1,.32,1) both; }
-@keyframes afab-drop {
-  0% { transform: translateY(calc(-100vh - 120px)) scale(1, 1); animation-timing-function: cubic-bezier(.77,0,.175,1); }
-  52% { transform: translateY(0) scale(.9, 1.14); animation-timing-function: cubic-bezier(.23,1,.32,1); }
-  62% { transform: translateY(0) scale(1.22, .72); animation-timing-function: cubic-bezier(.23,1,.32,1); }
-  74% { transform: translateY(-14px) scale(.93, 1.1); animation-timing-function: cubic-bezier(.23,1,.32,1); }
-  84% { transform: translateY(0) scale(1.06, .94) rotate(-7deg); animation-timing-function: cubic-bezier(.23,1,.32,1); }
-  92% { transform: translateY(0) scale(1) rotate(7deg); animation-timing-function: cubic-bezier(.23,1,.32,1); }
-  100% { transform: translateY(0) scale(1) rotate(0); }
-}
-@keyframes afab-hop {
-  0% { transform: translateY(0) scale(1, 1); }
-  18% { transform: translateY(0) scale(1.1, .88); }
-  50% { transform: translateY(-26px) scale(.94, 1.1); }
-  80% { transform: translateY(0) scale(1.08, .92); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes afab-jump {
-  0% { transform: translateY(0) scale(1, 1); }
-  16% { transform: translateY(0) scale(1.14, .84); }
-  46% { transform: translateY(-40px) scale(.92, 1.14); }
-  78% { transform: translateY(0) scale(1.1, .9); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes afab-big {
-  0% { transform: translateY(0) scale(1, 1); }
-  14% { transform: translateY(0) scale(1.18, .8); }
-  46% { transform: translateY(-60px) scale(.9, 1.18); }
-  80% { transform: translateY(0) scale(1.12, .88); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes afab-spin {
-  0% { transform: translateY(0) scale(1, 1); }
-  16% { transform: translateY(0) scale(1.12, .86); }
-  50% { transform: translateY(-42px) scale(.94, 1.1); }
-  82% { transform: translateY(0) scale(1.1, .9); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes afab-flip {
-  0% { transform: translateY(0) scale(1, 1); }
-  16% { transform: translateY(0) scale(1.12, .86); }
-  55% { transform: translateY(-52px) scale(.94, 1.08); }
-  84% { transform: translateY(0) scale(1.1, .9); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-/* the spin and the back-flip turn the mascot art only; the "Ask Fursat" label never mirrors or turns */
-@keyframes afab-spin-art { 0%, 16% { transform: perspective(500px) rotateY(0); } 50% { transform: perspective(500px) rotateY(180deg); } 82%, 100% { transform: perspective(500px) rotateY(360deg); } }
-@keyframes afab-flip-art { 0%, 16% { transform: rotate(0); } 55% { transform: rotate(-200deg); } 84%, 100% { transform: rotate(-360deg); } }
-@keyframes afab-power {
-  0% { transform: translateY(0) scale(1, 1); }
-  12% { transform: translateY(0) scale(1.2, .78); }
-  34% { transform: translateY(-72px) scale(.88, 1.2); }
-  52% { transform: translateY(0) scale(1.14, .86); }
-  68% { transform: translateY(-30px) scale(.94, 1.1); }
-  84% { transform: translateY(0) scale(1.08, .92); }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes afab-tilt {
-  0%, 100% { transform: rotate(0) scale(1); }
-  30% { transform: rotate(-6deg) scale(1.03); }
-  65% { transform: rotate(4deg) scale(1.02); }
-}
-
-/* gold coin that pops above the mascot (tiny, 0.8 s) */
-.afab-coin { position: absolute; left: 50%; top: -8px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8 0 22%, #f3c56b 23% 70%, #b9892c 100%); box-shadow: 0 0 0 1.5px #8a6419, 0 0 10px 2px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translateY(6px) scale(.4); }
-.afab.m-coin .afab-coin { animation: afab-coin 800ms cubic-bezier(.23,1,.32,1) both; }
-.afab-coin.c2 { margin-left: -24px; } .afab-coin.c3 { margin-left: 8px; }
-.afab.m-coin .afab-coin.c2 { animation-delay: 140ms; } .afab.m-coin .afab-coin.c3 { animation-delay: 280ms; }
-/* sparkle burst: six small gold diamonds fly out and fade (transform + opacity only) */
+/* sparkle burst on tap: six small gold diamonds (animated from the script) */
 .afab-spk { position: absolute; left: 50%; top: 30%; width: 0; height: 0; pointer-events: none; }
 .afab-spk i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; background: #f3c56b; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; }
-.afab.m-coin .afab-spk i { animation: afab-spk 900ms cubic-bezier(.23,1,.32,1) both; }
-@keyframes afab-spk { 0% { opacity: 1; transform: translate(0, 0) scale(.4); } 100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.2) rotate(90deg); } }
-@keyframes afab-coin {
-  0% { opacity: 0; transform: translateY(6px) scale(.4, .4); }
-  30% { opacity: 1; transform: translateY(-10px) scale(1, 1); }
-  70% { opacity: 1; transform: translateY(-14px) scale(.2, 1); }
-  100% { opacity: 0; transform: translateY(-18px) scale(.9, .9); }
-}
-/* hint bubble: beside the mascot (never above it, where the Instagram button sits); opens away from the screen edge */
-.afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Rupee,Poppins, system-ui, sans-serif; white-space: nowrap; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms cubic-bezier(.23,1,.32,1), transform 200ms cubic-bezier(.23,1,.32,1); }
-.afab.m-say .afab-bub { opacity: 1; transform: translate(0, -50%) scale(1); }
+/* hint bubble: beside the mascot (left of it on phones), or above it when the side is busy; tapping it opens Ask with that question */
+.afab-bub { position: absolute; top: 50%; left: calc(100% + 10px); display: block; padding: 7px 12px; border-radius: 14px; background: #fff8e8; color: #13301d; font: 600 .78rem/1.2 Rupee,Poppins, system-ui, sans-serif; width: max-content; max-width: 168px; box-shadow: 0 8px 20px -10px rgb(10 30 18 / .6), inset 0 0 0 1px rgb(243 197 107 / .7); opacity: 0; pointer-events: none; transform: translate(-6px, -50%) scale(.9); transform-origin: 0 50%; transition: opacity 160ms var(--out), transform 200ms var(--out); }
+.afab.m-say .afab-bub { opacity: 1; pointer-events: auto; transform: translate(0, -50%) scale(1); }
 @media (max-width: 767px) { .afab-bub { left: auto; right: calc(100% + 8px); transform-origin: 100% 50%; transform: translate(6px, -50%) scale(.9); } .afab.m-say .afab-bub { transform: translate(0, -50%) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .afab, .afab-q { transition: none; translate: none !important; } .afab:hover, .afab:active { transform: none; } .afab.m-drop, .afab.m-hop, .afab.m-jump, .afab.m-tilt, .afab.m-spin, .afab.m-flip, .afab.m-spin .afab-img, .afab.m-flip .afab-img, .afab.m-power { animation: none; } .afab.m-big { animation: none; } .afab-coin, .afab-spk { display: none; } .afab-bub { transition: none; } }
+.afab.m-soft .afab-bub { pointer-events: none; }
+.afab.m-up .afab-bub { top: auto; left: auto; right: 0; bottom: calc(100% + 8px); transform-origin: 100% 100%; transform: translateY(6px) scale(.9); }
+.afab.m-up.m-say .afab-bub { transform: translateY(0) scale(1); }
+.afab.m-up.m-flip .afab-bub { right: auto; left: 0; transform-origin: 0 100%; }
+@media (min-width: 768px) { .afab.m-up.m-flip .afab-bub { left: auto; right: 0; transform-origin: 100% 100%; } }
+@media (min-width: 768px) { .afab.m-up .afab-bub { right: auto; left: 0; transform-origin: 0 100%; } }
 @media print { .afab { display: none !important; } }
 /* ---- Dance (v5.60): the mood music vibrates Ask Fursat like a music visualizer. html.fk-music is set by 06.js while sound is on; --fk-beat (kick, 0..1) and
    --fk-b0..--fk-b4 (live level of five frequency bands, bass first) come from the song's own audio. She shakes on the bass, glows on the kick, and pixel bars fan out
@@ -424,7 +273,6 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
   from { transform: translate(calc(var(--fk-b0, 0) * -2.6px), calc(var(--fk-b0, 0) * 1.6px)) rotate(calc(var(--fk-b0, 0) * -5deg)); }
   to   { transform: translate(calc(var(--fk-b0, 0) * 2.6px), calc(var(--fk-b0, 0) * -1.6px)) rotate(calc(var(--fk-b0, 0) * 5deg)); }
 }
-@media (prefers-reduced-motion: reduce) { :global(html.fk-music) .afab .afab-img { animation: none; scale: none; box-shadow: none; } .afab-eq { display: none; } }
 
 /* ---- Offers ear: a small gold tab on the Ask pill + a real-offers card ---- */
 .afab-ear { position: fixed; left: 0; top: 0; z-index: 8501; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Rupee,Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -446,20 +294,7 @@ const PAGE_KEY: Record<string, string> = { '/menu': 'menu', '/order': 'menu', '/
 .afab-offers li span { font-size: .8125rem; line-height: 1.35; }
 .afab-offers li a { display: inline-flex; align-items: center; min-height: 44px; color: #13301d; font-weight: 600; font-size: .8125rem; text-decoration: underline; text-underline-offset: 3px; }
 .afab-offers small { display: block; margin-top: 6px; color: #5b4a2a; font-size: .75rem; }
-@media (prefers-reduced-motion: reduce) { .afab-ear.is-nudge { animation: none; } }
 @media print { .afab-ear, .afab-offers { display: none !important; } }
 
 
-/* v5.65 grounding: a soft contact shadow stays on the floor and shrinks / fades as the mascot rises; landing dust puffs are spawned by the script */
-.afab::after { content: ''; position: absolute; left: 14%; right: 14%; bottom: -9px; height: 9px; border-radius: 50%; background: radial-gradient(closest-side, rgba(20, 12, 4, .42), rgba(20, 12, 4, 0)); pointer-events: none; z-index: -2; transform-origin: 50% 50%; }
-.afab.m-hop::after { animation: afab-sh-26 480ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-jump::after, .afab.m-spin::after { animation: afab-sh-40 560ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-big::after, .afab.m-flip::after { animation: afab-sh-56 620ms cubic-bezier(.23,1,.32,1) both; }
-.afab.m-power::after { animation: afab-sh-72 1100ms cubic-bezier(.23,1,.32,1) both; }
-@keyframes afab-sh-26 { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(26px) scale(.62, .6); opacity: .45; } }
-@keyframes afab-sh-40 { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 46% { transform: translateY(40px) scale(.52, .5); opacity: .35; } }
-@keyframes afab-sh-56 { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(56px) scale(.46, .45); opacity: .28; } }
-@keyframes afab-sh-72 { 0%, 100% { transform: translateY(0) scale(1); opacity: 1; } 34% { transform: translateY(72px) scale(.4, .4); opacity: .22; } 52% { transform: translateY(0) scale(1); opacity: 1; } 68% { transform: translateY(30px) scale(.6); opacity: .5; } }
-.afab-dust { position: fixed; z-index: 8499; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(closest-side, rgba(244, 226, 190, .9), rgba(244, 226, 190, 0)); pointer-events: none; will-change: transform, opacity; }
-@media (prefers-reduced-motion: reduce) { .afab::after, .afab-dust { display: none; } }
 </style>

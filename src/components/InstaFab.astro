@@ -68,13 +68,14 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
       if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
       if ((ph || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
+    // Ask Fursat is always with the guest and docks to a free spot; if that spot is where this button sits, this button steps aside (Ask has the corner)
+    if (on && ask && ask.hasAttribute('data-dock') && !ask.hasAttribute('data-hide')) { const A = ask.getBoundingClientRect(), B = b.getBoundingClientRect(); if (A.right + 8 > B.left && A.left - 8 < B.right && A.bottom + 8 > B.top && A.top - 8 < B.bottom) on = false; }
     b.classList.toggle('is-on', on && !inCard);
     if (on && !inCard && !dropped) { // first appearance: drop from the top edge down to the resting spot
       dropped = true;
       b.style.setProperty('--ifab-drop', Math.round(b.getBoundingClientRect().bottom + 10) + 'px');
       b.classList.add('is-drop');
     }
-    if (ask) ask.classList.toggle('is-on', on);
     let lift = 0;
     const base = matchMedia('(max-width: 767px)').matches ? 84 : 20; // where the lowest button normally sits
     for (const el of below()) {

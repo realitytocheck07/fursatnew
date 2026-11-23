@@ -151,6 +151,7 @@ const ITEMS: Item[] = [
       if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
       if (r.right > innerWidth - 260 && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
     }
+    { const ask = document.querySelector('[data-fk-ask][data-dock]'); if (on && ask && !phone()) { const A = ask.getBoundingClientRect(), B = fab.getBoundingClientRect(); if (A.right + 8 > B.left && A.left - 8 < B.right && A.bottom + 8 > B.top && A.top - 8 < B.bottom) on = false; } }   // a docked Ask Fursat has the corner
     root.classList.toggle('is-on', on);
     if (on && !dropped && !phone()) {
       dropped = true;
