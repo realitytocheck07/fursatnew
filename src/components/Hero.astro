@@ -137,7 +137,7 @@ if(seen)split(true);
 }
 @media (max-width: 899px) {
   /* H1 part A (phone): the hero is exactly one screen under the header; the video box takes whatever height is left, so the ribbon (56px) sits on the first screen */
-  html .fxhero { --mq-h: 56px; height: calc(100svh - var(--sh-h, 94px) - 76px - env(safe-area-inset-bottom, 0px)); min-height: 520px; padding-bottom: var(--mq-h); display: flex; flex-direction: column; box-sizing: border-box; }
+  html .fxhero { --mq-h: 56px; height: calc(100svh - var(--sh-h, 94px) - 76px - env(safe-area-inset-bottom, 0px)); min-height: 0; padding-bottom: var(--mq-h); display: flex; flex-direction: column; box-sizing: border-box; }
   html .fxhero .fx-stage { flex: 1 1 auto; min-height: 0; }
   html .fxhero .fx-pl { flex: 1 1 0; min-height: 150px; aspect-ratio: auto !important; margin-top: 16px; }
   /* the fixed mobile bar (64px + 12px gap) covers the bottom of the screen, so the hero ends above it and the ribbon is the last thing you see over the bar */

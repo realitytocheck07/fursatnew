@@ -52,22 +52,42 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
   // anything fixed along the bottom-left that the buttons must sit above (Home legal bar, Home "Reserve a table" pill, Banquet phone dock)
   const below = () => ['legal', 'fxsticky', 'pb-dock'].map((id) => document.getElementById(id)).filter(Boolean);
   // Fade both buttons out while the footer is in view (they would cover its text), and the Instagram button also
-  // while an Instagram follow card is on screen (one Instagram link at a time). Watched with IntersectionObserver.
-  let inFooter = false, inCard = false, dropped = false;
-  let raf = 0;
+  // while an Instagram follow card is on screen (one Instagram link at a time).
+  // Scroll cost (audit D-01): ONE passive scroll listener, one rAF pass per frame, and that pass reads no layout: avoid zones come from an IntersectionObserver
+  // (cached list, rescanned when the DOM changes), the footer test uses a cached page / footer height, and the bar "lift" is measured only when a bar or the screen changes.
+  let inFooter = false, inCard = false, dropped = false, zoneHit = false;
+  let raf = 0, needLift = true;
+  const mqPh = matchMedia('(max-width: 767px)');
+  const zones = new Set(), foot = document.querySelector('.sf-footer');
+  let known = new WeakSet(), zio = null, docH = 0, footH = 0;
+  const scroller = () => document.scrollingElement || document.documentElement;
+  const measure = () => { const e = scroller(); docH = Math.max(e.scrollHeight, document.body.scrollHeight); footH = foot ? foot.offsetHeight : 0; };   // layout reads, but only on idle / resize
+  const lift = () => {
+    let l = 0;
+    const base = mqPh.matches ? 84 : 20; // where the lowest button normally sits
+    for (const el of below()) {
+      const cs = getComputedStyle(el);
+      if (cs.position !== 'fixed' || cs.display === 'none' || el.hidden || !el.offsetHeight) continue;
+      if (el.id === 'fxsticky' && !el.classList.contains('on')) continue; // slid away below the screen
+      if (el.getBoundingClientRect().left > 200) continue; // not on the left side
+      // use the bar's resting place (not its mid-slide position), so the buttons never meet it halfway
+      const top = (parseFloat(cs.bottom) || 0) + el.offsetHeight;
+      if ((parseFloat(cs.bottom) || 0) <= base + 40) l = Math.max(l, top + 8 - base);
+    }
+    root.style.setProperty('--fab-lift', l + 'px');
+  };
   const tick = () => {
     raf = 0;
-    const ph = matchMedia('(max-width: 767px)').matches, fe = document.activeElement;
+    if (needLift) { needLift = false; lift(); }
+    const ph = mqPh.matches, fe = document.activeElement;
     const sy = window.scrollY || document.body.scrollTop || document.documentElement.scrollTop; // desktop pages scroll the body, not the window
+    // measured from the page end, from cached heights: the curtain footer is sticky, so an IntersectionObserver would see it "in view" all the time
+    if (foot) inFooter = docH - (sy + innerHeight) < footH - 150;
     let on = (isHome ? !introOn() : sy > innerHeight * 0.6) && !inFooter;
     // phone: step aside while a form field is focused or the banquet "Send menu" dock is up
     if (on && ph && ((fe && (/^(INPUT|TEXTAREA|SELECT)$/.test(fe.tagName) || fe.isContentEditable)) || (document.getElementById('pb-dock') && !document.getElementById('pb-dock').hidden))) on = false;
     // a sticky panel (Party estimate, or anything marked data-fab-avoid) is in the buttons' corner: step aside while it is
-    if (on) for (const el of document.querySelectorAll('[data-fab-avoid], #pa-plan')) {
-      const r = el.getBoundingClientRect();
-      if (el.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2) continue; // bx: a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel. The Party plan (#pa-plan) keeps its old rule.
-      if ((ph || r.left < 260) && r.bottom > innerHeight - 170 && r.top < innerHeight) { on = false; break; }
-    }
+    if (on && zoneHit) on = false;
     // Ask Fursat is always with the guest and docks to a free spot; if that spot is where this button sits, this button steps aside (Ask has the corner)
     if (on && ask && ask.hasAttribute('data-dock') && !ask.hasAttribute('data-hide')) { const A = ask.getBoundingClientRect(), B = b.getBoundingClientRect(); if (A.right + 8 > B.left && A.left - 8 < B.right && A.bottom + 8 > B.top && A.top - 8 < B.bottom) on = false; }
     b.classList.toggle('is-on', on && !inCard);
@@ -76,31 +96,36 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
       b.style.setProperty('--ifab-drop', Math.round(b.getBoundingClientRect().bottom + 10) + 'px');
       b.classList.add('is-drop');
     }
-    let lift = 0;
-    const base = matchMedia('(max-width: 767px)').matches ? 84 : 20; // where the lowest button normally sits
-    for (const el of below()) {
-      const cs = getComputedStyle(el);
-      if (cs.position !== 'fixed' || cs.display === 'none' || el.hidden || !el.offsetHeight) continue;
-      if (el.id === 'fxsticky' && !el.classList.contains('on')) continue; // slid away below the screen
-      if (el.getBoundingClientRect().left > 200) continue; // not on the left side
-      // use the bar's resting place (not its mid-slide position), so the buttons never meet it halfway
-      const top = (parseFloat(cs.bottom) || 0) + el.offsetHeight;
-      if ((parseFloat(cs.bottom) || 0) <= base + 40) lift = Math.max(lift, top + 8 - base);
-    }
-    root.style.setProperty('--fab-lift', lift + 'px');
   };
-  const req = () => { if (!raf) raf = requestAnimationFrame(tick); };
-  addEventListener('scroll', req, { passive: true });
-  document.addEventListener('scroll', req, { passive: true, capture: true }); // body scroller (desktop) does not fire window scroll
-  addEventListener('resize', req, { passive: true });
-  addEventListener('focusin', req); addEventListener('focusout', () => setTimeout(req, 60));
-  // these bars show and hide on their own (class or hidden attribute), so re-check when they change
+  const req = (l) => { if (l) needLift = true; if (!raf) raf = requestAnimationFrame(tick); };
+  // zones: the bottom 170px of the screen is "the buttons' corner". Same rules as before: phones any zone; wider screens only zones whose left edge is in the corner (< 260px),
+  // and a zone taller than 1.2 screens (Menu TableLanding, 220vh) is the page, not a corner panel (the Party plan #pa-plan keeps its old rule).
+  const onZone = (es) => {
+    es.forEach((e) => {
+      const r = e.boundingClientRect, tall = e.target.id !== 'pa-plan' && innerWidth >= 768 && r.height > innerHeight * 1.2;
+      if (e.isIntersecting && !tall && (mqPh.matches || r.left < 260)) zones.add(e.target); else zones.delete(e.target);
+    });
+    zoneHit = zones.size > 0; req();
+  };
+  const scanZones = () => { if (!zio) return; document.querySelectorAll('[data-fab-avoid], #pa-plan').forEach((el) => { if (!known.has(el)) { known.add(el); zio.observe(el); } }); };
+  let ZH = 0, ZW = 0;
+  const startZones = () => {
+    if (!('IntersectionObserver' in window)) return;
+    if (zio && Math.abs(innerHeight - ZH) < 40 && innerWidth === ZW) return;   // the phone URL bar growing / shrinking must not rebuild the observer
+    ZH = innerHeight; ZW = innerWidth;
+    if (zio) { zio.disconnect(); zones.clear(); zoneHit = false; }
+    zio = new IntersectionObserver(onZone, { rootMargin: '-' + Math.max(0, innerHeight - 170) + 'px 0px 0px 0px', threshold: 0 });   // only the bottom 170px counts
+    known = new WeakSet(); scanZones();
+  };
+  let mt = 0, st = 0;
+  document.addEventListener('scroll', () => { req(); clearTimeout(st); st = setTimeout(() => { measure(); req(); }, 150); }, { passive: true, capture: true }); // ONE listener: the body scroller (desktop) does not fire window scroll, and capture on document catches both
+  addEventListener('resize', () => { measure(); startZones(); req(true); }, { passive: true });
+  addEventListener('load', () => { measure(); req(); });
+  addEventListener('focusin', () => req()); addEventListener('focusout', () => setTimeout(req, 60));
+  // these bars show and hide on their own (class or hidden attribute), so re-check (and re-measure the lift) when they change
   if ('IntersectionObserver' in window) {
-    // the buttons sit in the bottom ~150px: count the footer as "in view" once its top is above that strip
-    const foot = document.querySelector('.sf-footer');
-    // measured from the page end: the curtain footer is sticky, so an IntersectionObserver would see it "in view" all the time
-    if (foot) { const fchk = () => { const e = document.scrollingElement || document.documentElement, y = window.scrollY || document.body.scrollTop || e.scrollTop, h = Math.max(e.scrollHeight, document.body.scrollHeight); const v = h - (y + innerHeight) < foot.offsetHeight - 150; if (v !== inFooter) { inFooter = v; req(); } };
-      addEventListener('scroll', fchk, { passive: true }); document.addEventListener('scroll', fchk, { passive: true, capture: true }); addEventListener('resize', fchk); fchk(); }
+    startZones();
+    new MutationObserver(() => { clearTimeout(mt); mt = setTimeout(scanZones, 250); }).observe(document.body, { childList: true, subtree: true });   // zones added later
     const cards = new Set();
     const cio = new IntersectionObserver((es) => {
       es.forEach((e) => (e.isIntersecting ? cards.add(e.target) : cards.delete(e.target)));
@@ -108,9 +133,11 @@ const solo = path === '/ask'; // no Ask button on /ask, so this one takes the co
     });
     document.querySelectorAll('aside.ig').forEach((el) => cio.observe(el));
   }
-  const mo = new MutationObserver(req);
+  const mo = new MutationObserver(() => req(true));
   below().forEach((el) => mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }));
-  addEventListener('transitionend', req, { passive: true });
+  if (ask) new MutationObserver(() => req()).observe(ask, { attributes: true, attributeFilter: ['data-dock', 'data-hide'] });
+  addEventListener('transitionend', (e) => { const t = e.target; if (t === ask || (t && t.id && below().includes(t))) req(t !== ask); }, { passive: true });
+  measure();
   // --- shine: one gentle sweep on arrival, then about every 9 s. One at a time (lock shared with the WhatsApp button); paused when the tab is hidden,
   //     the WhatsApp dial/chat is open, or this button is not showing.
   const face = b.querySelector('.ifab-face'), S = (window.__fkShine = window.__fkShine || { busy: false });

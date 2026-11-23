@@ -55,17 +55,24 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     // ---- where is Ask free? Hit-test a few points of a box: the top thing there must not be a button, field, tile or bar ----
     const BLK = 'button,input,textarea,select,summary,label,[role=button],[class*=btn],[class*=fl-go],.fe-actions,.mb-bar,#pb-bar,#pb-dock,#fxsticky,.ifab.is-on,.waf-fab';
     const hit = (x, y) => { for (const el of document.elementsFromPoint(x, y)) { if (a.contains(el) || el.closest('.afab-ear,.afab-offers')) continue; const m = el.closest(BLK); if (!m) return false; const q = m.getBoundingClientRect(); return !(q.width > R.clientWidth * .6 && q.height > R.clientHeight * .45); } return false; };   // a "button" as big as the screen (a Menu door) is the page, not a control
-    const score = (x, y, w, h) => {
+    // score = how many sample points of the box hit a button / field / bar. `max` stops the count early (1 = "is anything there?"), so a blocked spot costs one hit-test, not thirty-six.
+    const score = (x, y, w, h, max = 1e9) => {
       const W = R.clientWidth, H = R.clientHeight, c = Math.min(9, Math.ceil(w / 14) + 1), r = Math.ceil(h / 14) + 1; let n = 0;   // a point every ~14px, so a thin chip or bar cannot slip between samples
       for (let i = 0; i < c; i++) for (let j = 0; j < r; j++) {
         const px = x - 6 + (w + 12) * i / (c - 1), py = y - 6 + (h + 12) * j / (r - 1);   // 6px safety margin around the box
-        if (px >= 0 && py >= 0 && px < W && py < H && hit(px, py)) n++;
+        if (px >= 0 && py >= 0 && px < W && py < H && hit(px, py) && ++n >= max) return n;
       }
       return n;
     };
-    const scan = (list) => { let best = null, bs = 1e9; for (const [x, y] of list) { const s = score(x, y, 44, 44); if (s < bs) { bs = s; best = { x, y }; if (!s) break; } } return best; };
+    const scan = (list) => { let best = null, bs = 1e9; for (const [x, y] of list) { const s = score(x, y, 44, 44, bs); if (s < bs) { bs = s; best = { x, y }; if (!s) break; } } return best; };
     // a dialog is open (it traps focus): the only time Ask steps away completely
-    const hidden = () => R.classList.contains('lock') || R.classList.contains('fk-sheet-open') || !!document.querySelector('dialog[open]') || [...document.querySelectorAll('[aria-modal="true"]')].some((e) => !e.hidden && e.getClientRects().length);
+    let modals = null, modalsAt = -1e9;   // [aria-modal] list cached for 1 s (it was queried on every place())
+    const hidden = () => {
+      if (R.classList.contains('lock') || R.classList.contains('fk-sheet-open') || document.querySelector('dialog[open]')) return true;
+      if (now() - modalsAt > 1000) { modals = document.querySelectorAll('[aria-modal="true"]'); modalsAt = now(); }
+      for (const e of modals) if (!e.hidden && e.getClientRects().length) return true;
+      return false;
+    };
 
     const place = () => {
       pt = 0; if (!live || a.classList.contains('is-intro')) return;
@@ -76,10 +83,10 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       let t = null;
       if (P && typing()) {                                    // phone + a field has focus: small, top-right edge, away from the keyboard and the field
         const x = (vv ? vv.offsetLeft + vv.width : W) - 52, y0 = (vv ? vv.offsetTop : 0) + 8;
-        if (cur && cur.top && !score(cur.x, cur.y, 44, 44)) t = cur;
+        if (cur && cur.top && !score(cur.x, cur.y, 44, 44, 1)) t = cur;
         else { for (let k = 0; k < 18; k++) L.push([x, y0 + k * 16]); t = scan(L); if (t) t.top = 1; }
-      } else if (score(nx, ny, nw, nh)) {                     // the natural corner has a button / field / bar in it: dock
-        if (cur && !cur.top && !score(cur.x, cur.y, 44, 44)) t = cur;
+      } else if (score(nx, ny, nw, nh, 1)) {                     // the natural corner has a button / field / bar in it: dock
+        if (cur && !cur.top && !score(cur.x, cur.y, 44, 44, 1)) t = cur;
         else {
           if (P) for (let k = 0; k < 40; k++) L.push([W - 56, by - k * 16]);                     // up the side edge, just above the bar
           else { for (let k = 1; k < 26; k++) L.push([nx + k * 16, by]); for (let k = 1; k < 40; k++) L.push([nx, by - k * 16]); }
@@ -90,7 +97,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       else { if (!dock) { dock = 1; a.setAttribute('data-dock', ''); } cur = t; a.style.setProperty('--wx', t.x - a.offsetLeft + 'px'); a.style.setProperty('--wy', t.y - a.offsetTop + 'px'); }
       earPlace();
     };
-    const req = () => { if (!pt) pt = setTimeout(() => { lastPlace = now(); place(); }, Math.max(0, 140 - (now() - lastPlace))); };
+    const req = (gap = 140) => { if (!pt) pt = setTimeout(() => { lastPlace = now(); place(); }, Math.max(0, gap - (now() - lastPlace))); };   // while the page scrolls the caller asks for a 320 ms gap
 
     const tryHints = () => { for (const [el, t0] of pend) { const [t, q] = el.dataset.askHint.split('|'); if (seen.has(t)) pend.delete(el); else if (say(t, q, now() - t0 > 1400)) { pend.delete(el); break; } } };
     // ---- hint bubble: once per section per visit, 3 s, never while typing; the tap opens Ask with that question ----
@@ -112,7 +119,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
         }
         return false;
       };
-      let s = c.find(([x, y]) => !txtHit(x, y) && !score(x, y, w, h)), soft = 0;
+      let s = c.find(([x, y]) => !txtHit(x, y) && !score(x, y, w, h, 1)), soft = 0;
       if (!s && force) { s = c.find(([x, y]) => !txtHit(x, y)); soft = 1; }    // no free strip after ~1.4 s: show it click-through, but only where it covers no heading, text or mascot
       if (!s) return false;
       seen.add(txt); bub.textContent = txt; a.classList.toggle('m-up', s[2] > 0); a.classList.toggle('m-flip', s[2] === 2); a.classList.toggle('m-soft', !!soft); a.setAttribute('href', '/ask?q=' + encodeURIComponent(q || txt));
@@ -132,18 +139,22 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     addEventListener('visibilitychange', () => { a.classList.toggle('is-paused', document.hidden); if (sleep) document.hidden ? sleep.pause() : sleep.play(); });
     ['pointerdown', 'keydown'].forEach((e) => addEventListener(e, wake, { passive: true, capture: true }));
 
-    // one passive scroll listener (capture: the desktop pages scroll the BODY): lean with the page, hop when it stops
-    document.addEventListener('scroll', (e) => {
-      const t = e.target.scrollingElement || e.target, y = t.scrollTop, p = ly.get(t); ly.set(t, y);
+    // ONE passive scroll listener (capture: the desktop pages scroll the BODY). It only notes the scroller; the work runs once per frame (rAF), and re-placing the pill
+    // (hit-tests) runs at most every 320 ms while scrolling, then once more when the scroll stops.
+    let sTgt = null, sRaf = 0;
+    const onFrame = () => {
+      sRaf = 0; const t = sTgt; sTgt = null; if (!t) return;
+      const y = t.scrollTop, p = ly.get(t); ly.set(t, y);
       if (p === undefined || p === y) return;
       wake(); moved += Math.abs(y - p);
       const d = y > p ? 1 : -1; if (d !== tilt) { tilt = d; img.style.setProperty('--tl', d * 4 + 'deg'); }
-      req(); clearTimeout(st);
+      req(320); clearTimeout(st);
       st = setTimeout(() => { img.style.setProperty('--tl', '0deg'); tilt = 0; if (live2() && moved > 160 && now() - lastHop > 1200 && !typing()) hop(); moved = 0; req(); }, 160);
-    }, { passive: true, capture: true });
-    addEventListener('resize', req, { passive: true });
+    };
+    document.addEventListener('scroll', (e) => { sTgt = e.target.scrollingElement || e.target; if (!sRaf) sRaf = requestAnimationFrame(onFrame); }, { passive: true, capture: true });
+    addEventListener('resize', () => req(), { passive: true });
     addEventListener('focusin', () => { unsay(); req(); }); addEventListener('focusout', () => setTimeout(req, 60));
-    if (window.visualViewport) visualViewport.addEventListener('resize', req);
+    if (window.visualViewport) visualViewport.addEventListener('resize', () => req());
     setInterval(() => { if (!document.hidden) { req(); if (pend.size) tryHints(); } }, 700);          // catches bars and dialogs that open on their own
 
     // ---- a new section arrives: wave, and its hint bubble if it has one ([data-ask-hint="line|question to pre-fill"]) ----
