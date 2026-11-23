@@ -147,7 +147,17 @@ export function initMenuBook() {
   let two = mq.matches;
   let leaves: HTMLElement[] = [];
   let turned = 0, busy = false, opened = false, maxTurned = 1;
+  // The turn in the air (if any): calling it lands it at once (every turn ends in exactly one of these, run once). A new tap, key, close, resize or
+  // swipe lands the old turn first instead of being ignored, so `busy` can never outlive its animations.
+  let inflight: (() => void) | null = null;
+  const settleNow = () => { if (busy && inflight) inflight(); };
+  // dev only: `window.__mbkDebug = true` logs every goTo start / settle (and which of finished / cancel / watchdog / commit ended it) to `window.__mbkLog`
+  const dbg = (ev: string, d: Record<string, unknown> = {}) => { const w = window as any; if (w.__mbkDebug) (w.__mbkLog ||= []).push({ ev, t: Math.round(performance.now()), turned, busy, ...d }); };
   const filled = new Set<string>();
+  // Leaves in the air (and the pages they uncover) are drawn whole. Every other leaf draws ONLY the face the reader can see: the right page
+  // (leaf `turned`, front) and, on the laptop spread, the left page (leaf `turned - 1`, back). The rest of the stack is visibility:hidden,
+  // so two pages can never be painted at the same spot and ~70 coplanar 3D layers are no longer composited on every frame.
+  const air = new Set<number>();
   const cover = () => `<div class="mb-cover"><span class="mb-spine-gl"></span><div class="mb-plaque"><img src="/assets/brand/fursat-elephant.webp" alt="" width="54" height="69"><img src="/assets/brand/fursat-wordmark.svg" alt="FURSAT" width="170" height="34"><span class="mb-plaque-s">Kitchen &amp; Bar</span></div><p class="mb-cover-t">Menu</p></div>`;
   const shade = '<i class="mb-sd"></i>';
   const leafPages = (k: number): [number, number] => (two ? [2 * k, 2 * k + 1] : [k, -1]);
@@ -158,7 +168,7 @@ export function initMenuBook() {
     root.classList.toggle('mb-one', !two);
     buildPages();
     bookEl.innerHTML = '';
-    filled.clear();
+    filled.clear(); air.clear();
     const nContent = two ? Math.ceil(pages.length / 2) : pages.length;
     maxTurned = two ? Math.floor(pages.length / 2) + 1 : pages.length;
     leaves = [];
@@ -179,10 +189,34 @@ export function initMenuBook() {
     if (f[1]) f[1].outerHTML = two ? pageHtml(b) : '<div class="mb-pg mb-blank"></div>';
   }
   const fillAround = (t: number, n = 3) => { for (let i = Math.max(1, t - 1); i <= Math.min(leaves.length - 1, t + n); i++) fill(i); };
+  function place(i: number) {
+    const l = leaves[i];
+    if (!l) return;
+    const live = air.has(i), f = i < turned;
+    const sf = live || (!f && i === turned), sb = live || (f && i === turned - 1);
+    l.style.visibility = sf || sb ? '' : 'hidden';
+    (l.children[0] as HTMLElement).style.visibility = sf ? '' : 'hidden';
+    (l.children[1] as HTMLElement).style.visibility = sb ? '' : 'hidden';
+  }
+  const placeAll = () => leaves.forEach((_, i) => place(i));
+  // after a settle: only the visible spread may be drawn and no leaf at rest may still carry an animation; if not, put it right (and count it)
+  function assertSettled() {
+    if (busy || air.size) return;
+    let bad = 0;
+    leaves.forEach((l, i) => {
+      const f = i < turned, sf = !f && i === turned, sb = f && i === turned - 1;
+      const want = [sf || sb ? '' : 'hidden', sf ? '' : 'hidden', sb ? '' : 'hidden'];
+      const got = [l.style.visibility, (l.children[0] as HTMLElement).style.visibility, (l.children[1] as HTMLElement).style.visibility];
+      const anims = l.getAnimations({ subtree: true });
+      if (want[0] !== got[0] || want[1] !== got[1] || want[2] !== got[2] || anims.length) { bad++; anims.forEach((a) => a.cancel()); setStatic(i); }
+    });
+    if (bad) bookEl.dataset.mbFix = String(+(bookEl.dataset.mbFix || 0) + 1);
+  }
   function setStatic(i: number) {
     const f = i < turned;
     leaves[i].style.transform = f ? 'rotateY(-180deg)' : 'none';
     leaves[i].style.zIndex = String(f ? i : leaves.length - i);
+    place(i);
   }
   function syncInert() {
     leaves.forEach((l, i) => {
@@ -215,6 +249,16 @@ export function initMenuBook() {
     // plain cream paper on the back while the leaf is in the air: the page on it fades in only over the last quarter of the turn, so text is never squashed
     const bp = l.querySelector<HTMLElement>('.mb-back>.mb-pg');
     if (bp && !o.cov) list.push(bp.animate(kfs([[0, 0], [0.88, 0], [1, 1]], dir), { ...opt, easing: EIO }));
+    // and the same for the page on the front: its rows are gone within the first stretch of the turn (and come back only at the very end of a turn back),
+    // so the old and the new rows are never on screen together, whichever way the browser draws the 3D leaf
+    const fp = l.querySelector<HTMLElement>('.mb-front>.mb-pg');
+    if (fp && !o.cov) list.push(fp.animate(kfs([[0, 1], [0.14, 0], [1, 0]], dir), { ...opt, easing: EIO }));
+    // the outgoing face is switched off at the edge-on moment (-90°, opacity only) instead of relying on backface-visibility alone,
+    // which GPU engines do not always apply to composited children of a culled face (the old rows then show over the new page)
+    if (!o.cov) {
+      list.push((l.children[0] as HTMLElement).animate(kfs([[0, 1], [mid, 1], [mid + 0.001, 0], [1, 0]], dir), { ...opt, easing: EIO }));
+      list.push((l.children[1] as HTMLElement).animate(kfs([[0, 0], [mid, 0], [mid + 0.001, 1], [1, 1]], dir), { ...opt, easing: EIO }));
+    }
     if (!o.cov) {
       const cr = $('.mb-cast-r', bookEl), cl = $('.mb-cast-l', bookEl);
       list.push(cr.animate(dir > 0 ? [{ transform: 'scaleX(0)', opacity: 0 }, { transform: 'scaleX(1)', opacity: 0.55, offset: 0.5 }, { transform: 'scaleX(1)', opacity: 0 }] : [{ transform: 'scaleX(1)', opacity: 0 }, { transform: 'scaleX(1)', opacity: 0.55, offset: 0.5 }, { transform: 'scaleX(0)', opacity: 0 }], { ...opt, easing: EIO }));
@@ -222,7 +266,7 @@ export function initMenuBook() {
     }
     const fin = () => {
       for (const x of l.getAnimations({ subtree: true })) x.cancel();
-      for (const x of bookEl.querySelectorAll('.mb-cast')) for (const y of (x as HTMLElement).getAnimations()) y.cancel();
+      for (const x of list) x.cancel(); // this leaf's own cast-shadow animations only: the other leaves of a long jump are still flying
       setStatic(i);
     };
     return { list, a, fin };
@@ -233,9 +277,11 @@ export function initMenuBook() {
   }
   async function goTo(t: number) {
     t = Math.max(1, Math.min(maxTurned, t));
-    if (busy || !opened || t === turned) return;
-    busy = true;
-    fillAround(Math.max(t, turned), 3);
+    if (!opened) return;
+    if (busy) { if (!inflight) return; inflight(); } // land the turn in the air, then carry on with this tap
+    if (t === turned) return;
+    busy = true; dbg('start', { to: t });
+    fillAround(Math.max(t, turned), 3); fill(Math.min(t, turned) - 2); fill(Math.min(t, turned) - 1); // the page uncovered on the left of a turn back is drawn too
     const dir: 1 | -1 = t > turned ? 1 : -1;
     const from = turned, n = Math.abs(t - turned);
     const NF = 9; // a long jump shows the last 9 leaves turning; the ones before them are already over (no 36 leaves in the air at once)
@@ -244,11 +290,29 @@ export function initMenuBook() {
     for (let i = 0; i < n; i++) all.push(dir > 0 ? from + i : from - 1 - i);
     const skip = all.slice(0, Math.max(0, n - NF)), ids = all.slice(skip.length);
     turned = t;
+    air.clear(); for (const id of ids) { air.add(id - 1); air.add(id); air.add(id + 1); } for (const x of [from, from - 1, t, t - 1]) air.add(x);
     skip.forEach((id) => setStatic(id));
+    placeAll();
     syncInert(); // inert states reflect the destination; the leaves are mid-air until the promise resolves
-    await Promise.all(ids.map((id, j) => flipLeaf(id, dir, { dur, delay: j * gap, z: dir > 0 ? 500 + leaves.length - id : 500 + id })));
-    busy = false;
-    update();
+    const flips = ids.map((id, j) => mkFlip(id, dir, { dur, delay: j * gap, z: dir > 0 ? 500 + leaves.length - id : 500 + id }));
+    let over = false, wd = 0, done!: () => void;
+    const turnDone = new Promise<void>((r) => { done = r; });
+    // the ONE ending of this turn: runs once, from whichever comes first: all leaves finished, one was cancelled, or the watchdog
+    const finish = (why: string = 'commit') => {
+      if (over) return; over = true; clearTimeout(wd); dbg('settle', { via: why, to: t });
+      for (const f of flips) f.fin();
+      air.clear(); placeAll();
+      if (inflight === finish) inflight = null;
+      busy = false;
+      setTimeout(assertSettled, 60);
+      done();
+    };
+    inflight = finish;
+    wd = window.setTimeout(() => finish('watchdog'), dur + (ids.length - 1) * gap + 600);
+    flips.forEach((f) => f.a.finished.then(f.fin, () => {})); // each leaf lands as soon as it is over
+    Promise.allSettled(flips.map((f) => f.a.finished)).then((r) => finish(r.some((x) => x.status === 'rejected') ? 'cancel' : 'finished'));
+    await turnDone;
+    if (!busy) update(); // (if a newer turn already took over, it updates the counter itself)
   }
   const pageToTurned = (p: number) => (two ? Math.ceil(p / 2) + 1 : p + 1);
   const visible = () => (two ? [turned > 1 ? 2 * (turned - 1) - 1 : -1, 2 * (turned - 1)] : [turned - 1]).filter((i) => i >= 0 && i < pages.length);
@@ -262,6 +326,8 @@ export function initMenuBook() {
     const cur = pages[v[v.length - 1]];
     tabsEl.querySelectorAll<HTMLElement>('.mb-tab').forEach((t) => { const on = !!cur && tabOf(cur) === t.dataset.sec; t.classList.toggle('on', on); if (on) t.setAttribute('aria-current', 'true'); else t.removeAttribute('aria-current'); if (on && !two) t.scrollIntoView({ inline: 'center', block: 'nearest' }); });
     syncInert();
+    // the pages the next turns need are built now, in idle time, not inside the tap that turns to them
+    (window.requestIdleCallback ? (f: () => void) => window.requestIdleCallback(f, { timeout: 400 }) : (f: () => void) => setTimeout(f, 80))(() => { for (let i = turned - 2; i <= turned + 4; i++) fill(i); });
   }
 
   /* ── open / close ──────────────────────────────────────── */
@@ -286,6 +352,7 @@ export function initMenuBook() {
     setTimeout(() => fill(2), 120); setTimeout(() => fill(3), 420); setTimeout(() => fill(4), 700);
     if (two) shift.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${pw / 2}px)` }], { duration: 1160, easing: EASE_IO, fill: 'both' });
     turned = 1; // the cover's final resting state is flipped
+    air.clear(); air.add(0); air.add(1); air.add(2); placeAll();
     const flip = flipLeaf(0, 1, { dur: 1160, cov: true });
     // 3. one real dish photo rises out of the page, then settles into it
     setTimeout(() => {
@@ -296,6 +363,7 @@ export function initMenuBook() {
       sh?.animate([{ opacity: 0 }, { opacity: 1, offset: 0.55 }, { opacity: 0.7 }], { duration: 1150, easing: EASE_OUT, fill: 'backwards' });
     }, 500);
     await flip;
+    air.clear(); placeAll();
     busy = false; opened = true;
     root.classList.add('mb-cover-gone');
     chrome().forEach((e) => { e.style.opacity = ''; e.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: EASE_OUT }); });
@@ -307,6 +375,7 @@ export function initMenuBook() {
   let closeAsked = false; // Esc or Close pressed while the book is still opening: it closes as soon as it has opened
   async function close() {
     if (!root.open) return;
+    settleNow();
     if (busy) { if (!opened) closeAsked = true; return; }
     busy = true;
     closeDrawer(true); $('#mb-waiter').hidden = true; setBg(false); root.classList.remove('mb-cover-gone');
@@ -315,16 +384,20 @@ export function initMenuBook() {
     //    Like a long jump, only the last 8 leaves are seen flying; the ones nearest the open page are already over.
     const n = turned, NF = 8;
     turned = 1;
+    air.clear(); air.add(0); air.add(1); air.add(n);
     if (n > 1) {
       const all: number[] = []; for (let i = n - 1; i >= 1; i--) all.push(i);
       const skip = all.slice(0, Math.max(0, all.length - NF)), ids = all.slice(skip.length);
+      for (const id of ids) { air.add(id - 1); air.add(id); air.add(id + 1); }
+      if (skip.length) { const e = skip[skip.length - 1]; air.add(e); air.add(e - 1); }
       skip.forEach((id) => setStatic(id));
+      placeAll();
       await Promise.all(ids.map((id, j) => flipLeaf(id, -1, { dur: 360, delay: j * 45, z: 500 + id })));
     }
     // 2. the cover closes (the laptop spread slides back to centre with it)
     if (two) shift.animate([{ transform: `translateX(${bookEl.getBoundingClientRect().width / 2}px)` }, { transform: 'translateX(0)' }], { duration: 760, easing: EASE_IO, fill: 'both' });
     await flipLeaf(0, -1, { dur: 760, cov: true, z: 999 });
-    turned = 0;
+    turned = 0; air.clear();
     // 3. the closed book shrinks into the button it came from
     const r = opener.getBoundingClientRect();
     const dx = r.left + r.width / 2 - innerWidth / 2, dy = r.top + r.height / 2 - innerHeight / 2;
@@ -363,7 +436,7 @@ export function initMenuBook() {
     two = mq.matches; buildLeaves();
     root.classList.add('mb-cover-gone'); turned = pageToTurned(p); leaves.forEach((_, i) => setStatic(i)); shift.style.transform = two ? `translateX(${bookEl.getBoundingClientRect().width / 2}px)` : ''; fillAround(turned, 3); update();
   }
-  mq.addEventListener('change', () => { if (!root.open || busy || !opened) return; rebuild(visible().pop() ?? 0); });
+  mq.addEventListener('change', () => { settleNow(); if (!root.open || busy || !opened) return; rebuild(visible().pop() ?? 0); });
 
   /* ── The Bar behind the site's 21+ check ──
      Same question and same storage key as /menu (menu-v2.ts). Before "yes" the drinks are not even built into the book:
@@ -383,6 +456,7 @@ export function initMenuBook() {
     });
   }
   async function openBar() {
+    settleNow();
     if (busy || !opened) return;
     if (!barOn()) {
       const a = await askAge();
@@ -413,6 +487,10 @@ export function initMenuBook() {
     const reset = () => { pid = -1; mode = 'idle'; fl = null; };
     stageEl.addEventListener('pointerdown', (e) => {
       const t = e.target as HTMLElement;
+      if (e.pointerType === 'mouse' || !e.isPrimary || !opened) return;
+      // a new primary touch while a drag is still recorded means the old gesture lost its pointerup: abandon it, never wait for it
+      if (pid !== -1) { settleNow(); reset(); }
+      if (busy) { if (!inflight) return; inflight(); }
       if (e.pointerType === 'mouse' || !e.isPrimary || !opened || busy || drawerOpen || !$('#mb-waiter').hidden || t.closest('.mb-tabs')) return;
       pid = e.pointerId; x0 = e.clientX; y0 = e.clientY; t0 = performance.now(); mode = 'pending'; trail = [[t0, e.clientX]];
     });
@@ -428,10 +506,23 @@ export function initMenuBook() {
         span = Math.max(140, bookEl.clientWidth * 0.9);
         try { stageEl.setPointerCapture(pid); } catch { /* ignore */ }
         busy = true; dragStamp = now;
+        // while the finger is down this is the turn's inflight: a tap, key, resize or new touch abandons the drag and frees `busy`
+        // even if the pointerup never arrives (browser took the gesture, capture failed, touch id reused)
+        const abortDrag = () => {
+          dbg('drag-abort');
+          bookEl.style.transform = '';
+          if (fl) fl.fin();
+          reset(); air.clear(); placeAll();
+          if (inflight === abortDrag) inflight = null;
+          busy = false; update(); setTimeout(assertSettled, 60);
+        };
+        inflight = abortDrag;
         if (!ok) mode = 'edge';
         else {
           fillAround(Math.max(turned + dir, turned), 3);
           const id = dir > 0 ? turned : turned - 1;
+          air.clear(); for (const x of [id - 1, id, id + 1, turned, turned - 1, turned + dir]) air.add(x);
+          placeAll();
           fl = mkFlip(id, dir, { dur: DUR, lin: true, z: dir > 0 ? 500 + leaves.length - id : 500 + id });
           fl.list.forEach((a) => { a.pause(); a.currentTime = 0; });
           mode = 'turn'; prog = 0;
@@ -452,8 +543,11 @@ export function initMenuBook() {
       reset();
       if (m === 'edge') {
         const cur = bookEl.style.transform; bookEl.style.transform = '';
-        await bookEl.animate([{ transform: cur }, { transform: 'none' }], { duration: 300, easing: EASE_OUT }).finished;
-        busy = false; return;
+        const an = bookEl.animate([{ transform: cur }, { transform: 'none' }], { duration: 300, easing: EASE_OUT });
+        let ended = false, w = 0;
+        const endE = () => { if (ended) return; ended = true; clearTimeout(w); an.cancel(); if (inflight === endE) inflight = null; busy = false; };
+        inflight = endE; w = window.setTimeout(endE, 450); an.finished.then(endE, endE);
+        return;
       }
       if (m !== 'turn' || !f) return;
       // a quick flick turns the page even when it is short: 60 px or more within 250 ms of touching down (measured from the press, so it does not
@@ -465,8 +559,10 @@ export function initMenuBook() {
         turned += d; syncInert();
         f.list.forEach((a) => { a.playbackRate = 1; a.play(); });
       } else f.list.forEach((a) => a.reverse());
-      await f.a.finished;
-      f.fin(); busy = false; update();
+      let ended = false, w = 0;
+      const end = () => { if (ended) return; ended = true; clearTimeout(w); f.fin(); air.clear(); placeAll(); if (inflight === end) inflight = null; busy = false; update(); setTimeout(assertSettled, 60); };
+      inflight = end; w = window.setTimeout(end, DUR + 250); // (the turn needs at most DUR more ms from here)
+      f.a.finished.then(end, end);
     };
     stageEl.addEventListener('pointerup', up);
     stageEl.addEventListener('pointercancel', up);
