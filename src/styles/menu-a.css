@@ -387,3 +387,185 @@ html:has(.mv){scroll-padding-bottom:24px}
 .mv .mc-tiles .mc-grid>li:nth-child(4n+2)>.mc-tile,.mv .mc-tiles .mc-grid>li:nth-child(4n+3)>.mc-tile{background:radial-gradient(120% 95% at 118% 128%,rgb(196 150 80/.10) 0 40%,transparent 40.6%),radial-gradient(150% 120% at 125% 140%,rgb(196 150 80/.06) 0 52%,transparent 52.6%),linear-gradient(160deg,#fffdf8,#fbf5ea)}
 .mv .mc-tiles .mc-tile .mc-c::before{content:"";display:block;width:30px;height:2px;border-radius:2px;background:#e0b25a;margin:6px 0 5px}
 .mv .mc-tiles .mc-tile.is-picked{box-shadow:0 0 0 2px #e0b25a,0 16px 26px -14px rgb(150 100 20/.55)}
+
+/* v5.115 MT: Food tiles with real dish photos, arrow circle, chef elephant, subtitle. Everything here is scoped to .mc-tiles--food (Drinks untouched). */
+.mv .mc-tiles--food .mc-sub{margin:0 0 10px;font:400 15px/1.35 var(--mv-sans);color:var(--ka-mut);max-width:calc(100% - 112px)}
+.mv .mc-tiles--food .mc-stage{position:relative}
+.mv .mc-tiles--food .mc-grid{position:relative;z-index:1}
+/* chef: shown to the waist, mirrored to face the tiles, tucked behind the top edge of the grid */
+.mv .mc-tiles--food .mc-chef{position:absolute;z-index:0;right:0;bottom:calc(100% - 10px);width:116px;height:74px;overflow:hidden;pointer-events:none;transform-origin:50% 100%}
+.mv .mc-tiles--food .mc-chef img{display:block;width:100%;height:auto;margin-top:-4%;transform:scaleX(-1);transform-origin:50% 100%}
+.mv .mc-tiles--food .mc-chef.is-pre{opacity:0;transform:translateY(46%) scale(.86)}
+.mv .mc-tiles--food .mc-chef.is-in{opacity:1;transform:none;transition:transform 650ms cubic-bezier(.34,1.56,.64,1),opacity 180ms ease-out}
+.mv .mc-tiles--food .mc-chef.is-in img{animation:mc-sway 5.2s ease-in-out 900ms infinite}
+@keyframes mc-sway{0%,100%{transform:scaleX(-1) rotate(-1.6deg)}50%{transform:scaleX(-1) rotate(1.6deg)}}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-sub{max-width:calc(100% - 200px)}
+  .mv .mc-tiles--food .mc-chef{width:160px;height:102px;right:8px}
+}
+/* photo: right half of the tile, fades into the colour with a soft mask (no fake cut-outs) */
+.mv .mc-tiles--food .mc-ph{position:absolute;inset:0;z-index:0;border-radius:inherit;overflow:hidden;pointer-events:none}
+.mv .mc-tiles--food .mc-ph img{position:absolute;top:0;right:0;width:52%;height:76%;object-fit:cover;
+  -webkit-mask-image:linear-gradient(90deg,transparent 12%,#000 60%),linear-gradient(180deg,#000 58%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,transparent 12%,#000 60%),linear-gradient(180deg,#000 58%,transparent 100%);mask-composite:intersect;transform-origin:70% 60%}
+.mv .mc-tiles--food .mc-ph-ico{position:absolute;right:14px;top:50%;width:52px;height:52px;margin-top:-26px;color:#e0b25a;opacity:.95}
+/* text sits above the photo; the divider moves from the count to the name so the arrow can share the count's row */
+.mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{position:relative;z-index:1}
+.mv .mc-tiles--food .mc-n::after{content:"";display:block;width:30px;height:2px;border-radius:2px;background:#e0b25a;margin:6px 0 0}
+.mv .mc-tiles .mc-tile .mc-c::before{display:none}
+.mv .mc-tiles--food .mc-foot{display:flex;align-items:center;gap:8px}
+.mv .mc-tiles--food .mc-go{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1.5px solid currentColor;color:var(--kt-go,#e0b25a)}
+.mv .mc-tiles--food .mc-go svg{width:14px;height:14px;transition:transform 150ms cubic-bezier(.19,1,.22,1)}
+.mv .mc-tiles--food .mc-tile.is-picked .mc-go{color:var(--ka-ink)}
+.mv .mc-tiles--food .mc-tick{z-index:2}
+/* arrow colour: gold outline on the green tiles, ink outline on the light ones (same checkerboard as the colours above) */
+.mv .mc-tiles--food .mc-grid>li:nth-child(4n+2),.mv .mc-tiles--food .mc-grid>li:nth-child(4n+3){--kt-go:var(--ka-ink)}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-grid>li:nth-child(4n+2),.mv .mc-tiles--food .mc-grid>li:nth-child(4n+3){--kt-go:#e0b25a}
+  .mv .mc-tiles--food .mc-grid>li:nth-child(8n+2),.mv .mc-tiles--food .mc-grid>li:nth-child(8n+4),.mv .mc-tiles--food .mc-grid>li:nth-child(8n+5),.mv .mc-tiles--food .mc-grid>li:nth-child(8n+7){--kt-go:var(--ka-ink)}
+}
+@media(hover:hover){
+  .mv .mc-tiles--food .mc-tile:hover .mc-go svg{transform:translateX(3px)}
+  .mv .mc-tiles--food .mc-ph img{transition:transform 150ms cubic-bezier(.19,1,.22,1)}
+  .mv .mc-tiles--food .mc-tile:hover .mc-ph img{transform:scale(1.03)}
+}
+/* 768+ fix: tiles 3 and 6 of each 8 take the coloured variables above but the unconditional light fill from the rule before; give them the green fill back so the cream names are readable */
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-grid>li:nth-child(8n+3)>.mc-tile,.mv .mc-tiles--food .mc-grid>li:nth-child(8n+6)>.mc-tile{background:radial-gradient(120% 95% at 118% 128%,rgb(255 255 255/.13) 0 40%,transparent 40.6%),radial-gradient(150% 120% at 125% 140%,rgb(255 255 255/.07) 0 52%,transparent 52.6%),var(--kt-bg)}
+}
+/* 768+: one-line names run further into the photo, so a scrim in the tile's own colour sits between photo and text (measured >= 4.5:1) */
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-ph::after{content:"";position:absolute;inset:0;background:var(--kt-bg);-webkit-mask-image:linear-gradient(90deg,#000 0,#000 44%,transparent 70%);mask-image:linear-gradient(90deg,#000 0,#000 44%,transparent 70%)}
+  .mv .mc-tiles--food .mc-tile.is-picked .mc-ph::after{background:var(--ka-gold)}
+}
+@media(min-width:768px){.mv .mc-tiles--food .mc-n{max-width:58%}}
+
+/* v5.116 MT2: right photo per tile, big and full colour; big chef leaning over Starters */
+.mv .mc-tiles--food .mc-ph::after{display:none}
+.mv .mc-tiles--food .mc-ph img{top:0;right:0;width:58%;height:100%;object-fit:cover;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 30%);mask-image:linear-gradient(90deg,transparent 0,#000 30%);-webkit-mask-composite:source-over;mask-composite:add;border-radius:0 inherit inherit 0}
+.mv .mc-tiles--food .mc-ph--cut img{width:60%;height:94%;top:3%;right:2%;object-fit:contain;-webkit-mask-image:none;mask-image:none;filter:drop-shadow(0 6px 8px rgb(20 12 6/.35))}
+.mv .mc-tiles--food .mc-n{max-width:50%}
+/* chef: full elephant, mirrored to face the tiles; lower body hidden behind the tile row, so he leans over Starters */
+.mv .mc-tiles--food .mc-chef{width:190px;height:124px;right:-4px;bottom:calc(100% - 14px);z-index:0}
+.mv .mc-tiles--food .mc-chef img{margin-top:0}
+.mv .mc-tiles--food .mc-sub{max-width:calc(100% - 200px)}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-chef{width:240px;height:156px;right:52%}
+  .mv .mc-tiles--food .mc-sub{max-width:calc(100% - 260px)}
+  .mv .mc-tiles--food .mc-n{max-width:50%}
+}
+.mv .mc-tiles--food .mc-ph img{width:47%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 38%);mask-image:linear-gradient(90deg,transparent 0,#000 38%)}
+.mv .mc-tiles--food .mc-ph--cut img{width:50%;right:1%}
+.mv .mc-tiles--food .mc-n{max-width:58%;font-size:21px;line-height:1.1;overflow-wrap:normal;word-break:normal;hyphens:none}
+.mv .mc-tiles--food .mc-foot{gap:6px}
+.mv .mc-tiles--food .mc-c{font-size:12.5px;white-space:nowrap}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-ph img{width:52%}
+  .mv .mc-tiles--food .mc-ph--cut img{width:54%}
+  .mv .mc-tiles--food .mc-n{font-size:24px;max-width:60%}
+  .mv .mc-tiles--food .mc-c{font-size:13.5px}
+}
+/* scrim in the tile's own colour, behind the text only */
+.mv .mc-tiles--food .mc-ph::after{display:block;content:"";position:absolute;inset:0;background:var(--kt-bg);-webkit-mask-image:linear-gradient(90deg,#000 0,#000 42%,transparent 56%);mask-image:linear-gradient(90deg,#000 0,#000 42%,transparent 56%)}
+.mv .mc-tiles--food .mc-tile.is-picked .mc-ph::after{background:var(--ka-gold)}
+.mv .mc-tiles--food .mc-ph img{width:56%}
+.mv .mc-tiles--food .mc-ph--cut img{width:56%;right:0}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-ph img,.mv .mc-tiles--food .mc-ph--cut img{width:58%}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 40%,transparent 54%);mask-image:linear-gradient(90deg,#000 0,#000 40%,transparent 54%)}
+}
+.mv .mc-tiles--food .mc-ph--cut img{width:50%;right:0}
+.mv .mc-tiles--food .mc-n{max-width:54%;font-size:20px}
+@media(min-width:768px){.mv .mc-tiles--food .mc-ph--cut img{width:56%}.mv .mc-tiles--food .mc-n{font-size:24px;max-width:60%}}
+
+/* v5.116 MT2 v2: fixed text column, equal row heights, food-only crops */
+.mv .mc-tiles--food .mc-grid{align-items:stretch}
+.mv .mc-tiles--food .mc-grid>li{display:flex}
+.mv .mc-tiles--food .mc-tile{container-type:inline-size;height:auto;align-self:stretch}
+.mv .mc-tiles--food .mc-n{width:54cqw;max-width:none;font-size:17px;line-height:1.12;white-space:normal;overflow-wrap:normal;word-break:normal;hyphens:none}
+.mv .mc-tiles--food .mc-foot{width:54cqw;max-width:none;gap:5px}
+.mv .mc-tiles--food .mc-go{width:24px;height:24px}
+.mv .mc-tiles--food .mc-go svg{width:12px;height:12px}
+.mv .mc-tiles--food .mc-c{font-size:12px}
+.mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 54cqw,transparent 64cqw);mask-image:linear-gradient(90deg,#000 0,#000 54cqw,transparent 64cqw)}
+.mv .mc-tiles--food .mc-ph--cut::after{display:none}
+.mv .mc-tiles--food .mc-ph img{width:50%}
+.mv .mc-tiles--food .mc-ph--cut img{width:46%;right:2%}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-n{font-size:22px}
+  .mv .mc-tiles--food .mc-c{font-size:13px}
+  .mv .mc-tiles--food .mc-ph img{width:50%}
+  .mv .mc-tiles--food .mc-ph--cut img{width:46%}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 54cqw,transparent 64cqw);mask-image:linear-gradient(90deg,#000 0,#000 54cqw,transparent 64cqw)}
+}
+/* v2b: container = whole tile (no side padding), text column = 58% of the tile incl. its 14px inset */
+.mv .mc-tiles--food .mc-tile{padding-left:0;padding-right:0}
+.mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{margin-left:14px;width:calc(58cqw - 14px)}
+.mv .mc-tiles--food .mc-n{font-size:15px;line-height:1.12}
+.mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 66cqw);mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 66cqw)}
+.mv .mc-tiles--food .mc-ph img{width:48%}
+.mv .mc-tiles--food .mc-ph--cut img{width:46%;right:2%}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-n{margin-left:16px;width:calc(58cqw - 16px);font-size:20px}
+  .mv .mc-tiles--food .mc-foot{margin-left:16px;width:calc(58cqw - 16px)}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 66cqw);mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 66cqw)}
+  .mv .mc-tiles--food .mc-ph img{width:48%}
+}
+/* v2c: phone column 61%, name 14px so "& South Indian" and "Burgers, kids" fit on one line each */
+@media(max-width:767px){
+  .mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{width:calc(62cqw - 14px)}
+  .mv .mc-tiles--food .mc-n{font-size:14px;letter-spacing:-.005em}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 62cqw,transparent 70cqw);mask-image:linear-gradient(90deg,#000 0,#000 62cqw,transparent 70cqw)}
+  .mv .mc-tiles--food .mc-ph img{width:46%}
+  .mv .mc-tiles--food .mc-ph--cut img{width:44%}
+}
+/* v2d: cut-out photos stay right of the text column */
+.mv .mc-tiles--food .mc-ph--cut img{width:38%;right:2%}
+@media(min-width:768px){.mv .mc-tiles--food .mc-ph--cut img{width:40%;right:2%}}
+/* v2e: shorter scrim fade so more of the food shows */
+.mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 61cqw,transparent 66cqw);mask-image:linear-gradient(90deg,#000 0,#000 61cqw,transparent 66cqw)}
+.mv .mc-tiles--food .mc-ph img{width:46%;right:0}
+.mv .mc-tiles--food .mc-ph--cut img{width:40%;right:2%}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 63cqw);mask-image:linear-gradient(90deg,#000 0,#000 58cqw,transparent 63cqw)}
+  .mv .mc-tiles--food .mc-ph img{width:50%}
+}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 60cqw,transparent 67cqw);mask-image:linear-gradient(90deg,#000 0,#000 60cqw,transparent 67cqw)}
+  .mv .mc-tiles--food .mc-ph img{width:48%}
+}
+@media(min-width:768px){.mv .mc-tiles--food .mc-ph--cut img{width:40%;right:2%}}
+/* v2f: food sits on the right of each square crop, so the photo box starts at 44% and the visible part (right of the scrim) is the food */
+.mv .mc-tiles--food .mc-ph:not(.mc-ph--cut) img{width:56%;right:0}
+
+/* v5.117 MT3: taller tiles, big whole-dish photo in the right ~half, scrim only behind the text column */
+.mv .mc-tiles--food .mc-tile{min-height:116px;padding-top:15px;padding-bottom:13px}
+.mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{margin-left:12px;width:calc(52cqw - 12px)}
+.mv .mc-tiles--food .mc-n{font-size:15px;line-height:1.1;letter-spacing:0}
+.mv .mc-tiles--food .mc-foot{gap:4px}
+.mv .mc-tiles--food .mc-go{width:20px;height:20px}
+.mv .mc-tiles--food .mc-go svg{width:10px;height:10px}
+.mv .mc-tiles--food .mc-c{font-size:11px}
+.mv .mc-tiles--food .mc-ph:not(.mc-ph--cut) img{top:0;right:0;width:54%;height:100%;object-fit:cover;object-position:50% 50%;-webkit-mask-image:none;mask-image:none;border-radius:0 inherit inherit 0}
+.mv .mc-tiles--food .mc-ph--cut img{top:2%;right:0;width:51%;height:96%;object-fit:contain;filter:drop-shadow(0 6px 8px rgb(20 12 6/.38))}
+.mv .mc-tiles--food .mc-ph::after{display:block;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 51cqw,transparent 58cqw);mask-image:linear-gradient(90deg,#000 0,#000 51cqw,transparent 58cqw)}
+.mv .mc-tiles--food .mc-ph--cut::after{display:none}
+@media(min-width:768px){
+  .mv .mc-tiles--food .mc-tile{min-height:136px;padding-top:18px;padding-bottom:16px}
+  .mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{margin-left:18px;width:calc(50cqw - 18px)}
+  .mv .mc-tiles--food .mc-n{font-size:21px}
+  .mv .mc-tiles--food .mc-foot{gap:6px}
+  .mv .mc-tiles--food .mc-go{width:24px;height:24px}
+  .mv .mc-tiles--food .mc-go svg{width:12px;height:12px}
+  .mv .mc-tiles--food .mc-c{font-size:13px}
+  .mv .mc-tiles--food .mc-ph:not(.mc-ph--cut) img{width:52%}
+  .mv .mc-tiles--food .mc-ph--cut img{width:49%}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 49cqw,transparent 55cqw);mask-image:linear-gradient(90deg,#000 0,#000 49cqw,transparent 55cqw)}
+}
+@media(max-width:379px){
+  .mv .mc-tiles--food .mc-n,.mv .mc-tiles--food .mc-foot{margin-left:10px;width:calc(57cqw - 10px)}
+  .mv .mc-tiles--food .mc-n{font-size:14px}
+  .mv .mc-tiles--food .mc-c{font-size:10.5px}
+  .mv .mc-tiles--food .mc-ph--cut img{width:43%}
+  .mv .mc-tiles--food .mc-ph::after{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 56cqw,transparent 62cqw);mask-image:linear-gradient(90deg,#000 0,#000 56cqw,transparent 62cqw)}
+}

@@ -73,23 +73,21 @@
 .fe-card .fe-go:disabled { opacity: .5; box-shadow: none; }
 .fe-go::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(115deg, transparent 20%, rgb(255 255 255 / .35) 48%, transparent 76%); transform: translateX(-130%); transition: transform .65s var(--fe-ease); }
 .fe-go-lab { display: block; height: 20px; overflow: hidden; }
-.fe-go-roll { display: flex; flex-direction: column; transition: transform 500ms var(--fe-ease); }
+.fe-go-roll { display: flex; flex-direction: column; transition: transform 300ms var(--fe-ease); }
 .fe-go-roll > span { display: block; height: 20px; white-space: nowrap; }
 .fe-go-chip { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--fe-green); }
 .fe-go--red .fe-go-chip { color: var(--fe-red); }
-.fe-go-chip svg { width: 16px; height: 16px; transition: transform 500ms var(--fe-ease); }
+.fe-go-chip svg { width: 16px; height: 16px; transition: transform 300ms var(--fe-ease); }
 @media (hover: hover) {
   .fe-card .fe-go:hover { background: linear-gradient(180deg in oklab, #2f5a1c, #24461a); }
   .fe-card .fe-go--red:hover { background: linear-gradient(180deg in oklab, #c8301f, #b02518); }
-  .fe-go:hover .fe-go-roll { transform: translateY(-50%); } .fe-go:hover .fe-go-chip svg { transform: rotate(-45deg); } .fe-go:hover::after { transform: translateX(130%); }
+  .fe-go:hover .fe-go-roll { transform: translateY(-50%); } .fe-go:hover .fe-go-chip svg { transform: translateX(3px); } .fe-go:hover::after { transform: translateX(130%); }
 }
-.fe-go:focus-visible .fe-go-roll { transform: translateY(-50%); } .fe-go:focus-visible .fe-go-chip svg { transform: rotate(-45deg); }
+.fe-go:focus-visible .fe-go-roll { transform: translateY(-50%); } .fe-go:focus-visible .fe-go-chip svg { transform: translateX(3px); }
 
 /* 2 · "ready" ring round Send (one per screen) */
 .fe-ring { position: relative; display: block; border-radius: 999px; }
 .fe-ring::before { content: ""; position: absolute; inset: -4px; border-radius: 999px; padding: 2px; pointer-events: none; opacity: 0; transition: opacity 200ms ease; background: conic-gradient(from var(--fk-ang), #c0291f, #c99a43, #2a5019, #c99a43, #c0291f); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; }
-.fe-ring.is-ready::before { opacity: 1; animation: fe-ang 3s linear infinite; }
-@keyframes fe-ang { to { --fk-ang: 360deg; } }
 
 /* 6 · secondary button: sliding fill */
 .fe-card .fe-sec2 { position: relative; isolation: isolate; overflow: hidden; background: #fff; color: var(--fe-green); border: 1px solid var(--fe-green); box-shadow: none; font-weight: 600; transition: color 400ms cubic-bezier(.22, 1, .36, 1), scale 120ms cubic-bezier(.25, .46, .45, .94); }
@@ -532,4 +530,72 @@
   .fe-sec .fe-card .fe-tk::after { width: 40%; }
   .fe-sec .fe-card .fe-step[data-step="2"] .fe-actions { margin-top: 0; }
   .fe-sec .fe-card .fe-step[data-step="3"] .fe-row2 { width: 100%; }
+}
+
+/* v5.118 F2e2: one shared button system (Banquet, Catering, Home Reserve popup) */
+.fe-card { --fe-tap: cubic-bezier(.25, .46, .45, .94); --fe-q: cubic-bezier(.22, 1, .36, 1); --fe-btn-ring: rgb(180 18 22 / .25); }
+@keyframes fe-spin { to { transform: rotate(360deg); } }
+
+/* all buttons: no tap flash, no double-tap zoom, no long-press select; one focus ring */
+.fe-card :is(button, a.fk-f-btn, .fe-go, .fe-link, .fe-pick) { -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.fe-card :is(button, a.fk-f-btn, .fe-go, .fe-link, .fe-pick):focus-visible,
+.fe-card .fe-tile:has(input:focus-visible), .fe-card .fk-f-chip:has(input:focus-visible), .bk-x:focus-visible { outline: 3px solid var(--fe-btn-ring); outline-offset: 3px; }
+
+/* 1 · red primary (Next / Continue) */
+.fe-card .fe-go { min-height: 48px; font: 600 15px/20px 'Poppins', sans-serif; cursor: pointer; transition: scale 120ms var(--fe-tap), opacity 200ms ease; }
+.fe-card .fe-go .fe-go-chip { position: relative; }
+.fe-card .fe-go .fe-go-chip svg { transition: transform 300ms var(--fe-ease), scale 200ms var(--fe-ease); }
+.fe-card .fe-go:not(:disabled):not([aria-disabled="true"]):active { scale: .96; }
+
+/* 2 · green WhatsApp Send: icon left, arrow chip right, spinner + tick states */
+.fe-card .fe-go.fe-go--wa { justify-content: flex-start; gap: 10px; padding: 8px 8px 8px 16px; }
+.fe-card .fe-go.fe-go--wa .fe-go-lab { flex: 1 1 auto; min-width: 0; }
+.fe-card .fe-go.fe-go--wa .fe-go-chip { display: grid; flex: none; margin-left: auto; color: #155019; }
+.fe-go-spin { display: none; flex: none; width: 16px; height: 16px; margin: 4px; border-radius: 50%; border: 2px solid rgb(255 255 255 / .35); border-top-color: #fff; animation: fe-spin .7s linear infinite; }
+.fe-go.is-busy { pointer-events: none; cursor: progress; }
+.fe-go.is-busy .fe-go-spin { display: block; }
+.fe-go.is-busy .fe-go-wa { display: none; }
+.fe-go-chip .fe-go-tick { position: absolute; inset: 8px; width: 16px; height: 16px; scale: 0; rotate: -45deg; transition: scale 300ms var(--fe-spring), rotate 300ms var(--fe-spring); }
+.fe-go.is-ok .fe-go-chip .fe-go-tick { scale: 1; rotate: 0deg; }
+.fe-go.is-ok .fe-go-chip .fe-go-arr { scale: 0; }
+
+/* ready sweep: a gold-to-green comet runs once round the pill (~900ms), then a soft glow breathes (2.4s) */
+.fe-ring { isolation: isolate; }
+.fe-ring::before { background: conic-gradient(from var(--fk-ang), rgb(201 154 67 / 0) 0deg, #c99a43 80deg, #2f8a3a 190deg, rgb(47 138 58 / 0) 300deg, rgb(201 154 67 / 0) 360deg); }
+.fe-ring::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 999px; pointer-events: none; opacity: 0; box-shadow: 0 0 0 2px rgb(201 154 67 / .3), 0 6px 22px -2px rgb(35 112 45 / .6); transition: opacity 300ms ease; }
+.fe-ring.is-ready::before { opacity: 0; }
+.fe-step.is-active .fe-ring.is-ready::before, .bk-sheet .fe-ring.is-ready::before { animation: fe-sweep 900ms var(--fe-out) both; }
+.fe-step.is-active .fe-ring.is-ready::after, .bk-sheet .fe-ring.is-ready::after { opacity: .9; transition-delay: 700ms; animation: fe-breathe 2.4s ease-in-out 1s infinite alternate; }
+@keyframes fe-sweep { 0% { --fk-ang: 0deg; opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { --fk-ang: 360deg; opacity: 0; } }
+@keyframes fe-breathe { from { scale: 1; filter: brightness(1); } to { scale: 1.035; filter: brightness(1.4); } }
+
+/* 3 · secondary (Back, Skip, Call, Edit): warm white, sliding #fbe9e5 fill; Back has the red outline */
+.fe-card :is(.fe-sec2, .fe-edit) { min-height: 48px; border-radius: 999px; font: 600 14px/20px 'Poppins', sans-serif; cursor: pointer; transition: color 400ms var(--fe-q), scale 120ms var(--fe-tap); }
+.fe-card .fe-edit { position: relative; isolation: isolate; overflow: hidden; }
+.fe-card .fe-edit::before { content: ""; position: absolute; inset: 0; z-index: -1; background: #fbe9e5; transform: translateX(-100%); transition: transform 400ms var(--fe-q); }
+@media (hover: hover) { .fe-card .fe-edit:hover::before { transform: none; } .fe-sec .fe-card .fe-edit:hover { color: var(--fe-red-d); } }
+.fe-card .fe-edit:active { scale: .96; }
+
+/* 4 · icon buttons: 44px round, press .94, soft fill on hover, number bounces on − / + */
+.fe-card .fe-step-g, .bk-sheet .fe-step-g { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+.fe-card .fe-step-g button, .bk-sheet .fe-step-g button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #fff; color: var(--fe-red); font-size: 24px; cursor: pointer; transition: background-color 200ms ease, scale 120ms var(--fe-tap); }
+.fe-card .fe-step-g button:active, .bk-sheet .fe-step-g button:active { scale: .94; }
+@media (hover: hover) { .fe-card .fe-step-g button:hover { background: #fbe9e5; } }
+.fe-step-g :is(input, .bk-gnum) { transition: transform 300ms var(--fe-spring); }
+.fe-step-g:has(button:active) :is(input, .bk-gnum) { transform: scale(1.12); }
+
+/* 5 · chips and tiles: press .97, 1px lift on hover devices */
+.fe-card .fk-f-chip:enabled:active, .fe-card label.fk-f-chip:active, .fe-card .fe-tile:active { scale: .97; }
+.fe-card .fk-f-chip--day, .fe-card .fk-f-chip--day[aria-pressed="true"] { transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, scale 120ms var(--fe-tap), translate 150ms var(--fe-out); }
+.fe-card .fe-link, .fe-card .fe-pick { transition: scale 120ms var(--fe-tap); }
+.fe-card :is(.fe-link, .fe-pick):active { scale: .96; }
+@media (hover: hover) {
+  .fe-card .fk-f-chip:not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled)):hover { translate: 0 -1px; }
+  .fe-card .fe-tile:hover { translate: 0 -1px; }
+}
+/* narrow phones (360-399): the WhatsApp label stays whole beside the icon and the chip */
+@media (max-width: 399px) {
+  .fe-card .fe-go.fe-go--wa { gap: 8px; padding-left: 14px; }
+  .fe-card .fe-go-wa { width: 22px; height: 22px; }
+  .fe-go-spin { margin: 3px; }
 }

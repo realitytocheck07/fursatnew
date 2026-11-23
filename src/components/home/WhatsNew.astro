@@ -83,7 +83,7 @@ const SIZES = '(max-width: 639px) 92vw, (max-width: 1019px) 50vw, 34vw';
               </>
             )}
             {hasTop && c.image && (
-              <div class="fw-ph" style={lqip}>
+              <div class="fw-ph fk-dna" style={lqip}>
                 <img src={c.image.src} srcset={c.image.srcset} sizes={SIZES} width={c.image.width} height={c.image.height} alt={c.image.alt} loading="lazy" decoding="async" />
               </div>
             )}
@@ -386,7 +386,7 @@ const SIZES = '(max-width: 639px) 92vw, (max-width: 1019px) 50vw, 34vw';
 }
 
 /* photo at the top: bleeds to the card edge */
-.fw-ph { margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 18px; aspect-ratio: 4 / 3; max-height: 340px; background-color: #3a1a1f; overflow: hidden }
+.fw-ph { margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 18px; max-height: 340px; background-color: #3a1a1f }
 .fw-ph img { display: block; width: 100%; height: 100%; object-fit: cover }
 
 /* top row */

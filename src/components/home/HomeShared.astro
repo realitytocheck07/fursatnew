@@ -1,6 +1,7 @@
 ---
 // Shared by the Home sections: design system (fk-tokens.css), section rhythm and the shared reveal.
 import '../../styles/fk-tokens.css';
+import '../../styles/dna-card.css';
 // Reveal (same contract as fk-motion's v5.12a reveal, without loading Motion/Anime.js on Home):
 //   [data-fk-reveal]  fades in + rises 12px once when it enters the screen
 //   [data-fk-stagger] group: direct children reveal one after another (value = step in ms, 60–100, group capped at 400ms)
@@ -27,6 +28,17 @@ import '../../styles/fk-tokens.css';
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(sweep)}},{passive:true});
   addEventListener('resize',sweep,{passive:true});
   setTimeout(sweep,2500);addEventListener('pageshow',sweep);
+})();
+</script>
+<script is:inline>
+/* DNA card reveal: the shape opens from the bottom (600ms), 80ms stagger per card entering together. Frames on screen at load are never hidden. */
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var f=[].slice.call(document.querySelectorAll('.fk-dna')),vh=innerHeight||document.documentElement.clientHeight;
+  var io=new IntersectionObserver(function(es){var n=0;es.forEach(function(e){if(!e.isIntersecting)return;
+    e.target.style.setProperty('--dna-d',(n++*80)+'ms');e.target.classList.add('is-in');io.unobserve(e.target)})},{threshold:.15});
+  f.forEach(function(el){if(el.getBoundingClientRect().top<vh)return;el.classList.add('fk-dna-pre');io.observe(el)});
+  setTimeout(function(){f.forEach(function(el){el.classList.add('is-in')})},4000);
 })();
 </script>
 <style is:global>

@@ -15,9 +15,9 @@ import InstaFeed from '../InstaFeed.astro';
     <div class="hst-btns"><a class="fk-btn fk-btn--secondary" href="/story">Read our story</a></div>
     <InstaFeed handle="fursatind.in" count={3} />
   </div>
-  <figure class="hst-ph" data-fk-reveal>
+  <div class="hst-phw fk-dna-sh"><figure class="hst-ph fk-dna" data-fk-reveal>
     <img src="/assets/interior/fursat_space_03-720.webp" alt="Fursat interior with patterned wooden screens, green plants and a black-and-white tiled floor" width="720" height="900" loading="lazy" decoding="async" />
-  </figure>
+  </figure></div>
 </section>
 
 <style is:global>
@@ -28,11 +28,13 @@ import InstaFeed from '../InstaFeed.astro';
 .hst-stats li+li::before{content:"·";margin:0 12px;color:#b8892e;font-weight:700}
 .hst-stats b{font-family:'Playfair Display',serif;font-weight:600;font-size:1.5rem;line-height:1;color:#1b3a26}
 .hst-btns{margin-top:8px}
-.hst-ph{margin:0;border-radius:26px;overflow:hidden;background:#d9cdb3;aspect-ratio:4/5;max-height:560px;width:100%}
+.hst-phw{min-width:0;align-self:center}
+.hst-ph{margin:0;background:#d9cdb3;max-height:560px;width:100%}
 .hst-ph img{display:block;width:100%;height:100%;object-fit:cover}
 @media(max-width:899px){
   .hst{grid-template-columns:minmax(0,1fr)}
-  .hst-ph{order:-1;aspect-ratio:4/3;max-height:none}
+  .hst-phw{order:-1}
+  .hst-ph{max-height:none}
 }
 @media(max-width:599px){
   .hst-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}

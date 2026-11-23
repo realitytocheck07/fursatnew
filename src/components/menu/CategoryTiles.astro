@@ -1,21 +1,81 @@
 ---
 // Big category tiles at the top of each list (Food = "The Table", Drinks = "The Bar"): real group names and real counts from the menu data.
 // Tap one: it turns gold, a check springs in, then the page scrolls to that category (menu-v2.ts). Drinks go through the 21+ check first.
+// v5.115 MT (Food only): a real dish photo fades into the right of each tile, an arrow circle bottom-left, the chef elephant peeks over the grid, one-line subtitle.
 interface Tile { id: string; label: string; count: number }
 interface Props { side: 'food' | 'drinks'; tiles: Tile[] }
 const { side, tiles } = Astro.props as Props;
 const unit = (n: number) => (side === 'food' ? (n === 1 ? 'dish' : 'dishes') : (n === 1 ? 'drink' : 'drinks'));
+
+// SWAP A TILE PHOTO = change ONE line here. `file` is the stem of a pair in public/assets/menu-tiles/ (<file>-360.webp + <file>-540.webp, square crops).
+// `file: null` = gold line icon instead of a photo (Breads until the owner sends one).
+// TODO(client): replace the generated caesar-salad photo (f-soups) with a real one.
+const TILE_PHOTO: Record<string, { file: string | null; cut?: boolean; pos?: string }> = {
+  'f-biryani':   { file: 'mt3-biryani', cut: true },
+  'f-starters':  { file: 'mt3-starters', cut: true },
+  'f-mains':     { file: 'mt3-mains', pos: '50% 50%' },
+  'f-breads':    { file: 'mt3-breads', pos: '50% 50%' },
+  'f-soups':     { file: 'mt3-soups', pos: '50% 50%' },
+  'f-breakfast': { file: 'mt3-breakfast', pos: '50% 50%' },
+  'f-more':      { file: 'mt3-burgers', pos: '50% 50%' },
+  'f-desserts':  { file: 'mt3-desserts', cut: true },
+};
+const isFood = side === 'food';
 ---
 <nav class={`mc-tiles mc-tiles--${side}`} id={`mc-${side}`} aria-label={side === 'food' ? 'Food categories' : 'Drink categories'}>
-  <ul class="mc-grid" role="list">
-    {tiles.map((t, i) => (
-      <li>
-        <button class="mc-tile" type="button" data-mc-go={t.id} data-side-of={side} style={`--i:${i}`}>
-          <span class="mc-n">{t.label}</span>
-          <span class="mc-c num">{t.count} {unit(t.count)}</span>
-          <span class="mc-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5.5 12.5 4.2 4.2 8.8-9.4" /></svg></span>
-        </button>
-      </li>
-    ))}
-  </ul>
+  {isFood && <p class="mc-sub">Choose your favourite category</p>}
+  <div class="mc-stage">
+    {isFood && (
+      <div class="mc-chef" aria-hidden="true">
+        <img src="/assets/brand/mascot/welcome-720.webp" width="720" height="720" alt="" decoding="async" />
+      </div>
+    )}
+    <ul class="mc-grid" role="list">
+      {tiles.map((t, i) => {
+        const ph = isFood ? TILE_PHOTO[t.id] : undefined;
+        return (
+          <li>
+            <button class="mc-tile" type="button" data-mc-go={t.id} data-side-of={side} style={`--i:${i}`}>
+              {ph && (
+                <span class={`mc-ph${ph.cut ? ' mc-ph--cut' : ''}`} aria-hidden="true">
+                  {ph.file ? (
+                    <img src={`/assets/menu-tiles/${ph.file}-360.webp`} srcset={`/assets/menu-tiles/${ph.file}-360.webp 360w, /assets/menu-tiles/${ph.file}-540.webp 540w`} sizes="(min-width: 768px) 170px, 100px" width="360" height={ph.cut ? 360 : 450} alt="" loading="lazy" decoding="async" style={`object-position:${ph.pos ?? '50% 50%'}`} />
+                  ) : (
+                    <svg class="mc-ph-ico" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M10 28c0-9 9-14 22-14s22 5 22 14c0 3-2 5-5 5v15a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4V33c-3 0-5-2-5-5Z" /><path d="M24 25l4 7M32 23l4 7M40 25l4 7" /></svg>
+                  )}
+                </span>
+              )}
+              <span class="mc-n">{isFood ? t.label.replace(/& /g, '&\u00a0') : t.label}</span>
+              {isFood ? (
+                <span class="mc-foot">
+                  <span class="mc-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12h13m-5-5 5 5-5 5" /></svg></span>
+                  <span class="mc-c num">{t.count} {unit(t.count)}</span>
+                </span>
+              ) : (
+                <span class="mc-c num">{t.count} {unit(t.count)}</span>
+              )}
+              <span class="mc-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5.5 12.5 4.2 4.2 8.8-9.4" /></svg></span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
 </nav>
+{isFood && (
+  <script>
+    // The chef springs in once when the tiles come into view, then sways (CSS). Without JS he simply stands there.
+    const chef = document.querySelector<HTMLElement>('.mc-tiles--food .mc-chef');
+    if (chef) {
+      if ('IntersectionObserver' in window) {
+        chef.classList.add('is-pre');
+        const io = new IntersectionObserver((es) => {
+          if (!es.some((e) => e.isIntersecting)) return;
+          io.disconnect();
+          chef.classList.add('is-in');
+        }, { threshold: 0.25 });
+        io.observe(chef.parentElement as HTMLElement);
+      }
+    }
+  </script>
+)}

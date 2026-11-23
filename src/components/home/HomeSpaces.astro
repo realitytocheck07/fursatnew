@@ -28,7 +28,7 @@ const IG = { 'kitchen-bar': 'fursatind.in', 'social-club': 'fursatsocialclub', '
   <div class="hw-panels">
     {SPACES.map((s, i) => (
       <article class="hw-panel fk-card fk-card--glass" id={`hw-p-${s.id}`} role="tabpanel" aria-labelledby={`hw-t-${s.id}`} data-hw={s.id} hidden={i !== 0}>
-        <span class="hw-ph"><img src={`${s.base}-720.webp`} srcset={`${s.base}-480.webp 480w, ${s.base}-720.webp 720w`} sizes="(min-width: 900px) 56vw, 92vw" alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width="720" height="540" /></span>
+        <span class="hw-phw fk-dna-sh"><span class="hw-ph fk-dna"><img src={`${s.base}-720.webp`} srcset={`${s.base}-480.webp 480w, ${s.base}-720.webp 720w`} sizes="(min-width: 900px) 56vw, 92vw" alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width="720" height="540" /></span></span>
         <div class="hw-info">
           <h3 class="hw-name">{s.label}</h3>
           <p class="hw-line">{s.line}</p>
@@ -73,7 +73,8 @@ const IG = { 'kitchen-bar': 'fursatind.in', 'social-club': 'fursatsocialclub', '
 .hw .hw-panel[hidden]{display:none!important}
 /* .fk-card--glass sets display:flex / overflow:visible at (0,2,0): this selector is stronger */
 .hw .hw-panel.fk-card{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch;gap:clamp(18px,3.4vw,48px);padding:clamp(10px,1.2vw,16px);border-radius:30px;background:linear-gradient(180deg,#fffaf0,#f7ecd5) !important;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 0 0 1px rgba(196,154,84,.38),0 22px 36px -24px rgba(70,45,10,.5) !important}
-.hw-ph{display:block;aspect-ratio:4/3;max-height:440px;min-height:0;overflow:hidden;border-radius:24px;box-shadow:0 20px 40px -22px rgba(22,48,26,.55)}
+.hw-phw{display:block;align-self:center;min-width:0}
+.hw-ph{display:block;max-height:440px;min-height:0}
 .hw-ph img{display:block;width:100%;height:100%;object-fit:cover}
 .hw-ig{grid-column:1/-1;padding:0 clamp(18px,3vw,36px) clamp(16px,2.4vw,28px)}
 .hw-ig .igf{margin:0}
@@ -88,6 +89,6 @@ const IG = { 'kitchen-bar': 'fursatind.in', 'social-club': 'fursatsocialclub', '
   .hw-panels{padding:0 16px}
   .hw .hw-panel.fk-card{grid-template-columns:minmax(0,1fr);gap:16px}
   .hw-info{padding:4px 10px 12px}
-  .hw-ph{aspect-ratio:4/3;max-height:none}
+  .hw-ph{max-height:none}
 }
 </style>

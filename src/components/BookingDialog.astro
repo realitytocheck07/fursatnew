@@ -160,10 +160,10 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
 .bk-grab { display: none; }
 @media (max-width: 640px) { .bk-grab { display: block; position: absolute; left: 50%; top: -16px; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: rgb(60 30 20 / .22); } .bk-top::after { content: ""; position: absolute; left: 0; right: 0; top: -22px; height: 22px; } }
 .bk-sheet .fe-h2 { margin: 0 0 12px; padding-right: 56px; text-align: left; font-size: clamp(28px, 7.4vw, 38px); outline: none; }
-.bk-x { position: absolute; right: 12px; top: 12px; z-index: 4; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #fff; color: #17140f; box-shadow: 0 2px 8px -4px rgb(60 30 20 / .3); cursor: pointer; transition: scale 120ms ease-out; }
+.bk-x { position: absolute; right: 12px; top: 12px; z-index: 4; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #fff; color: #17140f; box-shadow: 0 2px 8px -4px rgb(60 30 20 / .3); cursor: pointer; transition: background-color 200ms ease, scale 120ms cubic-bezier(.25, .46, .45, .94); -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .bk-x svg { width: 18px; height: 18px; }
-.bk-x:active { scale: .96; }
-.bk-x:focus-visible, .bk-sheet button:focus-visible, .bk-sheet .fk-f-chip:has(input:focus-visible) { outline: 3px solid rgb(180 18 22 / .35); outline-offset: 2px; }
+.bk-x:active { scale: .94; }
+.bk-x:focus-visible, .bk-sheet button:focus-visible, .bk-sheet .fk-f-chip:has(input:focus-visible) { outline: 3px solid rgb(180 18 22 / .25); outline-offset: 3px; }
 @media (hover: hover) { .bk-x:hover { background: #fbe9e5; } }
 
 /* welcome elephant peeks over the top-right edge, mirrored to point at the form */
@@ -195,20 +195,19 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
 .bk-times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .bk-zones { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 76px; }
 .bk-times .bk-chip { flex: none; }
-.bk-sheet .bk-chip { position: relative; flex: 1 1 auto; gap: 0; min-height: 44px; padding: 0 10px; background: #fffdf9; border: 1.5px solid #ecdcc4; color: #17140f; font-weight: 500; font-variant-numeric: tabular-nums; transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, opacity 200ms ease, scale 120ms ease-out; }
+.bk-sheet .bk-chip { position: relative; flex: 1 1 auto; gap: 0; min-height: 44px; padding: 0 10px; background: #fffdf9; border: 1.5px solid #ecdcc4; color: #17140f; font-weight: 500; font-variant-numeric: tabular-nums; transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, opacity 200ms ease, scale 120ms cubic-bezier(.25, .46, .45, .94), translate 150ms var(--bk-out); }
 .bk-times .bk-chip { padding: 0 4px; min-width: 0; }
 .bk-sheet .bk-chip:has(input:checked) { background-image: linear-gradient(180deg in oklab, #c4171c, var(--fe-red-d)); border-color: var(--fe-red-d); color: #fff; box-shadow: 0 6px 14px -6px rgb(146 9 12 / .55); }
 .bk-sheet .bk-chip:has(input:disabled) { opacity: .38; cursor: not-allowed; }
 .bk-sheet .bk-chip:has(input:disabled):active { scale: 1; }
 .bk-ck { color: #fff; margin: 0; }
 .bk-sheet .bk-chip:has(input:checked) .bk-ck { width: 14px; margin-right: 5px; transform: none; }
-@media (hover: hover) { .bk-sheet .bk-chip:not(:has(input:checked)):not(:has(input:disabled)):hover { border-color: var(--fe-red); } }
+@media (hover: hover) { .bk-sheet .bk-chip:not(:has(input:checked)):not(:has(input:disabled)):hover { border-color: var(--fe-red); } .bk-sheet .bk-chip:not(:has(input:disabled)):hover { translate: 0 -1px; } }
+.bk-sheet label.bk-chip:not(:has(input:disabled)):active { scale: .97; }
 
 /* guests stepper: number rolls (odometer) */
 .bk-sheet .bk-gpanel { padding: 8px; background: #fffdf9; border-color: #ecdcc4; }
-.bk-sheet .fe-step-g { grid-template-columns: 48px minmax(0, 1fr) 48px; }
-.bk-sheet .fe-card .fe-step-g button, .bk-sheet .fe-step-g button { width: 48px; height: 48px; font-size: 24px; background: #fff; color: var(--fe-red); border: 1px solid #ecdcc4; box-shadow: 0 2px 6px -3px rgb(120 70 20 / .3); transition: scale 120ms ease-out; }
-.bk-sheet .fe-step-g button:active { scale: .96; }
+.bk-sheet .fe-step-g button { box-shadow: 0 2px 6px -3px rgb(120 70 20 / .3); }
 .bk-gv { display: grid; place-items: center; min-width: 0; }
 .bk-gnum { justify-items: center; font: 600 30px/1.25 'Poppins', sans-serif; font-variant-numeric: tabular-nums; color: #17140f; min-width: 3ch; text-align: center; }
 
@@ -238,11 +237,6 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
 .bk-sheet .fe-actions--col:has(.fe-ring.is-ready) > .fe-masc-t { animation: none; }
 .bk-sheet .fe-actions--col.is-thumb:has(.fe-ring) > .fe-masc-t { animation: fe-thumb-in 500ms var(--bk-spring) both; }
 .bk-send { position: relative; }
-.bk-spin { display: none; flex: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgb(255 255 255 / .35); border-top-color: #fff; animation: bk-spin .7s linear infinite; }
-.bk-send.is-busy .bk-spin { display: block; }
-.bk-send.is-busy .fe-go-wa { display: none; }
-.bk-send.is-busy { pointer-events: none; }
-@keyframes bk-spin { to { transform: rotate(360deg); } }
 
 /* done: arch + namaste + 18 sparkles that stay and drift + wave */
 .bk-done.fe-done { inset: 0; border-radius: 0 0 var(--bk-r) var(--bk-r); background: linear-gradient(180deg, #fff8ee, #fbf0e1); justify-content: center; padding: 16px 0 clamp(96px, 26vw, 128px); z-index: 5; }
@@ -427,7 +421,7 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
     if (!S.day || S.day < today() || (S.day === today() && !avail(today()).some(function (t) { return t.label === S.time; }))) {
       goStep(1); buildDays(); S.day = ''; S.time = ''; render(); hint.textContent = 'That time has just passed. Please pick another.'; return;
     }
-    S.busy = true; send.setAttribute('aria-busy', 'true'); send.classList.add('is-busy');
+    S.busy = true; send.setAttribute('aria-busy', 'true'); send.style.width = send.offsetWidth + 'px'; send.classList.add('is-busy');
     ls('fz_n', nm); ls('fz_m', x); ls('fz_e', ev); ls('fk-me', JSON.stringify({ name: nm, phone: x, email: ev }));
     var dt = new Date(S.day + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
     var msg = ['Hi Fursat! 👋 I would like to reserve a table:', '• Name: ' + nm, '• Phone: +91 ' + x.slice(0, 5) + ' ' + x.slice(5)].concat(ev ? ['• Email: ' + ev] : [], ['• Date: ' + dt, '• Time: ' + S.time, '• Guests: ' + S.guests, '• Zone: ' + S.zone]).join('\n');
@@ -439,7 +433,8 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
     document.body.appendChild(a); a.click(); a.remove();
     $('bk-done-wa').href = url;
     [].forEach.call(send.querySelectorAll('.fe-go-roll > span'), function (s) { s.textContent = 'Opening WhatsApp…'; });
-    setTimeout(showDone, 450);
+    setTimeout(function () { send.classList.add('is-ok'); }, 450);
+    setTimeout(showDone, 750);
   }
   function showDone() {
     S.step = 3; sheet.setAttribute('data-step', '3'); $('bk-steplabel').textContent = LABEL[3];
@@ -447,7 +442,7 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
     main.style.minHeight = Math.min(540, Math.max(380, innerHeight - 260)) + 'px';
     setTimeout(function () { var t = $('bk-done-t'); if (t) t.focus({ preventScroll: true }); }, 120);
   }
-  function resetSend() { S.busy = false; send.removeAttribute('aria-busy'); send.classList.remove('is-busy'); [].forEach.call(send.querySelectorAll('.fe-go-roll > span'), function (s) { s.textContent = 'Send on WhatsApp'; }); }
+  function resetSend() { S.busy = false; send.removeAttribute('aria-busy'); send.classList.remove('is-busy', 'is-ok'); send.style.width = ''; [].forEach.call(send.querySelectorAll('.fe-go-roll > span'), function (s) { s.textContent = 'Send on WhatsApp'; }); }
   $('bk-again').addEventListener('click', function () {
     doneEl.classList.remove('is-in'); doneEl.hidden = true; scroll.inert = false; main.style.minHeight = ''; resetSend();
     S.step = 3; goStep(2);

@@ -28,12 +28,63 @@ import MarqueeStrip from './MarqueeStrip.astro';
 
   
  </div>
+  <div class="fxs-wrap" id="fxsw" inert aria-hidden="true">
+   <figure class="fxs-tile"><img src="/assets/dishes/new/fursat-rahasyam-480.webp" width="480" height="720" alt="Fursat Rahasyam, a layered house cocktail" loading="lazy" decoding="async" /></figure>
+   <div class="fxs-card">
+    <img class="fxs-el" src="/assets/brand/mascot/welcome-480.webp" width="480" height="480" alt="" loading="lazy" decoding="async" />
+    <p class="fxs-pill fxs-st" style="--i:0"><i aria-hidden="true"></i>Capital Park, Madhapur</p>
+    <h2 class="fxs-h"><b class="fxs-st" style="--i:1"><u>Experience the vibe.</u></b><b class="fxs-st" style="--i:2"><u>Feel the <em>Fursat.</em></u></b></h2>
+    <p class="fxs-p fxs-st" style="--i:3">South Indian flavours, continental classics and crafted drinks, and a hall for your celebrations.</p>
+    <div class="fxs-btns fxs-st" style="--i:4"><button class="fk-btn fk-btn--primary fk-btn--md fxs-book" type="button" data-open="book">Book a table <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><a class="fk-btn fk-btn--secondary fk-btn--md" href="#whats-new">See what&rsquo;s on</a></div>
+   </div>
+  </div>
+  <i class="fxs-rim" aria-hidden="true"></i>
 <MarqueeStrip />
 </section>
 <script is:inline>
 /* Time-of-day greeting: the data-greet text in the HTML is the neutral fallback; swap it by the visitor's local hour. Same size, so nothing shifts. */
 (function(){var e=document.querySelector('.fx-h1[data-greet]');if(!e)return;var h=new Date().getHours();
 e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&&h<17?'Good afternoon · long lunch':h>=17&&h<22?'Good evening · drinks & dinner':'Late night · the bar is on')})();
+</script>
+
+<script is:inline>
+/* H1 part B: after ONE round of the reel (or an early scroll / tap) the framed box grows into the right half and the card slides in. Box = clip-path + inner video translate/scale (FLIP), nothing animates width/height. Returning visitors (sessionStorage fx-split) land on the split. */
+(function(){
+var hero=document.getElementById('top'),pl=document.getElementById('fxpl'),stg=document.getElementById('fxstage'),wrap=document.getElementById('fxsw'),rim=hero&&hero.querySelector('.fxs-rim'),rv=document.getElementById('fxrv');
+if(!hero||!pl||!stg||!wrap||!rim)return;
+var on=false,tm=0,goAt=0,de=document.documentElement,KEY='fx-split';
+function phone(){return matchMedia('(max-width:899px)').matches}
+function vids(){return[document.getElementById('fxplv'),document.getElementById('fxrvf')].filter(Boolean)}
+function cov(v,w,h){var f=v.id==='fxrvf',vw=v.videoWidth||(f?540:1280),vh=v.videoHeight||(f?960:720);return Math.max(w/vw,h/vh)}
+function open(){wrap.removeAttribute('inert');wrap.removeAttribute('aria-hidden')}
+function split(now){
+ if(on)return;on=true;clearTimeout(tm);try{sessionStorage.setItem(KEY,'1')}catch(e){}
+ if(now){hero.classList.add('fxs-on','fxs-now','fxs-go','fxs-done');open();return}
+ var b=pl.getBoundingClientRect(),h=hero.getBoundingClientRect(),ctl=pl.querySelector('.hx-ctl'),dn=document.getElementById('fxdn'),vs=vids();
+ if(!phone()){var g=getComputedStyle(stg).gridTemplateRows;if(g&&g!=='none')stg.style.gridTemplateRows=g}  /* freeze the rows: the box leaving the grid must not move the old text */
+ hero.classList.add('fxs-on');
+ var p=pl.getBoundingClientRect(),R=phone()?28:36,t=b.top-p.top,l=b.left-p.left,r=p.right-b.right,bt=p.bottom-b.bottom;
+ pl.style.clipPath='inset('+t+'px '+r+'px '+bt+'px '+l+'px round '+R+'px)';
+ rim.style.cssText='left:'+(b.left-h.left)+'px;top:'+(b.top-h.top)+'px;width:'+b.width+'px;height:'+b.height+'px;border-radius:'+R+'px';
+ var dx=(b.left+b.width/2)-(p.left+p.width/2),dy=(b.top+b.height/2)-(p.top+p.height/2);
+ vs.forEach(function(v){v.style.translate=dx+'px '+dy+'px';v.style.scale=cov(v,b.width,b.height)/cov(v,p.width,p.height)});
+ if(ctl)ctl.style.translate=l+'px '+t+'px';
+ if(dn){var left=getComputedStyle(dn).left!=='auto';dn.style.translate=(left?l:-r)+'px '+(-bt)+'px'}
+ void pl.offsetWidth;                                   /* commit the start frame */
+ open();hero.classList.add('fxs-go');
+ pl.style.clipPath='';vs.forEach(function(v){v.style.translate='';v.style.scale=''});if(ctl)ctl.style.translate='';if(dn)dn.style.translate='';
+ setTimeout(function(){hero.classList.add('fxs-done');rim.removeAttribute('style')},1700)}
+function active(){return hero.classList.contains('go')&&!de.classList.contains('lock')&&Date.now()-goAt>600}
+if(hero.classList.contains('go'))goAt=Date.now();
+else if(window.MutationObserver){var mg=new MutationObserver(function(){if(hero.classList.contains('go')){goAt=Date.now();mg.disconnect()}});mg.observe(hero,{attributes:true,attributeFilter:['class']})}
+/* one round done: 10.js hands the reel over to the master loop and adds .out to #fxrv; wait for the crossfade, then split */
+if(rv&&window.MutationObserver){var mr=new MutationObserver(function(){if(rv.classList.contains('out')){mr.disconnect();tm=setTimeout(function(){split()},800)}});mr.observe(rv,{attributes:true,attributeFilter:['class']})}
+/* early: a scroll (desktop scrolls the body, so listen in the capture phase) or a tap anywhere but the hero controls */
+document.addEventListener('scroll',function(e){if(on||!active())return;var s=e.target,y=(s&&(s.scrollingElement||s).scrollTop)||window.scrollY||0;if(y>8)split()},{passive:true,capture:true});
+document.addEventListener('pointerdown',function(e){if(on||!active())return;var c=e.target&&e.target.closest;if(c&&e.target.closest('.hx-ctl,#fxskipall'))return;split()},{passive:true,capture:true});
+var seen=false;try{seen=sessionStorage.getItem(KEY)==='1'}catch(e){}
+if(seen)split(true);
+})();
 </script>
 
 <style is:global>
@@ -57,9 +108,9 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
    Hooks kept: #top .go .reel-on, #fxstage #fxpl #fxrv #fxrvf #fxrvb #fxplv, .fx-h1 u, .rv, .hx-ctl. */
 .fxhero .fx-olive{display:none}
 @media (min-width: 900px) {
-  html .fxhero { --u: 1; --r: 1; --hh: clamp(500px, calc(100dvh - var(--sh-h, 104px) - 30px), 900px); --h1: clamp(52px, min(6.6vw, 10.6vh), 112px); height: var(--hh); margin-top: 0; }
+  html .fxhero { --u: 1; --r: 1; --mq-h: 56px; --hh: clamp(500px, calc(100dvh - var(--sh-h, 104px) - 30px), 900px); --h1: clamp(52px, min(6.6vw, 10.6vh), 112px); height: var(--hh); margin-top: 0; }
   html .fxhero .fx-stage { position: relative; left: auto; top: auto; width: 100%; max-width: 1760px; height: 100%; margin: 0 auto; transform: none;
-    padding: 0 clamp(32px, 6vw, 112px) 0 clamp(176px, 14vw, 270px); box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto;
+    padding: 0 clamp(32px, 6vw, 112px) var(--mq-h) clamp(176px, 14vw, 270px); box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto;
     align-content: center; column-gap: clamp(24px, 4vw, 80px); }
   html .fxhero .txt, html .fxhero .fx-logo, html .fxhero .askdock { margin-left: 0; }
   html .fxhero .txt { position: relative; left: auto; top: auto; width: auto; height: auto; grid-column: 1; grid-row: 1; align-self: end; padding-top: 34px; z-index: 5; }
@@ -72,7 +123,7 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
   html .fxhero .fx-btns .fk-btn.fk-btn--md { font-size: 14.5px; padding: 0 24px; }
   html .fxhero .fx-info { position: relative; left: auto; top: auto; grid-column: 1; grid-row: 2; align-self: start; justify-self: start; margin-top: 26px; width: auto; max-width: none; z-index: 5; }
   html .fxhero .fx-pl { position: relative; right: auto; top: auto; grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: center; z-index: 2;
-    width: min(100%, calc((var(--hh) - 44px) * .9)); height: auto; aspect-ratio: 9 / 10; border-radius: 36px;
+    width: min(100%, calc((var(--hh) - var(--mq-h) - 44px) * .9)); height: auto; aspect-ratio: 9 / 10; border-radius: 36px;
     box-shadow: 0 0 0 1px rgba(214,160,64,.6), 0 2px 0 0 rgba(255,236,190,.6) inset, 0 44px 80px -34px rgba(60,32,8,.6), 0 0 120px -30px rgba(240,160,60,.5); }
   html .fxhero .fx-pl { isolation: isolate; }
   html .fxhero .fx-rv { border-radius: inherit; }
@@ -85,6 +136,12 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
     font: 800 min(16.5vw, 35vh)/.8 var(--serif); letter-spacing: -.06em; color: rgba(190,132,44,.15); }
 }
 @media (max-width: 899px) {
+  /* H1 part A (phone): the hero is exactly one screen under the header; the video box takes whatever height is left, so the ribbon (56px) sits on the first screen */
+  html .fxhero { --mq-h: 56px; height: calc(100svh - var(--sh-h, 94px) - 76px - env(safe-area-inset-bottom, 0px)); min-height: 520px; padding-bottom: var(--mq-h); display: flex; flex-direction: column; box-sizing: border-box; }
+  html .fxhero .fx-stage { flex: 1 1 auto; min-height: 0; }
+  html .fxhero .fx-pl { flex: 1 1 0; min-height: 150px; aspect-ratio: auto !important; margin-top: 16px; }
+  /* the fixed mobile bar (64px + 12px gap) covers the bottom of the screen, so the hero ends above it and the ribbon is the last thing you see over the bar */
+  @media (max-height: 780px) { html .fxhero .fx-h1 { font-size: clamp(36px, 10.4vw, 66px); } html .fxhero .fx-p { margin-top: 10px; font-size: 14px; line-height: 1.45; } html .fxhero .fx-btns { margin-top: 12px; } html .fxhero .txt .fx-h1[data-greet] { margin-top: 30px; } }
   .fxhero .fx-pl { isolation: isolate; }
   .fxhero .fx-rv { border-radius: inherit; }
   .fxhero .fx-pl { border-radius: 28px; box-shadow: 0 0 0 1px rgba(214,160,64,.55), 0 28px 50px -26px rgba(60,32,8,.55); }
@@ -92,5 +149,73 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
   html .fxhero .fx-stage::before { opacity: 0; transform: translate3d(0, 5%, 0); transition: opacity 1.6s cubic-bezier(.22,1,.36,1) .35s, transform 1.6s cubic-bezier(.22,1,.36,1) .35s; }
   html .fxhero.go .fx-stage::before { opacity: 1; transform: none; }
+}
+
+/* ── H1 part B (fxs-): split after one round (fxs- prefix). Layout B: the video box stays right and grows to the right half; the card takes the left. ── */
+.fxs-wrap{display:none}
+html .fxhero{position:relative}
+html .fxhero .fxs-wrap{display:flex;visibility:hidden;position:absolute;z-index:5;flex-direction:column}
+html .fxhero.fxs-go .fxs-wrap{visibility:visible}
+html .fxhero .fxs-rim{display:none;position:absolute;z-index:3;pointer-events:none;box-shadow:0 0 0 1px rgba(214,160,64,.6),0 44px 80px -34px rgba(60,32,8,.6),0 0 120px -30px rgba(240,160,60,.5);opacity:1}
+html .fxhero.fxs-on .fxs-rim{display:block}
+html .fxhero.fxs-go .fxs-rim{opacity:0;transition:opacity .3s ease-out}
+html .fxhero.fxs-done .fxs-rim,html .fxhero.fxs-now .fxs-rim{display:none}
+/* the box becomes the panel (final geometry; the framed look is a clip-path window onto it) */
+html .fxhero.fxs-on .fx-stage{position:static}
+html .fxhero.fxs-on .fx-pl{position:absolute;grid-area:auto;justify-self:stretch;align-self:stretch;margin:0;max-width:none;aspect-ratio:auto!important;border-radius:0;box-shadow:none;clip-path:inset(0 0 0 0 round 0px);z-index:2;transition:none}
+html .fxhero.fxs-go .fx-pl{transition:clip-path .9s cubic-bezier(.22,1,.36,1)}
+html .fxhero.fxs-on .fx-pl-rv,html .fxhero.fxs-on .fx-rv-f{scale:1.04}
+html .fxhero.fxs-go .fx-pl-rv,html .fxhero.fxs-go .fx-rv-f{transition:translate .9s cubic-bezier(.22,1,.36,1),scale .9s cubic-bezier(.22,1,.36,1),opacity .4s ease}
+html .fxhero.fxs-go .hx-ctl,html .fxhero.fxs-go .fx-dn{transition:translate .9s cubic-bezier(.22,1,.36,1)}
+/* old text: up 12px and out in 300ms; the h1 stays in the page for readers and search */
+html .fxhero.fxs-go .txt{opacity:0;transform:translate3d(0,-12px,0);pointer-events:none;transition:opacity .3s ease,transform .3s ease}
+html .fxhero.fxs-go .txt .fx-p,html .fxhero.fxs-go .txt .fx-btns{visibility:hidden;transition:visibility 0s .3s}
+html .fxhero.fxs-go .fx-info{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s .3s}
+html .fxhero.fxs-go .fx-stage::before{opacity:0;transition:opacity .4s ease}
+/* the card */
+.fxs-tile{margin:0;flex:none;overflow:hidden;border-radius:20px;box-shadow:0 18px 36px -18px rgba(60,32,8,.55),0 0 0 1px rgba(214,160,64,.5);opacity:0;transform:scale(.96);transform-origin:100% 100%}
+.fxs-tile img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 58%}
+html .fxhero.fxs-go .fxs-tile{opacity:1;transform:none;transition:opacity .5s ease-out .4s,transform .5s cubic-bezier(.34,1.56,.64,1) .4s}
+.fxs-card{position:relative;flex:none;display:flex;flex-direction:column;align-items:flex-start;box-sizing:border-box;background:#FBF4E4;border-radius:28px;box-shadow:0 0 0 1px rgba(214,160,64,.4),0 34px 60px -30px rgba(60,32,8,.55);opacity:0;transform:translate3d(-24px,0,0)}
+html .fxhero.fxs-go .fxs-card{opacity:1;transform:none;transition:opacity .45s ease-out .25s,transform .6s cubic-bezier(.34,1.56,.64,1) .25s}
+.fxs-el{position:absolute;z-index:2;pointer-events:none;height:auto;opacity:0;transform:translate3d(-10px,14px,0) scale(.6) rotate(-8deg);transform-origin:50% 100%;filter:drop-shadow(0 10px 14px rgba(60,32,8,.28))}
+html .fxhero.fxs-go .fxs-el{opacity:1;transform:none;transition:opacity .4s ease-out .55s,transform .7s cubic-bezier(.34,1.56,.64,1) .55s}
+.fxs-pill{display:inline-flex;align-items:center;gap:8px;margin:0;padding:7px 14px;border-radius:9999px;background:rgba(214,160,64,.16);color:#6b5a2c;font:600 12px/1 var(--fk-font-text,'Poppins',system-ui,sans-serif);letter-spacing:.1em;text-transform:uppercase}
+.fxs-pill i{width:7px;height:7px;border-radius:50%;background:#c0291f}
+.fxs-h{margin:14px 0 0;font:700 var(--fxs-h1,40px)/1 var(--serif);letter-spacing:-.03em;color:#1A1608}
+.fxs-h b{display:block;overflow:hidden;padding-bottom:.1em;font-weight:inherit}
+.fxs-h u{display:inline-block;text-decoration:none;transform:translate3d(0,112%,0)}
+.fxs-h em{font-style:normal;color:#c0291f}
+.fxs-p{margin:12px 0 0;max-width:30rem;font:400 15px/1.55 var(--fk-font-text,'Poppins',system-ui,sans-serif);color:rgba(26,22,8,.72)}
+.fxs-btns{display:flex;flex-wrap:wrap;align-self:stretch;gap:10px;margin-top:20px}
+.fxs-btns .fk-btn{white-space:nowrap}
+.fxhero .fxs-btns .fk-btn.fxs-book{background:linear-gradient(#c4171c,#9e0b10);border-color:#9e0b10;color:#fff;box-shadow:0 6px 16px -6px rgb(146 9 12 / .5),inset 0 1px 0 rgb(255 255 255 / .2)}
+.fxhero .fxs-btns .fxs-book svg{width:16px;height:16px;flex:none}
+@media (hover:hover){.fxhero .fxs-btns .fk-btn.fxs-book:hover{background:linear-gradient(#d11d22,#a80d12);border-color:#a80d12;color:#fff}}
+.fxs-st{opacity:0;transform:translate3d(0,14px,0)}
+html .fxhero.fxs-go .fxs-st{opacity:1;transform:none;transition:opacity .5s ease-out calc(.4s + var(--i) * .08s),transform .6s cubic-bezier(.34,1.56,.64,1) calc(.4s + var(--i) * .08s)}
+html .fxhero.fxs-go .fxs-h .fxs-st{opacity:1;transform:none;transition:none}
+html .fxhero.fxs-go .fxs-h u{transform:none;transition:transform .7s cubic-bezier(.22,1,.36,1) calc(.4s + var(--i,1) * .08s)}
+.fxs-h b{--i:1}.fxs-h b+b{--i:2}
+html .fxhero.fxs-now *{transition:none!important}
+@media (min-width: 900px) {
+  html .fxhero.fxs-on .fx-pl{left:50%;right:0;top:0;bottom:calc(var(--mq-h) / 2);width:auto;height:auto}
+  html .fxhero .fxs-wrap{left:clamp(28px,5vw,96px);top:0;bottom:var(--mq-h);width:min(560px,calc(50% - clamp(28px,5vw,96px) - 28px));justify-content:center;gap:14px}
+  .fxs-tile{align-self:flex-end;width:clamp(104px,9vw,140px);aspect-ratio:1 / 1}
+  .fxs-card{padding:46px clamp(24px,2.4vw,34px) clamp(22px,2.6vw,32px)}
+  .fxs-el{left:-30px;top:-74px;width:clamp(92px,8.8vw,120px)}
+  .fxs-h{--fxs-h1:clamp(30px,min(3.3vw,6vh),54px)}
+}
+@media (min-width: 900px) and (max-height: 700px) { .fxs-tile{display:none} }
+@media (max-width: 899px) {
+  html .fxhero.fxs-on .fx-pl{left:0;right:0;top:0;bottom:auto;width:auto;height:56%;flex:none;min-height:0}
+  html .fxhero .fxs-wrap{left:12px;right:12px;bottom:calc(var(--mq-h) + 8px)}
+  .fxs-tile{position:absolute;right:8px;top:-58px;z-index:2;width:84px;height:84px;border-radius:16px}
+  .fxs-card{padding:40px 18px 18px;border-radius:24px}
+  .fxs-el{left:-6px;top:-54px;width:90px}
+  .fxs-h{--fxs-h1:clamp(26px,8vw,34px)}
+  .fxs-p{font-size:13.5px;line-height:1.45;margin-top:10px}
+  .fxs-btns{margin-top:14px}
+  .fxs-btns .fk-btn{flex:1 1 auto;justify-content:center}
 }
 </style>

@@ -31,6 +31,10 @@ export function feFlow(cfg) {
   const dateEl = $('[data-v="date"]'), gEl = $('[data-v="count"]'), daysEl = $('#fe-days');
   const nameEl = $('[data-v="text"][autocomplete="name"]'), phoneEl = $('[data-v="phone"]'), emailEl = $('input[type="email"]');
   const sendBtn = $('#fe-send'), ring = $('#fe-ring'), done = $('#fe-done');
+  /* sending state: the width is locked before the label swaps; a double tap is one open (sending guard + pointer-events off) */
+  const sendLab = $$('.fe-go-roll > span', sendBtn), sendTxt = sendLab[0].textContent;
+  const setSendLab = (t) => sendLab.forEach((s) => { s.textContent = t; });
+  const sendReset = () => { sendBtn.removeAttribute('aria-busy'); sendBtn.classList.remove('is-busy', 'is-ok'); sendBtn.style.width = ''; setSendLab(sendTxt); };
   /* F2d: gold sparkles that burst in on open (25ms stagger, spring) and then STAY, drifting gently.
      [left %, top %, kind (r = 4x9 piece, d = 4px dot), rotation] around the arch; CSS does the rest. */
   const SPARK = [[8, 30, 'r', -28], [13, 16, 'd', 0], [24, 8, 'r', 22], [37, 3, 'd', 0], [50, 1, 'r', -12], [63, 4, 'd', 0], [75, 8, 'r', 34], [89, 19, 'r', -40], [94, 33, 'd', 0], [86, 44, 'r', 58], [6, 47, 'r', 40], [9, 60, 'd', 0], [94, 56, 'd', 0], [3, 15, 'd', 0], [82, 2, 'd', 0], [31, 14, 'r', -52], [97, 10, 'r', 15], [4, 74, 'r', -50]];
@@ -190,6 +194,7 @@ export function feFlow(cfg) {
     [...step2, ...step3].forEach((el) => { const m = check(el); show(el, m); if (m) { fail(el); if (!first) first = el; } });
     if (first) { if (step2.includes(first)) go(2); focusFirst(first); return; }
     sending = true; sendBtn.setAttribute('aria-busy', 'true');
+    sendBtn.style.width = sendBtn.offsetWidth + 'px'; sendBtn.classList.add('is-busy'); setSendLab('Opening WhatsApp…');
     /* same fields, same order, same text as before the redesign */
     const lines = [form.dataset.waIntro], sent = {};
     cfg.order.forEach((id) => {
@@ -207,10 +212,14 @@ export function feFlow(cfg) {
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(lines.join('\n'));
     $('#fe-done-wa').href = url;
     const w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (x) {} }
-    $('.fe-step[data-step="3"] [data-fe-tk]').classList.add('is-torn');
-    done.hidden = false; void done.offsetWidth; done.classList.add('is-in'); if (innerWidth < 821) card.scrollIntoView({ behavior: 'smooth', block: 'end' }); ding();
+    /* the tick pops in the chip, then the tear and the done screen play together */
+    setTimeout(() => sendBtn.classList.add('is-ok'), 450);
+    setTimeout(() => {
+      $('.fe-step[data-step="3"] [data-fe-tk]').classList.add('is-torn');
+      done.hidden = false; void done.offsetWidth; done.classList.add('is-in'); if (innerWidth < 821) card.scrollIntoView({ behavior: 'smooth', block: 'end' }); ding();
+    }, 750);
   });
-  $('#fe-again').addEventListener('click', () => { done.classList.remove('is-in'); done.hidden = true; $$('.fe-tk').forEach((t) => t.classList.remove('is-torn')); sending = false; sendBtn.removeAttribute('aria-busy'); });
+  $('#fe-again').addEventListener('click', () => { done.classList.remove('is-in'); done.hidden = true; $$('.fe-tk').forEach((t) => t.classList.remove('is-torn')); sending = false; sendReset(); });
 
   /* height fit: first fit has no transition; later size changes (summary opens, errors, fonts) animate */
   vp.classList.add('fe-nofit'); fit(); requestAnimationFrame(() => requestAnimationFrame(() => vp.classList.remove('fe-nofit')));
