@@ -11,7 +11,7 @@
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || c.saveData || /(^|-)[23]g$/.test(c.effectiveType || '')) return;
 
   var ready = false, items = vids.map(function (v) {
-    var fig = v.closest('.hy-win'), ctl = fig.parentNode.querySelector('[data-hv-ctl].' + (fig.classList.contains('hy-m') ? 'hy-m' : 'hy-d'));  // the controls layer of the same view
+    var fig = v.closest('.hy-win'), ctl = (v.dataset.hvk && fig.parentNode.querySelector('[data-hv-ctl][data-hvk="' + v.dataset.hvk + '"]')) || fig.parentNode.querySelector('[data-hv-ctl].' + (fig.classList.contains('hy-m') ? 'hy-m' : 'hy-d'));  // the controls layer of the same window (hvk = view-windowIndex)
     return { v: v, ctl: ctl, inView: false, loaded: false };
   });
 

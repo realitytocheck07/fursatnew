@@ -1,6 +1,5 @@
 ---
 import InstaFollow from '../components/InstaFollow.astro';
-import site from '../data/site.json';
 // story.astro v4 — About / Our Story (mock-about.png). Hybrid: textless background art (public/assets/bg/about-*,
 // scripts/prep-bg.py) carries the carved plaster, frames, plates and green band; live HTML on top in stage units.
 // Real photos clipped into the traced frame holes. Motion: src/scripts/fk-motion.ts (Anime.js + Motion).
@@ -15,18 +14,7 @@ import aPhone from '../../scripts/bg-specs/about-phone.out.json';
 import '../styles/fk-tokens.css';
 
 // TODO(client): founder / story line (not shown until the client provides one).
-// TODO(client): FSSAI licence number and GSTIN in site.json legal.* — the rows appear automatically once filled.
-// Real facts only (handoff §3/§4). Values still TODO(client) in site.json are not shown.
-const real = (v?: string) => !!v && !v.startsWith('TODO');
-const address = `${site.address.line1}, ${site.address.line2}, ${site.address.state} ${site.address.pin}`;
-const legalRows = [
-  { k: 'Brand', v: 'Fursat Kitchen | Bar' },
-  { k: 'Address', v: address },
-  { k: 'Hours', v: site.hours.display },
-  { k: 'Phone', v: site.phone },
-  ...(real(site.legal.fssai) ? [{ k: 'FSSAI licence', v: site.legal.fssai }] : []),
-  ...(real(site.legal.gstin) ? [{ k: 'GSTIN', v: site.legal.gstin }] : []),
-];
+// Business details (address, hours, phone, FSSAI, GSTIN) live in SiteFooter and the LocalBusiness JSON-LD in Base.astro; the Story page no longer repeats them.
 
 // Red elephant silhouette traced from the real logo (/assets/c86f49db5a.webp), viewBox 0 0 140 176
 const elephant = 'M109.5 10.2 L108.2 10.8 L100.2 6.0 L94.5 5.0 L93.2 4.0 L81.5 4.0 L70.5 8.0 L64.0 13.2 L61.0 18.5 L60.0 24.2 L62.8 30.5 L66.5 33.8 L68.2 33.8 L69.5 34.8 L76.2 34.8 L81.8 31.2 L83.5 27.2 L81.2 24.0 L79.5 24.0 L76.2 27.0 L73.5 27.0 L71.8 25.2 L71.8 22.5 L75.5 18.8 L79.5 16.8 L88.2 16.8 L92.5 18.8 L98.0 25.5 L98.0 32.2 L95.0 37.5 L88.2 44.0 L73.5 52.0 L68.2 56.0 L65.0 56.5 L64.5 58.0 L55.0 67.5 L54.0 71.2 L52.0 72.5 L51.0 74.5 L51.0 76.2 L48.0 83.5 L48.0 98.2 L50.8 104.2 L50.2 105.5 L52.0 106.2 L52.8 107.2 L52.2 108.5 L57.5 112.8 L69.5 118.8 L72.2 118.8 L73.5 119.8 L80.2 119.8 L81.5 118.8 L84.5 119.5 L85.5 117.8 L88.2 116.8 L91.8 113.2 L91.8 111.5 L92.8 110.2 L92.8 105.5 L94.5 104.0 L96.0 106.5 L96.0 114.2 L95.0 115.5 L95.0 117.2 L89.2 123.0 L85.5 124.0 L82.2 126.0 L66.5 126.0 L65.2 125.0 L62.5 125.0 L56.5 122.0 L55.5 120.2 L54.2 120.8 L50.2 118.0 L43.8 110.2 L40.2 102.0 L38.5 102.0 L29.5 107.0 L24.2 112.0 L20.2 114.2 L20.5 116.0 L14.0 123.5 L5.2 139.2 L7.2 140.8 L13.2 138.0 L14.0 138.5 L12.2 141.2 L13.0 142.5 L13.0 150.2 L12.0 151.5 L12.0 160.2 L13.0 161.5 L13.0 166.2 L12.2 167.5 L14.0 168.5 L14.5 170.8 L35.2 170.8 L35.8 163.5 L36.8 162.2 L36.8 160.5 L39.8 157.2 L41.5 157.5 L42.5 155.8 L48.2 155.8 L53.0 160.5 L52.2 162.5 L54.0 163.5 L54.5 170.8 L74.2 170.8 L74.8 161.5 L76.8 158.2 L78.2 157.0 L79.5 157.5 L80.5 155.8 L86.2 155.8 L90.0 158.2 L92.0 161.5 L92.5 170.8 L117.8 170.2 L117.8 168.5 L116.8 167.2 L116.8 159.5 L115.8 158.2 L115.8 142.5 L116.8 141.2 L116.8 133.5 L117.8 132.2 L117.8 127.5 L119.8 125.2 L119.2 122.8 L125.8 114.2 L128.8 108.2 L128.8 106.5 L130.8 103.2 L130.8 101.5 L133.8 94.2 L133.8 90.5 L135.5 89.5 L134.8 88.2 L134.8 84.5 L136.5 82.5 L135.8 81.2 L135.8 64.5 L136.5 63.2 L134.8 61.2 L134.8 57.5 L135.5 56.2 L133.8 55.2 L132.8 48.5 L128.8 39.2 L129.5 37.2 L127.8 36.2 L121.8 24.5Z';
@@ -35,12 +23,14 @@ const elephant = 'M109.5 10.2 L108.2 10.8 L100.2 6.0 L94.5 5.0 L93.2 4.0 L81.5 4
 // The words "Inside Fursat" are baked into the video's title card (video-src/inside-fursat/index.html, plaque ~90% of the frame width). The oval window is a diagonal blob, so a full-width video cuts the plaque at its edge.
 // Fix (sp- block in the style below): the video sits in the part of the oval that is wide at every row the plaque covers, with soft edges. pos 50% 50% puts the plaque in the middle of the window.
 const heroVid = {
-  d: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
-  m: { mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+  // s: the dining-room frame on phones and tablets (<=820px, video fills the wavy frame). l: the entrance frame, desktop (>=821px) exactly as before. m kept for the phone art.
+  s: { vcls: 'hy-vs', mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
+  d: { vcls: 'hy-vl', mp4: '/assets/video/inside-fursat-720.mp4', webm: '/assets/video/inside-fursat-720.webm', pos: '50% 50%', credit: { label: 'Video: @framesofhyd', href: 'https://instagram.com/framesofhyd' } },
 };
 const P = {
-  entrance: { src: '/assets/interior/tour-entrance.webp', alt: 'The Fursat entrance corridor: an elephant mural on the wall that reads Fursat, Aur Kuch Nahi, with potted plants along the glass', w: 1050, h: 1400, pos: '50% 62%', eager: true },
-  dining: { src: '/assets/interior/fursat_space_07.webp', alt: 'The Fursat dining hall with dark wood tables, blue velvet chairs and patterned screens', w: 1920, h: 2560, pos: '50% 60%' },
+  entrance: { src: '/assets/interior/tour-entrance.webp', alt: 'The Fursat entrance corridor: an elephant mural on the wall that reads Fursat, Aur Kuch Nahi, with potted plants along the glass', w: 1050, h: 1400, pos: '50% 62%', eager: true, prio: 'auto' as const },
+  // C-01: the dining photo is the phone LCP. Eager + high priority + a real srcset (the source file is 1280x1706, so the top step is the original, not an upscale). The entrance photo stays eager but no longer competes for priority.
+  dining: { src: '/assets/interior/fursat_space_07.webp', srcset: '/assets/interior/fursat_space_07-720.webp 720w, /assets/interior/fursat_space_07-1080.webp 1080w, /assets/interior/fursat_space_07.webp 1280w', sizes: '(max-width: 767px) 66vw, 50vw', alt: 'The Fursat dining hall with dark wood tables, blue velvet chairs and patterned screens', w: 1280, h: 1706, pos: '50% 60%', eager: true, prio: 'high' as const },
   lounge: { src: '/assets/interior/tour-lounge.webp', alt: 'The lounge seating at Fursat', w: 1050, h: 1400, pos: '50% 45%' },
 };
 // Photo wall: venue + food photos only, no guests/faces (owner rule). Natural ratios give the mixed heights.
@@ -78,13 +68,14 @@ const split = (n: number) => {
 const wall3 = split(3);
 const wall2 = split(2);
 const values = [
-  { t: 'Exceptional Food', l: 'Authentic flavours, crafted with care.', i: '<path d="M3 20a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1Z"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4"/><path d="M10 4h4"/>' },
-  { t: 'Warm Hospitality', l: 'A welcoming space for everyone.', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
-  { t: 'Memorable Experiences', l: 'Dining, celebrations and more.', i: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>' },
-  { t: 'Togetherness', l: 'Good food brings us closer.', i: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>' },
+  { c: 'green', t: 'Exceptional Food', l: 'Authentic flavours, crafted with care.', i: '<path d="M3 20a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1Z"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4"/><path d="M10 4h4"/>' },
+  { c: 'terra', t: 'Warm Hospitality', l: 'A welcoming space for everyone.', i: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' },
+  { c: 'cream', t: 'Memorable Experiences', l: 'Dining, celebrations and more.', i: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>' },
+  { c: 'olive', t: 'Togetherness', l: 'Good food brings us closer.', i: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>' },
 ];
-const plateD = [{ x: 142, y: 1075 }, { x: 378, y: 1075 }, { x: 620, y: 1075 }, { x: 860, y: 1075 }];
-const plateM = [{ x: 303, y: 2083 }, { x: 703, y: 2083 }, { x: 303, y: 2378 }, { x: 703, y: 2378 }];
+// Ring centres and radii measured from the baked gold rings in about-desk-0 / about-phone-0 (circle fit), in stage units. The colour discs sit exactly inside them.
+const plateD = [{ x: 144.2, y: 1077.6, r: 99 }, { x: 379.8, y: 1078.1, r: 100.4 }, { x: 619.9, y: 1077.9, r: 101 }, { x: 857.6, y: 1078.9, r: 101 }];
+const plateM = [{ x: 301.9, y: 2120.6, r: 142 }, { x: 701.7, y: 2119.9, r: 142 }, { x: 302.2, y: 2119.5 + 295, r: 144 }, { x: 701.6, y: 2119.5 + 295, r: 144 }];
 import InstagramFeed from '../components/InstagramFeed.astro';
 ---
 
@@ -100,8 +91,8 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
   <main class="st" id="main">
     <section class="hy st-stage" aria-labelledby="st-h1">
-      <HyWindows data={aDesk} photos={[P.dining, { ...P.entrance, video: heroVid.d }, P.lounge]} view="d" />
-      <HyWindows data={aPhone} photos={[P.dining, { ...P.entrance, video: heroVid.m }, P.lounge]} view="m" />
+      <HyWindows data={aDesk} photos={[{ ...P.dining, video: heroVid.s }, { ...P.entrance, video: heroVid.d }, P.lounge]} view="d" />
+      <HyWindows data={aPhone} photos={[{ ...P.dining, video: heroVid.s }, P.entrance, P.lounge]} view="m" />
 
       <div class="st-hero" data-fx-hero>
         <p class="hy-kicker" data-fx-step>About Us</p>
@@ -111,6 +102,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </div>
 
       <div class="st-craft" data-fx-reveal>
+        <span class="st-craft-gap" aria-hidden="true"></span>
         <h2 class="fk-ty-h2 hy-h2 st-h2"><span>Crafted for</span> <span class="hl">Good Times</span></h2>
         <p class="hy-lead">FURSAT is more than a restaurant. It&rsquo;s a place where flavours, conversations and celebrations come together.</p>
         <p class="hy-lead">A café, a kitchen, a bar and banquet spaces under one roof at Capital Park, Madhapur. Come for a coffee, stay for dinner, bring everyone for the celebration.</p>
@@ -118,13 +110,26 @@ import InstagramFeed from '../components/InstagramFeed.astro';
         <p class="st-tag">Fursat, aur kuch nahi!</p>
       </div>
 
+      {/* Mascot: namaste → (hold 1.2s) → welcome, both in one box. welcome presents RIGHT in the file, so it is mirrored to point at the text. Plays once (story-values script adds .is-in). */}
+      <div class="st-mascot" data-st-mascot aria-hidden="true">
+        <img class="st-m-n" src="/assets/brand/mascot/namaste-720.webp" srcset="/assets/brand/mascot/namaste-480.webp 480w, /assets/brand/mascot/namaste-720.webp 720w" sizes="(max-width: 767px) 40vw, 22vw" width="720" height="720" alt="" decoding="async" fetchpriority="low" />
+        <span class="st-m-w"><img src="/assets/brand/mascot/welcome-720.webp" srcset="/assets/brand/mascot/welcome-480.webp 480w, /assets/brand/mascot/welcome-720.webp 720w" sizes="(max-width: 767px) 40vw, 22vw" width="720" height="720" alt="" decoding="async" fetchpriority="low" /></span>
+      </div>
+      <link rel="preload" as="image" type="image/webp" href="/assets/brand/mascot/welcome-720.webp" imagesrcset="/assets/brand/mascot/welcome-480.webp 480w, /assets/brand/mascot/welcome-720.webp 720w" imagesizes="(max-width: 767px) 40vw, 22vw" fetchpriority="low" />
+
       <h2 class="fk-ty-h2 st-vh">Our Values</h2>
-      <ul class="st-values" data-fx-pop aria-label="Our values">
+      <ul class="st-values" data-st-values aria-label="Our values">
         {values.map((v, i) => (
-          <li class="st-val" style={`--x:${plateD[i].x};--y:${plateD[i].y};--mx:${plateM[i].x};--my:${plateM[i].y}`} data-fx-tilt>
-            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={v.i} />
-            <h3 class="fk-ty-h4">{v.t}</h3>
-            <p>{v.l}</p>
+          <li class={`st-val st-val--${v.c}`} style={`--i:${i};--x:${plateD[i].x};--y:${plateD[i].y};--r:${plateD[i].r};--mx:${plateM[i].x};--my:${plateM[i].y};--mr:${plateM[i].r}`}>
+            <div class="st-lift">
+              <span class="st-disc"></span>
+              <span class="st-sheen" aria-hidden="true"><i></i></span>
+              <div class="st-val-in">
+                <svg viewBox="0 0 24 24" aria-hidden="true" set:html={v.i} />
+                <h3 class="fk-ty-h4">{v.t}</h3>
+                <p>{v.l}</p>
+              </div>
+            </div>
           </li>
         ))}
       </ul>
@@ -182,14 +187,6 @@ import InstagramFeed from '../components/InstagramFeed.astro';
       </ul>
     </section>
 
-    <section class="st-legal-wrap" aria-labelledby="st-lh">
-      <div class="fk-emboss st-legal">
-        <h2 class="fk-ty-h3" id="st-lh">Business information</h2>
-        <dl>
-          {legalRows.map((r) => (<div><dt>{r.k}</dt><dd>{r.v}</dd></div>))}
-        </dl>
-      </div>
-    </section>
   </main>
 
 <InstagramFeed account="main" layout="page" title="Latest from Fursat" />
@@ -198,6 +195,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   <SiteFooter />
   <MobileBar active="story" />
   <script>import '../scripts/fk-motion';</script>
+  <script>import '../scripts/story-values';</script>
   <script is:inline src="/js/story-hero.js" defer></script>
 </Base>
 
@@ -205,7 +203,6 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st { background: #10261a; color: var(--fk-ink); font-family: var(--fk-sans); overflow-x: clip; }
   .st :where(h1, h2, h3, p, ul, dl, dd, figure) { margin: 0; padding: 0; }
   .st :where(ul) { list-style: none; }
-  .st { --st-label: #74501a; }
   .st-stage { aspect-ratio: 1000 / 1500; background: url(/assets/bg/about-desk-0.webp) top / 100% auto no-repeat #f6e6d1; }
 
   .st-hero { z-index: 3; left: calc(72 * var(--u)); top: calc(168 * var(--u)); width: calc(390 * var(--u)); display: grid; gap: calc(16 * var(--u)); }
@@ -214,7 +211,12 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-orn { width: calc(270 * var(--u)); margin-top: calc(8 * var(--u)); }
   .st-orn svg { fill: #c0291f; }
 
-  .st-craft { z-index: 3; left: calc(570 * var(--u)); top: calc(560 * var(--u)); width: calc(390 * var(--u)); display: grid; gap: calc(14 * var(--u)); justify-items: start; }
+  /* Crafted for Good Times: text on the left, the mascot (.st-mascot) stands at its right. .st-craft-gap is a float that holds the mascot's place so the text wraps around it and never runs under it. */
+  .st-craft { z-index: 3; left: calc(548 * var(--u)); top: calc(552 * var(--u)); width: calc(436 * var(--u)); display: block; }
+  .st-craft > * + * { margin-top: calc(14 * var(--u)); }
+  .st-craft > .st-craft-gap { float: right; width: calc(196 * var(--u)); height: calc(226 * var(--u)); margin: 0 0 0 calc(10 * var(--u)); shape-outside: inset(0); }
+  .st-craft > .st-craft-gap + * { margin-top: 0; }
+  .st-craft .hy-lead { max-width: none; }
   /* The stage is art that scales with the page width. fk-ty-* gives the scale step; the min() keeps the heading inside the art when the stage is small (tablet, small phones). */
   .st .st-h2 { font-size: min(var(--fk-fs-6), calc(40 * var(--u))); margin-bottom: calc(6 * var(--u)); }
   .st-h2 span { display: block; }
@@ -226,12 +228,55 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
   .st-vh { z-index: 3; left: 0; width: 100%; top: calc(918 * var(--u)); text-align: center; color: #1b3a26; }
   .st .st-vh { font-size: min(var(--fk-fs-6), calc(36 * var(--u))); }
+
+  /* ---------- Our Values: coloured discs inside the baked gold rings ---------- */
+  .st { --st-green: #1b3a26; --st-terra: #a65823; /* brand terracotta #b5632a, one step deeper so light text clears 4.5:1 */ --st-cream: #f1dfc3; --st-gold: #e6c27a; --st-olive: #58612f; --st-light: #fbf3e6; }
   .st-values { z-index: 3; inset: 0; pointer-events: none; }
-  .st-val { position: absolute; left: calc(var(--x) * var(--u)); top: calc(var(--y) * var(--u)); width: calc(176 * var(--u)); height: calc(176 * var(--u)); translate: -50% -50%; border-radius: 50%; display: grid; place-content: center; justify-items: center; text-align: center; gap: calc(6 * var(--u)); padding: 0 calc(14 * var(--u)); pointer-events: auto; }
-  .st-val svg { width: calc(38 * var(--u)); min-width: 20px; height: auto; fill: none; stroke: #1b3a26; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-  .st-val h3 { color: #1b3a26; }
-  .st .st-val h3 { font-size: min(var(--fk-fs-4), calc(18 * var(--u))); }
-  .st-val p { font: 400 max(12px, calc(12.5 * var(--u))) / 1.4 var(--fk-sans); color: #4a4232; max-width: calc(140 * var(--u)); }
+  /* --r = ring radius in stage units; the li is the ring's outer circle (r + 5), the disc is inset to the ring's inner edge */
+  .st-val { --R: calc(var(--r) + 5); --ann: 82%; position: absolute; left: calc(var(--x) * var(--u)); top: calc(var(--y) * var(--u)); width: calc(var(--R) * 2 * var(--u)); height: calc(var(--R) * 2 * var(--u)); translate: -50% -50%; border-radius: 50%; pointer-events: auto; color: var(--st-light); -webkit-tap-highlight-color: transparent; }
+  .st-val--cream { color: var(--st-green); }
+  .st-lift { position: absolute; inset: 0; border-radius: 50%; transition: transform 150ms ease-out; }
+  .st-disc { position: absolute; inset: calc(8.5 * var(--u)); border-radius: 50%; background: var(--disc); box-shadow: inset 0 2px 2px rgba(255, 255, 255, .28), inset 0 -10px 16px rgba(0, 0, 0, .2), 0 6px 12px -6px rgba(40, 25, 5, .5); }
+  /* paper grain, same feel as the plaster */
+  .st-disc::before { content: ""; position: absolute; inset: 0; border-radius: 50%; opacity: .22; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .9 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+  /* hover / tap: the stronger shadow is its own layer so only opacity and transform change */
+  .st-disc::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 18px 28px -8px rgba(40, 25, 5, .65); opacity: 0; transition: opacity 150ms ease-out; z-index: -1; }
+  .st-val--green { --disc: radial-gradient(120% 120% at 30% 22%, #2b533a 0%, var(--st-green) 55%, #142c1d 100%); }
+  .st-val--terra { --disc: radial-gradient(120% 120% at 30% 22%, #b8692f 0%, var(--st-terra) 55%, #8c471b 100%); }
+  .st-val--cream { --disc: radial-gradient(120% 120% at 30% 22%, #f9edd0 0%, #eed9a6 55%, var(--st-gold) 100%); }
+  .st-val--olive { --disc: radial-gradient(120% 120% at 30% 22%, #6c7842 0%, var(--st-olive) 55%, #444c22 100%); }
+  .st-val-in { position: absolute; inset: calc(8.5 * var(--u)); display: grid; place-content: center; justify-items: center; text-align: center; gap: calc(6 * var(--u)); padding: 0 calc(16 * var(--u)); }
+  .st-val svg { width: calc(46 * var(--u)); min-width: 22px; height: auto; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .st-val h3 { color: currentColor; font-weight: 600; }
+  .st .st-val h3 { font-size: min(var(--fk-fs-4), calc(19 * var(--u))); line-height: 1.15; text-wrap: balance; }
+  /* captions stay in the DOM for screen readers; the reference shows icon + title only */
+  .st-val p { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (hover: hover) { .st-val:hover .st-lift { transform: translateY(-4px); } .st-val:hover .st-disc::after { opacity: 1; } }
+  .st-val:active .st-lift { transform: translateY(-4px); } .st-val:active .st-disc::after { opacity: 1; }
+  /* sheen: one gold sweep along the ring, masked to the ring band */
+  .st-sheen { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; pointer-events: none; -webkit-mask-image: radial-gradient(circle closest-side, transparent var(--ann), #000 calc(var(--ann) + 1%)); mask-image: radial-gradient(circle closest-side, transparent var(--ann), #000 calc(var(--ann) + 1%)); }
+  .st-sheen i { position: absolute; top: -10%; bottom: -10%; left: 0; width: 42%; background: linear-gradient(100deg, transparent 0, rgba(255, 200, 80, .7) 32%, rgba(255, 252, 232, 1) 50%, rgba(255, 200, 80, .7) 68%, transparent 100%); transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+  /* start state (only when JS runs, so a failed script never leaves the circles invisible) */
+  .js .st-values:not(.is-in) .st-val { opacity: 0; }
+  .st-values.is-in .st-val { animation: st-pop 400ms cubic-bezier(.2, 0, 0, 1) both; animation-delay: calc(var(--i) * 100ms); }
+  .st-values.is-in .st-sheen i { animation: st-sheen 800ms cubic-bezier(.4, 0, .2, 1) both; animation-delay: calc(var(--i) * 100ms + 400ms); }
+  @keyframes st-pop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes st-sheen { 0% { opacity: 1; transform: translateX(-130%) skewX(-14deg); } 100% { opacity: 1; transform: translateX(330%) skewX(-14deg); } }
+
+  /* ---------- Mascot: namaste -> welcome (mirrored to face the text) ---------- */
+  .st-mascot { z-index: 3; left: calc(786 * var(--u)); top: calc(560 * var(--u)); width: calc(206 * var(--u)); aspect-ratio: 1; pointer-events: none; }
+  .st-mascot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; display: block; }
+  .st-m-w { position: absolute; inset: 0; opacity: 0; }
+  .st-m-w img { transform: scaleX(-1); }
+  .js .st-mascot:not(.is-in) { opacity: 0; }
+  .st-mascot.is-in { animation: st-m-in 600ms cubic-bezier(.2, 0, 0, 1) both; }
+  .st-mascot.is-in .st-m-n { animation: st-fade-out 400ms linear 1800ms both; }   /* 600ms enter + 1.2s hold */
+  .st-mascot.is-in .st-m-w { animation: st-fade-in 400ms linear 1800ms both, st-float 3s ease-in-out 2200ms infinite; }
+  .st-mascot.is-off .st-m-w { animation-play-state: running, paused; }
+  @keyframes st-m-in { from { opacity: 0; transform: translateY(16px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes st-fade-out { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes st-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes st-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
   .st-band { z-index: 3; left: calc(40 * var(--u)); width: calc(620 * var(--u)); top: calc(1286 * var(--u)); display: grid; justify-items: center; gap: calc(18 * var(--u)); text-align: center; }
   .st-bh { font-style: italic; color: #fbf3e6; }
@@ -261,11 +306,19 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 0 auto clamp(24px, 3.5vw, 40px); }
   .st-cta .fk-btn { min-height: 48px; }
   .st-cta .fk-btn--primary { background: #c0291f; color: #fff8ee; box-shadow: 0 0 0 1.5px #ffb3a8 inset; } /* the green primary vanishes on the deep-green strip */
-  /* sp-temp: remove after title re-render (the two video rules below; also reset heroVid pos if wanted) */
-  /* sp-temp: remove after title re-render */
-  .st .hy-win.hy-d video.hy-vid { inset: 0 auto 0 16.5%; width: 63%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
-  /* sp-temp: remove after title re-render */
-  .st .hy-win.hy-m video.hy-vid { inset: 0 auto 0 20%; width: 76%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  /* Story video placement. hy-vl = entrance frame, desktop >=821px (the plaque sits in the part of the oval that is wide at every row it covers, soft edges).
+     hy-vs = dining frame, <=820px: the video fills the same wavy clip-path, so the gold lip and shade stay exactly as the photo had them. */
+  @media (min-width: 821px) { .hy-vs { display: none !important; } }
+  @media (max-width: 820px) { .hy-vl { display: none !important; } }
+  .st .hy-win.hy-d video.hy-vl { inset: 0 auto 0 16.5%; width: 63%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  .st .hy-win video.hy-vs { inset: 0; width: 100%; -webkit-mask-image: none; mask-image: none; }
+  /* sound button + credit sit inside the wave, >=7px from the edge. Positions found by testing the clip path's shape at 360-767px (phone art) and 768-820px (desktop art). */
+  .st .hy-vctl.hy-vs .hy-snd { right: auto; top: auto; }
+  .st .hy-vctl.hy-vs .hy-cred { right: auto; bottom: auto; }
+  .st .hy-vctl.hy-m.hy-vs .hy-snd { left: 51%; bottom: 12%; }
+  .st .hy-vctl.hy-m.hy-vs .hy-cred { left: 20%; top: 22%; }
+  .st .hy-vctl.hy-d.hy-vs .hy-snd { left: 54%; bottom: 4%; }
+  .st .hy-vctl.hy-d.hy-vs .hy-cred { left: 46%; top: 9%; }
   .st-go { background: var(--fk-plaster, #f2eee4); padding: clamp(40px, 6vw, 88px) 6vw; text-align: center; }
   .st-go-h { color: #17200f; margin: 0 0 clamp(20px, 3vw, 36px); }
   .st-go-h em { color: var(--fk-red, #c0291f); }
@@ -278,18 +331,11 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-go-card:focus-visible { outline: 2px solid #c99a43; outline-offset: 3px; }
   @media (hover: hover) { .st-go-card:hover { border-color: #c99a43; transform: translateY(-2px); } }
   @media (prefers-reduced-motion: reduce) { .st-go-card { transition: none; } }
-  .st-legal-wrap { background: #10261a; padding: clamp(24px, 3vw, 40px) 6vw clamp(48px, 6vw, 88px); }
-  .st-legal { margin: 0 auto; max-width: 44rem; border-radius: 24px; padding: 1.6rem 1.9rem 1.5rem; color: var(--fk-ink); background: #f8ead8; box-shadow: 0 0 0 1px rgba(214, 170, 90, .5), 0 0 0 6px #f1dfc3, 0 22px 40px rgba(0, 0, 0, .35), inset 0 2px 3px #fff; }
-  .st-legal h2 { color: #1b3a26; margin-bottom: .8rem; }
-  .st-legal dl { display: grid; gap: .55rem; }
-  .st-legal dl > div { display: grid; grid-template-columns: 7.2rem 1fr; gap: .8rem; align-items: baseline; }
-  .st-legal dt { font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--st-label); }
-  .st-legal dd { font-size: .9rem; line-height: 1.5; }
 
   /* sp-: the tagline repeats under the wall photo, and below 1280px (and under 360px) its line meets the "Our Values" heading, so it only shows where it fits */
   @media (min-width: 768px) and (max-width: 1279px) { .st-tag { display: none; } }
+  @media (min-width: 768px) and (max-width: 1023px) { .st-craft { left: calc(530 * var(--u)); width: calc(454 * var(--u)); top: calc(548 * var(--u)); } .st-craft > .st-craft-gap { width: calc(150 * var(--u)); height: calc(172 * var(--u)); } .st-mascot { left: calc(836 * var(--u)); top: calc(556 * var(--u)); width: calc(150 * var(--u)); } }
   @media (max-width: 359px) { .st-tag, .st-rule { display: none; } .st-craft .hy-lead { font-size: 12.5px; line-height: 1.5; } }
-  @media (min-width: 768px) and (max-width: 959px) { .st-val p { display: none; } } /* 12px captions do not fit the plates at tablet width (phone hides them too) */
 
   @media (max-width: 767px) {
     .st-stage { aspect-ratio: 1000 / 2961.1; background-image: url(/assets/bg/about-phone-0.webp); }
@@ -297,21 +343,25 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     .st-hero .hy-kicker { font-size: 12px; letter-spacing: .14em; }
     .st .st-h1 { font-size: min(var(--fk-fs-5), calc(84 * var(--u))); } /* the phone art leaves ~170px beside the photo: one step down the scale, capped by the stage */
     .st-sub, .st-orn { display: none; }
-    .st-craft { left: calc(64 * var(--u)); top: calc(1130 * var(--u)); width: calc(872 * var(--u)); gap: calc(22 * var(--u)); }
+    .st-craft { left: calc(64 * var(--u)); top: calc(1104 * var(--u)); width: calc(872 * var(--u)); }
+    .st-craft > * + * { margin-top: calc(11 * var(--u)); }
+    .st-craft > .st-craft-gap { width: calc(318 * var(--u)); height: calc(312 * var(--u)); margin-left: calc(8 * var(--u)); }
+    .st-mascot { left: calc(610 * var(--u)); top: calc(1100 * var(--u)); width: calc(326 * var(--u)); }
     .st-h2 span { display: inline; }
     .st .st-h2 { font-size: min(var(--fk-fs-5), calc(70 * var(--u))); }
-    .st-craft .hy-lead { font-size: 13.5px; line-height: 1.55; }
+    .st-craft .hy-lead { font-size: 13.5px; line-height: 1.48; }
     .st-tag { font-size: calc(56 * var(--u)); }
     .st-vh { top: calc(1846 * var(--u)); }
     .st .st-vh { font-size: min(var(--fk-fs-5), calc(64 * var(--u))); }
-    .st-val { left: calc(var(--mx) * var(--u)); top: calc(var(--my) * var(--u)); width: calc(290 * var(--u)); height: calc(290 * var(--u)); gap: 2px; padding: 0 calc(12 * var(--u)); }
-    .st-val svg { min-width: 18px; width: calc(48 * var(--u)); }
+    .st-val { --R: calc(var(--mr) + 5); --ann: 86%; left: calc(var(--mx) * var(--u)); top: calc(var(--my) * var(--u)); }
+    .st-val-in { gap: 4px; padding: 0 calc(14 * var(--u)); }
+    .st-val svg { min-width: 20px; width: calc(66 * var(--u)); }
     .st .st-val h3 { font-size: var(--fk-fs-2); line-height: 1.15; }
-    .st-val p { display: none; }
     .st-band { left: calc(40 * var(--u)); width: calc(920 * var(--u)); top: calc(2706 * var(--u)); gap: 8px; }
     .st .st-bh { font-size: min(var(--fk-fs-4), calc(58 * var(--u))); }
     .st-band-orn { width: calc(440 * var(--u)); }
-    .st-legal-wrap { padding: 16px 16px 48px; }
-    .st-legal dl > div { grid-template-columns: 1fr; gap: .1rem; }
+    /* narrow phones: the ornament rule goes first, then (under 360px) the tagline, so the text never reaches "Our Values" */
+    @media (max-width: 389px) { .st-rule { display: none; } }
+    @media (max-width: 359px) { .st-tag { display: none; } .st-craft .hy-lead { font-size: 12.5px; line-height: 1.45; } }
   }
 </style>
