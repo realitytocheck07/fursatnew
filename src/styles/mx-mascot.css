@@ -13,3 +13,6 @@
 .mx-m.is-off .mx-br,.mx-m.is-off .mx-sw{animation-play-state:paused}
 @keyframes mx-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.015)}}
 @keyframes mx-sway{0%,100%{transform:rotate(-.8deg)}50%{transform:rotate(.8deg)}}
+
+/* MX1b chapter slots: parallax var is set from the scroll handler; only the slot itself reads it */
+.mx-ch{transform:translateY(var(--mx-py,0px))}

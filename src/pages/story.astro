@@ -12,6 +12,7 @@ import HyWindows from '../components/hybrid/HyWindows.astro';
 import aDesk from '../../scripts/bg-specs/about-desk.out.json';
 import aPhone from '../../scripts/bg-specs/about-phone.out.json';
 import '../styles/fk-tokens.css';
+import '../styles/mx-mascot.css';
 
 // TODO(client): founder / story line (not shown until the client provides one).
 // Business details (address, hours, phone, FSSAI, GSTIN) live in SiteFooter and the LocalBusiness JSON-LD in Base.astro; the Story page no longer repeats them.
@@ -110,12 +111,8 @@ import InstagramFeed from '../components/InstagramFeed.astro';
         <p class="st-tag">Fursat, aur kuch nahi!</p>
       </div>
 
-      {/* Mascot: namaste → (hold 1.2s) → welcome, both in one box. welcome presents RIGHT in the file, so it is mirrored to point at the text. Plays once (story-values script adds .is-in). */}
-      <div class="st-mascot" data-st-mascot aria-hidden="true">
-        <img class="st-m-n" src="/assets/brand/mascot/namaste-720.webp" srcset="/assets/brand/mascot/namaste-480.webp 480w, /assets/brand/mascot/namaste-720.webp 720w" sizes="(max-width: 767px) 40vw, 22vw" width="720" height="720" alt="" decoding="async" fetchpriority="low" />
-        <span class="st-m-w"><img src="/assets/brand/mascot/welcome-720.webp" srcset="/assets/brand/mascot/welcome-480.webp 480w, /assets/brand/mascot/welcome-720.webp 720w" sizes="(max-width: 767px) 40vw, 22vw" width="720" height="720" alt="" decoding="async" fetchpriority="low" /></span>
-      </div>
-      <link rel="preload" as="image" type="image/webp" href="/assets/brand/mascot/welcome-720.webp" imagesrcset="/assets/brand/mascot/welcome-480.webp 480w, /assets/brand/mascot/welcome-720.webp 720w" imagesizes="(max-width: 767px) 40vw, 22vw" fetchpriority="low" />
+      {/* Chapter 1 mascot (MX engine, public/js/mx-mascot.js): namaste, bow, then welcome (mirrored to face the text) */}
+      <span class="mx-m mx-ch st-mx1" data-mx="ch" data-ch="1" data-flip data-base="/assets/brand/mascot/" data-sizes="(max-width: 767px) 40vw, 22vw" data-poses="welcome" aria-hidden="true"><img src="/assets/brand/mascot/namaste-480.webp" srcset="/assets/brand/mascot/namaste-480.webp 480w, /assets/brand/mascot/namaste-720.webp 720w" sizes="(max-width: 767px) 40vw, 22vw" width="720" height="720" alt="" loading="lazy" decoding="async" draggable="false"></span>
 
       <h2 class="fk-ty-h2 st-vh">Our Values</h2>
       <ul class="st-values" data-st-values aria-label="Our values">
@@ -143,6 +140,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     </section>
 
     <section class="st-brand" aria-label="The Fursat wall">
+      <span class="mx-m mx-ch st-mx2" data-mx="ch" data-ch="2" data-first="welcome" data-flip data-base="/assets/brand/mascot/" data-sizes="(max-width: 767px) 92px, 156px" aria-hidden="true"><img src="/assets/brand/mascot/welcome-480.webp" srcset="/assets/brand/mascot/welcome-480.webp 480w, /assets/brand/mascot/welcome-720.webp 720w" sizes="(max-width: 767px) 92px, 156px" width="720" height="720" alt="" loading="lazy" decoding="async" draggable="false"></span>
       <div class="st-cta" data-fx-reveal>
         <a class="fk-btn fk-btn--primary" href="/reserve/">Reserve a table</a>
         <a class="fk-btn fk-btn--secondary" href="/menu/">See the menu</a>
@@ -176,6 +174,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     </section>
 
     <section class="st-go" aria-labelledby="st-go-h">
+      <span class="mx-m mx-ch st-mx3" data-mx="ch" data-ch="3" data-first="thumbs" data-base="/assets/brand/mascot/" data-sizes="(max-width: 767px) 80px, 140px" aria-hidden="true"><img src="/assets/brand/mascot/thumbs-480.webp" srcset="/assets/brand/mascot/thumbs-480.webp 480w, /assets/brand/mascot/thumbs-720.webp 720w" sizes="(max-width: 767px) 80px, 140px" width="720" height="720" alt="" loading="lazy" decoding="async" draggable="false"></span>
       <h2 class="fk-ty-h2 st-go-h" id="st-go-h" data-fx-reveal>Your <em>Fursat</em> starts here</h2>
       <ul class="st-go-list" role="list" data-fx-reveal>
         <li><a class="st-go-card" href="/reserve/"><b>Reserve a table</b><span>Pick a date and time; we confirm on WhatsApp.</span></a></li>
@@ -197,6 +196,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   <script>import '../scripts/fk-motion';</script>
   <script>import '../scripts/story-values';</script>
   <script is:inline src="/js/story-hero.js" defer></script>
+  <script is:inline src="/js/mx-mascot.js" defer></script>
 </Base>
 
 <style is:global>
@@ -211,7 +211,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   .st-orn { width: calc(270 * var(--u)); margin-top: calc(8 * var(--u)); }
   .st-orn svg { fill: #c0291f; }
 
-  /* Crafted for Good Times: text on the left, the mascot (.st-mascot) stands at its right. .st-craft-gap is a float that holds the mascot's place so the text wraps around it and never runs under it. */
+  /* Crafted for Good Times: text on the left, the mascot (.st-mx1) stands at its right. .st-craft-gap is a float that holds the mascot's place so the text wraps around it and never runs under it. */
   .st-craft { z-index: 3; left: calc(548 * var(--u)); top: calc(552 * var(--u)); width: calc(436 * var(--u)); display: block; }
   .st-craft > * + * { margin-top: calc(14 * var(--u)); }
   .st-craft > .st-craft-gap { float: right; width: calc(196 * var(--u)); height: calc(226 * var(--u)); margin: 0 0 0 calc(10 * var(--u)); shape-outside: inset(0); }
@@ -263,20 +263,16 @@ import InstagramFeed from '../components/InstagramFeed.astro';
   @keyframes st-pop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
   @keyframes st-sheen { 0% { opacity: 1; transform: translateX(-130%) skewX(-14deg); } 100% { opacity: 1; transform: translateX(330%) skewX(-14deg); } }
 
-  /* ---------- Mascot: namaste -> welcome (mirrored to face the text) ---------- */
-  .st-mascot { z-index: 3; left: calc(786 * var(--u)); top: calc(560 * var(--u)); width: calc(206 * var(--u)); aspect-ratio: 1; pointer-events: none; }
-  .st-mascot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; display: block; }
-  .st-m-w { position: absolute; inset: 0; opacity: 0; }
-  .st-m-w img { transform: scaleX(-1); }
-  .js .st-mascot:not(.is-in) { opacity: 0; }
-  .st-mascot.is-in { animation: st-m-in 600ms cubic-bezier(.2, 0, 0, 1) both; }
-  .st-mascot.is-in .st-m-n { animation: st-fade-out 400ms linear 1800ms both; }   /* 600ms enter + 1.2s hold */
-  .st-mascot.is-in .st-m-w { animation: st-fade-in 400ms linear 1800ms both, st-float 3s ease-in-out 2200ms infinite; }
-  .st-mascot.is-off .st-m-w { animation-play-state: running, paused; }
-  @keyframes st-m-in { from { opacity: 0; transform: translateY(16px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
-  @keyframes st-fade-out { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes st-fade-in { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes st-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  /* ---------- Chapter mascots (MX engine): chapter 1 keeps the old box; 2 and 3 peek in beside the CTA row and the heading ---------- */
+  .st-mx1 { left: calc(786 * var(--u)); top: calc(560 * var(--u)); width: calc(206 * var(--u)); }
+  .st-brand, .st-go { position: relative; overflow-x: clip; }
+  .st-mx2 { right: 0; top: 18px; width: 92px; }
+  .st-mx3 { right: 0; top: -46px; width: 80px; }
+  @media (min-width: 768px) {
+    .st-mx2 { right: clamp(24px, 12vw, 190px); top: 8px; width: clamp(118px, 10.5vw, 156px); }
+    .st-mx3 { right: clamp(24px, 8vw, 150px); top: clamp(6px, 1.2vw, 18px); width: clamp(110px, 9vw, 140px); }
+  }
+  @media (min-width: 768px) and (max-width: 1023px) { .st-mx3 { width: 88px; top: 6px; } }
 
   .st-band { z-index: 3; left: calc(40 * var(--u)); width: calc(620 * var(--u)); top: calc(1286 * var(--u)); display: grid; justify-items: center; gap: calc(18 * var(--u)); text-align: center; }
   .st-bh { font-style: italic; color: #fbf3e6; }
@@ -334,7 +330,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
   /* sp-: the tagline repeats under the wall photo, and below 1280px (and under 360px) its line meets the "Our Values" heading, so it only shows where it fits */
   @media (min-width: 768px) and (max-width: 1279px) { .st-tag { display: none; } }
-  @media (min-width: 768px) and (max-width: 1023px) { .st-craft { left: calc(530 * var(--u)); width: calc(454 * var(--u)); top: calc(548 * var(--u)); } .st-craft > .st-craft-gap { width: calc(150 * var(--u)); height: calc(172 * var(--u)); } .st-mascot { left: calc(836 * var(--u)); top: calc(556 * var(--u)); width: calc(150 * var(--u)); } }
+  @media (min-width: 768px) and (max-width: 1023px) { .st-craft { left: calc(530 * var(--u)); width: calc(454 * var(--u)); top: calc(548 * var(--u)); } .st-craft > .st-craft-gap { width: calc(150 * var(--u)); height: calc(172 * var(--u)); } .st-mx1 { left: calc(836 * var(--u)); top: calc(556 * var(--u)); width: calc(150 * var(--u)); } }
   @media (max-width: 359px) { .st-tag, .st-rule { display: none; } .st-craft .hy-lead { font-size: 12.5px; line-height: 1.5; } }
 
   @media (max-width: 767px) {
@@ -346,7 +342,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
     .st-craft { left: calc(64 * var(--u)); top: calc(1104 * var(--u)); width: calc(872 * var(--u)); }
     .st-craft > * + * { margin-top: calc(11 * var(--u)); }
     .st-craft > .st-craft-gap { width: calc(318 * var(--u)); height: calc(312 * var(--u)); margin-left: calc(8 * var(--u)); }
-    .st-mascot { left: calc(610 * var(--u)); top: calc(1100 * var(--u)); width: calc(326 * var(--u)); }
+    .st-mx1 { left: calc(610 * var(--u)); top: calc(1100 * var(--u)); width: calc(326 * var(--u)); }
     .st-h2 span { display: inline; }
     .st .st-h2 { font-size: min(var(--fk-fs-5), calc(70 * var(--u))); }
     .st-craft .hy-lead { font-size: 13.5px; line-height: 1.48; }
