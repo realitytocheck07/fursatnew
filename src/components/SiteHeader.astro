@@ -25,7 +25,7 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   <div class="sh-inner">
     <a href="/" class="sh-logo" aria-label="Fursat Kitchen | Bar Home">
       <span class="sh-lg-el" aria-hidden="true">
-        <img class="sh-lg-el-img" src="/assets/brand/fursat-elephant-3d-v1.webp" srcset="/assets/brand/fursat-elephant-3d-v1.webp 1x, /assets/brand/fursat-elephant-3d-v1@2x.webp 2x" data-fallback="/assets/brand/fursat-elephant.webp" alt="" width="36" height="46" decoding="async" fetchpriority="high" />
+        <img class="sh-lg-el-img" src="/assets/brand/fursat-elephant-3d-v1.webp" srcset="/assets/brand/fursat-elephant-3d-v1.webp 1x, /assets/brand/fursat-elephant-3d-v1@2x.webp 2x" data-fallback="/assets/brand/fursat-elephant.webp" alt="" aria-hidden="true" width="36" height="46" decoding="async" fetchpriority="high" />
         <span class="sh-lg-shine"><i></i></span>
       </span>
       <img class="sh-lg-word" src="/assets/brand/fursat-wordmark.svg" alt="Fursat Kitchen | Bar" width="441" height="88" />
@@ -37,19 +37,19 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
       <div class="sh-drop">
         <button class:list={["sh-link", "sh-drop-btn", { active: active === 'menu' }]} type="button" aria-expanded="false" aria-controls="sh-menu-menu"><span>Menu</span><svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="sh-menu" id="sh-menu-menu">
-          <a href="/menu" class="sh-card" style="--i:0"><span class="sh-card-img"><img data-src="/assets/nav/menu-all.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">All Categories</span><small>North Indian, Asian, Continental &amp; Kebabs</small></a>
-          <a href="/restaurant-bar#cocktails" class="sh-card" style="--i:1"><span class="sh-card-img"><img data-src="/assets/nav/bar.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Bar &amp; Mixology</span><small>Artisanal Cocktails, Single Malts &amp; Beers</small></a>
-          <a href="/menu?menu=cafe" class="sh-card" style="--i:2"><span class="sh-card-img"><img data-src="/assets/nav/cafe.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Café &amp; Coffee</span><small>Specialty Brews, Shakes &amp; Bakes</small></a>
-          <a href="/menu?tab=craft" class="sh-card" style="--i:3"><span class="sh-card-img"><img data-src="/assets/nav/craft.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Craft Your Plate</span><small>Customize your feast step-by-step</small></a>
+          <a href="/menu" class="sh-card" style="--i:0"><span class="sh-card-img"><img data-src="/assets/nav/menu-all.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">All Categories</span><small>North Indian, Asian, Continental &amp; Kebabs</small></a>
+          <a href="/restaurant-bar#cocktails" class="sh-card" style="--i:1"><span class="sh-card-img"><img data-src="/assets/nav/bar.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Bar &amp; Mixology</span><small>Artisanal Cocktails, Single Malts &amp; Beers</small></a>
+          <a href="/menu?menu=cafe" class="sh-card" style="--i:2"><span class="sh-card-img"><img data-src="/assets/nav/cafe.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Café &amp; Coffee</span><small>Specialty Brews, Shakes &amp; Bakes</small></a>
+          <a href="/menu?tab=craft" class="sh-card" style="--i:3"><span class="sh-card-img"><img data-src="/assets/nav/craft.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Craft Your Plate</span><small>Customize your feast step-by-step</small></a>
         </div>
       </div>
 
       <div class="sh-drop">
         <button class:list={["sh-link", "sh-drop-btn", { active: active === 'celebrate' || active === 'banquet' || active === 'party' || active === 'catering' }]} type="button" aria-expanded="false" aria-controls="sh-menu-celebrate"><span>Celebrate</span><svg class="sh-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="sh-menu" id="sh-menu-celebrate">
-          <a href="/party" class="sh-card" style="--i:0"><span class="sh-card-img"><img data-src="/assets/nav/party.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Parties &amp; Events</span><small>Birthdays, kitty parties, bar bashes and packages</small></a>
-          <a href="/banquet" class="sh-card" style="--i:1"><span class="sh-card-img"><img data-src="/assets/nav/banquet.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">The Grand Banquet Hall</span>{/* TODO(client): capacity / AV / live-stage line hidden until the client confirms it. */}</a>
-          <a href="/catering" class="sh-card" style="--i:2"><span class="sh-card-img"><img data-src="/assets/nav/catering.webp" alt="" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Outdoor Catering</span><small>Fursat royal dining delivered to your venue</small></a>
+          <a href="/party" class="sh-card" style="--i:0"><span class="sh-card-img"><img data-src="/assets/nav/party.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Parties &amp; Events</span><small>Birthdays, kitty parties, bar bashes and packages</small></a>
+          <a href="/banquet" class="sh-card" style="--i:1"><span class="sh-card-img"><img data-src="/assets/nav/banquet.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">The Grand Banquet Hall</span>{/* TODO(client): capacity / AV / live-stage line hidden until the client confirms it. */}</a>
+          <a href="/catering" class="sh-card" style="--i:2"><span class="sh-card-img"><img data-src="/assets/nav/catering.webp" alt="" aria-hidden="true" width="112" height="112" decoding="async" /></span><span class="sh-card-t">Outdoor Catering</span><small>Fursat royal dining delivered to your venue</small></a>
         </div>
       </div>
 
@@ -69,8 +69,8 @@ const hoursData = JSON.stringify(site.hours.schedule.map((s) => ({ d: s.dayOfWee
   <div class="sh-mobile-panel" id="sh-mobile-panel" role="dialog" aria-modal="true" aria-label="Site menu" hidden>
     <div class="sh-mp-top">
       <span class="sh-mp-brand" aria-hidden="true">
-        <img class="sh-mp-el" src="/assets/brand/fursat-elephant-3d-v1@3x.webp" alt="" width="60" height="77" decoding="async" />
-        <img class="sh-mp-word" src="/assets/brand/fursat-wordmark.svg" alt="" width="150" height="30" decoding="async" />
+        <img class="sh-mp-el" src="/assets/brand/fursat-elephant-3d-v1@3x.webp" alt="" aria-hidden="true" width="60" height="77" decoding="async" />
+        <img class="sh-mp-word" src="/assets/brand/fursat-wordmark.svg" alt="" aria-hidden="true" width="150" height="30" decoding="async" />
       </span>
       <button class="sh-mp-close" type="button" aria-label="Close navigation menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>

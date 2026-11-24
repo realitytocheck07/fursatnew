@@ -19,13 +19,13 @@ const iFood = '<path d="M4 16a8 8 0 0 1 16 0z"/><path d="M3 19.5h18"/><circle cx
       <span class="ms-tilt" id="ms-tilt">
         {hasImg ? <><picture>
             <source media="(max-width:767px)" srcset={hasSm ? '/assets/ask-mascot-sm.webp' : '/assets/ask-mascot-md.webp'} />
-            <img class="ms-p ms-idle" src="/assets/ask-mascot-md.webp" alt="" width="400" height="400" decoding="async" />
+            <img class="ms-p ms-idle" src="/assets/ask-mascot-md.webp" alt="" aria-hidden="true" width="400" height="400" decoding="async" />
           </picture><picture>
             <source media="(max-width:767px)" srcset={hasSm ? '/assets/ask-mascot-chew-sm.webp' : '/assets/ask-mascot-chew-md.webp'} />
-            <img class="ms-p ms-chew" src="/assets/ask-mascot-chew-md.webp" alt="" width="400" height="400" decoding="async" />
+            <img class="ms-p ms-chew" src="/assets/ask-mascot-chew-md.webp" alt="" aria-hidden="true" width="400" height="400" decoding="async" />
           </picture><picture>
             <source media="(max-width:767px)" srcset={hasSm ? '/assets/ask-mascot-cheer-sm.webp' : '/assets/ask-mascot-cheer-md.webp'} />
-            <img class="ms-p ms-cheer" src="/assets/ask-mascot-cheer-md.webp" alt="" width="400" height="400" decoding="async" />
+            <img class="ms-p ms-cheer" src="/assets/ask-mascot-cheer-md.webp" alt="" aria-hidden="true" width="400" height="400" decoding="async" />
           </picture></> :
         <svg viewBox="0 0 120 120" aria-hidden="true"><ellipse class="e1" cx="22" cy="58" rx="20" ry="26"/><ellipse class="e1" cx="98" cy="58" rx="20" ry="26"/><circle class="e2" cx="60" cy="62" r="34"/><path class="tr" d="M60 74c0 16-2 26 8 32" fill="none" stroke-width="14" stroke-linecap="round"/><path class="cr" d="M38 36l7-16 8 10 7-14 7 14 8-10 7 16z"/><rect class="sg" x="36" y="52" width="20" height="13" rx="6"/><rect class="sg" x="64" y="52" width="20" height="13" rx="6"/><path class="sg2" d="M56 57h8" stroke-width="3"/><path class="sm" d="M50 78q10 8 20 0" fill="none" stroke-width="3" stroke-linecap="round"/></svg>}
       </span>

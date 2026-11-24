@@ -47,7 +47,7 @@ const shown = (n: string) => SHOWN_SECTION[n] ?? n;
 const food: Section[] = (foodData as { section: string; items: Raw[] }[]).map((s) => ({ section: shown(s.section), items: s.items.map((i) => ({ ...i, section: shown(i.section), kind: 'food' as const })) }));
 const drinks: Section[] = (drinksData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'drink' as const })) }));
 // real dish photos by exact menu name (dish-photos.json); the build fails on a missing file or name
-type DishPhoto = { src: string; sm: string; xs: string; w: number; h: number; todo?: string };
+type DishPhoto = { src: string; sm: string; xs: string; w: number; h: number; todo?: string; alt?: string };
 const PHOTOS = dishPhotos.photos as Record<string, DishPhoto>;
 const allNames = new Set([...food, ...drinks].flatMap((s) => s.items.map((i) => i.name)));
 for (const [n, ph] of Object.entries(PHOTOS)) {
@@ -99,7 +99,7 @@ const bannerPhoto = (g: Group) => {
   const ph = groupSections(g).flatMap((s) => s.items).filter((i) => PHOTOS[i.name] && !PHOTOS[i.name].src.includes('/ask/'));
   const it = ph.find((i) => i.chefSpecial) ?? ph[0]; // a chef-special dish's photo first, else the first dish with a photo
   const f = it ? (photoFocus as Record<string, { cx: number; cy: number }>)[it.name] : undefined;
-  return it ? { sm: PHOTOS[it.name].sm, w: PHOTOS[it.name].w, h: PHOTOS[it.name].h, pos: `${Math.round((f?.cx ?? 0.5) * 100)}% ${Math.round((f?.cy ?? 0.55) * 100)}%` } : null;
+  return it ? { alt: PHOTOS[it.name].alt as string | undefined, sm: PHOTOS[it.name].sm, w: PHOTOS[it.name].w, h: PHOTOS[it.name].h, pos: `${Math.round((f?.cx ?? 0.5) * 100)}% ${Math.round((f?.cy ?? 0.55) * 100)}%` } : null;
 };
 // "Chef's specials": only dishes flagged chefSpecial in the data, only when a category has 3 or more, photo dishes first, at most 6.
 const specialsOf = (g: Group) => {
@@ -145,7 +145,7 @@ const tableDishes = tableData.dishes.map((d) => {
   const it = all.find((i) => i.name === d.name);
   const ph = PHOTOS[d.name];
   if (!it || !ph) throw new Error(`menu-table.json: "${d.name}" needs a menu item and a photo`);
-  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: dishKey(it), sm: ph.sm, w: Math.round(640 * ph.w / ph.h), clip: (d as { clip?: string }).clip ?? '' };
+  return { title: (d as { title?: string }).title ?? titleCase(it.name), label: d.label, price: money(it.price ?? 0), dn: dishKey(it), alt: (ph as { alt?: string }).alt ?? "", sm: ph.sm, w: Math.round(640 * ph.w / ph.h), clip: (d as { clip?: string }).clip ?? '' };
 });
 const vegMark = (veg?: boolean) => (veg ? 'mv-vm mv-vm--v' : 'mv-vm mv-vm--n');
 

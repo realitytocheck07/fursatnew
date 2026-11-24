@@ -37,10 +37,10 @@ const thumbFor = (id: string) => smallImg(IMGS[id]);
     </defs>
   </svg>
   <div class="pv-leaves" aria-hidden="true">
-    <img class="pv-leaf pv-tl" src="/assets/tour/leaves/leaf-tl.webp" alt="" width="268" height="222" decoding="async" loading="lazy" />
-    <img class="pv-leaf pv-tr" src="/assets/tour/leaves/leaf-tr.webp" alt="" width="272" height="236" decoding="async" loading="lazy" />
-    <img class="pv-leaf pv-bl" src="/assets/tour/leaves/leaf-bl.webp" alt="" width="164" height="267" decoding="async" loading="lazy" />
-    <img class="pv-leaf pv-br" src="/assets/tour/leaves/leaf-br.webp" alt="" width="205" height="151" decoding="async" loading="lazy" />
+    <img class="pv-leaf pv-tl" src="/assets/tour/leaves/leaf-tl.webp" alt="" aria-hidden="true" width="268" height="222" decoding="async" loading="lazy" />
+    <img class="pv-leaf pv-tr" src="/assets/tour/leaves/leaf-tr.webp" alt="" aria-hidden="true" width="272" height="236" decoding="async" loading="lazy" />
+    <img class="pv-leaf pv-bl" src="/assets/tour/leaves/leaf-bl.webp" alt="" aria-hidden="true" width="164" height="267" decoding="async" loading="lazy" />
+    <img class="pv-leaf pv-br" src="/assets/tour/leaves/leaf-br.webp" alt="" aria-hidden="true" width="205" height="151" decoding="async" loading="lazy" />
   </div>
 
   <div class="pv-inner">
@@ -139,7 +139,7 @@ const thumbFor = (id: string) => smallImg(IMGS[id]);
       <div class="pv-thumbs" role="group" aria-label="Choose a space">
         {ZONES.map((z, k) => (
           <button type="button" class="pv-thumb" data-z={k} aria-current="false">
-            <img src={thumbFor(z.pin)} alt="" width="840" height="1120" loading="lazy" decoding="async" style={`object-position:50% ${z.fy}%`} />
+            <img src={thumbFor(z.pin)} alt="" aria-hidden="true" width="840" height="1120" loading="lazy" decoding="async" style={`object-position:50% ${z.fy}%`} />
             <span>{z.name.replace(/^The /, 'The ')}</span>
             <i class="pv-tbar"><b></b></i>
           </button>

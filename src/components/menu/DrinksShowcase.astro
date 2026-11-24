@@ -9,7 +9,7 @@ const { photos, count, sections, bar } = Astro.props as Props;
 ---
 <section class="dk" aria-labelledby="dk-h">
   <div class="dk-hero">
-    <img class="dk-bg" src={bar.image} alt="" width="1400" height="1074" loading="lazy" decoding="async" />
+    <img class="dk-bg" src={bar.image} alt="" aria-hidden="true" width="1400" height="1074" loading="lazy" decoding="async" />
     <div class="dk-veil" aria-hidden="true"></div>
     <span class="dk-ghost" aria-hidden="true">BAR</span>
     <div class="dk-copy fk-reveal">

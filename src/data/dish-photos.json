@@ -1,47 +1,53 @@
 {
-  "_note": "Real Fursat dish photos linked to menu rows by exact item name. Only photos whose picture matches the dish (checked by eye 13 Nov). Do not add dsc*/fursat* repo files, any ask/dishes file (8 of 15 are mismatched; the 4 drinks now come full-size from dishes/new), or dishes/drinks-to-confirm/ (client naming them). 'todo' = client to confirm. Menu rows only, never the ring or a hero: life-fursat-bhai (hand), chicken-fry-piece-pulao (chef), classic-paneer-tikka and tiramisu (hands).",
+  "_note": "Real Fursat dish photos linked to menu rows by exact item name. Only photos whose picture matches the dish (checked by eye 13 Nov). Do not add dsc*/fursat* repo files, any ask/dishes file (8 of 15 are mismatched; the 4 drinks now come full-size from dishes/new), or dishes/drinks-to-confirm/ (client naming them). 'todo' = client to confirm. Menu rows only, never the ring or a hero: life-fursat-bhai (hand), chicken-fry-piece-pulao (chef), classic-paneer-tikka and tiramisu (hands). Rice / Noodles (Veg, Egg, Chicken, Mix): no real photo matches these (the old shared herb-rice photo, rice-spicy-coriander, shows one flavour only and no egg or chicken), so all four stay text-only until the client sends photos (FX2).",
   "photos": {
     "CAFE LATTE": {
       "src": "/assets/dishes/new/cafe-latte.webp",
       "sm": "/assets/dishes/sm/cafe-latte-sm.webp",
       "xs": "/assets/dishes/sm/cafe-latte-xs.webp",
       "w": 1268,
-      "h": 1600
+      "h": 1600,
+      "alt": "A cafe latte with fern latte art on a grey saucer"
     },
     "CAFE MOCHA": {
       "src": "/assets/dishes/new/cafe-mocha.webp",
       "sm": "/assets/dishes/sm/cafe-mocha-sm.webp",
       "xs": "/assets/dishes/sm/cafe-mocha-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A cafe mocha with flower latte art, beside a small gold elephant figure"
     },
     "CAPPUCCINO": {
       "src": "/assets/dishes/new/cappuccino.webp",
       "sm": "/assets/dishes/sm/cappuccino-sm.webp",
       "xs": "/assets/dishes/sm/cappuccino-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A cappuccino with latte art, coffee beans scattered beside the cup"
     },
     "Tiramisu": {
       "src": "/assets/dishes/new/tiramisu.webp",
       "sm": "/assets/dishes/sm/tiramisu-sm.webp",
       "xs": "/assets/dishes/sm/tiramisu-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A slice of tiramisu on a plate, with a hand holding an orange cocktail behind it"
     },
     "Apricot Delight": {
       "src": "/assets/dishes/new/apricot-delight.webp",
       "sm": "/assets/dishes/sm/apricot-delight-sm.webp",
       "xs": "/assets/dishes/sm/apricot-delight-xs.webp",
       "w": 1144,
-      "h": 1600
+      "h": 1600,
+      "alt": "Apricot delight in a glass cup, topped with pistachio"
     },
     "Biscoff Cheesecake": {
       "src": "/assets/dishes/new/biscoff-cheesecake.webp",
       "sm": "/assets/dishes/sm/biscoff-cheesecake-sm.webp",
       "xs": "/assets/dishes/sm/biscoff-cheesecake-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A slice of Biscoff cheesecake with a cookie on a white plate"
     },
     "Tres Leches": {
       "src": "/assets/dishes/new/tres-leches.webp",
@@ -49,102 +55,80 @@
       "xs": "/assets/dishes/sm/tres-leches-xs.webp",
       "w": 1067,
       "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
+      "todo": "TODO(client): confirm this photo shows this dish",
+      "alt": "A slice of tres leches cake in a white bowl with a pink flower"
     },
     "OG French Toast": {
       "src": "/assets/dishes/new/og-french-toast.webp",
       "sm": "/assets/dishes/sm/og-french-toast-sm.webp",
       "xs": "/assets/dishes/sm/og-french-toast-xs.webp",
       "w": 1107,
-      "h": 1600
+      "h": 1600,
+      "alt": "French toast topped with apple slices and cream on a teal plate"
     },
     "Korean Bun": {
       "src": "/assets/dishes/new/korean-bun.webp",
       "sm": "/assets/dishes/sm/korean-bun-sm.webp",
       "xs": "/assets/dishes/sm/korean-bun-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A golden Korean bun with herbs on a white plate, with a side of vegetables"
     },
     "Guntur Karam Wings": {
       "src": "/assets/dishes/new/guntur-karam-wings.webp",
       "sm": "/assets/dishes/sm/guntur-karam-wings-sm.webp",
       "xs": "/assets/dishes/sm/guntur-karam-wings-xs.webp",
       "w": 1138,
-      "h": 1600
+      "h": 1600,
+      "alt": "Spicy Guntur wings on a banana leaf with a lime wedge"
     },
     "Nalla Karam Kodi Vepudu": {
       "src": "/assets/dishes/new/nalla-karam-kodi-vepudu.webp",
       "sm": "/assets/dishes/sm/nalla-karam-kodi-vepudu-sm.webp",
       "xs": "/assets/dishes/sm/nalla-karam-kodi-vepudu-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "Nalla karam chicken fry with onion rings and lime, beside a tall blue drink"
     },
     "Jeedi Pappu Kodi Pakodi": {
       "src": "/assets/dishes/new/jeedi-pappu-kodi-pakodi.webp",
       "sm": "/assets/dishes/sm/jeedi-pappu-kodi-pakodi-sm.webp",
       "xs": "/assets/dishes/sm/jeedi-pappu-kodi-pakodi-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "Red-spiced chicken pakodi on a white plate, beside an orange cocktail"
     },
     "Chicken Tikka (Angara/ Malai/ Hariyali)": {
       "src": "/assets/dishes/new/chicken-tikka-angara.webp",
       "sm": "/assets/dishes/sm/chicken-tikka-angara-sm.webp",
       "xs": "/assets/dishes/sm/chicken-tikka-angara-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "Angara chicken tikka on a banana leaf with onion rings and green chutney"
     },
     "Classic Paneer Tikka": {
       "src": "/assets/dishes/new/classic-paneer-tikka.webp",
       "sm": "/assets/dishes/sm/classic-paneer-tikka-sm.webp",
       "xs": "/assets/dishes/sm/classic-paneer-tikka-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "Paneer tikka skewers with dips on a round plate, with a hand holding a drink"
     },
     "Ustad Special Nalli Gosht Biryani": {
       "src": "/assets/dishes/new/nalli-gosht-biryani-half.webp",
       "sm": "/assets/dishes/sm/nalli-gosht-biryani-half-sm.webp",
       "xs": "/assets/dishes/sm/nalli-gosht-biryani-half-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "Nalli gosht biryani in a brass handi with two small side bowls"
     },
     "Chicken Fry Piece Pulao": {
       "src": "/assets/dishes/new/chicken-fry-piece-pulao.webp",
       "sm": "/assets/dishes/sm/chicken-fry-piece-pulao-sm.webp",
       "xs": "/assets/dishes/sm/chicken-fry-piece-pulao-xs.webp",
       "w": 1067,
-      "h": 1600
-    },
-    "Rice / Noodles (Veg)": {
-      "src": "/assets/dishes/new/rice-spicy-coriander.webp",
-      "sm": "/assets/dishes/sm/rice-spicy-coriander-sm.webp",
-      "xs": "/assets/dishes/sm/rice-spicy-coriander-xs.webp",
-      "w": 1030,
       "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
-    },
-    "Rice / Noodles (Egg)": {
-      "src": "/assets/dishes/new/rice-spicy-coriander.webp",
-      "sm": "/assets/dishes/sm/rice-spicy-coriander-sm.webp",
-      "xs": "/assets/dishes/sm/rice-spicy-coriander-xs.webp",
-      "w": 1030,
-      "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
-    },
-    "Rice / Noodles (Chicken)": {
-      "src": "/assets/dishes/new/rice-spicy-coriander.webp",
-      "sm": "/assets/dishes/sm/rice-spicy-coriander-sm.webp",
-      "xs": "/assets/dishes/sm/rice-spicy-coriander-xs.webp",
-      "w": 1030,
-      "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
-    },
-    "Rice / Noodles (Mix)": {
-      "src": "/assets/dishes/new/rice-spicy-coriander.webp",
-      "sm": "/assets/dishes/sm/rice-spicy-coriander-sm.webp",
-      "xs": "/assets/dishes/sm/rice-spicy-coriander-xs.webp",
-      "w": 1030,
-      "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
+      "alt": "A chef presenting a plate of chicken fry piece pulao"
     },
     "Mexican Grilled Veggie Fried Burger": {
       "src": "/assets/dishes/new/mexican-veggie-burger.webp",
@@ -152,7 +136,8 @@
       "xs": "/assets/dishes/sm/mexican-veggie-burger-xs.webp",
       "w": 1059,
       "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
+      "todo": "TODO(client): confirm this photo shows this dish",
+      "alt": "A grilled veggie burger with fries in a wire basket"
     },
     "CREAMY BISCOFF SHAKE": {
       "src": "/assets/dishes/new/creamy-biscoff-shake.webp",
@@ -160,7 +145,8 @@
       "xs": "/assets/dishes/sm/creamy-biscoff-shake-xs.webp",
       "w": 1082,
       "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
+      "todo": "TODO(client): confirm this photo shows this dish",
+      "alt": "A creamy Biscoff shake topped with cream and a cookie, beside gold elephant figures"
     },
     "MIX BERRY SMOOTHIE": {
       "src": "/assets/dishes/new/mix-berry-smoothie.webp",
@@ -168,42 +154,48 @@
       "xs": "/assets/dishes/sm/mix-berry-smoothie-xs.webp",
       "w": 1090,
       "h": 1600,
-      "todo": "TODO(client): confirm this photo shows this dish"
+      "todo": "TODO(client): confirm this photo shows this dish",
+      "alt": "A pink mixed-berry smoothie with cream and a raspberry, beside gold elephant figures"
     },
     "Jamaican Jerk Chicken with Fries": {
       "src": "/assets/ask/dishes/jamaican-jerk-with-fries.webp",
       "sm": "/assets/dishes/sm/jamaican-jerk-with-fries-sm.webp",
       "xs": "/assets/dishes/sm/jamaican-jerk-with-fries-xs.webp",
       "w": 1200,
-      "h": 1593
+      "h": 1593,
+      "alt": "Jerk chicken with orange fries and mash on a blue-green plate"
     },
     "LIFE FURSAT BHAI": {
       "src": "/assets/dishes/new/life-fursat-bhai.webp",
       "sm": "/assets/dishes/sm/life-fursat-bhai-sm.webp",
       "xs": "/assets/dishes/sm/life-fursat-bhai-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A hand holding a yellow cocktail with a small orchid in a coupe glass"
     },
     "FURSAT RAHASYAM": {
       "src": "/assets/dishes/new/fursat-rahasyam.webp",
       "sm": "/assets/dishes/sm/fursat-rahasyam-sm.webp",
       "xs": "/assets/dishes/sm/fursat-rahasyam-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A tall blue and orange layered drink with an orange slice"
     },
     "ICED LATTE": {
       "src": "/assets/dishes/new/iced-latte.webp",
       "sm": "/assets/dishes/sm/iced-latte-sm.webp",
       "xs": "/assets/dishes/sm/iced-latte-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A tall iced latte beside gold elephant figures"
     },
     "GONGURA MUCHATLU": {
       "src": "/assets/dishes/new/gongura-muchatlu.webp",
       "sm": "/assets/dishes/sm/gongura-muchatlu-sm.webp",
       "xs": "/assets/dishes/sm/gongura-muchatlu-xs.webp",
       "w": 1067,
-      "h": 1600
+      "h": 1600,
+      "alt": "A yellow cocktail with a mint leaf in a coupe glass"
     }
   }
 }
