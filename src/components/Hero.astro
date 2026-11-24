@@ -4,6 +4,7 @@ import site from '../data/site.json';
 import MarqueeStrip from './MarqueeStrip.astro';
 // TODO(client): the burger and the cocktail in the "Fall into the lens" intro have no confirmed menu names, so the intro shows no label for them. Only the tiramisu (real menu item, Rs 375) is labelled. Add names/prices here once the client confirms.
 ---
+<link rel="preload" as="image" href="/assets/home/hero-reel-poster.jpg" fetchpriority="low" />
 <section class="fxhero" id="top" aria-label="Fursat Kitchen | Bar">
  <!-- ambient background, anchored to the viewport edges -->
  <div class="fx-bg" aria-hidden="true">

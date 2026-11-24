@@ -324,12 +324,15 @@ window.FursatConcierge={open:openIt,route:route};
   document.addEventListener("visibilitychange",function(){if(document.hidden)v.pause();else if(vis&&live)play()});
 })();
 
-/* ---------- 26b. hero reel first: hero-reel-540 plays once (after the intro), then hands over to the master loop ---------- */
+/* ---------- 26b. hero reel first: hero-reel-540 plays once (after the intro), then hands over to the master loop ----------
+   V1-reel: the reel is a plain <video preload=auto> that loads during the lens (paused on its first frame, ~3.4 s after the lens starts) and starts in the same task as the lens overlay removal.
+   Whole-file blob (seekable, to join the song): fast desktop with sound on only, aborted after ~9 s, attached at lens END, never during the lens.
+   reel -> master: the reel's last frame stays up until a master frame is decoded. "Watch again": the master keeps playing while the reel reloads, then one-frame swap. */
 (function(){
   var $=function(i){return document.getElementById(i)},hero=$("top"),rv=$("fxrv"),fg=$("fxrvf"),bg=$("fxrvb"),bar=$("fxrvp"),m=$("fxplv"),pv=$("fxpv"),stg=$("fxstage");
   if(!rv||!fg||!m||!hero)return;
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
-    save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false;
+    save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false,cleanT=0;
   window.__fzReel={on:true};
   var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
@@ -341,48 +344,60 @@ window.FursatConcierge={open:openIt,route:route};
     raf=requestAnimationFrame(tick)}
   function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){var q=bg.play();if(q&&q.catch)q.catch(function(){})}if(!raf)raf=requestAnimationFrame(tick)}
   function halt(){fg.pause();if(bg)bg.pause()}
-  /* C10: the host (Cloudflare Pages) answers media Range requests with a 200, so the reel is not seekable by URL and currentTime = T is ignored.
-     Fix: while the intro plays, fetch the reel file the browser would pick into a Blob; a blob: URL is fully seekable, so the reel can start at the song's second. */
+  /* a frame of video v is on screen (or cap ms passed) */
+  function frame(v,cb,cap){var d=false,t=setTimeout(fin,cap);function fin(){if(d)return;d=true;clearTimeout(t);cb()}
+    if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(fin);else v.addEventListener("playing",fin,{once:true})}
+  /* C10: the host answers media Range requests with a 200, so the reel is not seekable by URL. A blob: URL is seekable, so with the song playing the reel can join it. Fast desktop + sound only. */
   var blobUrl=null,blobP=null,conn=navigator.connection||{};
   function songPos(){return window.__fzSongPos?window.__fzSongPos():0}
   function soundOn(){var v=0;try{v=sessionStorage.getItem("fk-sound")==="1"}catch(e){}return v||songPos()>0}
   function goodNet(){return !save&&!/^(slow-2g|2g|3g)$/.test(conn.effectiveType||"")}
   function reelUrl(){var ss=fg.querySelectorAll("source"),i,t;for(i=0;i<ss.length;i++){t=ss[i].getAttribute("type");if(!t||fg.canPlayType(t))return ss[i].getAttribute("src")}return ""}
-  function fetchBlob(){if(blobP||save||calm||!window.fetch||!window.URL)return;var u=reelUrl();if(!u)return;   /* same URL the <video> would use, so the browser cache is shared: no second download */
-    blobP=fetch(u).then(function(r){return r.ok?r.blob():Promise.reject()}).then(function(b){blobUrl=URL.createObjectURL(b)}).catch(function(){})}
-  if(!save&&!calm){if(soundOn()||(!phone&&goodNet()))fetchBlob();addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on&&goodNet())fetchBlob()})}
+  function fetchBlob(){if(blobP||save||calm||phone||!window.fetch||!window.URL)return;var u=reelUrl();if(!u)return;
+    var ac=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ac)ac.abort()},9000);
+    blobP=fetch(u,ac?{signal:ac.signal}:undefined).then(function(r){return r.ok?r.blob():Promise.reject()}).then(function(b){clearTimeout(tm);if(st==="idle"||st==="wait")blobUrl=URL.createObjectURL(b)}).catch(function(){clearTimeout(tm)})}
+  addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on&&goodNet()&&window.__fzLens)fetchBlob()});
   addEventListener("pagehide",function(){if(blobUrl){try{URL.revokeObjectURL(blobUrl)}catch(e){}blobUrl=null}});
   function fromBlob(done){var n=0,fin=function(){if(!n++)done()};
     [fg,bg].forEach(function(x){if(x){x.preload="auto";x.src=blobUrl;x.load()}});loaded=true;
     if(fg.readyState>=1)fin();else{fg.addEventListener("loadedmetadata",fin,{once:true});setTimeout(fin,1500)}}
-  /* the seek and the first frames take a moment while the song keeps going: re-align to the song a few times right after the reel is really playing */
   function lock(){var n=0,fix=function(){var T=songPos();if(T<.5||st!=="play")return;var d=Math.abs(fg.currentTime-T);
       if(d>.22){try{fg.currentTime=Math.min(T+.3,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}}
       if(++n<12)setTimeout(fix,600)};
     fg.addEventListener("playing",function(){setTimeout(fix,150)},{once:true})}
   function start(mode){st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
-    if(mode==="fresh"){window.__fzReel.keepSong=true;load()}   /* blob not ready: the mp3 keeps playing, the reel starts muted from 0, the song is never restarted */
-    else if(mode==="plain")load();
+    if(mode==="fresh")window.__fzReel.keepSong=true;   /* no seekable blob: the mp3 keeps playing, the reel starts muted from 0, the song is never restarted */
     if(!paused())run()}
-  function begin(){if(st!=="idle")return;if(again){handoff();return}var T=songPos();
-    if(T<.5){start("plain");return}                    /* no song playing: the reel starts from 0 as before */
-    if(!blobP)fetchBlob();
-    var t0=Date.now();(function w(){if(st!=="idle")return;
-      if(blobUrl){st="wait";fromBlob(function(){var T2=songPos();try{fg.currentTime=Math.min(T2,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}st="idle";start("blob");lock()});return}
-      if(!blobP||Date.now()-t0>2000){start("fresh");return}   /* wait up to 2 s (the song keeps playing) */
-      setTimeout(w,100)})()}
-  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);hero.classList.remove("reel-on");
-    m.classList.add("zin");rv.classList.add("out");
+  /* plain path: start the moment the reel can play (usually already buffered during the lens); 15 s fallback = master loop + pill */
+  function waitPlain(){load();var fin=false,t;
+    function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);start(songPos()>=.5?"fresh":"plain")}
+    if(fg.readyState>=3){go();return}
+    fg.addEventListener("canplay",go);
+    t=setTimeout(function(){if(fin)return;fin=true;fg.removeEventListener("canplay",go);handoff()},15000)}
+  function begin(){if(st!=="idle")return;if(again){handoff();return}
+    st="wait";
+    if(songPos()>=.5&&blobUrl){fromBlob(function(){var T2=songPos();try{fg.currentTime=Math.min(T2,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}start("blob");lock()});return}
+    waitPlain()}
+  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);raf=0;
+    if(!hero.classList.contains("reel-on")){hero.classList.add("reel-again");placeAgain(4200)}   /* no reel on screen (reload, error, fallback): the pill shows at once */
     try{m.currentTime=2.45}catch(e){}
     if(!m.src&&stg)stg.click();
     var p=m.play();if(p&&p.catch)p.catch(function(){});
-    hero.classList.add("reel-again");placeAgain(4200);
-    setTimeout(function(){m.classList.remove("zin");halt();rv.style.visibility="hidden"},700)}
-  /* U2: "Watch again": play the reel once more, then hand over to the master loop exactly as the first time (handoff is the same function) */
-  function replay(){if(st==="play")return;st="play";window.__fzReel.on=true;warm=false;hero.classList.remove("reel-again");
-    if(pv&&paused()){pv.dataset.s="playing";pv.setAttribute("aria-label","Pause background video")}
-    rv.style.visibility="";m.classList.remove("zin");m.pause();[fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}});loaded=true;   /* load() restarts from 0 even where the host is not seekable */
-    rv.classList.remove("out");void rv.offsetWidth;hero.classList.add("reel-on");run()}
+    var sw=false;
+    function swap(){if(sw)return;sw=true;hero.classList.remove("reel-on");m.classList.add("zin");rv.classList.add("out");hero.classList.add("reel-again");placeAgain(4200);
+      clearTimeout(cleanT);cleanT=setTimeout(function(){m.classList.remove("zin");halt();rv.style.visibility="hidden"},700)}
+    frame(m,swap,1500)}                             /* the reel's last frame stays up until a master frame is decoded */
+  /* U2: "Watch again": the master keeps playing while the reel reloads; when it can play, swap in one frame */
+  function replay(){if(st!=="done")return;st="wait";warm=false;clearTimeout(cleanT);hero.classList.remove("reel-again");
+    if(bar)bar.style.transform="scaleX(0)";
+    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}});loaded=true;
+    var fin=false,t;
+    function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);
+      st="play";window.__fzReel.on=true;
+      if(pv&&paused()){pv.dataset.s="playing";pv.setAttribute("aria-label","Pause background video")}
+      rv.style.visibility="";rv.classList.remove("out");m.classList.remove("zin");hero.classList.add("reel-on");m.pause();run()}
+    fg.addEventListener("canplay",go);
+    t=setTimeout(function(){if(fin)return;fin=true;fg.removeEventListener("canplay",go);st="done";hero.classList.add("reel-again");placeAgain(300)},15000)}
   if(ag)ag.addEventListener("click",replay);
   /* phone: the card with "Book a table" sits at the bottom, so the pill rides just above the card (and the elephant on it): bottom-left of the video, clear of the Book button and the ribbon. Position = one translateY, tracked while the card slides in. */
   function placeAgain(ms){if(!ag)return;var t0=Date.now();(function f(){
@@ -401,10 +416,14 @@ window.FursatConcierge={open:openIt,route:route};
   if("IntersectionObserver"in window)new IntersectionObserver(function(es){if(st!=="play")return;if(es[0].isIntersecting){if(!paused())run()}else halt()}).observe(hero);
   document.addEventListener("visibilitychange",function(){if(st!=="play")return;if(document.hidden)halt();else if(!paused())run()});
   if(calm)return;                                    /* reduced motion: poster + the play button, no autoplay */
-  var de=document.documentElement;
-  function go(){if(!window.__fzLens&&hero.classList.contains("go")&&!de.classList.contains("lock")){setTimeout(begin,250);return true}}   /* U2: also held while the "Fall into the lens" intro plays */
-  addEventListener("fz:lensend",function(){go()});   /* only after the intro has ended */
-  if(!go()&&window.MutationObserver){var mo=new MutationObserver(function(){if(go())mo.disconnect()});mo.observe(hero,{attributes:true,attributeFilter:["class"]});mo.observe(de,{attributes:true,attributeFilter:["class"]})}
+  var de=document.documentElement,lt=0;
+  function ready(){return hero.classList.contains("go")&&!de.classList.contains("lock")}
+  /* lens running: the reel loads paused on its first frame ~3.4 s in; it starts at the lens END (fz:lensend fires synchronously from the lens end(), same task as the overlay removal) */
+  function check(){if(st!=="idle"||!ready())return st!=="idle";
+    if(window.__fzLens){if(!lt&&!again){lt=setTimeout(load,3400);if(goodNet()&&soundOn())fetchBlob()}return false}
+    begin();return true}
+  addEventListener("fz:lensend",function(){clearTimeout(lt);if(ready())begin()});
+  if(!check()&&window.MutationObserver){var mo=new MutationObserver(function(){if(check())mo.disconnect()});mo.observe(hero,{attributes:true,attributeFilter:["class"]});mo.observe(de,{attributes:true,attributeFilter:["class"]})}
 })();
 
 /* ---------- 27. intro control: one "Skip intro" opens the site straight away; crawlers, repeat visits and no-JS never see the intro ---------- */
