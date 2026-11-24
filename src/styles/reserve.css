@@ -102,7 +102,6 @@
 .rs-chips{position:relative;display:grid;gap:8px}
 .rs-dates{grid-template-columns:repeat(7,minmax(0,1fr));min-height:56px}
 .rs-times{grid-template-columns:repeat(6,minmax(0,1fr))}
-.rs-zones{grid-template-columns:repeat(5,minmax(0,1fr))}
 .rs-chip{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;min-height:44px;padding:4px;border-radius:999px;border:1px solid var(--rs-line-soft);background:var(--rs-raise);box-shadow:var(--rs-chip-shadow);color:var(--fk-forest-900);
   font:500 .8rem/1.15 var(--rs-sans);font-variant-numeric:tabular-nums;text-align:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   transition-property:color,background-color,border-color,transform;transition-duration:150ms;transition-timing-function:ease,ease,ease,var(--ease)}
@@ -122,10 +121,6 @@
 .rs-cal{overflow:hidden}
 .rs-calinp{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;font-size:16px}
 .rs-cal:focus-within{outline:2px solid var(--rs-focus);outline-offset:2px}
-.rs-zones .rs-chip{flex-direction:row;justify-content:flex-start;gap:8px;min-height:46px;padding:5px 10px 5px 6px;text-align:left}
-.rs-zones .rs-chip>span{min-width:0}
-.rs-zones .rs-chip:first-of-type{justify-content:center;text-align:center;padding-inline:6px}
-.rs-zt{width:30px;height:30px;flex:none;border-radius:50%;object-fit:cover;filter:saturate(1.15) sepia(.18) contrast(1.06) brightness(.92)}
 
 /* guests stepper */
 .rs-step{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;min-height:50px;padding:3px 5px;border-radius:999px;border:1px solid var(--rs-line);background:#fbf4ea;box-shadow:var(--rs-inset);transition:background-color 300ms ease}
@@ -169,11 +164,7 @@
 .rs-sum{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:0}
 .rs-sum dt{font:500 .75rem/1.6 var(--rs-sans);letter-spacing:.12em;text-transform:uppercase;color:var(--rs-label)}
 .rs-sum dd{margin:0;font-size:.9rem;line-height:1.4;font-variant-numeric:tabular-nums;color:var(--fk-ink)}
-
-/* Pick your spot (R3c): the home panorama in compact form */
-.rs-pick{display:grid;gap:10px;min-height:340px}
-.rs-pick[hidden],.rs-spots[hidden],.rs-pickview[hidden],.rs-pickbar[hidden],.rs-pk-note[hidden],.rs-link[hidden]{display:none}
-.rs-pickview .pv-embed{padding:0;background:none;overflow:visible;scroll-margin-top:0}
+.rs-link[hidden]{display:none}
 .pv-embed .pv-bg,.pv-embed .pv-leaves,.pv-embed .pv-head,.pv-embed .pv-foot,.pv-embed .pv-orn-b,.pv-embed .pv-tools,.pv-embed .pv-stories,.pv-embed .pv-pausetag,.pv-embed .pv-fallback{display:none}
 .pv-embed .pv-reveal{opacity:1!important;transform:none!important;transition:none!important}
 .pv-embed .pv-inner{width:100%}
@@ -192,17 +183,7 @@
 .pv-embed .pv-pin span{font-size:.7rem;padding:7px 12px 7px 16px}
 .pv-embed .pv-caption{max-width:70%}
 .pv-embed .pv-drag{top:auto;bottom:10px;height:auto;padding:7px 14px;font-size:.72rem;white-space:nowrap;width:max-content;max-width:calc(100% - 24px)}
-.rs-pickbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.rs-page .rs-pk-t{font:500 .95rem/1.3 var(--rs-sans);color:var(--fk-forest-900);min-width:0}
-.rs-page .rs-pk-note{margin:0}
 .rs-link{display:inline;padding:0;border:0;background:none;color:var(--fk-forest-800);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.rs-spotgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}
-.rs-spot{position:relative;display:flex;flex-direction:column;gap:8px;margin:0;padding:8px;border-radius:24px;border:1px solid var(--rs-line);background:var(--rs-raise);box-shadow:var(--rs-chip-shadow)}
-.rs-spot img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:16px;filter:saturate(1.15) sepia(.18) contrast(1.06) brightness(.92)}
-.rs-spot figcaption{display:flex;flex-direction:column;gap:2px;padding:0 6px}
-.rs-spot b{font:600 .9rem/1.2 var(--rs-sans);color:var(--fk-forest-900)}
-.rs-spot span{font-size:.76rem;line-height:1.35;color:var(--rs-muted)}
-.rs-spot .fk-btn{width:100%;margin-top:auto}
 
 /* Request sent (R3d): stamp, short confetti, summary, four actions */
 .rs-panel.is-done .rs-pform>:not(.rs-done){display:none}
@@ -326,7 +307,6 @@
 
 /* ───────── Tablet ───────── */
 @media (max-width:1180px){
-  .rs-zones{grid-template-columns:repeat(3,minmax(0,1fr))}
   .rs-times{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (max-width:1040px){
@@ -378,11 +358,9 @@
   .rs-times{grid-template-columns:repeat(3,minmax(0,1fr))}
   .rs-times .rs-chip{min-height:52px}
   .rs-chip{min-height:44px}
-  .rs-zones{grid-template-columns:repeat(3,minmax(0,1fr))}
   .rs-step{min-height:54px}
   .rs-box,.rs-box input,.rs-box select{min-height:52px}
   .rs-tk-inline .rs-tk-rows{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .rs-spotgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pv-embed .pv-win{height:clamp(280px,72vw,340px)}
   .pv-embed .pv-zones{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pv-embed .pv-zone svg{display:none}
@@ -526,11 +504,11 @@
   .rs-hy .rs-phead .rs-hrule{display:none}
   .rs-hy .rs-htxt .rs-psub{font-size:.95rem}
   .rs-hy .rs-mpanel{margin-top:14px}
-  /* two columns: date + time | guests, occasion, seating, name, phone */
+  /* two columns: date + time | guests, occasion, name, phone */
   .rs-hy .rs-qgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px;align-items:start;
-    grid-template-areas:"date date guests occ" "time time zone zone" "time time name phone" "time time email email" "party party party party"}
+    grid-template-areas:"date date guests occ" "time time name phone" "time time email email" "party party party party"}
   .rs-hy #f-date{grid-area:date}.rs-hy #f-time{grid-area:time}.rs-hy #f-guests{grid-area:guests}.rs-hy #f-occasion{grid-area:occ}
-  .rs-hy #f-zone{grid-area:zone}.rs-hy #f-name{grid-area:name}.rs-hy #f-phone{grid-area:phone}.rs-hy #f-email{grid-area:email}.rs-hy #rs-party{grid-area:party}
+  .rs-hy #f-name{grid-area:name}.rs-hy #f-phone{grid-area:phone}.rs-hy #f-email{grid-area:email}.rs-hy #rs-party{grid-area:party}
   .rs-hy .rs-qgrid > .rs-q{grid-column:auto;margin:0}
   /* foot: note left, button right */
   .rs-hy .rs-foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:center;margin-top:12px}
@@ -541,9 +519,6 @@
 }
 @container (min-width:1180px){
   .rs-hy .rs-dates .rs-chip{padding-inline:2px}
-  .rs-hy .rs-zones{gap:6px}
-  .rs-hy .rs-zones .rs-chip{padding-right:8px;gap:6px}
-  .rs-hy .rs-zones .rs-zt{width:26px;height:26px}
 }
 
 /* ═════ v5.2 RESERVE PHONE — complete booking form on the first phone screen ═════
@@ -566,12 +541,11 @@
   .rs-hy .rs-qgrid{gap:10px 10px}
   .rs-hy .rs-q-3{grid-column:span 3}
   .rs-hy .rs-page .rs-ql, .rs-page .rs-hy .rs-ql{margin-bottom:5px}
-  .rs-hy .rs-times,.rs-hy .rs-zones{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
-  .rs-hy .rs-times::-webkit-scrollbar,.rs-hy .rs-zones::-webkit-scrollbar{display:none}
+  .rs-hy .rs-times{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
+  .rs-hy .rs-times::-webkit-scrollbar{display:none}
   .rs-hy .rs-dates{margin:0 -14px;padding:2px 14px 4px}
   .rs-hy .rs-dates .rs-chip{min-height:54px}
   .rs-hy .rs-times .rs-chip{flex:0 0 76px;min-height:50px}
-  .rs-hy .rs-zones .rs-chip{flex:0 0 auto;min-height:44px}
   .rs-hy .rs-step{min-height:48px}
   .rs-hy .rs-box,.rs-hy .rs-box input,.rs-hy .rs-box select{min-height:48px}
   .rs-hy .rs-tk-inline,.rs-hy .rs-perks{display:none!important}
@@ -600,7 +574,7 @@
 .rs-more-l{display:flex;flex-wrap:wrap;justify-content:center;gap:0 4px;margin:0;padding:0;list-style:none}
 /* phone: chip rows fade at the right edge so a cut-off chip reads as "swipe" */
 @container (max-width:767.98px){
-  .rs-hy :is(.rs-dates,.rs-times,.rs-zones){-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .rs-hy :is(.rs-dates,.rs-times){-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
 }
 
 /* UI2 B2: chips are .fk-pill inside .fk-rail--m (rail on phones, grid from 768px) */
@@ -611,7 +585,6 @@
 @media (min-width:768px){
   .rs-chips.fk-rail--m.rs-dates{grid-template-columns:repeat(7,minmax(0,1fr))}
   .rs-chips.fk-rail--m.rs-times{grid-template-columns:repeat(6,minmax(0,1fr))}
-  .rs-chips.fk-rail--m.rs-zones{grid-template-columns:repeat(5,minmax(0,1fr))}
   .rs-chips.fk-rail--m>.fk-pill{min-width:0;padding-inline:4px}
 }
 .rs-submit.fk-btn--book .rs-cta-ic{stroke:currentColor}

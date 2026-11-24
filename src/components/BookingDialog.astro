@@ -2,7 +2,7 @@
 /* Home "Reserve a table" sheet (prefix bk-). 3 steps: 1 When, 2 Details, then the Done screen.
    Bottom sheet on phones, centred dialog on laptops. Looks like the Banquet "Lock your date" form: it reuses the fe-* classes
    from src/styles/fe-form.css (steps row, crimson ticket, crown date chips, FeGo buttons, ready ring, float labels, done arch + wave).
-   Opens from every [data-open="book"] on Home. WhatsApp text, email copy (fkForm.send), honeypot and data-pick zone are the same as the old popup. */
+   Opens from every [data-open="book"] on Home. WhatsApp text, email copy (fkForm.send), honeypot are the same as the old popup. */
 import '../styles/fe-form.css';
 import '../styles/mx-mascot.css';
 import FeGo from './FeGo.astro';
@@ -12,7 +12,6 @@ import site from '../data/site.json';
 const M = '/assets/brand/mascot/';
 const hour24 = (t: string) => { const m = /^(\d{1,2})\s*(AM|PM)$/i.exec(String(t).trim()); return m ? (Number(m[1]) % 12) + (m[2].toUpperCase() === 'PM' ? 12 : 0) : 0; };
 const times = (slots as { time: string }[]).map((s) => ({ label: s.time, h: hour24(s.time) }));
-const zones = ['Café', 'Kitchen', 'Bar', 'Banquets'];
 const CK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
 /* 18 gold sparkles: end positions on two arcs round the arch (they burst out, then stay and drift) */
 const sparks = Array.from({ length: 18 }, (_, k) => {
@@ -63,14 +62,6 @@ const sparks = Array.from({ length: 18 }, (_, k) => {
                   <button type="button" id="bk-gp" aria-label="More guests">+</button>
                 </div>
               </div>
-
-              <div class="fe-sechead bk-sh"><span class="fe-lab" id="bk-zl">Zone</span></div>
-              <div class="bk-zones" id="bk-zones" role="radiogroup" aria-labelledby="bk-zl">
-                {zones.map((z) => (
-                  <label class="fk-f-chip bk-chip"><input type="radio" name="zone" value={z}><span class="fe-ck bk-ck" set:html={CK} /><span>{z}</span></label>
-                ))}
-              </div>
-
               <p class="fk-f-err fe-err bk-hint" id="bk-hint" role="alert"></p>
               <div class="fe-actions">
                 <FeGo tone="red" label="Next: your details" id="bk-next" class="is-idle" aria-disabled="true" />
@@ -88,7 +79,6 @@ const sparks = Array.from({ length: 18 }, (_, k) => {
                     <div class="fe-tk-cell"><span class="fe-tk-k">DATE</span><span class="fe-tk-v fe-sw" id="bk-t-d"></span></div>
                     <div class="fe-tk-cell"><span class="fe-tk-k">TIME</span><span class="fe-tk-v fe-sw" id="bk-t-t"></span></div>
                     <div class="fe-tk-cell"><span class="fe-tk-k">GUESTS</span><span class="fe-tk-v fe-sw" id="bk-t-g"></span></div>
-                    <div class="fe-tk-cell"><span class="fe-tk-k">SEATING</span><span class="fe-tk-v fe-sw" id="bk-t-z"></span></div>
                   </div>
                 </div>
               </div>
@@ -194,9 +184,8 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
 .bk-sheet .fe-days { padding-top: 22px; margin-top: -16px; }
 .bk-date { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
-/* time + zone chips */
+/* time chips */
 .bk-times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.bk-zones { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 76px; }
 .bk-times .bk-chip { flex: none; }
 .bk-sheet .bk-chip { position: relative; flex: 1 1 auto; gap: 0; min-height: 44px; padding: 0 10px; background: #fffdf9; border: 1.5px solid #ecdcc4; color: #17140f; font-weight: 500; font-variant-numeric: tabular-nums; transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, opacity 200ms ease, scale 120ms cubic-bezier(.25, .46, .45, .94), translate 150ms var(--bk-out); }
 .bk-times .bk-chip { padding: 0 4px; min-width: 0; }
@@ -323,6 +312,7 @@ html:has(.bk-dlg[open]) { overflow: hidden; }
 .bk-dlg.is-kb .bk-sheet.fe-card { max-height: calc(var(--bk-vvh, 100dvh) - 8px); }
 .bk-dlg.is-kb .bk-steps, .bk-dlg.is-kb .bk-s2h, .bk-dlg.is-kb .bk-s2-l, .bk-dlg.is-kb .bk-sheet .fk-f-fine, .bk-dlg.is-kb .bk-more, .bk-dlg.is-kb .bk-welcome { display: none; }
 .bk-dlg.is-kb .bk-sheet .fe-actions--col { position: sticky; bottom: 0; z-index: 2; background: linear-gradient(180deg, rgb(251 240 225 / 0), #fbf0e1 24%); padding: 8px 0 6px; margin: 6px 0 0; }
+#bk-hint { margin-bottom: 76px; }
 </style>
 <script is:inline src="/js/mx-mascot.js" defer></script>
 <script>
@@ -335,13 +325,12 @@ import '../scripts/fe-swipe.js';
   var WA = dlg.getAttribute('data-wa') || '919059670033';
   var EASE = 'cubic-bezier(.25,1,.5,1)', SPRING = 'cubic-bezier(.34,1.56,.64,1)';
   var steps = [].slice.call(vp.querySelectorAll('.fe-step'));
-  var daysEl = $('bk-days'), timesEl = $('bk-times'), zonesEl = $('bk-zones'), dIn = $('bk-date'), hint = $('bk-hint'), next = $('bk-next');
+  var daysEl = $('bk-days'), timesEl = $('bk-times'), dIn = $('bk-date'), hint = $('bk-hint'), next = $('bk-next');
   var nIn = $('bk-n'), phIn = $('bk-ph'), emIn = $('bk-em'), fieldsEl = $('bk-fields'), rem = $('bk-rem');
   var send = $('bk-send'), ring = $('bk-ring'), acts = $('bk-acts'), welcome = sheet.querySelector('.bk-welcome');
-  var gnum = $('bk-gnum'), tD = $('bk-t-d'), tT = $('bk-t-t'), tG = $('bk-t-g'), tZ = $('bk-t-z');
-  var ZONES = ['Café', 'Kitchen', 'Bar', 'Banquets'];
+  var gnum = $('bk-gnum'), tD = $('bk-t-d'), tT = $('bk-t-t'), tG = $('bk-t-g');
   var T = [].slice.call(timesEl.children).map(function (el) { return { el: el, inp: el.firstElementChild, label: el.firstElementChild.value, h: +el.getAttribute('data-h') }; });
-  var S = { step: 1, day: '', time: '', guests: 2, zone: 'Bar', extra: '', busy: false, remembered: false, thumbed: false };
+  var S = { step: 1, day: '', time: '', guests: 2, extra: '', busy: false, remembered: false, thumbed: false };
   var opener = null, closing = false, closeTimer = 0, stepTimer = 0;
   var phone = function () { return matchMedia('(max-width:640px)').matches; };
 
@@ -369,11 +358,10 @@ import '../scripts/fe-swipe.js';
   }
   var last = { d: '', g: 0 };
   function tickets(first) {
-    if (first) { [tD, tT, tG, tZ, gnum].forEach(function (b) { b.innerHTML = ''; }); last = { d: '', g: 0 }; }
+    if (first) { [tD, tT, tG, gnum].forEach(function (b) { b.innerHTML = ''; }); last = { d: '', g: 0 }; }
     roll(tD, S.day ? lng(S.day) : '—', S.day >= last.d ? 1 : -1);
     roll(tT, S.time || '—', 1);
     roll(tG, String(S.guests), S.guests >= last.g ? 1 : -1);
-    roll(tZ, S.zone, 1);
     roll(gnum, String(S.guests), S.guests >= last.g ? 1 : -1);
     last = { d: S.day, g: S.guests };
   }
@@ -394,7 +382,6 @@ import '../scripts/fe-swipe.js';
     a.forEach(function (t) { ok[t.label] = 1; });
     [].forEach.call(daysEl.children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-v') === S.day ? 'true' : 'false'); });
     T.forEach(function (t) { var off = !!S.day && !ok[t.label]; t.inp.disabled = off; t.inp.checked = t.label === S.time; });
-    [].forEach.call(zonesEl.querySelectorAll('input'), function (i) { i.checked = i.value === S.zone; });
     next.classList.toggle('is-idle', !(S.day && S.time)); next.setAttribute('aria-disabled', S.day && S.time ? 'false' : 'true');
     tickets();
   }
@@ -405,7 +392,6 @@ import '../scripts/fe-swipe.js';
     render(); nod();
   });
   timesEl.addEventListener('change', function (e) { if (e.target.name === 'time') { S.time = e.target.value; hint.textContent = ''; render(); nod(); } });
-  zonesEl.addEventListener('change', function (e) { if (e.target.name === 'zone') { S.zone = e.target.value; render(); } });
   $('bk-more').addEventListener('click', function () { try { if (dIn.showPicker) dIn.showPicker(); else dIn.click(); } catch (_) { dIn.click(); } });
   dIn.addEventListener('change', function () { var v = dIn.value; if (!v || v < startDay()) return; S.extra = v; buildDays(); S.day = v; if (S.time && !avail(v).some(function (t) { return t.label === S.time; })) S.time = ''; render(); nod(); });
 
@@ -499,8 +485,8 @@ import '../scripts/fe-swipe.js';
     S.busy = true; send.setAttribute('aria-busy', 'true'); send.style.width = send.offsetWidth + 'px'; send.classList.add('is-busy');
     ls('fz_n', nm); ls('fz_m', x); ls('fz_e', ev); ls('fk-me', JSON.stringify({ name: nm, phone: x, email: ev }));
     var dt = new Date(S.day + 'T00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-    var msg = window.fkWa.format({ kind: 'table', name: nm, phone: x, date: S.day, time: S.time, guests: S.guests, lines: [['Email', ev], ['Seating', S.zone]], offer: true });
-    var ff = { name: nm, phone: x, date: dt, time: S.time, guests: String(S.guests), zone: S.zone };
+    var msg = window.fkWa.format({ kind: 'table', name: nm, phone: x, date: S.day, time: S.time, guests: S.guests, lines: [['Email', ev]], offer: true });
+    var ff = { name: nm, phone: x, date: dt, time: S.time, guests: String(S.guests) };
     if (ev) ff.email = ev;
     if (window.fkForm && window.fkForm.send) window.fkForm.send('restaurant', 'Table request (home)', ff, document.querySelector('#bk-f [name=botcheck]'));
     var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
@@ -559,10 +545,10 @@ import '../scripts/fe-swipe.js';
   dlg.addEventListener('focusout', function () { setTimeout(vvFit, 120); });
 
   /* ---------- open / close ---------- */
-  function open(zone, el) {
+  function open(el) {
     clearTimeout(closeTimer); clearTimeout(stepTimer); closing = false;
     opener = el || document.activeElement;
-    resetSend(); S.step = 1; S.extra = ''; S.day = ''; S.time = ''; S.guests = 2; S.zone = ZONES.indexOf(zone) > -1 ? zone : 'Bar'; S.thumbed = false;
+    resetSend(); S.step = 1; S.extra = ''; S.day = ''; S.time = ''; S.guests = 2; S.thumbed = false;
     acts.classList.remove('is-thumb'); ring.classList.remove('is-ready');
     sheet.setAttribute('data-step', '1'); $('bk-steplabel').textContent = LABEL[1];
     steps.forEach(function (s, i) { s.classList.toggle('is-active', i === 0); s.classList.remove('is-before'); if (i === 0) s.removeAttribute('inert'); else s.setAttribute('inert', ''); });
@@ -591,13 +577,13 @@ import '../scripts/fe-swipe.js';
   dlg.addEventListener('cancel', function (e) { e.preventDefault(); closeIt(); });
   dlg.addEventListener('click', function (e) { if (e.target === dlg) closeIt(); });
   $('bk-x').addEventListener('click', closeIt);
-  window.openFursatBook = function (zone) { open(zone, document.activeElement); };
+  window.openFursatBook = function () { open(document.activeElement); };
   document.addEventListener('click', function (e) {
     var el = e.target.closest && e.target.closest('[data-open="book"]');
     if (!el) return;
     e.preventDefault();
     var m = $('fxmenu'); if (m && !m.hidden) m.hidden = true;
-    open(el.getAttribute('data-pick'), el);
+    open(el);
   }, true);
 
   /* ---------- swipe down to close (phone): 30% or a fast flick; friction past the top ---------- */

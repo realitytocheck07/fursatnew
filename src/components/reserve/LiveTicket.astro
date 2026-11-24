@@ -6,7 +6,7 @@ interface Props { variant: 'aside' | 'inline'; }
 const { variant } = Astro.props;
 const rows = [
   { k: 'date', l: 'Date' }, { k: 'time', l: 'Time' }, { k: 'guests', l: 'Guests' },
-  { k: 'zone', l: 'Seating' }, { k: 'occasion', l: 'Occasion' }, { k: 'offer', l: 'Offer' }, { k: 'name', l: 'Name' }, { k: 'phone', l: 'Mobile' },
+  { k: 'occasion', l: 'Occasion' }, { k: 'offer', l: 'Offer' }, { k: 'name', l: 'Name' }, { k: 'phone', l: 'Mobile' },
 ];
 ---
 <div class={`rs-tk rs-tk-${variant}`} aria-hidden="true" data-ticket>
