@@ -337,12 +337,14 @@ window.FursatConcierge={open:openIt,route:route};
   var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
   function paused(){return !!(pv&&pv.dataset.s==="paused")}
-  function load(){if(loaded)return;loaded=true;[fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}})}
-  function sync(){if(bg&&Math.abs(bg.currentTime-fg.currentTime)>.25)try{bg.currentTime=fg.currentTime}catch(e){}}
+  var bgL=false,bgW=false,lr=0;
+  function load(){if(loaded)return;loaded=true;fg.preload="auto";fg.load()}   /* V1b: front reel only; the ambient bg reel loads after the reel is playing */
+  function loadBg(){if(!bg||bgL)return;bgL=true;bg.preload="auto";bg.load()}
+  function sync(){if(bg&&bg.readyState>0&&Math.abs(bg.currentTime-fg.currentTime)>.25)try{bg.currentTime=fg.currentTime}catch(e){}}
   function tick(){raf=0;if(st!=="play")return;var d=fg.duration||60;bar.style.transform="scaleX("+Math.min(fg.currentTime/d,1).toFixed(4)+")";sync();
     if(phone&&!warm&&d-fg.currentTime<6){warm=true;if(!m.src&&stg)stg.click()}   /* phone: start fetching the master a few seconds early */
     raf=requestAnimationFrame(tick)}
-  function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){var q=bg.play();if(q&&q.catch)q.catch(function(){})}if(!raf)raf=requestAnimationFrame(tick)}
+  function run(){if(st==="done")return;var p=fg.play();if(p&&p.catch)p.catch(function(){});if(bg){if(bgL){var q=bg.play();if(q&&q.catch)q.catch(function(){})}else if(!bgW){bgW=true;fg.addEventListener("playing",function(){loadBg();if(st==="play"&&!paused()){var q2=bg.play();if(q2&&q2.catch)q2.catch(function(){})}},{once:true})}}if(!raf)raf=requestAnimationFrame(tick)}
   function halt(){fg.pause();if(bg)bg.pause()}
   /* a frame of video v is on screen (or cap ms passed) */
   function frame(v,cb,cap){var d=false,t=setTimeout(fin,cap);function fin(){if(d)return;d=true;clearTimeout(t);cb()}
@@ -359,7 +361,7 @@ window.FursatConcierge={open:openIt,route:route};
   addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on&&goodNet()&&window.__fzLens)fetchBlob()});
   addEventListener("pagehide",function(){if(blobUrl){try{URL.revokeObjectURL(blobUrl)}catch(e){}blobUrl=null}});
   function fromBlob(done){var n=0,fin=function(){if(!n++)done()};
-    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.src=blobUrl;x.load()}});loaded=true;
+    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.src=blobUrl;x.load()}});loaded=true;bgL=true;
     if(fg.readyState>=1)fin();else{fg.addEventListener("loadedmetadata",fin,{once:true});setTimeout(fin,1500)}}
   function lock(){var n=0,fix=function(){var T=songPos();if(T<.5||st!=="play")return;var d=Math.abs(fg.currentTime-T);
       if(d>.22){try{fg.currentTime=Math.min(T+.3,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}}
@@ -374,6 +376,10 @@ window.FursatConcierge={open:openIt,route:route};
     if(fg.readyState>=3){go();return}
     fg.addEventListener("canplay",go);
     t=setTimeout(function(){if(fin)return;fin=true;fg.removeEventListener("canplay",go);handoff()},15000)}
+  /* V1b contract with Hero.astro: cb() runs once the front reel can show a decoded frame (or after cap ms); the lens fades on top of it, then starts the reel on fz:lensfade */
+  window.__fzReelReady=function(cb,cap){var fin=false,t;function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);cb()}
+    if(st!=="idle"||again||save||calm||fg.readyState>=3){go();return}
+    load();fg.addEventListener("canplay",go);t=setTimeout(go,cap||1500)};
   function begin(){if(st!=="idle")return;if(again){handoff();return}
     st="wait";
     if(songPos()>=.5&&blobUrl){fromBlob(function(){var T2=songPos();try{fg.currentTime=Math.min(T2,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}start("blob");lock()});return}
@@ -390,7 +396,7 @@ window.FursatConcierge={open:openIt,route:route};
   /* U2: "Watch again": the master keeps playing while the reel reloads; when it can play, swap in one frame */
   function replay(){if(st!=="done")return;st="wait";warm=false;clearTimeout(cleanT);hero.classList.remove("reel-again");
     if(bar)bar.style.transform="scaleX(0)";
-    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}});loaded=true;
+    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}});loaded=true;bgL=true;
     var fin=false,t;
     function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);
       st="play";window.__fzReel.on=true;
@@ -420,9 +426,11 @@ window.FursatConcierge={open:openIt,route:route};
   function ready(){return hero.classList.contains("go")&&!de.classList.contains("lock")}
   /* lens running: the reel loads paused on its first frame ~3.4 s in; it starts at the lens END (fz:lensend fires synchronously from the lens end(), same task as the overlay removal) */
   function check(){if(st!=="idle"||!ready())return st!=="idle";
-    if(window.__fzLens){if(!lt&&!again){lt=setTimeout(load,3400);if(goodNet()&&soundOn())fetchBlob()}return false}
+    if(window.__fzLens){if(!lt&&!again){lt=1;if(goodNet()&&soundOn())fetchBlob()}return false}
     begin();return true}
-  addEventListener("fz:lensend",function(){clearTimeout(lt);if(ready())begin()});
+  addEventListener("fz:lensrun",function(){if(st==="idle"&&!again&&!lr)lr=setTimeout(function(){if(st==="idle"&&!again)load()},500)});   /* V1b: fetch the front reel during the light first shot, never in dive 2 */
+  addEventListener("fz:lensfade",function(){clearTimeout(lr);if(ready())begin()});
+  addEventListener("fz:lensend",function(){clearTimeout(lr);if(ready())begin()});
   if(!check()&&window.MutationObserver){var mo=new MutationObserver(function(){if(check())mo.disconnect()});mo.observe(hero,{attributes:true,attributeFilter:["class"]});mo.observe(de,{attributes:true,attributeFilter:["class"]})}
 })();
 

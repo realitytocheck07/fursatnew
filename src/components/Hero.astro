@@ -65,7 +65,9 @@ var LB=[[95,300],[200,245],[330,232],[450,238],[560,270],[640,345],[668,420],[66
 var WD={a:{face:'lz-a',poly:LA,tx:319,ty:284,r:.465,dish:'lz-burger',cx:.47},b:{face:'lz-b',poly:LB,tx:-29,ty:277,r:.457,dish:'lz-tira',cx:.5}};
 function pre(n,a,b,s){var l=document.createElement('link');l.rel='preload';l.as='image';l.type='image/webp';l.setAttribute('imagesrcset',B+n+'-'+a+'.webp '+a+'w,'+B+n+'-'+b+'.webp '+b+'w');l.setAttribute('imagesizes',s);document.head.appendChild(l)}
 /* the lens pictures are requested only after first paint + load + idle, so they never compete with the LCP resources */
-function preLater(){pre('lz-a',720,1080,SF);pre('lz-burger',900,1600,SD)}
+function preLater(){pre('lz-a',720,1080,SF);pre('lz-burger',900,1600,SD);warm()}
+/* V1b: decode the two first pictures at idle too, so the lens is built sooner after #top.go */
+function warm(){[['lz-a',720,1080,SF],['lz-burger',900,1600,SD]].forEach(function(x){try{var i=new Image();i.sizes=x[3];i.srcset=B+x[0]+'-'+x[1]+'.webp '+x[1]+'w,'+B+x[0]+'-'+x[2]+'.webp '+x[2]+'w';i.src=B+x[0]+'-'+x[2]+'.webp';if(i.decode)i.decode().catch(function(){})}catch(e){}})}
 var idl=window.requestIdleCallback||function(f){setTimeout(f,300)};
 if(document.readyState==='complete')idl(preLater,{timeout:2000});else addEventListener('load',function(){idl(preLater,{timeout:2000})},{once:true});
 function el(t,c){var e=document.createElement(t);if(c)e.className=c;return e}
@@ -94,7 +96,7 @@ function run(){
   lab.innerHTML='<b>Tiramisu</b><span>\u20B9375</span>';
   btns.innerHTML='<a class="fk-btn fk-btn--primary fk-btn--md" href="/order/">Order</a><button type="button" class="fk-btn fk-btn--secondary fk-btn--md lz-sec" data-open="book">Reserve</button>';
   end_.appendChild(scr);end_.appendChild(lab);end_.appendChild(line);end_.appendChild(btns);
-  ov=el('div','lz');ov.id='lz';ov.appendChild(Bw.wr);ov.appendChild(A.wr);ov.appendChild(vg);ov.appendChild(end_);hero.appendChild(ov);
+  ov=el('div','lz');ov.id='lz';ov.appendChild(Bw.wr);ov.appendChild(A.wr);ov.appendChild(vg);ov.appendChild(end_);hero.appendChild(ov);an(ov,[{opacity:0},{opacity:1}],{duration:150,easing:'ease-out'});   /* V1b: ease in, no hard cut from the page */
   var W=ov.clientWidth,H=ov.clientHeight,ph=W<900,s=ph?Math.max(W/1080,H/1045):H/1045,fs=ph?W*2.2/1672:Math.max(W/1672,H/941);
   function geo(o){var w=o.w,c=ctr(w.poly),Ox,Oy;
     if(ph){Ox=Math.min(0,Math.max(W-1080*s,W/2-s*c[0]));Oy=Math.min(0,Math.max(H-1045*s,H/2-s*c[1]))}else{Ox=(W-1080*s)/2;Oy=(H-1045*s)/2}
@@ -128,15 +130,20 @@ function run(){
   an(lab,[{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:450,delay:3750,easing:'cubic-bezier(.2,.8,.2,1)'});
   an(line,[{opacity:1,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)'}],{duration:350,delay:4050,easing:'cubic-bezier(.7,0,.2,1)'});
   an(btns,[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:400,delay:4150,easing:'cubic-bezier(.2,.8,.2,1)'});
-  an(ov,[{opacity:1},{opacity:0}],{duration:200,delay:4700}).finished.then(end,end);
-  /* wall-clock cap: a slow first frame can start the animation clock late; the lens never outlives ~4.9 s from the moment it was built */
-  setTimeout(function(){if(done)return;try{an(ov,[{opacity:1},{opacity:0}],{duration:120}).finished.then(end,end)}catch(e){end()}},4600);
+  /* V1b: at the designed end the lens holds its last frame until the front reel has a decoded frame (10.js: __fzReelReady, cap 1500 ms), then fades 200 ms ON TOP of the reel; 10.js starts the reel on fz:lensfade. #lz is removed (fz:lensend) when the fade ends. */
+  var fz=0;
+  function fade(d){if(fz||done)return;fz=1;try{dispatchEvent(new Event('fz:lensfade'))}catch(e){}try{an(ov,[{opacity:1},{opacity:0}],{duration:d}).finished.then(end,end)}catch(e){end()}}
+  function gate(){if(fz||done)return;var r=window.__fzReelReady;if(!r){fade(200);return}try{r(function(){fade(200)},1500)}catch(e){fade(200)}}
+  an(ov,[{opacity:1},{opacity:1}],{duration:1,delay:4700}).finished.then(gate,gate);
+  /* stuck-lens guard only: if the normal fade has not started by 5.6 s from the moment the lens was built, fade out quickly */
+  setTimeout(function(){fade(120)},5600);
   setTimeout(function(){if(!(Bw.face.complete&&Bw.face.naturalWidth&&Bw.bg.complete&&Bw.bg.naturalWidth))end()},2200);
   ov.addEventListener('pointerdown',function(e){if(e.target.closest&&e.target.closest('.lz-btns'))return;end()},{passive:true});
   btns.addEventListener('click',function(){setTimeout(end,80)});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')end()});
   document.addEventListener('scroll',function(e){var t=e.target,y=(t&&(t.scrollingElement||t).scrollTop)||window.scrollY||0;if(y>8)end()},{passive:true,capture:true});
   window.__fzLensAnims=all;
+  try{dispatchEvent(new Event('fz:lensrun'))}catch(e){}
 }
 function start(){try{sessionStorage.setItem(KEY,'1')}catch(e){}
   var a=new Image();a.srcset=B+'lz-a-720.webp 720w,'+B+'lz-a-1080.webp 1080w';a.sizes=SF;a.src=B+'lz-a-1080.webp';
@@ -216,6 +223,9 @@ if(seen)split(true);
   .lz-dish{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%)}
   .lz-end{align-items:center;padding-bottom:14px}.lz-btns{width:100%}.lz-btns .fk-btn{flex:1 1 0;justify-content:center}
 }
+/* V1b: the reel poster sits behind the reel video (same crop as the video), so the lens never fades onto an empty dark box */
+.fxhero .fx-rv{background:#1d170a url(/assets/home/hero-reel-poster.jpg) 50% 38%/cover no-repeat}
+@media (min-width: 900px){.fxhero .fx-rv{background-position:50% 14%}}
 /* Watch again pill (U2): shows after the reel has played once; bottom-left, above the ribbon */
 .fx-again{position:absolute;left:clamp(16px,3vw,32px);bottom:calc(var(--mq-h,56px) + 14px);z-index:7;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px 0 16px;border-radius:999px;border:1px solid #c99a43;background:rgba(252,247,240,.95);color:#4a3410;font:600 13px/1 var(--fk-sans,'Poppins',system-ui,sans-serif);letter-spacing:.02em;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(42,27,8,.35);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;opacity:0;visibility:hidden;transform:translateY(calc(var(--ay,0px) + 8px));transition:opacity .35s cubic-bezier(.23,1,.32,1),transform .35s cubic-bezier(.23,1,.32,1),visibility 0s linear .35s}
 .fx-again svg{width:12px;height:12px;fill:#9c4f1c;flex:none}
