@@ -90,9 +90,9 @@ const menuTiles = [
         </aside>
 
         <div class="od-cards">
-          <div class="od-row" id="od-row" role="list" tabindex="-1">
+          <div class="od-row" id="od-row" tabindex="-1">
 
-            <article class="od-card od-card--pick" role="listitem" aria-labelledby="od-t-pick">
+            <article class="od-card od-card--pick" aria-labelledby="od-t-pick">
               {/* TODO(client): replace this green panel with the Fursat takeaway-bag photo */}
               <span class="od-pimg" aria-hidden="true"><img src="/assets/brand/fursat-elephant.webp" alt="" width="120" height="120" decoding="async" /></span>
               <span class="od-badge od-badge--bag" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12l1 12H5Z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg></span>
@@ -104,7 +104,7 @@ const menuTiles = [
               </a>
             </article>
 
-            <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-sw">
+            <article class="od-card od-card--city" aria-labelledby="od-t-sw">
               <span class="od-brand" aria-hidden="true"><img src="/assets/brand/swiggy-mark.svg" alt="" width="64" height="64" decoding="async" /><b class="od-brand-sw">Swiggy</b></span>
               <h2 class="od-ct" id="od-t-sw">Order on <span class="r">Swiggy</span></h2>
               <p class="od-cs">Fast &amp; reliable delivery</p>
@@ -114,7 +114,7 @@ const menuTiles = [
               </a>
             </article>
 
-            <article class="od-card od-card--city" role="listitem" aria-labelledby="od-t-zo">
+            <article class="od-card od-card--city" aria-labelledby="od-t-zo">
               <span class="od-brand" aria-hidden="true"><img class="od-brand-zo" src="/assets/brand/zomato-logo.svg" alt="" width="160" height="64" decoding="async" /></span>
               <h2 class="od-ct" id="od-t-zo">Order on <span class="r">Zomato</span></h2>
               <p class="od-cs">Great food, great service</p>
@@ -192,11 +192,11 @@ const menuTiles = [
           )}
 
           <h3 class="od-h3">Jump to a section</h3>
-          <div class="od-cats" role="list">
+          <ul class="od-cats" style="list-style:none;margin:0;padding:0">
             {sections.map((s) => (
-              <a class="od-cat" role="listitem" href={`/menu#${s.id}`}>{s.name}<small>{s.count}</small></a>
+              <li><a class="od-cat" href={`/menu#${s.id}`}>{s.name}<small>{s.count}</small></a></li>
             ))}
-          </div>
+          </ul>
         </section>
 
         <!-- STEP 3: booking points -->

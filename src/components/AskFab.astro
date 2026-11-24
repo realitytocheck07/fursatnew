@@ -18,10 +18,10 @@ const show = path !== '/ask' && path !== '/404';
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 ---
 {show && (
-  <a class="afab" href={href} aria-label={tip} data-fk-ask data-home={path === '/' ? '' : undefined}>
+  <a class="afab" href={href} data-fk-ask data-home={path === '/' ? '' : undefined}>
     <img class="afab-img" src="/assets/ask-mascot-sm.webp" alt="" width="56" height="56" decoding="async" loading="lazy" />
     <span class="afab-eq" aria-hidden="true"><i style="--a:-72deg;--b:var(--fk-b3,0)"></i><i style="--a:-60deg;--b:var(--fk-b1,0)"></i><i style="--a:-48deg;--b:var(--fk-b0,0)"></i><i style="--a:-36deg;--b:var(--fk-b2,0)"></i><i style="--a:-24deg;--b:var(--fk-b4,0)"></i><i style="--a:24deg;--b:var(--fk-b4,0)"></i><i style="--a:36deg;--b:var(--fk-b2,0)"></i><i style="--a:48deg;--b:var(--fk-b0,0)"></i><i style="--a:60deg;--b:var(--fk-b1,0)"></i><i style="--a:72deg;--b:var(--fk-b3,0)"></i></span>
-    <span class="afab-t"><b>Ask</b> <span translate="no">Fursat</span></span>
+    <span class="afab-t"><b>Ask</b><span style="font-size:0">{' '}</span><span translate="no">Fursat</span></span>
     {q && <span class="afab-q">{q}</span>}
     <span class="afab-spk" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
     <span class="afab-bub" aria-hidden="true"></span>

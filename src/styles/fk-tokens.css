@@ -462,10 +462,10 @@ html[data-daypart="evening"] .hy::before { opacity: 1; background: radial-gradie
   transition:transform 150ms var(--ui2-ease),background-color 200ms ease,color 200ms ease,box-shadow 200ms ease,border-color 200ms ease}
 .fk-pill:active{transform:scale(.96)}
 .fk-pill:focus-visible{outline:2px solid var(--ui2-focus);outline-offset:2px}
-.fk-pill[aria-pressed="true"],.fk-pill[aria-current="true"],.fk-pill.is-on{background:var(--ui2-green);border-color:var(--ui2-green);color:var(--ui2-cream);box-shadow:var(--ui2-glow-gold)}
-.fk-pill[aria-pressed="true"]:focus-visible,.fk-pill.is-on:focus-visible{outline-color:var(--ui2-gold)}
+.fk-pill[aria-pressed="true"],.fk-pill[aria-selected="true"],.fk-pill[aria-current="true"],.fk-pill.is-on{background:var(--ui2-green);border-color:var(--ui2-green);color:var(--ui2-cream);box-shadow:var(--ui2-glow-gold)}
+.fk-pill[aria-pressed="true"]:focus-visible,.fk-pill[aria-selected="true"]:focus-visible,.fk-pill.is-on:focus-visible{outline-color:var(--ui2-gold)}
 .fk-pill small{font:500 .75rem/1 var(--fk-sans);opacity:.85}
-@media (hover:hover) and (pointer:fine){.fk-pill:not([aria-pressed="true"]):not(.is-on):hover{background:var(--ui2-glass-hi);border-color:var(--ui2-gold)}}
+@media (hover:hover) and (pointer:fine){.fk-pill:not([aria-pressed="true"]):not([aria-selected="true"]):not(.is-on):hover{background:var(--ui2-glass-hi);border-color:var(--ui2-gold)}}
 @media (prefers-reduced-motion:reduce){.fk-pill{transition:none}.fk-pill:active{transform:none}}
 
 /* ---- 4. SWIPE RAIL ---- (fk-ui.js sets data-start="1" once scrolled away from the start, data-end="1" while more is to the right) */

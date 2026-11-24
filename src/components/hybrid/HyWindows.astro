@@ -48,7 +48,7 @@ const pos = (w: { l: number; t: number; w: number; h: number }) =>
       <svg class="hy-snd-on" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       <svg class="hy-snd-off" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
-    {photos[k]!.video!.credit && <a class="hy-cred" href={photos[k]!.video!.credit!.href} target="_blank" rel="noopener" aria-label={photos[k]!.video!.credit!.label.replace(/^Video: /, "Video by ")} hidden><span class="hy-cred-p">Video: </span>{photos[k]!.video!.credit!.label.replace(/^Video: /, "")}</a>}
+    {photos[k]!.video!.credit && <a class="hy-cred" href={photos[k]!.video!.credit!.href} target="_blank" rel="noopener" hidden><span class="hy-cred-p">Video: </span>{photos[k]!.video!.credit!.label.replace(/^Video: /, "")}</a>}
   </div>
 ))}
 
