@@ -1,0 +1,15 @@
+/* MX1a mascot: transform + opacity only */
+.mx-m{position:absolute;z-index:3;aspect-ratio:1;transform-origin:50% 100%;pointer-events:none;opacity:0;transition:opacity 200ms cubic-bezier(.23,1,.32,1)}
+.mx-m.mx-on{opacity:1}
+.mx-m.mx-on.mx-hide{opacity:0}
+.mx-par,.mx-br,.mx-sw{position:absolute;inset:0;display:block;transform-origin:50% 100%}
+.mx-p{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 100ms linear;filter:drop-shadow(0 8px 10px rgb(60 30 20 / .2))}
+.mx-p.is-front{opacity:1;transition-duration:150ms}
+.mx-m[data-flip] .mx-p[data-pose="welcome"]{scale:-1 1}
+.mx-m.mx-rs{width:94px}
+@media (max-width:700px){.mx-m.mx-rs{width:83px}.mx-m.mx-rs .mx-p[data-pose="welcome"]{scale:-1 1}}
+.mx-m.is-live .mx-br{animation:mx-breathe 3.2s ease-in-out infinite}
+.mx-m.is-live .mx-sw{animation:mx-sway 5.6s ease-in-out infinite}
+.mx-m.is-off .mx-br,.mx-m.is-off .mx-sw{animation-play-state:paused}
+@keyframes mx-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.015)}}
+@keyframes mx-sway{0%,100%{transform:rotate(-.8deg)}50%{transform:rotate(.8deg)}}

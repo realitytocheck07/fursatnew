@@ -11,6 +11,8 @@ import LiveTicket from './LiveTicket.astro';
 import OrganicFrame from '../fx/OrganicFrame.astro';
 import slotData from '../../data/slots.json';
 import ld from '../../data/ld.json';
+import '../../styles/mx-mascot.css';
+const MXM = '/assets/brand/mascot/';
 // R3d: success screen. Directions use the repo's existing Google Maps link (ld.json hasMap).
 const mapsUrl = (ld as any)[0].hasMap as string;
 import PanoramicViewer from '../PanoramicViewer.astro';
@@ -37,6 +39,7 @@ const conditions: string[] = [];
 ---
 <OrganicFrame shape="blobBooking" class="rs-panel-frame" fill lip={16}>
 <section id="book" class="rs-panel fk-organic__body" tabindex="-1" aria-labelledby="rs-book-h">
+  <span class="mx-m mx-rs" data-mx="rs" data-from="-36" data-base={MXM} data-sizes="94px" data-poses="welcome,thumbs" aria-hidden="true"><img src={MXM + 'namaste-480.webp'} srcset={`${MXM}namaste-480.webp 480w, ${MXM}namaste-720.webp 720w`} sizes="94px" width="720" height="720" alt="" loading="lazy" decoding="async" draggable="false"></span>
   <form class="rs-pform" id="res-form" novalidate onsubmit="return false;" aria-labelledby="rs-book-h">
     <header class="rs-phead">
       <span class="rs-hicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg></span>
@@ -771,6 +774,7 @@ const conditions: string[] = [];
 </script>
 
 <script>import '../../scripts/fe-swipe.js';</script>
+<script is:inline src="/js/mx-mascot.js" defer></script>
 <style is:global>
 /* U1: compact send pill + arrow-circle swipe handle (src/scripts/fe-swipe.js) */
 .rs-page .rs-submit.fk-btn--book { display: flex; width: fit-content; max-width: 100%; min-height: 44px; margin: 14px auto 0; padding: 6px 6px 6px 18px; gap: 10px; white-space: nowrap; }
