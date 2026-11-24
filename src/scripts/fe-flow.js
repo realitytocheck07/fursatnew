@@ -1,5 +1,6 @@
 // fe-flow.js: the F2 three-step celebrate flow (Banquet "Lock your date", Catering quote). Same wiring as the old forms:
 // WhatsApp text field by field (cfg.order), email copy via window.fkForm?.send, honeypot, data-wa-form hooks, validation.
+import "./fe-swipe.js";
 export function feFlow(cfg) {
   const form = document.querySelector(cfg.form);
   if (!form) return;

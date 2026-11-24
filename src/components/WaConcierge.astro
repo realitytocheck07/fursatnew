@@ -1,0 +1,330 @@
+---
+// WaConcierge: ONE round WhatsApp button, bottom-right, that opens a premium concierge chat panel.
+// It replaces the old WhatsApp "Fursat Connect" button + tease, the Instagram button and the Offers tab.
+// Panel: bottom sheet on phones (drag handle, swipe down to close), 360px card above the button on laptop.
+// Chat: typing dots, "Namaste! Welcome to FURSAT" types out, then the tagline fades in, then the option rows stagger in. Plays once per visit (sessionStorage fz_wac).
+// Motion is transform / opacity only. Owner rule: no reduced-motion fallbacks.
+import site from '../data/site.json';
+import slots from '../data/slots.json';
+
+// TODO(client): the FURSAT15 offer stays hidden until confirmed (same switch as Mascot / MascotOfferModal / index).
+const OFFER_ENABLED = false;
+const hasOffer = OFFER_ENABLED || slots.some((s: { discount?: number }) => Number(s.discount) > 0);
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const wa = site.whatsapp;
+const waText = 'Hi FURSAT! I\'d like to know more.';
+const waHref = `https://wa.me/${wa}?text=${encodeURIComponent(waText)}`;
+// one Instagram link per page, same accounts as the old Instagram button; the main one comes from site.json
+const IG: Record<string, string> = {
+  '/banquet': 'fursatbanquets',
+  '/party': 'fursatbanquets',
+  '/catering': 'fursat_bitesandbuffet',
+  '/restaurant-bar': 'fursatsocialclub',
+};
+const igHref = IG[path] ? `https://www.instagram.com/${IG[path]}/` : site.social.instagram;
+const show = path !== '/404';
+
+const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
+const IC: Record<string, string> = {
+  menu: '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M8 8h7M8 12h7"/>',
+  reserve: '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>',
+  banquet: '<path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-5h4v5"/>',
+  catering: '<path d="M4 14h16a8 8 0 01-16 0z"/><path d="M12 6v3M3 14h18"/>',
+  ask: '<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  insta: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/>',
+  offer: '<path d="M20 12v8H4v-8M2.5 8h19v4h-19zM12 8v12"/><path d="M12 8c-2.5 0-4-1-4-2.5S9 3 10.3 3C11.600 3 12 5 12 8zm0 0c2.500 0 4-1 4-2.500S15 3 13.700 3C12.400 3 12 5 12 8z"/>',
+  arrow: '<path d="M9 6l6 6-6 6"/>',
+};
+---
+{show && (
+<div class="wac" data-wac data-wa-href={waHref} data-wa-text={waText} data-path={path}>
+  <div class="wac-bd" data-wac-bd aria-hidden="true"></div>
+  <button class="wac-btn" type="button" aria-label="Chat with FURSAT" aria-haspopup="dialog" aria-expanded="false" aria-controls="wac-panel">
+    <span class="wac-pulse" aria-hidden="true"></span>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d={WA_PATH}/></svg>
+  </button>
+  <section class="wac-panel" id="wac-panel" role="dialog" aria-modal="true" aria-labelledby="wac-t" tabindex="-1" inert>
+    <div class="wac-grab" data-wac-grab>
+      <span class="wac-handle" aria-hidden="true"></span>
+      <header class="wac-h">
+        <span class="wac-logo"><img src="/assets/brand/fursat-elephant.webp" alt="" width="40" height="40" decoding="async" /></span>
+        <div class="wac-ht"><p id="wac-t">FURSAT</p><small>Chat with us</small></div>
+        <button class="wac-x" type="button" aria-label="Close chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+      </header>
+    </div>
+    <div class="wac-body" data-wac-body>
+      <div class="wac-chat">
+        <p class="wac-sr" data-wac-live></p>
+        <div class="wac-dots" data-wac-dots aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="wac-msg" data-wac-b1><p><span class="wac-v" data-wac-v></span><span class="wac-r" data-wac-r>Namaste! Welcome to FURSAT</span></p></div>
+        <div class="wac-msg wac-msg--tag" data-wac-b2><p lang="hi-Latn">Fursat, aur kuch nahi!</p></div>
+      </div>
+      <ul class="wac-opts" data-wac-opts>
+        <li><a class="wac-opt" href="/menu"><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.menu}></svg></span><span class="wac-ot">View menu</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
+        {path !== '/reserve' && <li><a class="wac-opt" href="/reserve" data-wac-reserve><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.reserve}></svg></span><span class="wac-ot">Reserve a table</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>}
+        <li class="wac-split"><a class="wac-opt" href="/banquet"><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.banquet}></svg></span><span class="wac-ot">Banquets &amp; events</span></a><a class="wac-sec" href="/party">Parties</a></li>
+        <li><a class="wac-opt" href="/catering"><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.catering}></svg></span><span class="wac-ot">Catering</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
+        {path !== '/ask' && <li><a class="wac-opt" href="/ask" data-wac-ask><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.ask}></svg></span><span class="wac-ot">Ask Fursat</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>}
+        <li><button class="wac-opt wac-opt--wa" type="button" data-wac-wa><span class="wac-oi"><svg viewBox="0 0 24 24"><path fill="currentColor" d={WA_PATH}/></svg></span><span class="wac-ot">WhatsApp us</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></button></li>
+        <li><a class="wac-opt" href={igHref} target="_blank" rel="noopener"><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.insta}></svg></span><span class="wac-ot">Instagram<small class="wac-vh"> (opens in a new tab)</small></span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
+        {hasOffer && <li><a class="wac-opt wac-opt--offer" href="/reserve" data-wac-offer><span class="wac-oi"><svg viewBox="0 0 24 24" set:html={IC.offer}></svg></span><span class="wac-ot">Today's offers<small>10% off when you book online</small></span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>}
+      </ul>
+    </div>
+  </section>
+</div>
+)}
+<script is:inline>
+(() => {
+  const root = document.querySelector('[data-wac]');
+  if (!root) return;
+  const de = document.documentElement, btn = root.querySelector('.wac-btn'), panel = root.querySelector('.wac-panel'), bd = root.querySelector('[data-wac-bd]');
+  const body = root.querySelector('[data-wac-body]'), grab = root.querySelector('[data-wac-grab]'), closeB = root.querySelector('.wac-x');
+  const dots = root.querySelector('[data-wac-dots]'), b1 = root.querySelector('[data-wac-b1]'), b2 = root.querySelector('[data-wac-b2]');
+  const vis = root.querySelector('[data-wac-v]'), rest = root.querySelector('[data-wac-r]'), live = root.querySelector('[data-wac-live]');
+  const opts = [...root.querySelectorAll('.wac-opts > li')], FULL = rest.textContent;
+  const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {} };
+  const phone = () => matchMedia('(max-width: 767px)').matches;
+  let isOpen = false, timers = [], playing = false, lastFocus = null, bypass = false;
+
+  // reserve: on pages that carry the existing Home Reserve dialog, the row uses its trigger; elsewhere it is the /reserve link
+  const rsv = root.querySelector('[data-wac-reserve]'), off = root.querySelector('[data-wac-offer]');
+  [rsv, off].forEach((a) => { if (a && document.getElementById('bkdlg')) a.setAttribute('data-open', 'book'); });
+
+  // The Offers tab (+ its card) is rendered by AskFab.astro, which this session does not edit: the concierge replaces it, so take it out of the DOM here.
+  // TODO(AskFab owner): delete the .afab-ear / #afab-offers markup, earPlace() and the ear listeners from AskFab.astro, then remove this line.
+  document.querySelectorAll('[data-fk-ear], #afab-offers').forEach((n) => n.remove());
+
+  // ---- chat script ----
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+  const clearAll = () => { timers.forEach(clearTimeout); timers = []; };
+  const showOpts = (instant) => {
+    opts.forEach((li, i) => { li.style.setProperty('--i', instant ? 0 : i); });
+    root.classList.add('is-opts'); if (instant) root.classList.add('is-instant');
+  };
+  const finish = () => {   // final state, instantly
+    clearAll(); playing = false;
+    dots.classList.remove('is-on'); root.classList.add('is-b1', 'is-b2', 'is-instant');
+    vis.textContent = FULL; rest.textContent = ''; b1.removeAttribute('aria-hidden'); b2.removeAttribute('aria-hidden');
+    showOpts(true); live.removeAttribute('aria-live');
+  };
+  const play = () => {
+    playing = true; store('fz_wac', '1');
+    root.classList.remove('is-b1', 'is-b2', 'is-opts', 'is-instant');
+    vis.textContent = ''; rest.textContent = FULL;
+    b1.setAttribute('aria-hidden', 'true'); b2.setAttribute('aria-hidden', 'true');
+    live.setAttribute('aria-live', 'polite');
+    dots.classList.add('is-on');
+    later(() => {   // after ~700 ms of dots the first bubble starts typing
+      dots.classList.remove('is-on'); root.classList.add('is-b1');
+      live.textContent = FULL + '. ' + b2.textContent;   // announced once
+      let i = 0;
+      const step = () => {
+        i++; vis.textContent = FULL.slice(0, i); rest.textContent = FULL.slice(i);
+        if (i < FULL.length) later(step, 35 * (0.65 + Math.random() * 0.8));
+        else later(() => { root.classList.add('is-b2'); b1.removeAttribute('aria-hidden'); b2.removeAttribute('aria-hidden'); later(() => { showOpts(false); live.removeAttribute('aria-live'); playing = false; }, 320); }, 260);
+      };
+      later(step, 120);
+    }, 700);
+  };
+
+  // ---- open / close ----
+  const focusables = () => [...panel.querySelectorAll('a[href],button:not([disabled])')].filter((e) => e.offsetParent !== null || e === closeB).filter((e) => getComputedStyle(e).visibility !== 'hidden');
+  const lock = (on) => { de.classList.toggle('wac-lock', on && phone()); };
+  function open() {
+    if (isOpen) return;
+    isOpen = true; lastFocus = document.activeElement;
+    root.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true'); panel.removeAttribute('inert');
+    de.setAttribute('data-wac-open', ''); lock(true);
+    if (store('fz_wac')) finish(); else play();
+    panel.style.transform = ''; panel.style.transition = '';
+    requestAnimationFrame(() => { closeB.focus({ preventScroll: true }); });
+  }
+  function close(opts2) {
+    if (!isOpen) return;
+    isOpen = false; if (playing) finish();
+    root.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); panel.setAttribute('inert', '');
+    de.removeAttribute('data-wac-open'); lock(false);
+    panel.style.transform = ''; panel.style.transition = '';
+    if (!opts2 || opts2.focus !== false) { try { btn.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  btn.addEventListener('click', () => (isOpen ? close() : open()));
+  closeB.addEventListener('click', () => close());
+  bd.addEventListener('click', () => close());
+  document.addEventListener('keydown', (e) => {
+    if (!isOpen) return;
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const f = focusables(); if (!f.length) { e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1], a = document.activeElement;
+    if (!panel.contains(a)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+  });
+  document.addEventListener('focusin', (e) => { if (isOpen && !panel.contains(e.target) && e.target !== btn) { const f = focusables(); if (f[0]) f[0].focus(); } });
+
+  // ---- options ----
+  // WhatsApp: one tap, one window.open, exactly once
+  const waBtn = root.querySelector('[data-wac-wa]');
+  waBtn.addEventListener('click', () => {
+    if (waBtn.dataset.busy) return; waBtn.dataset.busy = '1'; setTimeout(() => { delete waBtn.dataset.busy; }, 800);
+    window.open(root.dataset.waHref, '_blank', 'noopener,noreferrer');
+    close({ focus: false });
+  });
+  // Ask Fursat: through the existing Ask pill (it opens Ask with the page-aware question); /ask itself otherwise
+  const askRow = root.querySelector('[data-wac-ask]');
+  if (askRow) askRow.addEventListener('click', (e) => {
+    const a = document.querySelector('[data-fk-ask]'); close({ focus: false });
+    if (a) { e.preventDefault(); a.click(); }
+  });
+  // Reserve / offers: the existing Home dialog opens from its [data-open="book"] trigger (set above); other pages go to /reserve
+  [rsv, off].forEach((a) => { if (a) a.addEventListener('click', () => { close({ focus: false }); }); });
+  // any other link: close as the page changes (links to the current page just close)
+  panel.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('a[href]'); if (a && !a.hasAttribute('data-open') && !a.hasAttribute('data-wac-ask') && a.target !== '_blank') close({ focus: false }); if (a && a.target === '_blank') close({ focus: false }); });
+
+  // ---- swipe down (phone sheet): follows the finger; closes past ~30%, springs back otherwise ----
+  let sy = 0, dy = 0, drag = false, ok = false;
+  panel.addEventListener('touchstart', (e) => {
+    if (!phone() || !isOpen || e.touches.length !== 1) return;
+    sy = e.touches[0].clientY; dy = 0; drag = false;
+    ok = grab.contains(e.target) || body.scrollTop <= 0;
+  }, { passive: true });
+  panel.addEventListener('touchmove', (e) => {
+    if (!ok || !phone() || !isOpen) return;
+    dy = e.touches[0].clientY - sy;
+    if (dy <= 0) { if (drag) { panel.style.transform = ''; drag = false; } return; }
+    if (!drag && body.scrollTop > 0 && !grab.contains(e.target)) return;
+    drag = true; if (e.cancelable) e.preventDefault();
+    panel.style.transition = 'none'; panel.style.transform = 'translate3d(0,' + dy + 'px,0)';
+  }, { passive: false });
+  const endDrag = () => {
+    if (!drag) return; drag = false;
+    const h = panel.offsetHeight;
+    panel.style.transition = '';
+    if (dy > h * 0.3) { panel.style.transform = 'translate3d(0,' + h + 'px,0)'; close(); panel.style.transform = ''; }
+    else panel.style.transform = '';
+  };
+  panel.addEventListener('touchend', endDrag); panel.addEventListener('touchcancel', endDrag);
+
+
+  // ---- sits clear of the other fixed bars: the Book bar / banquet dock lift the button above them (and Ask Fursat, which reads the same --fab-lift) ----
+  // Home: hidden while the intro is on screen (it would sit over the intro), like the buttons it replaces.
+  const isHome = root.dataset.path === '/', mqPh = matchMedia('(max-width: 767px)'), bars = ['fxsticky', 'pb-dock'];
+  let raf = 0;
+  const introOn = () => ['heli', 'intro', 'gate', 'lcap'].some((id) => document.getElementById(id)) || de.classList.contains('lock');
+  const lift = () => {
+    raf = 0; let l = 0;
+    if (mqPh.matches) {
+      const mb = document.querySelector('.mb-bar'), base = (mb ? innerHeight - mb.getBoundingClientRect().top : 76) + 12;
+      bars.forEach((id) => {
+        const el = document.getElementById(id); if (!el) return;
+        const cs = getComputedStyle(el);
+        if (cs.position !== 'fixed' || cs.display === 'none' || el.hidden || !el.offsetHeight) return;
+        if (id === 'fxsticky' && !el.classList.contains('on')) return;   // slid away
+        const b = parseFloat(cs.bottom) || 0;                             // resting place, not the mid-slide position
+        l = Math.max(l, b + el.offsetHeight + 8 - base);
+      });
+    }
+    de.style.setProperty('--fab-lift', Math.max(0, Math.round(l)) + 'px');
+    de.toggleAttribute('data-wac-intro', isHome && introOn());
+  };
+  const req = () => { if (!raf) raf = requestAnimationFrame(lift); };
+  const mo = new MutationObserver(req);
+  bars.forEach((id) => { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); });
+  mo.observe(de, { attributes: true, attributeFilter: ['class'] });
+  if (isHome) mo.observe(document.body, { childList: true });
+  addEventListener('resize', req, { passive: true }); addEventListener('load', req); addEventListener('pageshow', req);
+  lift();
+
+  // ---- first load of the visit: ONE gentle pulse ----
+  if (!store('fz_wac_p')) { store('fz_wac_p', '1'); btn.classList.add('is-pulse'); btn.addEventListener('animationend', (e) => { if (/wac-pulse/.test(e.animationName)) btn.classList.remove('is-pulse'); }, { once: true }); }
+
+  // ---- other panels take over: close while the Reserve dialog (or any dialog) opens ----
+  new MutationObserver(() => { if (isOpen && document.querySelector('dialog[open], .pk.on')) close({ focus: false }); }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['open', 'class'] });
+  addEventListener('pageshow', (e) => { if (e.persisted) close({ focus: false }); });
+  addEventListener('resize', () => { if (isOpen) lock(true); }, { passive: true });
+})();
+</script>
+<style is:global>
+.wac { --g: #1a5d23; --gold: #e9a23b; --cream: #fbf0e1; --red: #b41216; --ease: cubic-bezier(.2,0,0,1); }
+.wac-btn { position: fixed; z-index: 8500; right: 20px; bottom: 20px; width: 56px; height: 56px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: pointer; background: var(--g); color: #fff;
+  box-shadow: 0 0 0 2px var(--gold), 0 14px 26px -12px rgb(10 40 16 / .7); -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: opacity 240ms var(--ease), transform 240ms var(--ease), visibility 0s linear 0s; }
+.wac-btn svg { width: 28px; height: 28px; display: block; }
+.wac-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.wac-btn:active { transform: scale(.96); }
+.wac-pulse { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--gold); opacity: 0; pointer-events: none; }
+.wac-btn.is-pulse .wac-pulse { animation: wac-pulse 1600ms var(--ease) 600ms 1 both; }
+@keyframes wac-pulse { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.7); } }
+@media (hover: hover) and (pointer: fine) { .wac-btn:hover { transform: translateY(-2px); } .wac-btn:hover:active { transform: scale(.96); } }
+/* hides (fade + slight drop) while a form / menu book / hero ribbon is on screen or a dialog is open (FabGuard sets the attribute) */
+html[data-wac-hide]:not([data-wac-open]) .wac-btn, html[data-wac-intro] .wac-btn, html:has(dialog[open]) .wac-btn { opacity: 0; transform: translateY(10px); visibility: hidden; pointer-events: none; transition: opacity 200ms var(--ease), transform 200ms var(--ease), visibility 0s linear 200ms; }
+/* phone: above the mobile bar (bar height + safe area + 12px) */
+@media (max-width: 767px) { .wac-btn { right: 12px; bottom: calc(var(--mb-clear, 76px) + 12px + var(--fab-lift, 0px)); } html.fk-typing:not([data-wac-open]) .wac-btn { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px); } }
+.wac-bd { position: fixed; inset: 0; z-index: 9100; background: rgb(16 38 26 / .42); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 300ms var(--ease), visibility 0s linear 300ms; }
+.wac.is-open .wac-bd { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+@media (min-width: 768px) { .wac-bd { background: transparent; } }
+@media (min-width: 768px) { .wac.is-open .wac-btn { z-index: 9102; } }
+.wac-panel { position: fixed; z-index: 9101; display: flex; flex-direction: column; overflow: hidden; background-color: var(--cream); color: #2b2218; font: 400 15px/1.45 Poppins, Rupee, system-ui, sans-serif;
+  background-image: radial-gradient(rgb(180 140 70 / .13) 1.2px, transparent 1.4px), radial-gradient(rgb(26 93 35 / .06) 1.2px, transparent 1.4px); background-size: 22px 22px, 22px 22px; background-position: 0 0, 11px 11px;
+  opacity: 0; visibility: hidden; transition: transform 300ms var(--ease), opacity 300ms var(--ease), visibility 0s linear 300ms; will-change: transform, opacity; overscroll-behavior: contain; }
+.wac.is-open .wac-panel { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+@media (min-width: 768px) {
+  .wac-panel { right: 20px; bottom: 88px; width: 360px; max-height: min(640px, calc(100svh - 108px)); border-radius: 22px; box-shadow: 0 0 0 1.5px rgb(233 162 59 / .75), 0 28px 60px -18px rgb(30 20 8 / .55); transform: translateY(14px) scale(.97); transform-origin: 100% 100%; }
+  .wac-handle { display: none; }
+}
+@media (max-width: 767px) {
+  .wac-panel { left: 0; right: 0; bottom: 0; max-height: 80svh; border-radius: 24px 24px 0 0; box-shadow: 0 -18px 50px -16px rgb(30 20 8 / .5), inset 0 1.5px 0 rgb(233 162 59 / .8); transform: translateY(104%); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .wac-panel { transition-duration: 320ms, 240ms, 0s; }
+}
+.wac-grab { flex: none; touch-action: none; background: linear-gradient(180deg, #14451b, var(--g)); color: #fff; }
+.wac-handle { display: block; width: 40px; height: 4px; margin: 8px auto 0; border-radius: 4px; background: rgb(255 255 255 / .45); }
+.wac-h { display: flex; align-items: center; gap: 12px; padding: 10px 8px 12px 16px; }
+.wac-logo { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--cream); box-shadow: 0 0 0 2px var(--gold); display: grid; place-items: center; overflow: hidden; }
+.wac-logo img { width: 34px; height: 34px; object-fit: contain; display: block; }
+.wac-ht { flex: 1; min-width: 0; }
+.wac-ht p { margin: 0; font: 700 1rem/1.15 "Playfair Display", Georgia, serif; letter-spacing: .08em; }
+.wac-ht small { display: block; margin-top: 2px; font-size: .78rem; color: rgb(255 255 255 / .82); }
+.wac-x { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background-color 160ms ease-out, transform 160ms var(--ease); }
+.wac-x svg { width: 22px; height: 22px; }
+.wac-x:active { transform: scale(.94); background: rgb(255 255 255 / .16); }
+.wac-x:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+@media (hover: hover) and (pointer: fine) { .wac-x:hover { background: rgb(255 255 255 / .16); } }
+.wac-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 16px; -webkit-overflow-scrolling: touch; }
+.wac-chat { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 112px; }
+.wac-sr, .wac-vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+/* bubbles: white, WhatsApp-style tail; the text is in the DOM from the start, the hidden part keeps the bubble's size so nothing reflows while typing */
+.wac-msg, .wac-dots { max-width: 86%; padding: 9px 13px; border-radius: 4px 16px 16px 16px; background: #fff; box-shadow: 0 1px 1.5px rgb(60 40 10 / .18); }
+.wac-msg p { margin: 0; font-size: .95rem; color: #2b2218; }
+.wac-r { visibility: hidden; }
+.wac-msg { opacity: 0; transform: translateY(6px); visibility: hidden; transition: opacity 260ms var(--ease), transform 260ms var(--ease), visibility 0s linear 260ms; }
+.wac.is-b1 [data-wac-b1], .wac.is-b2 [data-wac-b2] { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+.wac.is-instant .wac-msg, .wac.is-instant .wac-opts > li { transition: none !important; }
+.wac-msg--tag p { font: italic 500 1.08rem/1.35 "Playfair Display", Georgia, serif; color: var(--red); }
+.wac-dots { position: absolute; left: 0; top: 0; display: flex; gap: 5px; padding: 12px 14px; opacity: 0; transform: translateY(4px); visibility: hidden; transition: opacity 160ms ease-out, transform 160ms var(--ease), visibility 0s linear 160ms; }
+.wac-dots.is-on { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+.wac-dots i { width: 7px; height: 7px; border-radius: 50%; background: #9b8f7c; animation: wac-dot 900ms ease-in-out infinite; }
+.wac-dots i:nth-child(2) { animation-delay: 150ms; } .wac-dots i:nth-child(3) { animation-delay: 300ms; }
+@keyframes wac-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+/* options */
+.wac-opts { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.wac-opts > li { opacity: 0; transform: translateY(8px); visibility: hidden; transition: opacity 260ms var(--ease), transform 260ms var(--ease), visibility 0s linear 260ms; }
+.wac.is-opts .wac-opts > li { opacity: 1; transform: none; visibility: visible; transition-delay: calc(var(--i, 0) * 60ms); }
+.wac-opt, .wac-sec { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.wac-opt { width: 100%; min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 6px 12px 6px 8px; border: 0; border-radius: 14px; background: rgb(255 255 255 / .86); box-shadow: inset 0 0 0 1px rgb(201 154 67 / .35); color: #2b2218; text-align: left; text-decoration: none; font: 500 .95rem/1.2 Poppins, Rupee, system-ui, sans-serif; cursor: pointer; transition: background-color 160ms ease-out, transform 160ms var(--ease); }
+.wac-opt:active { transform: scale(.98); background: #fff; }
+.wac-opt:focus-visible, .wac-sec:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .wac-opt:hover { background: #fff; box-shadow: inset 0 0 0 1px var(--gold); } }
+.wac-oi { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #eaf3e3; color: var(--g); }
+.wac-oi svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.wac-opt--wa .wac-oi { background: var(--g); color: #fff; } .wac-opt--wa .wac-oi svg { fill: currentColor; stroke: none; }
+.wac-ot { flex: 1; min-width: 0; } .wac-ot small { display: block; margin-top: 2px; font-size: .74rem; font-weight: 500; color: var(--red); }
+.wac-oa { flex: none; width: 16px; height: 16px; fill: none; stroke: #9b8f7c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.wac-split { display: flex; align-items: stretch; gap: 6px; }
+.wac-split .wac-opt { flex: 1; width: auto; }
+.wac-sec { flex: none; min-height: 48px; display: grid; place-items: center; padding: 0 14px; border-radius: 14px; background: rgb(255 255 255 / .86); box-shadow: inset 0 0 0 1px rgb(201 154 67 / .35); color: var(--g); font: 600 .82rem/1 Poppins, Rupee, system-ui, sans-serif; text-decoration: none; transition: background-color 160ms ease-out; }
+@media (hover: hover) and (pointer: fine) { .wac-sec:hover { background: #fff; box-shadow: inset 0 0 0 1px var(--gold); } }
+.wac-sec:active { transform: scale(.97); }
+html.wac-lock, html.wac-lock body { overflow: hidden !important; overscroll-behavior: none; }
+@media print { .wac { display: none !important; } }
+</style>

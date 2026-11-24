@@ -331,6 +331,7 @@ window.FursatConcierge={open:openIt,route:route};
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
     save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false;
   window.__fzReel={on:true};
+  var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
   function paused(){return !!(pv&&pv.dataset.s==="paused")}
   function load(){if(loaded)return;loaded=true;[fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}})}
@@ -359,11 +360,11 @@ window.FursatConcierge={open:openIt,route:route};
       if(d>.22){try{fg.currentTime=Math.min(T+.3,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}}
       if(++n<12)setTimeout(fix,600)};
     fg.addEventListener("playing",function(){setTimeout(fix,150)},{once:true})}
-  function start(mode){st="play";hero.classList.add("reel-on");m.pause();
+  function start(mode){st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
     if(mode==="fresh"){window.__fzReel.keepSong=true;load()}   /* blob not ready: the mp3 keeps playing, the reel starts muted from 0, the song is never restarted */
     else if(mode==="plain")load();
     if(!paused())run()}
-  function begin(){if(st!=="idle")return;var T=songPos();
+  function begin(){if(st!=="idle")return;if(again){handoff();return}var T=songPos();
     if(T<.5){start("plain");return}                    /* no song playing: the reel starts from 0 as before */
     if(!blobP)fetchBlob();
     var t0=Date.now();(function w(){if(st!=="idle")return;
@@ -375,7 +376,21 @@ window.FursatConcierge={open:openIt,route:route};
     try{m.currentTime=2.45}catch(e){}
     if(!m.src&&stg)stg.click();
     var p=m.play();if(p&&p.catch)p.catch(function(){});
-    setTimeout(function(){m.classList.remove("zin");halt();rv.remove()},700)}
+    hero.classList.add("reel-again");placeAgain(4200);
+    setTimeout(function(){m.classList.remove("zin");halt();rv.style.visibility="hidden"},700)}
+  /* U2: "Watch again": play the reel once more, then hand over to the master loop exactly as the first time (handoff is the same function) */
+  function replay(){if(st==="play")return;st="play";window.__fzReel.on=true;warm=false;hero.classList.remove("reel-again");
+    if(pv&&paused()){pv.dataset.s="playing";pv.setAttribute("aria-label","Pause background video")}
+    rv.style.visibility="";m.classList.remove("zin");m.pause();[fg,bg].forEach(function(x){if(x){x.preload="auto";x.load()}});loaded=true;   /* load() restarts from 0 even where the host is not seekable */
+    rv.classList.remove("out");void rv.offsetWidth;hero.classList.add("reel-on");run()}
+  if(ag)ag.addEventListener("click",replay);
+  /* phone: the card with "Book a table" sits at the bottom, so the pill rides just above the card (and the elephant on it): bottom-left of the video, clear of the Book button and the ribbon. Position = one translateY, tracked while the card slides in. */
+  function placeAgain(ms){if(!ag)return;var t0=Date.now();(function f(){
+    if(!matchMedia("(max-width:899px)").matches||!hero.classList.contains("fxs-on")){ag.style.removeProperty("--ay")}
+    else{var el=hero.querySelector(".fxs-el"),cd=hero.querySelector(".fxs-card");if(el&&cd){var hr=hero.getBoundingClientRect(),top=Math.min(el.getBoundingClientRect().top,cd.getBoundingClientRect().top);ag.style.setProperty("--ay",(top-hr.top-10-(ag.offsetTop+ag.offsetHeight))+"px")}}
+    if(Date.now()-t0<ms)requestAnimationFrame(f)})()}
+  addEventListener("resize",function(){if(hero.classList.contains("reel-again"))placeAgain(300)});
+  if(again)placeAgain(4200);
   fg.addEventListener("ended",handoff);fg.addEventListener("error",handoff);
   rv.querySelectorAll("source").forEach(function(s){s.addEventListener("error",function(){if(!fg.currentSrc)handoff()})});
   if(save){handoff();return}                         /* Save-Data: skip the 60s reel, go straight to the master loop */
@@ -387,7 +402,8 @@ window.FursatConcierge={open:openIt,route:route};
   document.addEventListener("visibilitychange",function(){if(st!=="play")return;if(document.hidden)halt();else if(!paused())run()});
   if(calm)return;                                    /* reduced motion: poster + the play button, no autoplay */
   var de=document.documentElement;
-  function go(){if(hero.classList.contains("go")&&!de.classList.contains("lock")){setTimeout(begin,250);return true}}   /* only after the intro has ended */
+  function go(){if(!window.__fzLens&&hero.classList.contains("go")&&!de.classList.contains("lock")){setTimeout(begin,250);return true}}   /* U2: also held while the "Fall into the lens" intro plays */
+  addEventListener("fz:lensend",function(){go()});   /* only after the intro has ended */
   if(!go()&&window.MutationObserver){var mo=new MutationObserver(function(){if(go())mo.disconnect()});mo.observe(hero,{attributes:true,attributeFilter:["class"]});mo.observe(de,{attributes:true,attributeFilter:["class"]})}
 })();
 

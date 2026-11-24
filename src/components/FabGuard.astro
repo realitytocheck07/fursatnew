@@ -1,14 +1,14 @@
 ---
-/* FabGuard — ONE place that keeps the floating buttons (Ask Fursat pill, the Offers tab, Instagram, WhatsApp + its tease) off the content.
-   Below 1024px, while any "avoid zone" is inside the buttons' band (the bottom ~270px of the screen, above and around the mobile bar),
-   <html data-fab-clear> is set and the buttons fade out; they come back when the zone has scrolled away.
-   Zones: anything marked data-fab-avoid, the Home hero ribbon (.mq-strip), menu prices (.mv-item-price) and book / add controls
-   (.mv-open, .mb-add, .mb-plus, .mb-picks-bar, .mb-dock). Watched with IntersectionObserver (no per-scroll work, fine for a 300-dish list).
-   The mobile bar itself never hides; content keeps its room via --mb-clear (see MobileBar) and scroll-padding-bottom below. */
+/* FabGuard: ONE place that keeps the floating buttons (Ask Fursat pill + the WhatsApp concierge) off the content.
+   Zones: anything marked data-fab-avoid, the Home hero ribbon (.mq-strip), menu prices (.mv-item-price), book / add controls
+   (.mv-open, .mb-add, .mb-plus, .mb-picks-bar, .mb-dock) and booking forms (form, fields). One IntersectionObserver, no per-scroll work.
+   - <html data-fab-clear> (below 1024px): Ask Fursat steps aside while any zone is in the bottom band (unchanged behaviour).
+   - <html data-wac-hide> (all widths): the concierge button fades out while a zone is in ITS corner (bottom-right band; on wider screens
+     only zones that reach the right edge). It stays while its own panel is open. The footer is never observed (curtain footer). */
 ---
 <style is:global>
 @media (max-width: 1023px) {
-  html[data-fab-clear] :is(.afab, .afab-ear, .ifab, .waf-fab, .waf-tease) {
+  html[data-fab-clear] :is(.afab, .afab-ear) {
     opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
     transition: opacity .18s ease, visibility 0s .18s !important;
   }
@@ -19,36 +19,41 @@
 </style>
 <script is:inline>
 (function () {
-  var de = document.documentElement, ZONES = '[data-fab-avoid],.mq-strip,.mv-item-price,.mv-open,.mb-add,.mb-plus,.mb-picks-bar,.mb-dock';
-  var BAND = 270, io = null, inSet = new Set(), known = new WeakSet(), tm = 0, rt = 0;
-  function waOpen() { return !!document.querySelector('.waf-fab[aria-expanded="true"]'); }
-  function update() { de.toggleAttribute('data-fab-clear', innerWidth < 1024 && inSet.size > 0 && !waOpen()); }
-  function onIO(es) {
-    es.forEach(function (e) {
-      var tall = e.boundingClientRect.height > innerHeight * 1.2;       // a zone taller than 1.2 screens is the page, not a corner panel (same rule as the buttons)
-      if (e.isIntersecting && !(tall && innerWidth >= 768)) inSet.add(e.target); else inSet.delete(e.target);
+  var de = document.documentElement, ZONES = '[data-fab-avoid],.mq-strip,.mv-item-price,.mv-open,.mb-add,.mb-plus,.mb-picks-bar,.mb-dock,form,input:not([type=hidden]),select,textarea,.fk-btn,.fk-f-field';
+  var io = null, inSet = new Set(), known = new WeakSet(), tm = 0, rt = 0, lastH = 0, lastW = 0;
+  function bandPx() { return innerWidth < 768 ? 270 : 150; }
+  function update() {
+    var wide = innerWidth >= 1024, hitAsk = false, hitWac = false;
+    inSet.forEach(function (el) {
+      if (el.closest('#fxsticky,#pb-dock,.mb-bar,.wac')) return;     // fixed bars never count as content
+      var r = el.getBoundingClientRect(), tall = r.height > innerHeight * 1.2;
+      if (!wide) hitAsk = true;
+      if (tall && innerWidth >= 768) return;                         // a zone taller than 1.2 screens is the page, not a corner panel
+      if (innerWidth < 768 || r.right > innerWidth - 110) hitWac = true;
     });
+    de.toggleAttribute('data-fab-clear', !wide && hitAsk);
+    de.toggleAttribute('data-wac-hide', hitWac);
+  }
+  function onIO(es) {
+    es.forEach(function (e) { if (e.isIntersecting) inSet.add(e.target); else inSet.delete(e.target); });
     update();
   }
   function scan() {
     if (!io) return;
     document.querySelectorAll(ZONES).forEach(function (el) { if (!known.has(el)) { known.add(el); io.observe(el); } });
   }
-  var lastH = 0, lastW = 0;
   function start(force) {
-    if (!force && io && Math.abs(innerHeight - lastH) < 40 && innerWidth === lastW) return;   // the phone URL bar growing / shrinking while scrolling must not rebuild the observer
+    if (!force && io && Math.abs(innerHeight - lastH) < 40 && innerWidth === lastW) return;   // the phone URL bar must not rebuild the observer
     lastH = innerHeight; lastW = innerWidth;
     if (io) { io.disconnect(); io = null; known = new WeakSet(); inSet.clear(); }
-    if (innerWidth >= 1024 || !('IntersectionObserver' in window)) { update(); return; }
-    io = new IntersectionObserver(onIO, { rootMargin: '-' + Math.max(0, innerHeight - BAND) + 'px 0px 0px 0px', threshold: 0 });
-    scan();
+    if (!('IntersectionObserver' in window)) { update(); return; }
+    io = new IntersectionObserver(onIO, { rootMargin: '-' + Math.max(0, innerHeight - bandPx()) + 'px 0px 0px 0px', threshold: 0 });
+    scan(); update();
   }
-  function later() { clearTimeout(tm); tm = setTimeout(scan, 200); }
+  function later() { if (tm) return; tm = setTimeout(function () { tm = 0; scan(); update(); }, 150); }   // throttle, not debounce: a list that keeps changing must still be scanned
   start();
   addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(start, 150); }, { passive: true });
   addEventListener('pageshow', function () { start(true); });
-  new MutationObserver(function (ms) {
-    for (var i = 0; i < ms.length; i++) { if (ms[i].type === 'attributes' && ms[i].attributeName === 'aria-expanded') update(); else later(); }
-  }).observe(document.body || de, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-fab-avoid', 'aria-expanded'] });
+  new MutationObserver(later).observe(document.body || de, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-fab-avoid'] });
 })();
 </script>

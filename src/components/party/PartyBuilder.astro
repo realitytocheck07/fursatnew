@@ -235,6 +235,7 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 </div>
 
 <script type="application/json" id="pb-data" set:html={JSON.stringify(client)}></script>
+<script>import '../../scripts/fe-swipe.js';</script>
 <style is:global>
 .pb{max-width:1240px;margin:0 auto;padding:clamp(64px,7vw,88px) clamp(16px,4vw,48px) clamp(24px,3vw,40px);scroll-margin-top:56px}
 .pb-sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -326,7 +327,7 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 .pb-est-l{margin:0;font:600 .75rem/1.3 var(--fk-sans);letter-spacing:.12em;text-transform:uppercase;color:#74501a}
 .pb-est-v{margin:6px 0 2px;font:500 clamp(2.6rem,5vw,3.4rem)/1.1 var(--fk-serif);color:#2a5019;font-variant-numeric:tabular-nums}
 .pb-est-s{margin:0 0 14px;font:400 .875rem/1.4 var(--fk-sans);color:#5a5040}
-.pb-wa{width:100%;gap:10px}
+.pb-wa{width:auto;max-width:100%;gap:10px;min-height:44px;padding:6px 6px 6px 20px;white-space:nowrap}.fl-ring:has(.pb-wa){display:flex;justify-content:center}.pb-wa .fl-chip{margin-left:4px}.pb-wa .fl-chip,.pb-wa .fl-roll{-webkit-user-select:none;user-select:none}@media (hover:hover){.pb-wa:hover .fl-chip svg{transform:translateX(3px)}}.pb-wa:focus-visible .fl-chip svg{transform:none}
 .pb-call{display:grid;place-items:center;min-height:48px;margin-top:10px;border-radius:999px;border:1.5px solid #c99a43;color:#18301f;font:600 .9375rem/1 var(--fk-sans);text-decoration:none;transition:transform 150ms var(--fk-ease-out)}
 .pb-call:active{transform:scale(.96)}
 .pb-call:focus-visible{outline:2px solid #8a5a14;outline-offset:3px}

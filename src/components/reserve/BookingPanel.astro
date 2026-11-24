@@ -187,7 +187,7 @@ const conditions: string[] = [];
       <button type="button" id="res-submit-btn" class="fk-btn fk-btn--book rs-submit">
         <svg class="rs-cta-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17M9 14.5l2 2 4-4"/></svg>
         <span>Request a Table</span>
-        <svg class="rs-cta-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        <span class="rs-cta-chip" aria-hidden="true"><svg class="rs-cta-go" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
       <p class="rs-fine" id="rs-fine">Opens WhatsApp with your details.</p>
       <noscript><p class="rs-fine"><a href="https://wa.me/919059670033?text=Hi%20Fursat!%20I%20would%20like%20to%20reserve%20a%20table." target="_blank" rel="noopener">No JavaScript? Request a table on WhatsApp.</a></p></noscript>
@@ -659,6 +659,7 @@ const conditions: string[] = [];
     const msg = window.fkWa.format({ kind: 'table', name, phone, date: booking.date, time: booking.time, guests: booking.guests, lines: [['Email', email], ['Seating', seating], ['Occasion', occasion], ['Table', booking.table]], offer: true });
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
     window.fkForm?.send('restaurant', 'Table booking', { name, phone, ...(email ? { email } : {}), guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
+    submit.classList.add('is-sent'); /* swipe module: the send really started */
     const w = window.open(url, '_blank');
     const fine = $('rs-fine');
     fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';
@@ -745,7 +746,7 @@ const conditions: string[] = [];
     ['f-guests', 'f-occasion'].forEach((id) => $(id).classList.remove('is-prefilled')); clearErr(); $('rs-fine').textContent = 'Opens WhatsApp with your details.'; syncInputs();
   }
   $('rs-again').addEventListener('click', () => {
-    panel.classList.remove('is-done'); doneEl.hidden = true; sent = null; resetAll();
+    panel.classList.remove('is-done'); doneEl.hidden = true; sent = null; submit.classList.remove('is-sent'); resetAll();
     if (mode !== 'quick') setMode('quick'); else renderAll();
     $('rs-book-h').focus({ preventScroll: true });
   });
@@ -769,7 +770,15 @@ const conditions: string[] = [];
 })();
 </script>
 
+<script>import '../../scripts/fe-swipe.js';</script>
 <style is:global>
+/* U1: compact send pill + arrow-circle swipe handle (src/scripts/fe-swipe.js) */
+.rs-page .rs-submit.fk-btn--book { display: flex; width: fit-content; max-width: 100%; min-height: 44px; margin: 14px auto 0; padding: 6px 6px 6px 18px; gap: 10px; white-space: nowrap; }
+.rs-submit .rs-cta-chip { flex: none; display: grid; place-items: center; width: 32px; height: 32px; margin-left: 4px; border-radius: 50%; background: #fff; color: var(--ui2-red, #b41216); }
+.rs-submit .rs-cta-chip .rs-cta-go { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+@media (hover: hover) and (pointer: fine) { .rs-submit:hover .rs-cta-go { transform: translateX(3px); } }
+.rs-submit[aria-disabled="true"]:hover .rs-cta-go { transform: none; }
+.rs-submit .rs-cta-chip { -webkit-user-select: none; user-select: none; }
   /* R1 a11y: 44px targets, field errors, required marks. Colours are existing tokens only. */
   .rs-page .rs-hy .fk-btn.rs-sbtn{width:45px;height:45px;min-height:0}
   .rs-page .rs-hy .fk-btn,.rs-page .rs-hy .rs-mode{min-height:45px}

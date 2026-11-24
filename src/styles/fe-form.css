@@ -599,3 +599,20 @@
   .fe-card .fe-go-wa { width: 22px; height: 22px; }
   .fe-go-spin { margin: 3px; }
 }
+
+/* ===== U1: compact send pill + small secondary Back (Home popup, Banquet, Catering) =====
+   The green send button is sized to its content (min 44px, label never wraps). Back / Call become small secondaries:
+   beside Send on laptop, below it on phone. The arrow circle is the swipe handle (src/scripts/fe-swipe.js). */
+.fe-card .fe-go.fe-go--wa { width: auto; max-width: 100%; flex: none; display: inline-flex; justify-content: flex-start; align-items: center; gap: 10px; min-height: 44px; padding: 6px 6px 6px 16px; white-space: nowrap; }
+.fe-card .fe-go.fe-go--wa .fe-go-lab { flex: 0 0 auto; min-width: 0; }
+.fe-card .fe-go.fe-go--wa .fe-go-chip { margin-left: 4px; }
+.fe-card .fe-actions--col { align-items: center; }
+.fe-card .fe-actions--col > .fe-ring { width: auto; max-width: 100%; flex: none; }
+.fe-card .fe-actions--col .fe-row2, .fe-sec .fe-card .fe-step[data-step="3"] .fe-row2 { width: auto; justify-content: center; }
+.fe-card .fe-actions--col .fe-row2 > :is(.fk-f-btn, a.fk-f-btn) { flex: 0 0 auto; width: auto; min-height: 44px; padding: 0 18px; font-size: 13.5px; font-weight: 500; }
+@media (min-width: 821px) {
+  .fe-card .fe-actions--col { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 10px; }
+}
+@media (max-width: 380px) { .fe-card .fe-go.fe-go--wa { gap: 8px; padding-left: 14px; } .fe-sec .fe-card .fe-go.fe-go--wa .fe-go-lab, .fe-card .fe-go.fe-go--wa .fe-go-lab { font-size: 13.5px; } }
+/* the arrow circle is a handle: no text selection / callout while dragging */
+.fe-go-chip { -webkit-user-select: none; user-select: none; }

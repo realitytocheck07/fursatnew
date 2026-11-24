@@ -1,7 +1,6 @@
 ---
 import AskFab from '../components/AskFab.astro';
-import InstaFab from '../components/InstaFab.astro';
-import WaAgent from '../components/WaAgent.astro';
+import WaConcierge from '../components/WaConcierge.astro';
 import FabGuard from '../components/FabGuard.astro';
 import fs from 'node:fs';
 import ld from '../data/ld.json';
@@ -93,6 +92,8 @@ interface PreloadImage {
   href: string;
   media?: string;
   type?: string;
+  imagesrcset?: string;
+  imagesizes?: string;
 }
 
 interface Props {
@@ -196,6 +197,8 @@ const faqLd = faq && faq.length
     rel="preload"
     as="image"
     href={img.href}
+    imagesrcset={img.imagesrcset}
+    imagesizes={img.imagesizes}
     media={img.media}
     type={img.type || 'image/webp'}
     fetchpriority="high"
@@ -235,8 +238,7 @@ const faqLd = faq && faq.length
 <style is:global>.fk-skip{position:fixed;left:12px;top:-70px;z-index:100000;min-height:44px;display:inline-flex;align-items:center;padding:0 20px;border-radius:999px;background:#10261a;color:#f6e6d1;font:600 15px/1 Poppins,system-ui,sans-serif;text-decoration:none;transition:top .2s}.fk-skip:focus{top:12px;outline:2px solid #c99a43;outline-offset:2px}</style>
 <slot />
 <AskFab />
-<InstaFab />
-<WaAgent />
+<WaConcierge />
 <FabGuard />
 </body>
 </html>
