@@ -41,7 +41,7 @@ const askChips = ['I’m hungry', 'Something spicy under 400', 'Biryani for two'
 const routes = [
   { href: '/reserve', t: 'Reserve a table', p: 'Lunch, dinner or a night out', icon: 'M3.5 10h17M8 3v4M16 3v4M5.5 5h13a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z', main: true },
   { href: '/party', t: 'Parties & events', p: 'Birthdays, kitty parties, bar bashes', icon: 'M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6Z' },
-  { href: '/banquet', t: 'Banquet hall', p: '50–350 guests, AV and live stage', icon: 'M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6' },
+  { href: '/banquet', t: 'Banquet hall', p: 'Weddings, birthdays and corporate events', icon: 'M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6' },
   { href: '/catering', t: 'Outdoor catering', p: 'Fursat food at your venue', icon: 'M3 14h18a9 9 0 0 0-18 0ZM2 18h20M12 5V3' },
 ];
 const menuTiles = [
@@ -55,7 +55,7 @@ const menuTiles = [
   title="Order Online – Swiggy, Zomato & Pickup | Fursat Madhapur"
   description="Order Fursat Kitchen | Bar your way: pick up at Capital Park, Madhapur, or get it delivered on Swiggy or Zomato. Browse the full menu or reserve a table."
   canonical="https://fursatind.in/order/"
-  ogImage="https://fursatind.in/assets/order/order-hero-1200.webp"
+  ogImage="https://fursatind.in/assets/interior/fursat_space_10.webp"
   ogImageAlt="Fursat Kitchen | Bar — Order online in Madhapur"
 >
   <SiteHeader active="order" variant="plaster" />
@@ -64,22 +64,8 @@ const menuTiles = [
     <!-- the scene: round-table photo fades into a cream-gold floor; sidebar + 3 cards + menu strip all sit on it -->
     <div class="od-scene" id="choose">
       <picture class="od-hero-pic">
-        <source media="(max-width:760px)" srcset="/assets/order/order-hero-phone-720.webp 720w, /assets/order/order-hero-phone-1112.webp 1112w" sizes="100vw" />
-        <img class="od-hero-bg" src="/assets/order/order-hero-1600.webp" srcset="/assets/order/order-hero-768.webp 768w, /assets/order/order-hero-1200.webp 1200w, /assets/order/order-hero-1600.webp 1600w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async" />
+        <img class="od-hero-bg" src="/assets/interior/fursat_space_10.webp" srcset="/assets/interior/fursat_space_10-480.webp 480w, /assets/interior/fursat_space_10-720.webp 720w, /assets/interior/fursat_space_10.webp 1280w" sizes="100vw" width="1280" height="1706" alt="" fetchpriority="high" decoding="async" />
       </picture>
-      <!-- natural motion on the real photo: steam off the hot plates, fizz + foam in the tall glass (CSS only, transform/opacity, paused off-screen, off for reduced motion) -->
-      <div class="od-fx" id="od-fx" aria-hidden="true">
-        <i class="st" style="--x:22.5%;--y:63%;--d:0s"></i><i class="st" style="--x:25%;--y:63%;--d:1.6s;--dx:-10px"></i><i class="st" style="--x:23.5%;--y:64%;--d:3.1s"></i>
-        <i class="st" style="--x:52%;--y:69%;--d:.8s"></i><i class="st" style="--x:56%;--y:68%;--d:2.4s;--dx:-8px"></i><i class="st" style="--x:54%;--y:70%;--d:3.9s"></i>
-        <i class="st" style="--x:83%;--y:41%;--d:.4s;--dx:8px"></i><i class="st" style="--x:85%;--y:41%;--d:2.2s"></i>
-        <span class="od-glass"></span>
-      </div>
-      <script is:inline>
-      (function(){var fx=document.getElementById('od-fx');if(!fx||matchMedia('(prefers-reduced-motion: reduce)').matches)return;var g=fx.querySelector('.od-glass'),h='';
-        for(var i=0;i<24;i++){var s=(3.6+Math.random()*4.4).toFixed(1);h+='<i style="--l:'+(8+Math.random()*78).toFixed(0)+'%;--s:'+s+'px;--t:'+(2.6+Math.random()*2.6).toFixed(1)+'s;--d:-'+(Math.random()*5).toFixed(1)+'s;--w:'+((Math.random()<.5?-1:1)*(2+Math.random()*4)).toFixed(0)+'px"></i>'}
-        for(var j=0;j<6;j++)h+='<b style="--l:'+(10+j*14)+'%;--d:-'+(Math.random()*3).toFixed(1)+'s"></b>';g.innerHTML=h;
-        if('IntersectionObserver' in window)new IntersectionObserver(function(e){fx.classList.toggle('is-off',!e[0].isIntersecting)}).observe(fx)})();
-      </script>
 
       <div class="od-hero-in">
         <p class="od-k"><span>Order online</span></p>

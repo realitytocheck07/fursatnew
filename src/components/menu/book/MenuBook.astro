@@ -18,8 +18,8 @@ const FOC = focus as Record<string, { cx: number; cy: number; z: number }>;
 const P = (photos as { photos: Record<string, { src: string; sm: string; xs: string }> }).photos;
 
 // Sections of the book = the live menu's groups (FOOD_GROUPS: "Starters", "Mains", ...), each holding its member sections' dishes in menu order.
-// Same display rename as menu.astro (TODO(client): the data names one section after a person).
-const SHOWN_SECTION: Record<string, string> = { "Sreemukhi's special menu": 'Special menu' };
+// Same display-name override map as menu.astro (empty: food.json already says "Special menu").
+const SHOWN_SECTION: Record<string, string> = {};
 const bySection = new Map((food as { section: string; items: any[] }[]).map((s) => [SHOWN_SECTION[s.section] ?? s.section, s.items]));
 // Full and Half are two choices only where the data has both prices: description "Half ₹599 | Full ₹999".
 const HF = /Half\s*₹?\s*([\d,]+)\s*\|\s*Full\s*₹?\s*([\d,]+)/i;

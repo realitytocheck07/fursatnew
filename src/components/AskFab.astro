@@ -2,8 +2,6 @@
 // AskFab: the "Ask Fursat" mascot, always with the guest (not on /ask). It never hides for a button or a field: it DOCKS (44px avatar) at the nearest free spot,
 // and only steps away while a dialog is open. One hint bubble per [data-ask-hint] section (3 s, once per visit). Page-aware: opens /ask with a question that fits.
 // Motion: float, blink, hop when scrolling stops, lean while scrolling, wave on a new section, tap sparkles, sleepy after 25 s. WAAPI, transform/opacity only. No sound.
-import slots from '../data/slots.json';
-import site from '../data/site.json';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const HINTS: Record<string, string> = {
   '/cafe': 'coffee and desserts',
@@ -17,9 +15,6 @@ const HINTS: Record<string, string> = {
 const q = HINTS[path];
 const href = q ? `/ask?q=${encodeURIComponent(q)}` : '/ask';
 const show = path !== '/ask' && path !== '/404';
-// Offers "ear": only offers that are real and switchable in the data files (the table-booking discount in slots.json). The hidden FURSAT15 offer stays hidden until the client confirms it.
-const disc = Math.max(0, ...slots.map((x: { discount?: number }) => x.discount || 0));
-const waOffers = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent('Hi Fursat, what offers are on today?')}`;
 const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 ---
 {show && (
@@ -31,15 +26,6 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     <span class="afab-spk" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
     <span class="afab-bub" aria-hidden="true"></span>
   </a>
-  <button class="afab-ear" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="afab-offers" aria-label="Offers" data-fk-ear hidden><span aria-hidden="true">🎁</span><span class="afab-ear-t">Offers</span></button>
-  <div class="afab-offers" id="afab-offers" role="dialog" aria-label="Offers at Fursat" hidden>
-    <p class="afab-of-h">Offers at Fursat</p>
-    <ul>
-      {disc > 0 && <li><b>{disc}% off</b><span>when you book a table. Pick a time slot that shows the offer.</span><a href="/reserve">Book a table →</a></li>}
-      <li><b>Today’s offers</b><span>Ask the team, they reply on WhatsApp.</span><a href={waOffers} target="_blank" rel="noopener">Ask on WhatsApp →</a></li>
-    </ul>
-    <small>Terms apply, confirm on WhatsApp.</small>
-  </div>
   <script is:inline>
   (() => {
     const a = document.querySelector('[data-fk-ask]');
@@ -53,8 +39,8 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     const seen = new Set(), ly = new WeakMap(), pend = new Map();
 
     // ---- where is Ask free? Hit-test a few points of a box: the top thing there must not be a button, field, tile or bar ----
-    const BLK = 'button,input,textarea,select,summary,label,[role=button],[class*=btn],[class*=fl-go],.fe-actions,.mb-bar,#pb-bar,#pb-dock,#fxsticky,.ifab.is-on,.waf-fab';
-    const hit = (x, y) => { for (const el of document.elementsFromPoint(x, y)) { if (a.contains(el) || el.closest('.afab-ear,.afab-offers')) continue; const m = el.closest(BLK); if (!m) return false; const q = m.getBoundingClientRect(); return !(q.width > R.clientWidth * .6 && q.height > R.clientHeight * .45); } return false; };   // a "button" as big as the screen (a Menu door) is the page, not a control
+    const BLK = 'button,input,textarea,select,summary,label,[role=button],[class*=btn],[class*=fl-go],.fe-actions,.mb-bar,#pb-bar,#pb-dock,#fxsticky';
+    const hit = (x, y) => { for (const el of document.elementsFromPoint(x, y)) { if (a.contains(el)) continue; const m = el.closest(BLK); if (!m) return false; const q = m.getBoundingClientRect(); return !(q.width > R.clientWidth * .6 && q.height > R.clientHeight * .45); } return false; };   // a "button" as big as the screen (a Menu door) is the page, not a control
     // score = how many sample points of the box hit a button / field / bar. `max` stops the count early (1 = "is anything there?"), so a blocked spot costs one hit-test, not thirty-six.
     const score = (x, y, w, h, max = 1e9) => {
       const W = R.clientWidth, H = R.clientHeight, c = Math.min(9, Math.ceil(w / 14) + 1), r = Math.ceil(h / 14) + 1; let n = 0;   // a point every ~14px, so a thin chip or bar cannot slip between samples
@@ -70,13 +56,17 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     const hidden = () => {
       if (R.classList.contains('lock') || R.classList.contains('fk-sheet-open') || document.querySelector('dialog[open]')) return true;
       if (now() - modalsAt > 1000) { modals = document.querySelectorAll('[aria-modal="true"]'); modalsAt = now(); }
-      for (const e of modals) if (!e.hidden && e.getClientRects().length) return true;
+      for (const e of modals) {   // a closed dialog (WaConcierge's #wac-panel) stays in the DOM: inert + visibility:hidden. Count a dialog only when it is really open and visible.
+        if (e.hidden || e.inert || e.closest('[inert]') || !e.getClientRects().length) continue;
+        const v = getComputedStyle(e); if (v.visibility === 'hidden' || v.display === 'none') continue;
+        return true;
+      }
       return false;
     };
 
     const place = () => {
       pt = 0; if (!live || a.classList.contains('is-intro')) return;
-      const off = hidden(); a.toggleAttribute('data-hide', off); if (off) { earPlace(); return; }
+      const off = hidden(); a.toggleAttribute('data-hide', off); if (off) return;
       const W = R.clientWidth, H = R.clientHeight, cs = getComputedStyle(a), P = ph(), vv = window.visualViewport;
       if (!dock) { natW = a.offsetWidth; natH = a.offsetHeight; }
       const nw = natW || (P ? 48 : 190), nh = natH || (P ? 48 : 56), nx = P ? W - parseFloat(cs.right) - nw : parseFloat(cs.left), ny = H - parseFloat(cs.bottom) - nh, by = ny + nh - 44, L = [];
@@ -95,7 +85,6 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       }
       if (!t) { if (dock) { dock = 0; cur = null; a.removeAttribute('data-dock'); a.style.setProperty('--wx', '0px'); a.style.setProperty('--wy', '0px'); } }
       else { if (!dock) { dock = 1; a.setAttribute('data-dock', ''); } cur = t; a.style.setProperty('--wx', t.x - a.offsetLeft + 'px'); a.style.setProperty('--wy', t.y - a.offsetTop + 'px'); }
-      earPlace();
     };
     const req = (gap = 140) => { if (!pt) pt = setTimeout(() => { lastPlace = now(); place(); }, Math.max(0, gap - (now() - lastPlace))); };   // while the page scrolls the caller asks for a 320 ms gap
 
@@ -111,11 +100,11 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       const TXT = 'h1,h2,h3,h4,h5,h6,p,li,figcaption,blockquote,.fe-masc,.fe-side-m,[class*="masc"]', MASC = '.fe-masc,.fe-side-m,[class*="masc"]';
       const txtHit = (x, y) => {
         const bx = x - 6, by = y - 6, bw = w + 12, bh = h + 12;
-        for (const m of document.querySelectorAll(MASC)) { if (a.contains(m) || m.closest('.afab-ear,.afab-offers')) continue; const q = m.getBoundingClientRect(); if (q.width && q.height && x - 12 < q.right && x + w + 12 > q.left && y - 12 < q.bottom && y + h + 12 > q.top) return true; }
+        for (const m of document.querySelectorAll(MASC)) { if (a.contains(m)) continue; const q = m.getBoundingClientRect(); if (q.width && q.height && x - 12 < q.right && x + w + 12 > q.left && y - 12 < q.bottom && y + h + 12 > q.top) return true; }
         const c2 = Math.min(9, Math.ceil(bw / 14) + 1), r2 = Math.ceil(bh / 14) + 1;
         for (let i = 0; i < c2; i++) for (let j = 0; j < r2; j++) {
           const px = bx + bw * i / (c2 - 1), py = by + bh * j / (r2 - 1); if (px < 0 || py < 0 || px >= W || py >= H) continue;
-          for (const el of document.elementsFromPoint(px, py)) { if (a.contains(el) || el.closest('.afab-ear,.afab-offers')) continue; if (el.closest(TXT)) return true; }
+          for (const el of document.elementsFromPoint(px, py)) { if (a.contains(el)) continue; if (el.closest(TXT)) return true; }
         }
         return false;
       };
@@ -176,28 +165,6 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       e.preventDefault(); a.dataset.go = '1'; wake(); spark(); setTimeout(() => { location.href = a.href; }, 240);
     });
     addEventListener('pageshow', () => { delete a.dataset.go; });
-
-    // ---- Offers ear: a small gold tab on the pill (hidden while docked); positions come from the pill's layout box, so it never needs a frame loop ----
-    const ear = document.querySelector('[data-fk-ear]'), card = document.getElementById('afab-offers');
-    let open = false;
-    function earPlace() {
-      if (!ear || !card) return;
-      const P = ph(), pth = location.pathname.replace(/\/$/, '') || '/', H = R.clientHeight;
-      const show = (!P || pth === '/' || pth === '/reserve') && live && !a.classList.contains('is-intro') && !a.hasAttribute('data-hide') && !dock;   // phones: only Home and Reserve
-      if (!show) { if (!ear.hidden) { R.classList.remove('fk-ear-on'); ear.hidden = true; card.hidden = true; open = false; ear.setAttribute('aria-expanded', 'false'); } return; }
-      if (ear.hidden) { ear.hidden = false; if (P) { if (store('fk-ear-seen')) ear.classList.add('is-compact'); else { store('fk-ear-seen', '1'); setTimeout(() => ear.classList.add('is-compact'), 5000); } } }
-      R.classList.toggle('fk-ear-on', !P);
-      const w = ear.offsetWidth || 74, left = P ? a.offsetLeft + a.offsetWidth - w : a.offsetLeft, top = a.offsetTop - ear.offsetHeight - (P ? -7 : 10) - (R.classList.contains('fk-music') ? 30 : 0);
-      ear.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-      if (open) { card.style.left = P ? 'auto' : Math.max(12, left) + 'px'; card.style.right = P ? '12px' : 'auto'; card.style.bottom = H - a.offsetTop + ear.offsetHeight + 4 + 'px'; }
-    }
-    if (ear && card) {
-      const set = (v) => { open = v; card.hidden = !v; ear.setAttribute('aria-expanded', String(v)); ear.classList.toggle('is-open', v); earPlace(); };
-      ear.addEventListener('click', (e) => { e.stopPropagation(); set(!open); });
-      document.addEventListener('click', (e) => { if (open && !card.contains(e.target)) set(false); });
-      addEventListener('keydown', (e) => { if (open && e.key === 'Escape') { set(false); ear.focus(); } });
-      setInterval(() => { if (!ear.hidden && !open && live2()) { ear.classList.remove('is-nudge'); void ear.offsetWidth; ear.classList.add('is-nudge'); } }, 14000);   // a tiny wiggle so the tab is noticed
-    }
 
     // ---- Home: the pill is red at the left during the intro; when the intro ends it hops to its place (FLIP, transform only) ----
     const introOn = () => R.classList.contains('lock') || ['heli', 'intro', 'gate', 'lcap'].some((i) => document.getElementById(i));
@@ -285,27 +252,6 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
   to   { transform: translate(calc(var(--fk-b0, 0) * 2.6px), calc(var(--fk-b0, 0) * -1.6px)) rotate(calc(var(--fk-b0, 0) * 5deg)); }
 }
 
-/* ---- Offers ear: a small gold tab on the Ask pill + a real-offers card ---- */
-.afab-ear { position: fixed; left: 0; top: 0; z-index: 8501; display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 4px 12px 12px; margin-bottom: -10px; border: 0; border-radius: 16px 16px 4px 4px; background: linear-gradient(180deg, #f6dc93, #dcaa48); color: #2b2416; font: 700 .78rem/1 Rupee,Poppins, system-ui, sans-serif; box-shadow: 0 8px 18px -10px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(154 111 42 / .6); cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.afab-ear[hidden], .afab-offers[hidden] { display: none; }
-/* desktop: Instagram, Offers and Ask Fursat form a tidy vertical stack (10px gaps, no overlap): Ask at the bottom, Offers above it, Instagram on top */
-@media (min-width: 768px) { .afab-ear { height: 40px; min-height: 40px; padding: 0 14px; margin: 0; border-radius: 14px; } }
-/* phone: after the first view the Offers tab collapses to a 44px icon chip */
-@media (max-width: 767px) { .afab-ear { min-width: 44px; justify-content: center; } .afab-ear.is-compact { width: 44px; padding-left: 0; padding-right: 0; } .afab-ear.is-compact .afab-ear-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } }
-.afab-ear:active { scale: .96; }
-.afab-ear:focus-visible { outline: 3px solid #f3c56b; outline-offset: 3px; }
-.afab-ear.is-nudge { animation: afab-ear 900ms cubic-bezier(.23,1,.32,1) both; }
-@keyframes afab-ear { 0%, 100% { rotate: 0deg; } 20% { rotate: -7deg; } 45% { rotate: 6deg; } 70% { rotate: -3deg; } }
-.afab-offers { position: fixed; z-index: 8600; width: min(300px, calc(100vw - 24px)); padding: 14px 16px 12px; border-radius: 18px; background: #fff8e8; color: #13301d; box-shadow: 0 18px 40px -16px rgb(10 30 18 / .7), inset 0 0 0 1px rgb(201 154 67 / .6); font-family: Rupee,Poppins, system-ui, sans-serif; }
-.afab-of-h { margin: 0 0 8px; font: 600 1rem/1.2 'Playfair Display', Georgia, serif; }
-.afab-offers ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.afab-offers li { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid rgb(201 154 67 / .35); }
-.afab-offers li:last-child { border-bottom: 0; padding-bottom: 0; }
-.afab-offers li b { color: #c02a1a; font-size: .95rem; }
-.afab-offers li span { font-size: .8125rem; line-height: 1.35; }
-.afab-offers li a { display: inline-flex; align-items: center; min-height: 44px; color: #13301d; font-weight: 600; font-size: .8125rem; text-decoration: underline; text-underline-offset: 3px; }
-.afab-offers small { display: block; margin-top: 6px; color: #5b4a2a; font-size: .75rem; }
-@media print { .afab-ear, .afab-offers { display: none !important; } }
 
 
 </style>

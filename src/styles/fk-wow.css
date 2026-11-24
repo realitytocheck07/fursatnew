@@ -6,13 +6,11 @@
 /* ---------- STAGE 1.1  package dialog: sat under the phone nav (z 9000) and Book bar (8990) ---------- */
 .pk{z-index:9600}
 /* floating buttons step aside while any dialog is open */
-body:has(.pk.on) :is(.afab,.waf-fab,.waf-tease,.ifab,.fk-igfab),
-body:has(dialog[open]) :is(.afab,.waf-fab,.waf-tease,.ifab,.fk-igfab){opacity:0!important;pointer-events:none!important;visibility:hidden}
+body:has(.pk.on) :is(.afab),
+body:has(dialog[open]) :is(.afab){opacity:0!important;pointer-events:none!important;visibility:hidden}
 
-/* ---------- STAGE 1.2  WhatsApp button vs menu "+" ---------- */
-body:has(main.mv) .waf-fab{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px + var(--fab-lift,0px));transform:scale(.85);transform-origin:100% 100%}
+/* ---------- STAGE 1.2  menu card keeps clear of the floating buttons ---------- */
 @media (min-width:768px){
-  body:has(main.mv) .waf-fab{bottom:calc(20px + var(--fab-lift,0px))}
   body:has(main.mv) .mv-card{padding-right:max(0px,env(safe-area-inset-right))}
 }
 @media (max-width:767px){body:has(main.mv) .mv-card{padding-right:56px}}

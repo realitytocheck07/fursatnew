@@ -2,7 +2,7 @@
 import slots from '../data/slots.json';
 // StickyBar.astro — floating Book pill (phones/tablets). Opens the same booking flow as before (data-open="book").
 // Home toggles `.on` from 10.js (slides in); other pages pass `always`: it slides in once the guest scrolls past half a screen.
-// The "10% off" line shows only while slots.json has a discount above 0.
+// The "10% off when you book online" line shows only while slots.json has a discount above 0. (Offer applies to all web bookings.)
 interface Props {
   always?: boolean;
 }
@@ -12,7 +12,7 @@ const hasOffer = slots.some((s) => Number(s.discount) > 0);
 <div class="fx-sticky fk-bookbar" id="fxsticky" data-always={always ? '' : undefined}>
   <span class="fkb-txt">
     <strong>Book a table</strong>
-    {hasOffer && <small>10% off selected times</small>}
+    {hasOffer && <small>10% off when you book online</small>}
   </span>
   <button type="button" class="fk-btn fk-btn--book fkb-btn" data-open="book">Book</button>
 </div>

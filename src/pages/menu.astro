@@ -41,8 +41,8 @@ type Raw = {
 type Item = Raw & { kind: 'food' | 'drink' };
 type Section = { section: string; items: Item[] };
 
-// TODO(client): confirm. The data names one section after a person; the site shows it as "Special menu" (display only, food.json is not changed here).
-const SHOWN_SECTION: Record<string, string> = { "Sreemukhi's special menu": 'Special menu' };
+// Display-name overrides for menu sections (none needed now: food.json already says "Special menu").
+const SHOWN_SECTION: Record<string, string> = {};
 const shown = (n: string) => SHOWN_SECTION[n] ?? n;
 const food: Section[] = (foodData as { section: string; items: Raw[] }[]).map((s) => ({ section: shown(s.section), items: s.items.map((i) => ({ ...i, section: shown(i.section), kind: 'food' as const })) }));
 const drinks: Section[] = (drinksData as { section: string; items: Raw[] }[]).map((s) => ({ section: s.section, items: s.items.map((i) => ({ ...i, kind: 'drink' as const })) }));
@@ -152,7 +152,9 @@ const vegMark = (veg?: boolean) => (veg ? 'mv-vm mv-vm--v' : 'mv-vm mv-vm--n');
 // ── SEO: Menu / MenuSection / MenuItem schema (same text and prices as the visible list) ──
 // TODO(client): Peri Peri Cottage Cheese Sandwich (395 vs 240) and Sriracha Paneer Tikka Burger prices are untouched.
 const SITE = 'https://fursatind.in';
-const itemLd = (i: Item) => {
+// Vegetarian tag: real veg FOOD only (never drinks). "One Anchor" sits in food.json but is a mocktail.
+const NOT_VEG_FOOD = new Set(['One Anchor']);
+const itemLd = (i: Item, isFood: boolean) => {
   const vs = variants(i);
   const offers = vs.length > 1
     ? vs.map((v) => ({ '@type': 'Offer', name: v.label, price: v.value, priceCurrency: 'INR' }))
@@ -161,7 +163,7 @@ const itemLd = (i: Item) => {
     '@type': 'MenuItem', name: titleCase(i.name),
     ...(i.description ? { description: i.description } : {}),
     ...(offers ? { offers } : {}),
-    ...(i.veg ? { suitableForDiet: 'https://schema.org/VegetarianDiet' } : {}),
+    ...(isFood && i.veg && !NOT_VEG_FOOD.has(i.name) ? { suitableForDiet: 'https://schema.org/VegetarianDiet' } : {}),
     ...(i.image ? { image: SITE + i.image } : {}),
   };
 };
@@ -173,7 +175,7 @@ const menuLd = {
   ].map(({ name, list, id }) => ({
     '@type': 'Menu', '@id': `${SITE}/menu/#${id}`, name, url: `${SITE}/menu/#mv-${id}`, inLanguage: 'en-IN',
     provider: { '@id': `${SITE}/#restaurant` },
-    hasMenuSection: list.map((sec) => ({ '@type': 'MenuSection', name: sec.section, hasMenuItem: sec.items.map(itemLd) })),
+    hasMenuSection: list.map((sec) => ({ '@type': 'MenuSection', name: sec.section, hasMenuItem: sec.items.map((it) => itemLd(it, id === 'food')) })),
   })),
 };
 const ldItems = menuLd['@graph'].reduce((n, m) => n + m.hasMenuSection.reduce((k, sec) => k + sec.hasMenuItem.length, 0), 0);

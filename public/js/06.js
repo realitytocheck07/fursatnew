@@ -28,7 +28,7 @@ function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intr
 function tick(now){if(done)return;if(t0===null)t0=now;var p=cl((now-t0-400)/D,0,1);frame(p);p<1?requestAnimationFrame(tick):finish()}
 if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};/* 11.js shows "Enter Fursat" and starts the intro on tap or after 2 s */
  var skip=function(e){if(e&&e.target&&e.target.closest&&e.target.closest(".fk-isnd"))return;if(t0!==null&&performance.now()-t0>1200)finish()};["wheel","touchmove","keydown","pointerdown"].forEach(function(n){addEventListener(n,skip,{passive:true})})}
-/* SOUND v5.57 / SOUND-CONTRACT: ONE song (intro-music-sreemukhi, 60 s) for the intro and the landing page.
+/* SOUND v5.57 / SOUND-CONTRACT: ONE song (intro-music, 60 s) for the intro and the landing page.
    v5.57: the hero reel files now CARRY that song as their audio track, so on the landing page picture and music are one stream (exact sync, nothing to correct).
    During the intro the separate mp3 plays (synced to the helicopter); when the reel starts, the sound switches to the reel's own audio and the mp3 fades out.
    - Tap "Enter Fursat": the song starts at once (the tap allows it) and plays to its full length, through the intro and on the landing page.
@@ -36,7 +36,7 @@ if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=func
    - Either button turns it off again. The song never loops; when it ends the buttons go back to "Sound on".
    sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id:"main"}; other players (drinks, tour) take over via fk:music. */
 var IV=.85,ac,an,fd,avg=0,last=0,B=0,sb=$("snd"),fkb=$("fksndb"),fkv=$("fksndv"),ended=false,rf=$("fxrvf"),viaReel=false;
-var M={a:new Audio("/assets/audio/intro-music-sreemukhi.mp3"),on:false,f:0};M.a.preload="none";M.a.volume=0;
+var M={a:new Audio("/assets/audio/intro-music.mp3"),on:false,f:0};M.a.preload="none";M.a.volume=0;
 function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
 function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
 function fade(t,v,ms,cb){cancelAnimationFrame(t.f);var s=t.a.volume,t0=performance.now();(function f(n){var k=cl((n-t0)/ms,0,1);t.a.volume=s+(v-s)*k;if(k<1)t.f=requestAnimationFrame(f);else if(cb)cb()})(t0)}

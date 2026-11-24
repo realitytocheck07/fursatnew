@@ -4,7 +4,7 @@
     "items": [
       {
         "name": "SAROJA X PRESS",
-        "description": "Litche Juice, Vanilla Ice Cream, Blue Curraco Syrup",
+        "description": "Litchi Juice, Vanilla Ice Cream, Blue Curaçao Syrup",
         "price": 249,
         "veg": true,
         "alc": false,
@@ -1666,7 +1666,7 @@
         "chefSpecial": false
       },
       {
-        "name": "CARTADO",
+        "name": "Cortado",
         "price": 229,
         "alc": false,
         "veg": true,

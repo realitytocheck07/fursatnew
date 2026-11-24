@@ -1693,7 +1693,7 @@
   "c": "Hot coffee",
   "k": "drink",
   "v": "veg",
-  "ref": "CARTADO"
+  "ref": "Cortado"
  },
  {
   "n": "Macchiato",
@@ -1852,7 +1852,7 @@
  },
  {
   "n": "Diet Salad",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "v": "veg",
   "d": "Fresh veggies, broccoli, kale, walnuts, almonds, dates, drizzled with lemony ginger dressing",
@@ -1860,20 +1860,20 @@
  },
  {
   "n": "Healthy Soup",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "ref": "Healthy Soup"
  },
  {
   "n": "Favorite Mushroom",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "v": "veg",
   "ref": "Favorite Mushroom"
  },
  {
   "n": "Pataas Nethi Mamsam Vepudu",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "v": "nonveg",
   "t": "mutton meat",
@@ -1881,7 +1881,7 @@
  },
  {
   "n": "Adhurs Vellulli Karam Royyalu",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "v": "nonveg",
   "s": 1,
@@ -1890,7 +1890,7 @@
  },
  {
   "n": "Signature Makka Jonna Vada",
-  "c": "Sreemukhi's food",
+  "c": "Special menu",
   "k": "sree",
   "v": "veg",
   "t": "corn",
@@ -1898,7 +1898,7 @@
  },
  {
   "n": "Ramulamma Cosmopolitan",
-  "c": "Sreemukhi's drinks",
+  "c": "Special drinks",
   "k": "sree",
   "a": 1,
   "d": "Vodka, cranberry juice, lime juice and triple sec",
@@ -1906,7 +1906,7 @@
  },
  {
   "n": "Sundari",
-  "c": "Sreemukhi's drinks",
+  "c": "Special drinks",
   "k": "sree",
   "a": 1,
   "d": "Rum, hibiscus syrup, sweet and sour, egg white",
@@ -1914,7 +1914,7 @@
  },
  {
   "n": "B52",
-  "c": "Sreemukhi's drinks",
+  "c": "Special drinks",
   "k": "sree",
   "v": "veg",
   "d": "Strawberry, blueberry infused syrup, pineapple juice",
@@ -1922,7 +1922,7 @@
  },
  {
   "n": "One Anchor",
-  "c": "Sreemukhi's drinks",
+  "c": "Special drinks",
   "k": "sree",
   "v": "veg",
   "d": "Strawberry, blueberry infused syrup, pineapple juice",

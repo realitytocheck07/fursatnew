@@ -23,7 +23,7 @@
     {re:/romantic|date night|anniversary/,cats:["Desserts","Mocktails","Pasta","Pizza"],w:2,why:"Date night"}
   ];
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-  var HI={food:"Something spicy under 400",drinks:"Something cold and refreshing",sree:"Filter Sreemukhi\u2019s menu"};
+  var HI={food:"Something spicy under 400",drinks:"Something cold and refreshing",sree:"Filter the special menu"};
   function inMode(it){return mode==="food"?it.k==="food":mode==="drinks"?(it.k==="drink"&&!it.a):it.k==="sree"}
   function run(text){
     var t=text.toLowerCase().replace(/[\u2019']/g,"'"),max=null,m=t.match(/(?:under|below|less than|within|upto|up to|max|budget|\u20b9|rs\.?)\s*(?:rs\.?|\u20b9)?\s*(\d{2,4})/);
@@ -48,7 +48,7 @@
   function render(text,top,quiet){
     var sree=mode==="sree",anyAlc=top.some(function(r){return r.it.a});
     var wa="https://wa.me/919059670033?text="+encodeURIComponent("Hi Fursat! I would like to reserve a table.");
-    var ttl=sree?"Sreemukhi\u2019s Special Menu":top.length?(mode==="drinks"?"My drinks for \u201c":"My picks for \u201c")+esc(text)+"\u201d":"Hmm, nothing matched \u201c"+esc(text)+"\u201d";
+    var ttl=sree?"Special menu":top.length?(mode==="drinks"?"My drinks for \u201c":"My picks for \u201c")+esc(text)+"\u201d":"Hmm, nothing matched \u201c"+esc(text)+"\u201d";
     var h='<h2 class="fk-ty-h2 rs-h" id="as-rh" tabindex="-1"><span>'+ttl+"</span></h2>";
     if(top.length){h+='<ol class="rs-list">'+top.map(function(r,k){var it=r.it,
           tags=[it.c,it.a?"Contains alcohol, 21+":""].filter(Boolean).join(" \u00b7 "),
@@ -59,7 +59,7 @@
     h+='<a class="fk-btn fk-btn--md fk-btn--primary fk-btn--on-dark rs-wa" href="'+wa+'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.47 15.04L2 22l5.1-1.34A9.9 9.9 0 1 0 12.04 2zm0 1.8a8.1 8.1 0 1 1-4.2 15.02l-.3-.18-3 .79.8-2.92-.2-.31A8.1 8.1 0 0 1 12.04 3.8zM8.6 7.4c-.2 0-.5.07-.75.35-.26.28-1 .97-1 2.37s1.03 2.75 1.17 2.94c.14.19 2 3.17 4.9 4.32 2.4.95 2.9.76 3.42.71.52-.05 1.68-.69 1.92-1.35.24-.66.24-1.23.17-1.35-.07-.12-.26-.19-.54-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.1-.16.19-.33.21-.61.07-.28-.14-1.2-.44-2.28-1.4-.84-.75-1.41-1.68-1.58-1.96-.16-.28-.02-.43.12-.57.13-.13.28-.33.43-.5.14-.16.19-.28.28-.47.1-.19.05-.35-.02-.5-.07-.14-.62-1.55-.86-2.1-.22-.5-.45-.5-.64-.51z"/></svg><span>Reserve a table on WhatsApp</span><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></a>'
       +'<p class="rs-fine">Prices from the <span class="brand-t">Fursat</span> printed menu. Taxes extra.'+(anyAlc?" Alcohol is served to guests aged 21 and above only.":"")+"</p>";
     out.innerHTML=h;out.hidden=false;if(quiet)return;
-    if(st)st.textContent=sree?top.length+(top.length===1?" item":" items")+" in Sreemukhi\u2019s special menu":top.length?top.length+(top.length===1?" result":" results")+" for "+text+". Press Tab to move through them.":"No results for "+text+".";var hd=document.getElementById("as-rh"),pn=document.getElementById("ah-ans")||out,R=pn.getBoundingClientRect(),top0=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sh-h"))||80;if(R.top<top0||R.bottom>innerHeight+40)pn.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});hd.focus({preventScroll:true})}
+    if(st)st.textContent=sree?top.length+(top.length===1?" item":" items")+" in the special menu":top.length?top.length+(top.length===1?" result":" results")+" for "+text+". Press Tab to move through them.":"No results for "+text+".";var hd=document.getElementById("as-rh"),pn=document.getElementById("ah-ans")||out,R=pn.getBoundingClientRect(),top0=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sh-h"))||80;if(R.top<top0||R.bottom>innerHeight+40)pn.scrollIntoView({behavior:calm?"auto":"smooth",block:"start"});hd.focus({preventScroll:true})}
   function go(){var text=q.value.trim();if(!text&&mode!=="sree"){if(st)st.textContent="Type what you feel like eating, then press Enter.";q.focus();return}
     if(st)st.textContent="";out.hidden=false;out.innerHTML=calm?"":'<div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div><div class="mot-skeleton" style="height:120px;border-radius:14px;margin:16px 0;"></div>';
     ready.then(function(){render(text,run(text))})}

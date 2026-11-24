@@ -21,10 +21,9 @@ import MobileBar from '../components/MobileBar.astro';
         <span class="tr-kicker">LEGAL & POLICIES</span>
         <h1 class="fk-ty-h2 tr-title mot-headline">House Rules, Privacy & Cancellation Policy</h1>
         <p class="tr-updated">Last Updated: November 2026</p>
-        <nav class="tr-jump" aria-label="On this page"><a href="#rules">House rules</a><a href="#privacy">Privacy</a><a href="#refund">Cancellation &amp; refunds</a></nav>
+        <nav class="tr-jump" aria-label="On this page"><a href="#rules">House rules</a><a href="#privacy">Privacy</a><a href="#refund">Cancellation &amp; refunds</a><a href="#offer">Online booking offer</a></nav>
 
-        <!-- TODO(client): offer terms section (FURSAT15 / 15%) removed until the client confirms the offer; restore from git history (v5.17) if confirmed. -->
-        <!-- Section 2: House Rules -->
+                <!-- Section 2: House Rules -->
         <section class="tr-section" id="rules">
           <h2 class="fk-ty-h3">1. House Rules & Admission Policy</h2>
           <ul>
@@ -70,6 +69,12 @@ import MobileBar from '../components/MobileBar.astro';
               <b>Banquet & Private Events:</b> Advance deposits for banquet dates are refundable up to 7 days prior to the scheduled event date, subject to an administrative fee. <!-- TODO(client): confirm refund window (7 days) and fee (10% was a placeholder) -->
             </li>
           </ul>
+        </section>
+
+        <!-- TODO(client): confirm the wording and the percentage with the owner. Offer = 10% off the food bill for tables booked on the website; confirmed at the table; staff can change or end it. -->
+        <section class="tr-section" id="offer">
+          <h2 class="fk-ty-h3">4. Online booking offer</h2>
+          <p>Book a table on our website and enjoy 10% off your food bill. Please confirm the offer with our team at the table. The restaurant may change or end this offer at any time.</p>
         </section>
 
         <!-- Contact Box -->

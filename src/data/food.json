@@ -359,7 +359,7 @@
     ]
   },
   {
-    "section": "Sreemukhi's special menu",
+    "section": "Special menu",
     "items": [
       {
         "name": "Diet Salad",
@@ -368,7 +368,7 @@
         "veg": true,
         "spicy": false,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu"
+        "section": "Special menu"
       },
       {
         "name": "Healthy Soup",
@@ -376,7 +376,7 @@
         "veg": true,
         "spicy": false,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu",
+        "section": "Special menu",
         "description": ""
       },
       {
@@ -385,7 +385,7 @@
         "veg": true,
         "spicy": false,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu",
+        "section": "Special menu",
         "description": ""
       },
       {
@@ -394,7 +394,7 @@
         "veg": false,
         "spicy": true,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu",
+        "section": "Special menu",
         "description": ""
       },
       {
@@ -403,7 +403,7 @@
         "veg": false,
         "spicy": true,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu",
+        "section": "Special menu",
         "description": ""
       },
       {
@@ -412,7 +412,7 @@
         "veg": true,
         "spicy": false,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu",
+        "section": "Special menu",
         "description": ""
       },
       {
@@ -423,7 +423,7 @@
         "spicy": false,
         "chefSpecial": true,
         "alc": true,
-        "section": "Sreemukhi's special menu"
+        "section": "Special menu"
       },
       {
         "name": "Sundari",
@@ -433,7 +433,7 @@
         "spicy": false,
         "chefSpecial": true,
         "alc": true,
-        "section": "Sreemukhi's special menu"
+        "section": "Special menu"
       },
       {
         "name": "B52",
@@ -443,7 +443,7 @@
         "spicy": false,
         "chefSpecial": true,
         "alc": true,
-        "section": "Sreemukhi's special menu"
+        "section": "Special menu"
       },
       {
         "name": "One Anchor",
@@ -452,7 +452,7 @@
         "veg": true,
         "spicy": false,
         "chefSpecial": true,
-        "section": "Sreemukhi's special menu"
+        "section": "Special menu"
       }
     ]
   },
@@ -479,7 +479,7 @@
       },
       {
         "name": "Caesar Salad (Veg)",
-        "description": "Romain lettuce, Roasted foxnuts, House ceasar dressing",
+        "description": "Romaine lettuce, Roasted foxnuts, House Caesar dressing",
         "price": 395,
         "veg": true,
         "spicy": false,
@@ -488,7 +488,7 @@
       },
       {
         "name": "Caesar Salad (Chicken)",
-        "description": "Romain lettuce, Roasted foxnuts, House ceasar dressing, grilled chicken",
+        "description": "Romaine lettuce, Roasted foxnuts, House Caesar dressing, grilled chicken",
         "price": 475,
         "veg": false,
         "spicy": false,
@@ -497,7 +497,7 @@
       },
       {
         "name": "Caesar Salad (Prawns)",
-        "description": "Romain lettuce, Roasted foxnuts, House ceasar dressing, grilled prawns",
+        "description": "Romaine lettuce, Roasted foxnuts, House Caesar dressing, grilled prawns",
         "price": 525,
         "veg": false,
         "spicy": false,
