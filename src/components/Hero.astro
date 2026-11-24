@@ -55,6 +55,8 @@ e.setAttribute('data-greet',h>=5&&h<12?'Good morning · slow brunch mood':h>=12&
 /* U2 task 4: "Fall into the lens" intro. Plays once per visit (fz_lens), after the site intro has set #top.go, and holds the reel (window.__fzLens) until it ends or is skipped. */
 var KEY='fz_lens',de=document.documentElement,hero=document.getElementById('top');
 if(!hero)return;
+/* HR3: the lens intro is switched off. Flip LENS_ON to true to bring it back (all code below stays as it was). With it off, window.__fzLens is never set, so 10.js starts the reel as soon as #top has .go. */
+var LENS_ON=false;if(!LENS_ON)return;
 try{if(sessionStorage.getItem(KEY)==='1')return}catch(e){}
 try{if(navigator.connection&&navigator.connection.saveData)return}catch(e){}
 window.__fzLens=true;
@@ -166,8 +168,36 @@ function phone(){return matchMedia('(max-width:899px)').matches}
 function vids(){return[document.getElementById('fxplv'),document.getElementById('fxrvf')].filter(Boolean)}
 function cov(v,w,h){var f=v.id==='fxrvf',vw=v.videoWidth||(f?540:1280),vh=v.videoHeight||(f?960:720);return Math.max(w/vw,h/vh)}
 function open(){wrap.removeAttribute('inert');wrap.removeAttribute('aria-hidden')}
+/* HR2 phone sequence (max-width 767 only): .fxm on #top. The reel plays full screen for one round with no card; then the SAME #fxpl clip-path shrinks to a window at the top (the videos only get translate/scale, no new video, no src, no seek) and the card comes in below it. Desktop never takes these branches. */
+var M=matchMedia('(max-width:767px)').matches,armed=false,rzT=0;
+if(M)hero.classList.add('fxm');
+function fxmGeo(){
+ var hh=hero.clientHeight,pw=hero.clientWidth,mq=parseFloat(getComputedStyle(hero).getPropertyValue('--mq-h'))||56,ph=hh-mq,ch=wrap.offsetHeight,
+  top=8,wb=hh-mq-8-ch-64,wh=Math.max(120,wb-top),k=Math.max((pw-24)/pw,wh/ph),st=hero.style;
+ wb=top+wh;
+ st.setProperty('--fxm-b',(ph-wb)+'px');
+ st.setProperty('--fxm-k',k.toFixed(4));
+ st.setProperty('--fxm-ty',((top+wh/2)-ph/2+.1*k*ph).toFixed(1)+'px');
+ st.setProperty('--fxm-ab',(mq+8+ch+10)+'px');
+ rim.style.cssText='left:12px;top:'+top+'px;width:'+(pw-24)+'px;height:'+wh+'px;border-radius:24px'}
+function fxmSplit(now){
+ fxmGeo();
+ if(now){hero.classList.add('fxs-on','fxs-now','fxs-go','fxs-done');open()}
+ else{hero.classList.add('fxs-on','fxs-go');open();setTimeout(function(){hero.classList.add('fxs-done')},1700)}
+ addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(fxmGeo,120)},{passive:true});
+ try{document.fonts&&document.fonts.ready.then(function(){fxmGeo()})}catch(e){}}
+/* safety (phone): 7 s after #top.go, if the reel is not actually playing (blocked, errored, offline, or silent for 2 s) the card comes anyway. HR3 trade-off: a reel that is still LOADING with network progress in the last 2 s may hold the card back, but never past 10 s after #top.go (was 20 s). Once the reel has really played, the card never comes early: a mid-round rebuffer waits until the reel has been silent for 8 s, and a paused reel (pause button, or hero off screen) waits for as long as it is paused. */
+function arm(){if(!M||armed)return;armed=true;var t0=Date.now(),lp=t0,ran=false,f=document.getElementById('fxrvf');
+ if(f)['progress','loadedmetadata','loadeddata','canplay','suspend','playing','timeupdate'].forEach(function(n){f.addEventListener(n,function(){lp=Date.now()})});
+ function chk(){if(on)return;var g=document.getElementById('fxrvf'),n=Date.now(),q=n-lp;
+  if(g&&!g.paused&&g.currentTime>.05&&g.readyState>=2){ran=true;lp=n;setTimeout(chk,1000);return}
+  if(ran){if((g&&g.paused)||q<8000){setTimeout(chk,1000);return}split();return}
+  if(g&&g.networkState===2&&q<2000&&n-t0<10000){setTimeout(chk,500);return}
+  split()}
+ setTimeout(chk,7000)}
 function split(now){
  if(on)return;on=true;clearTimeout(tm);try{sessionStorage.setItem(KEY,'1')}catch(e){}
+ if(M){fxmSplit(now);return}
  if(now){hero.classList.add('fxs-on','fxs-now','fxs-go','fxs-done');open();return}
  var b=pl.getBoundingClientRect(),h=hero.getBoundingClientRect(),ctl=pl.querySelector('.hx-ctl'),dn=document.getElementById('fxdn'),vs=vids();
  if(!phone()){var g=getComputedStyle(stg).gridTemplateRows;if(g&&g!=='none')stg.style.gridTemplateRows=g}  /* freeze the rows: the box leaving the grid must not move the old text */
@@ -184,13 +214,13 @@ function split(now){
  pl.style.clipPath='';vs.forEach(function(v){v.style.translate='';v.style.scale=''});if(ctl)ctl.style.translate='';if(dn)dn.style.translate='';
  setTimeout(function(){hero.classList.add('fxs-done');rim.removeAttribute('style')},1700)}
 function active(){return !window.__fzLens&&hero.classList.contains('go')&&!de.classList.contains('lock')&&Date.now()-goAt>600}
-if(hero.classList.contains('go'))goAt=Date.now();
-else if(window.MutationObserver){var mg=new MutationObserver(function(){if(hero.classList.contains('go')){goAt=Date.now();mg.disconnect()}});mg.observe(hero,{attributes:true,attributeFilter:['class']})}
+if(hero.classList.contains('go')){goAt=Date.now();arm()}
+else if(window.MutationObserver){var mg=new MutationObserver(function(){if(hero.classList.contains('go')){goAt=Date.now();arm();mg.disconnect()}});mg.observe(hero,{attributes:true,attributeFilter:['class']})}
 /* one round done: 10.js hands the reel over to the master loop and adds .out to #fxrv; wait for the crossfade, then split */
 if(rv&&window.MutationObserver){var mr=new MutationObserver(function(){if(rv.classList.contains('out')){mr.disconnect();tm=setTimeout(function(){split()},800)}});mr.observe(rv,{attributes:true,attributeFilter:['class']})}
 /* early: a scroll (desktop scrolls the body, so listen in the capture phase) or a tap anywhere but the hero controls */
-document.addEventListener('scroll',function(e){if(on||!active())return;var s=e.target,y=(s&&(s.scrollingElement||s).scrollTop)||window.scrollY||0;if(y>8)split()},{passive:true,capture:true});
-document.addEventListener('pointerdown',function(e){if(on||!active())return;var c=e.target&&e.target.closest;if(c&&e.target.closest('.hx-ctl,#fxskipall,.fx-again,.lz'))return;split()},{passive:true,capture:true});
+document.addEventListener('scroll',function(e){if(on||M||!active())return;var s=e.target,y=(s&&(s.scrollingElement||s).scrollTop)||window.scrollY||0;if(y>8)split()},{passive:true,capture:true});
+document.addEventListener('pointerdown',function(e){if(on||M||!active())return;var c=e.target&&e.target.closest;if(c&&e.target.closest('.hx-ctl,#fxskipall,.fx-again,.lz'))return;split()},{passive:true,capture:true});
 var seen=false;try{seen=sessionStorage.getItem(KEY)==='1'}catch(e){}
 if(seen)split(true);
 })();
@@ -363,5 +393,41 @@ html .fxhero.fxs-now *{transition:none!important}
   .fxs-p{font-size:13.5px;line-height:1.45;margin-top:10px}
   .fxs-btns{margin-top:14px}
   .fxs-btns .fk-btn{flex:1 1 auto;justify-content:center}
+}
+
+/* ── HR2: phone sequence (max-width 767 only, class .fxm set by the split script). Phase 1: #fxpl fills the hero, nothing else shows. Phase 2: clip-path + video translate/scale shrink it to a window at the top, then the card, then tile and mascot. transform / clip-path / opacity only. ── */
+@media (max-width: 767px) {
+  html .fxhero.fxm .fx-stage{position:static}
+  html .fxhero.fxm .fx-pl{position:absolute;left:0;right:0;top:0;bottom:var(--mq-h);width:auto;height:auto;min-height:0;margin:0;flex:none;border-radius:0;box-shadow:none;z-index:2;clip-path:inset(0px 0px 0px 0px round 0px)}
+  html .fxhero.fxm:not(.fxs-on) .txt{opacity:0;pointer-events:none}
+  html .fxhero.fxm:not(.fxs-on) .fx-p,html .fxhero.fxm:not(.fxs-on) .fx-btns,html .fxhero.fxm:not(.fxs-on) .fx-info{visibility:hidden}
+  /* HR3: until the round is over (.fxs-on) the card, tile, mascot, lady/burger images and the Watch-again pill cannot show at all */
+  html .fxhero.fxm:not(.fxs-on) .fxs-wrap,html .fxhero.fxm:not(.fxs-on) .fx-again{visibility:hidden}
+  html .fxhero.fxm .hx-ctl{position:absolute;top:16px;left:22px;right:auto;bottom:auto;z-index:8;display:flex;gap:8px}
+  html .fxhero.fxm.fxs-on .fx-pl{left:0;right:0;top:0;bottom:var(--mq-h);width:auto;height:auto}
+  html .fxhero.fxm.fxs-on .fx-pl-rv,html .fxhero.fxm.fxs-on .fx-rv-f{scale:1}
+  html .fxhero.fxm.fxs-on.fxs-go .fx-pl{clip-path:inset(8px 12px var(--fxm-b,0px) 12px round 24px);transition:clip-path .9s cubic-bezier(.23,1,.32,1)}
+  html .fxhero.fxm.fxs-on.fxs-go .fx-pl-rv,html .fxhero.fxm.fxs-on.fxs-go .fx-rv-f{translate:0 var(--fxm-ty,0px);scale:var(--fxm-k,1);transition:translate .9s cubic-bezier(.23,1,.32,1),scale .9s cubic-bezier(.23,1,.32,1),opacity .4s ease}
+  /* gold ring around the settled window: fades in after the shrink (no width/height animation) */
+  html .fxhero.fxm.fxs-on .fxs-rim{display:block;opacity:0;z-index:3;box-shadow:0 0 0 1px rgba(214,160,64,.6),0 18px 32px -20px rgba(60,32,8,.5)}
+  html .fxhero.fxm.fxs-go .fxs-rim{opacity:1;transition:opacity .35s cubic-bezier(.23,1,.32,1) .8s}
+  /* card: slides up 24px with a fade, after the shrink has started; tile and mascot only once the card is in */
+  html .fxhero.fxm .fxs-card{transform:translate3d(0,24px,0)}
+  html .fxhero.fxm.fxs-go .fxs-card{opacity:1;transform:none;transition:opacity .45s cubic-bezier(.23,1,.32,1) .45s,transform .6s cubic-bezier(.34,1.56,.64,1) .45s}
+  html .fxhero.fxm.fxs-go .fxs-st{transition:opacity .5s cubic-bezier(.23,1,.32,1) calc(.7s + var(--i) * .08s),transform .6s cubic-bezier(.34,1.56,.64,1) calc(.7s + var(--i) * .08s)}
+  html .fxhero.fxm.fxs-go .fxs-h .fxs-st{transition:none}
+  html .fxhero.fxm.fxs-go .fxs-h u{transition:transform .7s cubic-bezier(.23,1,.32,1) calc(.7s + var(--i,1) * .08s)}
+  html .fxhero.fxm.fxs-go .fxs-tile{transition:opacity .5s cubic-bezier(.23,1,.32,1) 1.2s,transform .5s cubic-bezier(.34,1.56,.64,1) 1.2s}
+  html .fxhero.fxm .fxs-el{transform:translate3d(0,14px,0) scale(.6)}
+  html .fxhero.fxm.fxs-go .fxs-el{opacity:1;transform:none;transition:opacity .4s cubic-bezier(.23,1,.32,1) 1.35s,transform .7s cubic-bezier(.34,1.56,.64,1) 1.35s}
+  html .fxhero.fxm.fxs-now *{transition:none!important}
+  /* Watch again: icon + label, centred in the free strip above the card between the mascot and the tile; only after the card is in */
+  html .fxhero.fxm .fx-again{left:50%;right:auto;bottom:var(--fxm-ab,calc(var(--mq-h) + 14px));padding:0 14px 0 12px;gap:6px;font-size:12.5px;opacity:0;visibility:hidden;transform:translate(-50%,8px)}
+  html .fxhero.fxm .fx-again span:first-child{display:none}
+  html .fxhero.fxm.reel-again.fxs-done .fx-again{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  html .fxhero.fxm.reel-again.fxs-done .fx-again:active{transform:translate(-50%,0) scale(.96)}
+  /* one row of buttons and tighter padding, so the card stays short enough on 360x740 */
+  html .fxhero.fxm .fxs-btns{flex-wrap:nowrap;gap:8px}
+  html .fxhero.fxm .fxs-btns .fk-btn{min-width:0;padding-left:14px;padding-right:14px}
 }
 </style>
