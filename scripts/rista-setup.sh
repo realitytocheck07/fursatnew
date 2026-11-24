@@ -29,4 +29,4 @@ put DEBUG_TOKEN "$D"
 echo
 echo "DEBUG_TOKEN (save it in your password manager, shown once): $D"
 echo "Secrets apply on the NEXT deployment: push any commit, or Cloudflare > Deployments > Retry deployment."
-echo "Then open /api/health -> configured:true, and /api/debug?token=<DEBUG_TOKEN>&path=/branch/list for the branch code."
+echo "Then open /api/health -> configured:true, and GET /api/debug?path=/branch/list with the header \"x-debug-token: <DEBUG_TOKEN>\" for the branch code."

@@ -89,11 +89,13 @@ test('menu: stockStatus fails -> falls back to /items/soldout', async () => {
 test('debug: locked without the token, works with it, only allowed paths', async () => {
   _clear(); fakeFetch();
   assert.equal((await debug({ request: req('/api/debug?path=/branch/list'), env })).status, 404);
-  assert.equal((await debug({ request: req('/api/debug?token=wrong&path=/branch/list'), env })).status, 404);
-  assert.equal((await debug({ request: req('/api/debug?token=dbg-token-123&path=/sale'), env })).status, 400);
-  const ok = await debug({ request: req('/api/debug?token=dbg-token-123&path=/branch/list'), env });
+  const dreq = (path, tok) => new Request('https://fursat.test' + path, { headers: { 'x-debug-token': tok } });
+  assert.equal((await debug({ request: dreq('/api/debug?path=/branch/list', 'wrong'), env })).status, 404);
+  assert.equal((await debug({ request: req('/api/debug?token=dbg-token-123&path=/branch/list'), env })).status, 404); // query token no longer accepted
+  assert.equal((await debug({ request: dreq('/api/debug?path=/sale', 'dbg-token-123'), env })).status, 400);
+  const ok = await debug({ request: dreq('/api/debug?path=/branch/list', 'dbg-token-123'), env });
   assert.equal(ok.status, 200); assert.equal((await ok.json())[0].branchCode, 'FK');
-  assert.equal((await debug({ request: req('/api/debug?token=x&path=/branch/list'), env: { ...env, DEBUG_TOKEN: '' } })).status, 404);
+  assert.equal((await debug({ request: dreq('/api/debug?path=/branch/list', 'x'), env: { ...env, DEBUG_TOKEN: '' } })).status, 404);
 });
 
 test('menu page hook: script only loads when site.json rista.live is true', async () => {

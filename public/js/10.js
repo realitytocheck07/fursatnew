@@ -146,7 +146,7 @@ var IC={
 function ic(n,c){return '<svg class="cc-i'+(c?' '+c:'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[n]+'</svg>'}
 function inr(n){return "₹"+Number(n).toLocaleString("en-IN")}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-function wa(msg){window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank","noopener")}
+function wa(msg){window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer")}
 
 var TABS=[["banq","Banquets","hall"],["cater","Catering & buffets","cater"],["visit","Visit us","pin"],["talk","Contact","phone"]];
 var ROUTES=[

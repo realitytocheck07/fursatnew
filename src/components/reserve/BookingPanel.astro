@@ -660,7 +660,7 @@ const conditions: string[] = [];
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(msg);
     window.fkForm?.send('restaurant', 'Table booking', { name, phone, ...(email ? { email } : {}), guests: String(booking.guests), date, time: booking.time, seating, occasion, table: booking.table || '', offer: offerOf() || '' }, $('res-submit-btn').parentNode.querySelector('[name=botcheck]'));
     submit.classList.add('is-sent'); /* swipe module: the send really started */
-    const w = window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
     const fine = $('rs-fine');
     fine.textContent = 'WhatsApp is open. Your request is only sent once you press Send there. ';
     showDone(url); // WhatsApp stays exactly as before; the panel now switches to "Request sent"

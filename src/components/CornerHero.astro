@@ -94,7 +94,7 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
     <div class="ch-btns">
       {ctas.map((c) => (
         <a class:list={['fk-btn', c.primary ? 'fk-btn--primary' : 'fk-btn--secondary', { 'ch-film': c.film }]} href={c.href} data-open={c.book ? 'book' : undefined}
-          target={c.external ? '_blank' : undefined} rel={c.external ? 'noopener' : undefined}>
+          target={c.external ? '_blank' : undefined} rel={c.external ? 'noopener noreferrer' : undefined}>
           {c.film && <i class="ch-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6.5v11l9-5.5z" /></svg></i>}<span>{c.label}</span>{!c.film && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>}
         </a>
       ))}

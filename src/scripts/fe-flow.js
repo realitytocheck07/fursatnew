@@ -213,7 +213,7 @@ export function feFlow(cfg) {
     try { localStorage.setItem('fk-me', JSON.stringify({ name: nameEl.value.trim(), phone: phoneEl.value.trim(), email: emailEl.value.trim() })); } catch (x) {}
     const url = 'https://wa.me/919059670033?text=' + encodeURIComponent(window.fkWa.format({ kind: cfg.kind, name: core.name, phone: core.phone, date: core.date, guests: core.guests, lines: extra }));
     $('#fe-done-wa').href = url;
-    const w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (x) {} }
+    window.open(url, '_blank', 'noopener,noreferrer');
     /* the tick pops in the chip, then the tear and the done screen play together */
     setTimeout(() => sendBtn.classList.add('is-ok'), 450);
     setTimeout(() => {

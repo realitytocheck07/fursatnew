@@ -708,7 +708,7 @@ const OFFER_ENABLED = false;
           localStorage.setItem('fursat_offer_claimed', phone);
           const msg = 'Hi Fursat! I unlocked the FURSAT15 offer (15% OFF). My number is +91' + phone + '. Please confirm my coupon.';
           window.fkForm && window.fkForm.send('restaurant', 'Offer FURSAT15 claim', { phone: '+91' + phone, offer: 'FURSAT15 (15% OFF)' });
-          window.open('https://wa.me/919059670033?text=' + encodeURIComponent(msg), '_blank');
+          window.open('https://wa.me/919059670033?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
           step1.hidden = true;
           step2.hidden = false;
         } else {

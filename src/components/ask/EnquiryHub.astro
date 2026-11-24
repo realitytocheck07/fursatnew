@@ -415,7 +415,7 @@ const ico: Record<string, string> = {
     if (window.fkForm) window.fkForm.send('events', 'Event enquiry', { email: (form.querySelector('#eh-email') || {}).value || '', occasion: tiles[cur].name, guests: guests.value.trim(), date: date.value, time: time.value, name: name.value.trim(), phone: digits(), note: note.value.trim() }, form.querySelector('[name=botcheck]'));
     var url = 'https://wa.me/' + D.wa + '?text=' + encodeURIComponent(message());
     fine.textContent = 'Opening WhatsApp with your enquiry.';
-    window.open(url, '_blank', 'noopener');
+    window.open(url, '_blank', 'noopener,noreferrer');
   });
   window.fkHub = { message: message, pick: pick };
 
