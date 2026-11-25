@@ -23,7 +23,9 @@ const IG: Record<string, string> = {
   '/restaurant-bar': 'fursatsocialclub',
 };
 const igHref = IG[path] ? `https://www.instagram.com/${IG[path]}/` : site.social.instagram;
-const show = path !== '/404';
+const show = true;   // F-FAB: the sheet is global (the tab bar's WhatsApp tab opens it on every page); the circle stays hidden on /404 (CSS)
+// odd number of half-width tiles on phones (Reserve and Ask both shown) -> Instagram takes a full row
+const loneIg = (path !== '/reserve') === (path !== '/ask');
 
 const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
 const IC: Record<string, string> = {
@@ -71,7 +73,7 @@ const IC: Record<string, string> = {
         <li><a class="wac-opt" href="/catering"><span class="wac-oi wac-oi--catering"><svg viewBox="0 0 24 24" set:html={IC.catering}></svg></span><span class="wac-ot">Catering</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
         {path !== '/ask' && <li><a class="wac-opt" href="/ask" data-wac-ask><span class="wac-oi wac-oi--ask"><svg viewBox="0 0 24 24" set:html={IC.ask}></svg></span><span class="wac-ot">Ask Fursat</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>}
         <li><button class="wac-opt wac-opt--wa" type="button" data-wac-wa><span class="wac-oi"><svg viewBox="0 0 24 24"><path fill="currentColor" d={WA_PATH}/></svg></span><span class="wac-ot">WhatsApp us</span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></button></li>
-        <li><a class="wac-opt" href={igHref} target="_blank" rel="noopener"><span class="wac-oi wac-oi--insta"><svg viewBox="0 0 24 24" set:html={IC.insta}></svg></span><span class="wac-ot">Instagram<small class="wac-vh"> (opens in a new tab)</small></span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
+        <li class={loneIg ? 'wac-lone' : undefined}><a class="wac-opt" href={igHref} target="_blank" rel="noopener"><span class="wac-oi wac-oi--insta"><svg viewBox="0 0 24 24" set:html={IC.insta}></svg></span><span class="wac-ot">Instagram<small class="wac-vh"> (opens in a new tab)</small></span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>
         {hasOffer && <li><a class="wac-opt wac-opt--offer" href="/reserve" data-wac-offer><span class="wac-oi wac-oi--offer"><svg viewBox="0 0 24 24" set:html={IC.offer}></svg></span><span class="wac-ot">Today's offers<small>10% off when you book online</small></span><svg class="wac-oa" viewBox="0 0 24 24" set:html={IC.arrow}></svg></a></li>}
       </ul>
     </div>
@@ -145,9 +147,9 @@ const IC: Record<string, string> = {
       im.src = im.dataset.src;
     });
   };
-  function open() {
+  function open(opener) {
     if (isOpen) return;
-    isOpen = true; lastFocus = document.activeElement; loadArt();
+    isOpen = true; lastFocus = opener || document.activeElement; loadArt();
     root.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true'); panel.removeAttribute('inert');
     de.setAttribute('data-wac-open', ''); lock(true);
     if (store('fz_wac')) finish(); else play();
@@ -160,9 +162,15 @@ const IC: Record<string, string> = {
     root.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); panel.setAttribute('inert', '');
     de.removeAttribute('data-wac-open'); lock(false);
     panel.style.transform = ''; panel.style.transition = '';
-    if (!opts2 || opts2.focus !== false) { try { btn.focus({ preventScroll: true }); } catch (e) {} }
+    if (!opts2 || opts2.focus !== false) { try { (lastFocus && lastFocus.isConnected && lastFocus !== document.body ? lastFocus : btn).focus({ preventScroll: true }); } catch (e) {} }
   }
-  btn.addEventListener('click', () => (isOpen ? close() : open()));
+  btn.addEventListener('click', () => (isOpen ? close() : open(btn)));
+  // phone tab bar: a plain click on the WhatsApp tab opens this sheet; ctrl/meta/shift/alt/middle click and no-JS keep the tab's own wa.me link
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !phone()) return;
+    const t = e.target.closest && e.target.closest('[data-wac-tab]'); if (!t) return;
+    e.preventDefault(); if (!isOpen) open(t);
+  });
   closeB.addEventListener('click', () => close());
   bd.addEventListener('click', () => close());
   document.addEventListener('keydown', (e) => {
@@ -277,6 +285,8 @@ const IC: Record<string, string> = {
 html[data-wac-hide]:not([data-wac-open]) .wac-btn, html[data-wac-intro] .wac-btn, html:has(dialog[open]) .wac-btn { opacity: 0; transform: translateY(10px); visibility: hidden; pointer-events: none; transition: opacity 200ms var(--ease), transform 200ms var(--ease), visibility 0s linear 200ms; }
 /* phone: above the mobile bar (bar height + safe area + 12px) */
 @media (max-width: 767px) { .wac-btn { right: 12px; bottom: calc(var(--mb-clear, 76px) + 12px + var(--fab-lift, 0px)); } html.fk-typing:not([data-wac-open]) .wac-btn { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px); } }
+/* F-FAB: where there is no tab bar (/menu) the green circle stays on phones; Ask Fursat stacks above it instead of on top of it (same formula as the circle + its 56px + 8px) */
+@media (max-width: 767px) { html:not(:has(.mb-bar)) .afab { bottom: calc(var(--mb-clear, 76px) + 12px + 56px + 8px + var(--fab-lift, 0px)); } }
 .wac-bd { position: fixed; inset: 0; z-index: 9100; background: rgb(16 38 26 / .42); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 300ms var(--ease), visibility 0s linear 300ms; }
 .wac.is-open .wac-bd { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
 @media (min-width: 768px) { .wac-bd { background: transparent; } }
@@ -354,5 +364,39 @@ html[data-wac-hide]:not([data-wac-open]) .wac-btn, html[data-wac-intro] .wac-btn
 @media (hover: hover) and (pointer: fine) { .wac-sec:hover { filter: brightness(1.14); } }
 .wac-sec:active { transform: scale(.96); }
 html.wac-lock, html.wac-lock body { overflow: hidden !important; overscroll-behavior: none; }
+/* F-FAB: /404 renders the sheet (the tab opens it) but never had the circle */
+.wac[data-path="/404"] .wac-btn { display: none; }
+/* F-FAB phones (<= 767): the green circle is gone wherever the tab bar exists (its WhatsApp tab opens the sheet); compact one-screen sheet. Desktop rules above are untouched. */
+@media (max-width: 767px) {
+  html:has(.mb-bar) .wac-btn { display: none; }   /* only pages WITHOUT the tab bar (/menu) keep the circle: it is their only WhatsApp entry */
+  .wac { --band: 76px; }
+  .wac-panel { max-height: calc(100svh - 16px); }
+  .wac-mc { top: 2px; right: 8px; width: 104px; }
+  .wac-h { margin: -26px 12px 0; padding: 6px 4px 6px 6px; }
+  .wac-body { padding: 10px 12px 12px; }
+  .wac-chat { min-height: 0; gap: 2px; }
+  .wac-msg { padding: 7px 14px; max-width: 100%; }
+  .wac-msg p { font-size: .92rem; line-height: 1.3; }
+  .wac-msg--tag { padding: 0 6px; background: none; box-shadow: none; }
+  .wac-msg--tag p { font-size: .8rem; line-height: 1.3; text-decoration: none; }
+  .wac-dots { padding: 11px 14px; }
+  .wac-opts { margin-top: 10px; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wac-opts > li { min-width: 0; }
+  .wac-opts > li:has(.wac-opt--wa) { grid-column: 1 / -1; order: -1; }
+  .wac-opts > li.wac-split, .wac-opts > li.wac-lone, .wac-opts > li:has(.wac-opt--offer) { grid-column: 1 / -1; }
+  .wac-opts > li:has(.wac-opt--offer) { order: 9; }
+  .wac-opt { min-height: 56px; border-radius: 18px; padding: 6px 8px 6px 6px; gap: 8px; font-size: .86rem; line-height: 1.2; }
+  .wac-oi { width: 40px; height: 40px; }
+  .wac-oi svg { width: 20px; height: 20px; }
+  .wac-opts > li:not(.wac-split) > .wac-opt:not(.wac-opt--wa):not(.wac-opt--offer) .wac-oa { display: none; }
+  .wac-split { border-radius: 18px; }
+  .wac-split .wac-opt { padding-right: 4px; }
+  .wac-sec { min-height: 44px; margin-left: 8px; }
+  .wac-opt--wa { min-height: 60px; border-radius: 999px; padding: 8px 14px 8px 8px; gap: 12px; font: 700 1.08rem/1.2 Poppins, Rupee, system-ui, sans-serif; color: #fff; background: linear-gradient(180deg, #16994c, #0e6f37); box-shadow: 0 0 0 2px var(--gold), 0 10px 18px -10px rgb(10 60 28 / .8), inset 0 1px 0 rgb(255 255 255 / .25); }
+  .wac-opt--wa .wac-oi { width: 44px; height: 44px; background: #fff; color: #0e6f37; box-shadow: none; }
+  .wac-opt--wa .wac-oi svg { width: 24px; height: 24px; }
+  .wac-opt--wa .wac-oa { stroke: #fff; }
+  .wac-opt--offer { padding-right: 12px; }
+}
 @media print { .wac { display: none !important; } }
 </style>
