@@ -7,7 +7,7 @@ import InstagramFeed from '../InstagramFeed.astro';
 <WhatsNew />
 <section class="hn-ig">
   <div class="hn-in">
-    <InstagramFeed account="all" limit={12} title="From our Instagram" />
+    <InstagramFeed account="all" limit={12} rows={{ 2: 3, 3: 2, 4: 2 }} title="From our Instagram" />
   </div>
 </section>
 <style>

@@ -391,7 +391,8 @@ function init(root: HTMLElement) {
   if (CAFE) {
     const exit = $<HTMLElement>('#mv-cafe-all');
     exit?.addEventListener('click', (e) => { e.preventDefault(); history.replaceState(null, '', location.pathname); delete root.dataset.cafe; go('f-biryani', 'food'); });
-    setTimeout(() => go('d-coffee', 'drinks'), 250);
+    const goId = /^#go=([a-z0-9-]+)$/.exec(location.hash)?.[1];
+    if (!(goId && document.getElementById('g-' + goId))) setTimeout(() => go('d-coffee', 'drinks'), 250); // a valid /menu?menu=cafe#go=<group> link keeps its own target
   }
 
   /* ── category tiles: gold + a check that springs in (400ms), then the smooth jump; drinks ask the 21+ question first ── */

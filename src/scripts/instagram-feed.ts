@@ -232,6 +232,15 @@ function normalizePost(raw: any): IgPost | null {
   return { ...raw, image, permalink, type: raw.type || raw.media_type || 'IMAGE' } as IgPost;
 }
 
+/* ---------- tile count: data-rows="2:3,3:2,4:2" = columns:rows, so the grid always ends on a full row; no attribute = the old limit ---------- */
+const colsOf = (grid: HTMLElement) => getComputedStyle(grid).gridTemplateColumns.split(' ').length || 1;
+function countFor(root: HTMLElement, grid: HTMLElement, limit: number) {
+  const spec = root.dataset.rows; if (!spec) return limit;
+  const cols = colsOf(grid);
+  const hit = spec.split(',').map((s) => s.split(':').map(Number)).find(([c]) => c === cols);
+  return hit ? Math.min(limit, hit[0] * hit[1]) : limit;
+}
+
 /* ---------- one feed ---------- */
 async function initFeed(root: HTMLElement) {
   const account = (root.dataset.account || 'all') as 'all' | IgAcct;
@@ -240,6 +249,7 @@ async function initFeed(root: HTMLElement) {
   const chips = root.querySelector<HTMLElement>('.igfeed-chips');
   const targets: IgAcct[] = account === 'all' ? IG_ACCT_KEYS : [account];
   root.dataset.state = 'loading'; grid.hidden = false;
+  [...grid.children].slice(countFor(root, grid, limit)).forEach((li) => li.remove()); // skeleton = final tile count, so the grid keeps its height
 
   const results = await Promise.allSettled(targets.map(loadOnce));
   const pool: Tagged[] = [];
@@ -263,7 +273,7 @@ async function initFeed(root: HTMLElement) {
   // Which accounts have posts decides which chips exist (a failed Banquets feed hides its chip).
   let current: 'all' | IgAcct = 'all';
   const draw = (cur: 'all' | IgAcct, animate: boolean) => {
-    const list = (cur === 'all' ? pool : pool.filter((p) => p.acct === cur)).slice(0, limit);
+    const list = (cur === 'all' ? pool : pool.filter((p) => p.acct === cur)).slice(0, countFor(root, grid, limit));
     grid.replaceChildren(...list.map((p, i) => tile(p, i, account === 'all')));
     grid.setAttribute('aria-busy', 'false'); relayout(grid);
     if (animate) reveal(grid); else grid.querySelectorAll('.igfeed-li').forEach((li) => li.classList.add('is-in'));
@@ -284,7 +294,8 @@ async function initFeed(root: HTMLElement) {
       });
     }
   }
-  new ResizeObserver(() => relayout(grid)).observe(grid);
+  let lastCols = colsOf(grid);
+  new ResizeObserver(() => { relayout(grid); const c = colsOf(grid); if (root.dataset.rows && c !== lastCols) { lastCols = c; draw(current, false); } }).observe(grid); // rotated / resized across a column change: same pool, new full-row count, no new request for tiles already shown
 }
 
 export function initInstagramFeeds() {

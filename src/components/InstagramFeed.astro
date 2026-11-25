@@ -6,14 +6,17 @@
 // Brand: embossed cream tiles, thin gold edge, soft shadow. Motion: transform and opacity only (see the script for wave, lift, FLIP lightbox, reveal).
 import { IG_ACCOUNTS, IG_ACCT_KEYS, IG_MAX_TILES, type IgAcct } from '../lib/instagram-config';
 
-interface Props { account?: 'all' | IgAcct; limit?: number; title?: string; tone?: 'light' | 'dark'; layout?: 'inline' | 'page' }
-const { account = 'all', limit = IG_MAX_TILES, title = 'From our Instagram', tone = 'light', layout = 'inline' } = Astro.props;
+interface Props { account?: 'all' | IgAcct; limit?: number; title?: string; tone?: 'light' | 'dark'; layout?: 'inline' | 'page'; rows?: Record<number, number> }
+const { account = 'all', limit = IG_MAX_TILES, title = 'From our Instagram', tone = 'light', layout = 'inline', rows } = Astro.props;
 const isAll = account === 'all';
 const targets = isAll ? IG_ACCT_KEYS : [account as IgAcct];
 const uid = `igfeed-${account}`;
 const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
+// rows = { columns: rows }: the script renders exactly columns x rows tiles (no orphan); skeletons start at the largest of those counts
+const rowsAttr = rows ? Object.entries(rows).map(([c, r]) => `${c}:${r}`).join(',') : undefined;
+const nSk = rows ? Math.max(1, Math.min(n, Math.max(...Object.entries(rows).map(([c, r]) => Number(c) * r)))) : n;
 ---
-<section class={`igfeed igfeed--${tone} igfeed--${layout}`} data-igfeed data-account={account} data-limit={n} data-state="idle" aria-labelledby={`${uid}-h`}>
+<section class={`igfeed igfeed--${tone} igfeed--${layout}`} data-igfeed data-account={account} data-limit={n} data-rows={rowsAttr} data-state="idle" aria-labelledby={`${uid}-h`}>
   <div class="igfeed-head">
     <h3 class="igfeed-t" id={`${uid}-h`}>{title}</h3>
     {isAll && (
@@ -25,7 +28,7 @@ const n = Math.max(1, Math.min(limit, IG_MAX_TILES));
   </div>
 
   <ul class="igfeed-grid" aria-busy="true" hidden>
-    {Array.from({ length: n }, () => <li class="igfeed-li igfeed-sk" aria-hidden="true"><span class="igfeed-sq"></span></li>)}
+    {Array.from({ length: nSk }, () => <li class="igfeed-li igfeed-sk" aria-hidden="true"><span class="igfeed-sq"></span></li>)}
   </ul>
 
   <div class="igfeed-fb">

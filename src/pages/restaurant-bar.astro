@@ -28,12 +28,12 @@ import SignatureCocktails from '../components/home/SignatureCocktails.astro';
     ]}
     hero={{ src: '/assets/interior/bar-front.webp', alt: 'The bar at Fursat Kitchen | Bar', w: 1200, h: 1600, pos: '50% 50%' }}
     pillars={[
-      { icon: 'cocktail', title: 'Cocktails', line: '25 signature and classic cocktails. 21+.' },
-      { icon: 'flame', title: 'Appetizers', line: '22 starters, from tikkas to kebabs.' },
-      { icon: 'glass', title: 'Mocktails', line: '14 zero-proof mocktails.' },
-      { icon: 'menu', title: 'Biryani & Mains', line: '26 biryani and rice, 18 mains.' },
+      { icon: 'cocktail', title: 'Cocktails', href: '/menu/#go=d-cocktails', line: '25 signature and classic cocktails. 21+.' },
+      { icon: 'flame', title: 'Appetizers', href: '/menu/#go=f-starters', line: '22 starters, from tikkas to kebabs.' },
+      { icon: 'glass', title: 'Mocktails', href: '/menu/#go=d-mocktails', line: '14 zero-proof mocktails.' },
+      { icon: 'menu', title: 'Biryani & Mains', href: '/menu/#go=f-biryani', line: '26 biryani and rice, 18 mains.' },
       // TODO(client): confirm match screenings / music nights
-      { id: 'social', icon: 'glass', title: 'Social Club', line: 'Cricket on the big screen and music nights.' },
+      { id: 'social', icon: 'glass', title: 'Social Club', href: '#match-nights', line: 'Cricket on the big screen and music nights.' },
     ]}
     momentsA="From the"
     momentsB="Kitchen"
@@ -60,7 +60,7 @@ import SignatureCocktails from '../components/home/SignatureCocktails.astro';
   >
     <SignatureCocktails slot="before-cards" />
     <!-- Match nights: one real photo + one line. TODO(client): confirm which matches are screened (same open point as the Social Club pillar). -->
-    <section slot="before-cards" class="mn" aria-labelledby="mn-h">
+    <section slot="before-cards" class="mn" id="match-nights" aria-labelledby="mn-h">
       <figure class="mn-ph">
         <img src="/assets/celebrations/match-night-big-screen-640.webp" srcset="/assets/celebrations/match-night-big-screen-360.webp 360w, /assets/celebrations/match-night-big-screen-640.webp 640w" sizes="(max-width: 767px) 40vw, 220px" alt="Diners watching a live cricket match on the big screen in the Fursat hall" width="640" height="853" loading="lazy" decoding="async" />
       </figure>
@@ -71,7 +71,7 @@ import SignatureCocktails from '../components/home/SignatureCocktails.astro';
       </div>
     </section>
     <style is:global>
-    .mn{display:flex;align-items:center;gap:clamp(16px,3vw,32px);max-width:760px;margin:clamp(20px,3vw,40px) auto;padding:clamp(14px,2.4vw,22px);border-radius:22px;background:#10261a;color:#fbf3e6;box-shadow:0 0 0 1.5px #c99a43,0 18px 34px -16px rgba(14,34,20,.6)}
+    .mn{scroll-margin-top:96px;display:flex;align-items:center;gap:clamp(16px,3vw,32px);max-width:760px;margin:clamp(20px,3vw,40px) auto;padding:clamp(14px,2.4vw,22px);border-radius:22px;background:#10261a;color:#fbf3e6;box-shadow:0 0 0 1.5px #c99a43,0 18px 34px -16px rgba(14,34,20,.6)}
     .mn-ph{flex:0 0 clamp(104px,30vw,200px);margin:0;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:#0b1c13}
     .mn-ph img{display:block;width:100%;height:100%;object-fit:cover}
     .mn-tx{min-width:0}

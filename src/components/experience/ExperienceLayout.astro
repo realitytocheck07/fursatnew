@@ -12,7 +12,7 @@ import InstaFollow from '../InstaFollow.astro';
 import '../../styles/fk-tokens.css';
 
 interface Cta { label: string; href: string; primary?: boolean; book?: boolean }
-interface Pillar { icon: string; title: string; line: string; id?: string }
+interface Pillar { icon: string; title: string; line: string; id?: string; href?: string }
 interface Photo { src: string; alt: string; pos?: string; w?: number; h?: number }
 interface Card { tag?: string; name: string; price?: string; text: string; img?: Photo; icon?: string }
 interface Props {
@@ -76,9 +76,18 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
   <section class="xp-band" aria-label={`${p.h1a} highlights`}>
     <ul class="xp-pillars" data-fk-stagger="80">
       {p.pillars.map((pl) => (
-        <li class="xp-pillar" id={pl.id}>
-          <span class="xp-ring"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[pl.icon]} /></span>
-          <span class="xp-pt"><strong class="fk-ty-h4">{pl.title}</strong><small>{pl.line}</small></span>
+        <li class={pl.href ? 'xp-pillar xp-pillar--link' : 'xp-pillar'} id={pl.id}>
+          {pl.href ? (
+            <a class="xp-pillar-a" href={pl.href}>
+              <span class="xp-ring"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[pl.icon]} /></span>
+              <span class="xp-pt"><strong class="fk-ty-h4">{pl.title}</strong><small>{pl.line}</small></span>
+            </a>
+          ) : (
+            <>
+              <span class="xp-ring"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[pl.icon]} /></span>
+              <span class="xp-pt"><strong class="fk-ty-h4">{pl.title}</strong><small>{pl.line}</small></span>
+            </>
+          )}
         </li>
       ))}
     </ul>
@@ -206,6 +215,17 @@ const LIVE: Record<string, 'main' | 'bites' | 'banquets'> = { 'fursatind.in': 'm
   .xp-orn svg { width: 28px; height: 34px; fill: #eda05a; }
   @media (max-width: 900px) { .xp-pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xp-moments { grid-template-columns: 1fr; } }
   @media (max-width: 480px) { .xp-pt small { display: none; } .xp-pillar { padding: 18px 10px; } }
+  /* linked pillars: the <a> carries the card look (same ring, fill, radius, padding), so the lift/press moves the whole card */
+  .xp-pillar.xp-pillar--link { padding: 0; background: none; box-shadow: none; justify-items: stretch; }
+  .xp-pillar-a { display: grid; justify-items: center; align-content: start; text-align: center; gap: 12px; box-sizing: border-box; min-height: 44px; padding: 22px 16px; border-radius: 22px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(243,197,107,.28); color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition-property: transform, background-color, box-shadow; transition-duration: .15s, .2s, .2s; transition-timing-function: ease-out; }
+  .xp-pillar-a .xp-ring { transition: box-shadow .2s ease-out; }
+  .xp-pillar-a:focus-visible { outline: 3px solid #e8c27a; outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) {
+    .xp-pillar-a:hover { background: rgba(255,255,255,.09); box-shadow: inset 0 0 0 1px rgba(243,197,107,.7), 0 14px 26px -16px rgba(0,0,0,.65); transform: translateY(-2px); }
+    .xp-pillar-a:hover .xp-ring { box-shadow: 0 0 0 2px #e8c27a, 0 0 0 6px rgba(232,194,122,.28); }
+  }
+  .xp-pillar-a:active, .xp-pillar-a:hover:active { transform: scale(.96); } /* after the hover rule on purpose */
+  @media (max-width: 480px) { .xp-pillar-a { padding: 18px 10px; } }
   .xp-cards-sec, .xp-faq { background: #10261a; padding: clamp(32px, 4vw, 64px) clamp(16px, 5vw, 80px) clamp(40px, 5vw, 72px); text-align: center; }
   .xp-sec-kicker { font: 600 .78rem/1.3 var(--fk-sans); letter-spacing: .2em; text-transform: uppercase; color: #e8c27a; }
   .xp-sec-h { color: #fbf3e6; margin: .35rem 0 clamp(24px, 3vw, 40px) !important; }
