@@ -317,7 +317,23 @@ window.FursatConcierge={open:openIt,route:route};
     var pv=document.getElementById("fxpv");
     if(pv)pv.addEventListener("click",loadAndPlay,{once:true});
   } else {
-    if(d.indexOf("data:")===0){fetch(d).then(function(r){return r.blob()}).then(function(b){v.src=URL.createObjectURL(b);v.load();loaded()}).catch(function(){v.src=d;loaded()})}else{v.src=d;v.load();loaded()}
+    var go=function(){if(d.indexOf("data:")===0){fetch(d).then(function(r){return r.blob()}).then(function(b){v.src=URL.createObjectURL(b);v.load();loaded()}).catch(function(){v.src=d;loaded()})}else{v.src=d;v.load();loaded()}};
+    var fg=document.getElementById("fxrvf"),stg2=document.getElementById("fxstage");
+    if(calm||!fg||!stg2||!hero||!document.getElementById("fxrv"))go();   /* 26b only runs with these elements; without them nothing would ever ask for the master */
+    else{
+      /* LAG1: the master (10 MB) no longer competes with the intro, lens and reel. It starts after the reel is nearly over (last 8 s, same lead the phone uses) or over/skipped,
+         and not before the browser is idle (2.5 s cap), whichever is later. handoff() in 26b calls #fxstage.click() when the master has no src: that loads it at once, so the reel -> master swap still waits for a decoded frame, never for the idle gate. */
+      var fired=0,idle=false,near=false;
+      var fire=function(){if(fired)return;fired=1;fg.removeEventListener("timeupdate",chk);fg.removeEventListener("ended",over);fg.removeEventListener("error",over);stg2.removeEventListener("click",now);go()};
+      var try_=function(){if(near&&idle)fire()};
+      var now=function(e){if(e&&e.isTrusted)return;fire()};   /* only the script click from handoff() in 26b, never a visitor tap */
+      var over=function(){near=true;try_()};
+      var chk=function(){if(fg.duration&&fg.duration-fg.currentTime<8)over()};
+      fg.addEventListener("timeupdate",chk);fg.addEventListener("ended",over);fg.addEventListener("error",over);
+      stg2.addEventListener("click",now);
+      var armIdle=function(){var f=function(){idle=true;try_()};if(window.requestIdleCallback)requestIdleCallback(f,{timeout:2500});else setTimeout(f,2500)};
+      if(document.readyState==="complete")armIdle();else addEventListener("load",armIdle,{once:true});
+    }
   }
   if(hero&&window.MutationObserver)new MutationObserver(start).observe(hero,{attributes:true,attributeFilter:["class"]});
   if("IntersectionObserver"in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){if(live)play()}else v.pause()}).observe(document.getElementById("top")||v);

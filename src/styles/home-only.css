@@ -3,4 +3,11 @@
  .fx-dn{left:auto;right:30px;bottom:30px;padding:13px 20px 0;border-radius:10px;gap:7px}
  .fx-dn-n{font-size:25px}
  .fx-dn-bar{margin:5px -20px 0}
-}.wz-t em{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:var(--terracotta)!important;color:var(--terracotta)!important;animation:none!important}
+}.wz-t em{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:var(--terracotta)!important;color:var(--terracotta)!important;animation:none!important}/* LAG1: skip rendering of four heavy below-the-fold sections until they near the viewport. contain-intrinsic-block-size = measured rendered height minus the section's block padding (the sections are border-box; the intrinsic size is the content box), desktop 1366 / phone 390,
+   so the page height is the same before and after they render; "auto" keeps the real height once rendered. Block size only: width is untouched. */
+#whats-new,#season,#signature-cocktails,#spaces{content-visibility:auto}
+#whats-new{contain-intrinsic-block-size:auto 898.42px}
+#season{contain-intrinsic-block-size:auto 554.78px}
+#signature-cocktails{contain-intrinsic-block-size:auto 707.81px}
+#spaces{contain-intrinsic-block-size:auto 647.58px}
+@media(max-width:767px){#whats-new{contain-intrinsic-block-size:auto 1787.53px}#season{contain-intrinsic-block-size:auto 531.7px}#signature-cocktails{contain-intrinsic-block-size:auto 719.23px}#spaces{contain-intrinsic-block-size:auto 630.77px}}
