@@ -34,6 +34,16 @@ const rowIcon = (h: string) => {
   if (/bread/.test(t)) return '<path d="M4 14a8 6 0 0 1 16 0v4H4z"/><path d="M9 11l1 3M13 11l1 3"/>';
   return '<path d="M3 20h18"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4M10 4h4"/>';
 };
+const secIcon = (h: string) => {
+  const t = h.toLowerCase();
+  if (/drink/.test(t)) return '<path d="M7 4h10l-1.2 15a1.5 1.5 0 0 1-1.5 1.4H9.7a1.5 1.5 0 0 1-1.5-1.4z"/><path d="M7.6 10h8.8"/>';
+  if (/dessert|sweet/.test(t)) return '<path d="M3 17V11l18-4.5V17z"/><path d="M3 14l18-4.5"/><path d="M3 17h18"/>';
+  if (/rice|biryani|pulao|pulav/.test(t)) return '<path d="M3.5 12h17a8.5 8.5 0 0 1-17 0z"/><path d="M7 12c1-3 3-4 5-4s4 1 5 4"/><path d="M10 9.6h.01M13 9h.01M14.6 10.6h.01M9 11h.01"/>';
+  if (/starter|appetizer/.test(t)) return '<path d="M4 16a8 8 0 0 1 16 0z"/><path d="M3 19h18"/><path d="M12 8V6.5M10.5 6.5h3"/>';
+  if (/main|curr/.test(t)) return '<path d="M3.5 12h17a8.5 8.5 0 0 1-17 0z"/><path d="M7 12c0-3 2.2-4.5 5-4.5s5 1.5 5 4.5"/>';
+  if (/accompan/.test(t)) return '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 17l-5.3 2.7 1.1-5.9L3.5 9.7l5.9-.8z"/>';
+  return '<circle cx="12" cy="12" r="3.2"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/>';
+};
 const addIcon = (n: string) => {
   const t = n.toLowerCase();
   if (/seafood/.test(t)) return '<path d="M3 12c3-5 8-6 13-3l5-2v10l-5-2c-5 3-10 2-13-3z"/><circle cx="8" cy="11" r=".8"/>';
@@ -49,18 +59,15 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 ---
 <section class="pb" id="pa-plan" aria-labelledby="pa-plan-h">
   <div class="pb-card">
-    <div class="pb-host" id="pa-host" data-pose="idle" aria-hidden="false">
-      <div class="pa-stage">
-        <img class="pa-p pa-idle" src="/assets/ask-mascot-md.webp" srcset="/assets/ask-mascot-md-240.webp 240w, /assets/ask-mascot-md.webp 400w" sizes="(max-width: 767px) 88px, 120px" alt="Fursat&rsquo;s elephant host in a gold crown and sunglasses" width="400" height="400" loading="lazy" decoding="async" />
-        <img class="pa-p pa-cheer" src="/assets/ask-mascot-cheer-md.webp" srcset="/assets/ask-mascot-cheer-md-240.webp 240w, /assets/ask-mascot-cheer-md.webp 400w" sizes="(max-width: 767px) 88px, 120px" alt="" aria-hidden="true" width="400" height="400" loading="lazy" decoding="async" />
-      </div>
-    </div>
-
     <div class="pb-grid">
       <div class="pb-left">
+        <svg class="pb-wave" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0H400V13C340 29 282 3 204 13S60 27 0 11Z"/></svg>
         <header class="pb-head">
           <h2 class="fk-ty-h2 pb-h" id="pa-plan-h" data-fx-reveal>Build Your <span class="pb-hl">Celebration</span></h2>
           <p class="pb-sub">Pick a package, tell us how many are coming, and see your estimate.</p>
+          <div class="pb-host" id="pa-host" data-pose="idle" aria-hidden="true">
+            <div class="pa-stage"><img class="pb-chef" src="/assets/brand/mascot/pointing-480.webp" srcset="/assets/brand/mascot/pointing-480.webp 480w, /assets/brand/mascot/pointing-720.webp 720w" sizes="(max-width: 767px) 40vw, 170px" alt="" width="480" height="576" loading="lazy" decoding="async" /></div>
+          </div>
         </header>
         <!-- Event type + guests: segmented control and stepper on desktop, pills that open a bottom sheet on phones -->
         <div class="pb-ctls">
@@ -94,6 +101,7 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
         </div>
         <p class="pb-blurb" id="pb-blurb">{groups.find((g) => g.id === initial.group)?.blurb}</p>
 
+        <div class="pb-step-box">
         <h3 class="pb-h3 pb-h3--pkg"><span class="pb-n" aria-hidden="true"></span>Choose your package</h3>
         {groups.map((g) => (
           <fieldset class="pb-pkgs" data-group={g.id} hidden={g.id !== initial.group ? true : undefined}>
@@ -111,9 +119,9 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
                   <div class="pb-inc-in">
                     <dl class="pb-dl">
                       {x.p.sections?.map((s: any) => (
-                        <div><dt>{s.h}</dt><dd>{x.group === 'banquet' ? (s.rule ? s.rule : (s.items || s.lines).join(' \u00b7 ')) : (s.lines || s.items).join(' \u00b7 ')}</dd></div>
+                        <div><dt><svg class="pb-di" viewBox="0 0 24 24" aria-hidden="true" focusable="false" set:html={secIcon(s.h)} />{s.h}</dt><dd>{x.group === 'banquet' ? (s.rule ? s.rule : (s.items || s.lines).join(' \u00b7 ')) : (s.lines || s.items).join(' \u00b7 ')}</dd></div>
                       ))}
-                      {x.p.drinks && <div><dt>Drinks{x.p.drinks.serve ? ' \u00b7 ' + x.p.drinks.serve : ''}</dt><dd>{[...(SHOW_LIQUOR_BRANDS ? x.p.drinks.brands : []), ...x.p.drinks.lines].join(' \u00b7 ')}</dd></div>}
+                      {x.p.drinks && <div><dt><svg class="pb-di" viewBox="0 0 24 24" aria-hidden="true" focusable="false" set:html={secIcon('Drinks')} />Drinks{x.p.drinks.serve ? ' \u00b7 ' + x.p.drinks.serve : ''}</dt><dd>{[...(SHOW_LIQUOR_BRANDS ? x.p.drinks.brands : []), ...x.p.drinks.lines].join(' \u00b7 ')}</dd></div>}
                     </dl>
                     {x.group === 'bar' && <p class="pb-age">Alcohol is served to guests aged 21 and above only.</p>}
                     {x.group === 'banquet' && <a class="pb-build" href={`/banquet?pkg=${x.id}#packages`}>Choose the dishes for this menu <span aria-hidden="true">&rarr;</span></a>}
@@ -124,6 +132,7 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
             {g.id === 'banquet' && <a class="pb-build pb-hall" href="/banquet#enquire">Enquire about the hall <span aria-hidden="true">&rarr;</span></a>}
           </fieldset>
         ))}
+        </div>
 
       </div>
 
@@ -144,7 +153,8 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
         </div>
 
       <div class="pb-right">
-        <h3 class="pb-h3 pb-h3--r">Explore our menu</h3>
+        <div class="pb-step-box">
+        <h3 class="pb-h3 pb-h3--r"><span class="pb-n" aria-hidden="true"></span>Explore our menu</h3>
         <p class="pb-blurb pb-blurb--r">Tap a course to see the dishes.</p>
 
         <div class="pb-menu" data-menu="choices">
@@ -191,13 +201,16 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
           </div>
         ))}
 
-        <h3 class="pb-h3 pb-h3--r pb-h3--add">Add-ons</h3>
+        </div>
+        <div class="pb-step-box">
+        <h3 class="pb-h3 pb-h3--r pb-h3--add"><span class="pb-n" aria-hidden="true"></span>Add-ons</h3>
         <ul class="pb-adds">
           {(data.addons as any[]).map((a) => (
             <li class="pb-add"><span class="pb-tile pb-tile--s" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={addIcon(a.n)} /></span><span class="pb-add-n">{a.n}</span><b class="pb-add-p">{'\u20b9' + a.p}</b></li>
           ))}
         </ul>
         <p class="pb-fine">Add-on prices are as printed on the Fursat party menu.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -470,4 +483,63 @@ const client = { groups: groups.map((g) => ({ id: g.id, label: g.label })), pkgs
 .fl-sec:focus-visible{outline:2px solid #2a5019;outline-offset:3px;color:#fff}
 .fl-sec:focus-visible::before{transform:none}
 @media (hover:hover){.fl-sec:hover{color:#fff}.fl-sec:hover::before{transform:none}}
+/* ===== G-BUILDER: header, one chef mascot, icons, step containers, package row, detail icons ===== */
+.pb{padding-top:clamp(32px,4vw,48px)}
+.pb-card{counter-reset:pbs}
+.pb-ctls{counter-reset:none}
+.pb-left{position:relative;padding-top:calc(clamp(24px,3.4vw,44px) + 20px)}
+.pb-wave{position:absolute;left:0;top:0;width:100%;height:26px;display:block;pointer-events:none;border-radius:inherit}
+.pb-wave path{fill:var(--fk-cream-100)}
+.pb-head{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:calc(clamp(130px,13vw,170px) * 1.2);padding-right:calc(clamp(130px,13vw,170px) + 16px)}
+.pb-head::after{content:"";display:block;width:64px;height:2px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg in oklab,var(--fk-gold-500),var(--fk-gold-300))}
+.pb-hl{color:var(--fk-gold-300)}
+.pb-host{position:absolute;right:0;top:50%;translate:0 -50%;width:clamp(130px,13vw,170px);z-index:2;pointer-events:none}
+.pb-host .pa-stage{width:100%;aspect-ratio:auto;display:block}
+.pb-host .pa-stage::after{display:none}
+.pb-chef{display:block;width:100%;height:auto;pointer-events:none}
+.pb-pill>svg:first-child{stroke:var(--fk-gold-700)}
+#pb-blurb{display:flex;align-items:center;justify-content:center;gap:12px;text-align:center}
+#pb-blurb::before,#pb-blurb::after{content:"";flex:1;min-width:16px;height:1px;background:linear-gradient(90deg in oklab,transparent,rgba(230,194,122,.8))}
+#pb-blurb::after{transform:scaleX(-1)}
+/* step containers */
+.pb-step-box{margin:22px 0 0;padding:16px 12px 12px;border-radius:24px;background:var(--fk-cream-50);border:1px solid rgba(201,154,67,.6);box-shadow:0 12px 24px -16px rgba(14,34,20,.55),inset 0 1px 0 #fff}
+.pb-right .pb-step-box{margin:0 0 16px}
+.pb-step-box .pb-h3{margin:0 0 12px;gap:12px;font:600 .75rem/1.2 var(--fk-sans);letter-spacing:.2em;text-transform:uppercase;color:#74501a}
+.pb-step-box .pb-h3::before,.pb-step-box .pb-h3::after{content:"";flex:1;min-width:12px;height:1px;background:linear-gradient(90deg in oklab,transparent,rgba(201,154,67,.9))}
+.pb-step-box .pb-h3::after{transform:scaleX(-1)}
+.pb-step-box .pb-h3 .pb-n{order:-1;width:30px;height:30px;background:var(--fk-forest-800);box-shadow:inset 0 0 0 1.5px var(--fk-gold-500);color:var(--fk-gold-300)}
+.pb-step-box .pb-blurb--r{text-align:center}
+.pb-step-box :is(.pb-row,.pb-add){background:#fff}
+/* package row */
+.pb-pk{background:#fff;box-shadow:inset 0 0 0 1px rgba(201,154,67,.6)}
+.pb-pk.is-on{background:#fffaf0;box-shadow:inset 0 0 0 2px var(--fk-gold-500)}
+.pb-pk-n,.pb-pk-p,.pb-pk.is-on .pb-pk-n,.pb-pk.is-on .pb-pk-p{color:var(--fk-forest-800)}
+.pb-pk-p small,.pb-pk.is-on .pb-pk-p small{color:#5a5040}
+.pb-pk-l{grid-template-columns:auto minmax(0,1fr) auto 28px}
+.pb-pk-p{position:relative;align-self:center;padding-left:12px}
+.pb-pk-p::before{content:"";position:absolute;left:0;top:-12px;bottom:-12px;width:1px;background:rgba(201,154,67,.7)}
+.pb-ck{width:28px;height:28px;padding:6px;box-sizing:border-box;border-radius:50%;background:linear-gradient(145deg in oklab,var(--fk-gold-300),var(--fk-gold-500));stroke:var(--fk-forest-800);stroke-width:2.8}
+.pb-opt .pb-ck{width:20px;height:20px;padding:0;border-radius:0;background:none;stroke:#a8731c;stroke-width:2.4}
+/* package details */
+.pb-dl{gap:0;padding:2px 0 6px;border-top:1px solid rgba(201,154,67,.5)}
+.pb-dl>div{position:relative;min-height:44px;padding:10px 0 10px 52px;grid-template-columns:minmax(0,9rem) minmax(0,1fr);align-items:center;border-top:1px solid rgba(201,154,67,.32)}
+.pb-dl>div:first-child{border-top:0}
+.pb-dl dt{color:var(--fk-forest-800)}
+.pb-dl dd{color:#3d3a2c}
+.pb-di{position:absolute;left:0;top:50%;translate:0 -50%;width:40px;height:40px;padding:9px;box-sizing:border-box;border-radius:50%;background:#e6ecd9;fill:none;stroke:var(--fk-forest-800);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:767px){
+  .pb{padding-top:36px}
+  .pb-left{padding-top:44px}
+  .pb-h{font-size:2.25rem;line-height:1.08}
+  .pb-hl{display:block}
+  .pb-head{display:block;min-height:0;padding-right:0}
+  .pb-head>:is(.pb-h,.pb-sub){max-width:58%}
+  .pb-head::after{margin-top:14px}
+  .pb-host{right:-8px;top:auto;bottom:-26px;translate:none;width:40%}
+  .pb-ctls{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+  .pb-pill{gap:8px;padding:0 10px}
+  .pb-pill>svg:first-child{display:block;width:24px;height:24px;stroke-width:1.7}
+  .pb-dl>div{grid-template-columns:minmax(0,1fr)}
+  .pb-dl dt{padding-top:0}
+}
 </style>
