@@ -524,13 +524,16 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 
   /* Gallery Strip */
   .ct-gallery-strip {
+    --ct-gx: clamp(16px, 4vw, 40px);
+    --ct-gw: clamp(260px, 30vw, 420px);
     padding: clamp(40px, 6vw, 70px) 0;
     overflow: hidden}
   .ct-gallery-scroll {
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding: 0 clamp(16px, 4vw, 40px) 16px;
+    padding: 0 var(--ct-gx) 16px;
+    scroll-padding-inline: var(--ct-gx);
     scrollbar-width: thin;
     scrollbar-color: rgba(201,154,67,.5) transparent}
   .ct-gallery-scroll::-webkit-scrollbar {
@@ -540,7 +543,8 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
     border-radius: 999px}
   .ct-gallery-item {
     margin: 0;
-    flex: 0 0 clamp(260px, 30vw, 420px);
+    flex: 0 0 var(--ct-gw);
+    scroll-snap-align: start;
     aspect-ratio: 4/3;
     overflow: hidden;
     border-radius: 64px 8px 64px 8px;
@@ -553,6 +557,15 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
     transition: transform 0.5s ease}
   .ct-gallery-item:hover img {
     transform: scale(1.06)}
+  /* frame shows a 50%-tall window of a 2:3 photo: keep the plate inside it */
+  .ct-gallery-item:nth-child(1) img { object-position: 50% 95% }
+  .ct-gallery-item:nth-child(2) img { object-position: 50% 80% }
+  .ct-gallery-item:nth-child(3) img { object-position: 50% 88% }
+  /* below 1200px the strip scrolls: snap every slide to the gutter, the trailing spacer lets the last one reach it too */
+  @media (max-width: 1199px) {
+    .ct-gallery-scroll { scroll-snap-type: x mandatory }
+    .ct-gallery-scroll::after { content: ""; flex: 0 0 max(0px, calc(100% - var(--ct-gw) - 20px)) }
+  }
 
   .ct-req { margin: 0 0 4px; font-size: 0.8125rem; color: #74501a}
   .ct-field input, .ct-field select { min-height: 48px; font-size: 1rem}

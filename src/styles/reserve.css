@@ -352,7 +352,7 @@
   .rs-mode{gap:6px;padding:0 4px;font-size:.84rem;white-space:nowrap}
   .rs-mode svg{width:16px;height:16px}
   /* date strip swipes (pan-x); times 3-up; zones 3-up; every target ≥44px */
-  .rs-dates{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -18px;padding:2px 18px 6px}
+  .rs-dates{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -18px;padding:2px 18px 6px;scroll-padding-inline:18px}
   .rs-dates::-webkit-scrollbar{display:none}
   .rs-dates .rs-chip{flex:0 0 68px;min-height:58px}
   .rs-times{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -541,9 +541,9 @@
   .rs-hy .rs-qgrid{gap:10px 10px}
   .rs-hy .rs-q-3{grid-column:span 3}
   .rs-hy .rs-page .rs-ql, .rs-page .rs-hy .rs-ql{margin-bottom:5px}
-  .rs-hy .rs-times{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px}
+  .rs-hy .rs-times{display:flex;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;scrollbar-width:none;margin:0 -14px;padding:2px 14px 4px;scroll-padding-inline:14px}
   .rs-hy .rs-times::-webkit-scrollbar{display:none}
-  .rs-hy .rs-dates{margin:0 -14px;padding:2px 14px 4px}
+  .rs-hy .rs-dates{margin:0 -14px;padding:2px 14px 4px;scroll-padding-inline:14px}
   .rs-hy .rs-dates .rs-chip{min-height:54px}
   .rs-hy .rs-times .rs-chip{flex:0 0 76px;min-height:50px}
   .rs-hy .rs-step{min-height:48px}

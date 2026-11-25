@@ -116,6 +116,6 @@ const reels = [
 /* the shared .fk-rail class resets margin-inline to 0, which left the 3 cards stuck to the left; centre the rail whenever the cards fit (the swipe rail below keeps its own scroll when they overflow) */
 @media(min-width:768px){html .sc-rail.sc-rail{margin-inline:auto}}
 .sc-rail{justify-content:safe center}
-@media(max-width:767px){.sc-rail{display:flex;max-width:none}.sc-rail>*{flex:0 0 calc(80% - 12px)}}
+@media(max-width:767px){html .sc-rail.sc-rail{padding-inline:16px;scroll-padding-inline:16px}.sc-rail{display:flex;max-width:none}.sc-rail>*{flex:0 0 calc(80% - 12px)}}
 
 </style>
