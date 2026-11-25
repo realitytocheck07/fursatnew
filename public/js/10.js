@@ -368,7 +368,7 @@ window.FursatConcierge={open:openIt,route:route};
       if(++n<12)setTimeout(fix,600)};
     fg.addEventListener("playing",function(){setTimeout(fix,150)},{once:true})}
   function start(mode){st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
-    if(mode==="fresh")window.__fzReel.keepSong=true;   /* no seekable blob: the mp3 keeps playing, the reel starts muted from 0, the song is never restarted */
+    if(mode==="fresh")window.__fzReel.own=true;   /* AV1: the song is playing and the reel starts from 0 with its OWN audio (same music, same stream as its picture): 06.js fades the song out (120 ms) while the reel audio fades in (200 ms); the reel is not moved to the song */
     if(!paused())run()}
   /* plain path: start the moment the reel can play (usually already buffered during the lens); 15 s fallback = master loop + pill */
   function waitPlain(){load();var fin=false,t;
@@ -400,6 +400,7 @@ window.FursatConcierge={open:openIt,route:route};
     var fin=false,t;
     function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);
       st="play";window.__fzReel.on=true;
+      if(window.__fzReel.heard&&window.__fzReplayOn)window.__fzReplayOn();else try{fg.muted=true}catch(e){}   /* AV1: replay keeps the reel sound only if it was on when the reel ended */
       if(pv&&paused()){pv.dataset.s="playing";pv.setAttribute("aria-label","Pause background video")}
       rv.style.visibility="";rv.classList.remove("out");m.classList.remove("zin");hero.classList.add("reel-on");m.pause();run()}
     fg.addEventListener("canplay",go);

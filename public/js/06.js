@@ -52,11 +52,12 @@ var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0}
 var inIntro=function(){return document.documentElement.classList.contains("lock")};
 var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.__fzReel.on&&!window.__fzReel.keepSong&&!calm&&!inIntro())};
 /* the reel's own audio: fade in over the song's fade-out. If the browser refuses sound (it pauses the video), re-mute, keep the picture playing and leave "Sound on" for a tap. */
+var rsAt=0,refused=false;
 function reelSound(on,quick){if(!rf)return;if(!on){rf.muted=true;return}
- try{rf.volume=0;rf.muted=false}catch(e){}
+ rsAt=performance.now();try{rf.volume=0;rf.muted=false}catch(e){}
  var t0=performance.now();(function f(n){var k=cl((n-t0)/(quick?200:500),0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0);
- setTimeout(function(){var up=$("fxpv");if(rf.paused&&!rf.ended&&!document.hidden&&!(up&&up.dataset.s==="paused")&&M.on&&viaReel){rf.muted=true;var q=rf.play();if(q&&q.catch)q.catch(function(){});viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}},500)}
-function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);ui();
+ setTimeout(function(){var up=$("fxpv");if(rf.paused&&!rf.ended&&!document.hidden&&!(up&&up.dataset.s==="paused")&&M.on&&viaReel){rf.muted=true;var q=rf.play();if(q&&q.catch)q.catch(function(){});toSong(rf.currentTime)}},500)}   /* AV1: sound refused: the song carries on from the reel's second (sound stays on) */
+function play(sync){var a=M.a;if(M.on)return;refused=false;M.on=true;flag(true);ui();
  emit("fk:sound",{on:true});emit("fk:music",{id:"main"});
  if(reelUsable()){viaReel=true;reelSound(true);wake();return}
  viaReel=false;hook(a);if(ac&&ac.resume)ac.resume();
@@ -67,7 +68,7 @@ function play(sync){var a=M.a;if(M.on)return;M.on=true;flag(true);ui();
  var ok=function(){if(!M.on)return;fade(M,IV,sync?250:600);wake()};
  if(p&&p.then)p.then(ok,function(){M.on=false;flag(false);ui()});else ok()}
 /* quiet: no fk:sound (another player took over); keep: leave the sound flag as it is */
-function stop(quiet,keep){if(!M.on)return;M.on=false;if(!keep)flag(false);ui();if(viaReel){viaReel=false;reelSound(false)}else fade(M,0,250,function(){if(!M.on)M.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
+function stop(quiet,keep){if(!M.on)return;if(window.__fzReel)window.__fzReel.heard=false;M.on=false;if(!keep)flag(false);ui();if(viaReel){viaReel=false;reelSound(false)}else fade(M,0,250,function(){if(!M.on)M.a.pause()});if(!quiet)emit("fk:sound",{on:false})}
 function toggle(sync){M.on?stop():play(sync)}
 /* v5.62 VIBE WITH US: a separate track (611fb91032.mp3, from 27 s, looping) on its own button #snd.
    The reel's own sound (the song carried by the hero video) has NO play button: it comes with the video after the Enter tap, and while it plays #rsnd offers to switch it off.
@@ -98,21 +99,26 @@ M.a.addEventListener("ended",function(){if(!M.on||viaReel)return;M.on=false;flag
 addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
 addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="main")stop(true,true)});
 /* the reel starts (after the intro): if sound is on, hand over from the mp3 to the reel's own audio. The reel ending / failing turns the sound off, like the song ending. */
-if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&reelUsable()){
+/* AV1: the reel's audio cannot play (paused by scroll / tab, or the browser refused sound): the mp3 carries on from the reel's second. */
+function toSong(tt,resume){var a=M.a;viaReel=false;if(resume)refused=true;rf.muted=true;if(resume){var rq=rf.play();if(rq&&rq.catch)rq.catch(function(){})}   /* resume: the browser paused the reel because it refused sound, so the picture keeps going muted */
+  hook(a);if(ac&&ac.resume)ac.resume();a.preload="auto";a.volume=0;
+  var go=function(){try{a.currentTime=Math.min(tt,(a.duration||60)-.1)}catch(x){}var q=a.play();if(q&&q.then)q.then(function(){if(M.on)fade(M,IV,250)},function(){});else fade(M,IV,250)};
+  if(a.readyState>=1)go();else a.addEventListener("loadedmetadata",go,{once:true});wake()}
+if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&!refused&&reelUsable()){
   /* v5.58: coming back from the mp3 (the reel was paused by scroll / tab switch while the song kept playing): put the picture where the song is */
-  try{var tt=M.a.currentTime;if(tt>.3&&Math.abs(rf.currentTime-tt)>.4)rf.currentTime=tt}catch(x){}
+  var own=window.__fzReel&&window.__fzReel.own;if(window.__fzReel)window.__fzReel.own=false;   /* AV1: first start of the reel: it plays from 0 on its own audio */
+  if(!own)try{var tt=M.a.currentTime;if(tt>.3&&Math.abs(rf.currentTime-tt)>.4)rf.currentTime=tt}catch(x){}
   viaReel=true;fade(M,0,120,function(){M.a.pause()});reelSound(true,true)}});
  /* v5.58 FIX "music stops before the end": the reel is paused when the hero scrolls off screen or the tab hides (10.js). Its audio is the song, so the
     song died with it. Now, whenever the reel pauses by itself (not the guest's own pause button, not the end), the mp3 carries on from the same second. */
  rf.addEventListener("pause",function(){if(!M.on||!viaReel||rf.ended||document.documentElement.classList.contains("lock"))return;
   var up=$("fxpv");if(up&&up.dataset.s==="paused")return;
-  var tt=rf.currentTime,a=M.a;viaReel=false;rf.muted=true;hook(a);if(ac&&ac.resume)ac.resume();a.preload="auto";a.volume=0;
-  var go=function(){try{a.currentTime=Math.min(tt,(a.duration||60)-.1)}catch(x){}var q=a.play();if(q&&q.then)q.then(function(){if(M.on)fade(M,IV,250)},function(){});else fade(M,IV,250)};
-  if(a.readyState>=1)go();else a.addEventListener("loadedmetadata",go,{once:true});wake()});
- var reelEnd=function(){if(M.on&&viaReel){viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}};
+  toSong(rf.currentTime,performance.now()-rsAt<700&&!document.hidden)});
+ var reelEnd=function(){if(M.on&&viaReel){if(window.__fzReel)window.__fzReel.heard=true;viaReel=false;M.on=false;flag(false);ui();emit("fk:sound",{on:false})}};
  rf.addEventListener("ended",reelEnd);rf.addEventListener("error",reelEnd)}
 /* the Enter tap starts the song; the 2 s auto-enter does not */
 window.__fzIntroSound=function(tap){if(tap)play(true)};
+window.__fzReplayOn=function(){play(false)};   /* AV1: "Watch again" with the reel sound that was on when the reel ended */
 /* intro over (finished, or Skip intro): the song keeps playing on the landing page; only the intro button goes away with the intro */
 function onEnd(){if(ended)return;ended=true;finish()}
 addEventListener("fz:introend",onEnd);
