@@ -10,7 +10,7 @@ interface Cta { label: string; href: string; primary?: boolean; book?: boolean; 
 // hlColor = highlight colour for the h1 word, labels = small pills under the rings, one list per photo set, one name per ring.
 // ss (kit HS, optional): iris slideshow inside the photo window. See the SlideShow type below. Pages that do not pass it render exactly as before.
 type Box = [number, number, number, number];
-interface Slide { cap: [string, string]; alt: string; full: string; fw: number; fh: number; d?: string; p?: string; cat?: string }
+interface Slide { cap: [string, string]; alt: string; full: string; fw: number; fh: number; d?: string; p?: string; cat?: string; pos?: [string, string]; filt?: string }
 interface SS { label: string; mask: { d: string; p: string }; win: { d: Box; p: Box }; ui: { d: Box; p: Box }; ui_pos?: 'top' | 'bottom'; slides: Slide[]; cats?: { id: string; label: string }[]; chipsAt?: number }
 interface Props { page: 'cafe' | 'bar' | 'party' | 'banquet'; kicker: string; h1a: string; h1b?: string; lead: string; ctas: Cta[]; alt: string; id?: string; sub?: string; subHl?: string; hlColor?: string; labels?: string[][]; manual?: boolean; ss?: SS }
 // manual (banquet): the page runs its own rotation (4 slides incl. the sneak-peek loop); slots 'art' (inside the art) and 'after' (under the buttons) are optional.
@@ -52,19 +52,20 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
           <div class="ch-win">
             {ss.slides.map((sl, i) => (
               <div class="ch-sl" data-i={i} style={i > 0 && lqs[i] && lqs[i][0] ? `--lqd:url('${lqs[i][0]}');--lqp:url('${lqs[i][1] || lqs[i][0]}')` : undefined}>
-                {i === 0 ? <img class="ch-s0" alt="" decoding="async" /> : <img alt="" decoding="async" fetchpriority="low" data-d={sl.d} data-p={sl.p} />}
+                {i === 0 ? <img class="ch-s0" alt="" decoding="async" /> : <img alt="" decoding="async" fetchpriority="low" data-d={sl.d} data-p={sl.p} style={sl.pos || sl.filt ? `${sl.pos ? `--pd:${sl.pos[0]};--pp:${sl.pos[1]};` : ''}${sl.filt ? `--pf:${sl.filt};` : ''}` : undefined} />}
               </div>
             ))}
-            <i class={`ch-shade ch-shade--${ss.ui_pos || 'bottom'}`}></i>
           </div>
         </div>
         <button type="button" class="ch-hit" aria-label="Open this photo full screen" tabindex="-1"></button>
         <div class="ch-ui" role="region" aria-roledescription="carousel" aria-label={ss.label}>
+          <div class="ch-low">
           <div class={`ch-cap ch-cap--${ss.ui_pos || 'bottom'}`} aria-hidden="true">
             {ss.slides.map((sl, i) => <p class={`ch-ci${i === 0 ? ' is-on' : ''}`}><span class="ch-ct">{sl.cap[0]}</span><span class="ch-cn">{sl.cap[1]}</span></p>)}
           </div>
           <div class={`ch-pg ch-pg--${ss.ui_pos || 'bottom'}`} role="group" aria-label="Choose a photo">
             {ss.slides.map((sl, i) => <button type="button" class="ch-pd" data-i={i} aria-label={`Show photo ${i + 1} of ${ss.slides.length}: ${sl.cap[1]}`}><span aria-hidden="true"><b></b></span></button>)}
+          </div>
           </div>
           <p class="ch-live" aria-live="off" aria-atomic="true">{ss.slides[0].cap[1]}</p>
           <div class="ch-cvs" data-cv-group="hero-slides">
@@ -337,27 +338,24 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
 .ch.is-ssr .ch-ss { display: block; }
 .ch-win { position: absolute; left: calc(var(--wx) * 1%); top: calc(var(--wy) * 1%); width: calc(var(--ww) * 1%); height: calc(var(--wh) * 1%); overflow: hidden; background: linear-gradient(160deg, #7a5a38 0%, #4a3320 55%, #2f2014 100%); }
 .ch-sl::before { content: ""; position: absolute; inset: -6%; background: var(--lqd) center / cover no-repeat; filter: blur(12px); }
-@media (max-width: 820px) { .ch-sl::before { background-image: var(--lqp); } }
+@media (max-width: 820px) { .ch-sl::before { background-image: var(--lqp); } .ch-sl > img { object-position: var(--pp, var(--pd, 50% 50%)); } }
 .ch-sl { position: absolute; inset: 0; visibility: hidden; overflow: hidden; }
 .ch-sl.is-on { visibility: visible; }
-.ch-sl > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: 50% 50%; will-change: transform; }
+.ch-sl > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--pd, 50% 50%); filter: var(--pf, none); display: block; transform-origin: 50% 50%; will-change: transform; }
 /* slide 1 = the baked art itself, placed so the window area lines up exactly with the visible window */
 .ch-sl > img.ch-s0 { inset: auto; left: calc(-100% * var(--wx) / var(--ww)); top: calc(-100% * var(--wy) / var(--wh)); width: calc(10000% / var(--ww)); height: calc(10000% / var(--wh)); object-fit: fill; }
-.ch-shade { position: absolute; left: calc((var(--ux) - var(--wx)) / var(--ww) * 100%); top: calc((var(--uy) - var(--wy)) / var(--wh) * 100%); width: calc(var(--uw) / var(--ww) * 100%); height: calc(var(--uh) / var(--wh) * 100%); z-index: 99; pointer-events: none; }
-.ch-shade--bottom { background: radial-gradient(130% 110% at 0% 100%, rgba(8,20,13,.9) 0%, rgba(8,20,13,.72) 42%, rgba(8,20,13,0) 85%); }
-.ch-shade--top { background: radial-gradient(130% 130% at 0% 0%, rgba(8,20,13,.9) 0%, rgba(8,20,13,.72) 42%, rgba(8,20,13,0) 85%); }
 .ch-hit { position: absolute; left: calc(var(--wx) * 1%); top: calc(var(--wy) * 1%); width: calc(var(--ww) * 1%); height: calc(var(--wh) * 1%); z-index: 3; padding: 0; border: 0; background: none; cursor: zoom-in; pointer-events: none; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
 .ch.is-ssr .ch-hit { pointer-events: auto; }
 .ch-hit:focus-visible { outline: 2px solid #e8c27a; outline-offset: -4px; }
 .ch-ui { position: absolute; left: calc(var(--ux) * 1%); top: calc(var(--uy) * 1%); width: calc(var(--uw) * 1%); height: calc(var(--uh) * 1%); z-index: 4; pointer-events: none; }
-.ch-cap { position: absolute; left: 6%; max-width: 88%; overflow: hidden; display: grid; padding: .5em 1.9em .55em .8em; margin-left: -.8em; border-radius: 12px; background: linear-gradient(90deg, rgba(8,20,13,.8) 0%, rgba(8,20,13,.74) 86%, rgba(8,20,13,0) 100%); }
-.ch-cap--bottom { bottom: 40px; } .ch-cap--top { top: 6px; }
+/* caption = a cream tab sitting on the frame's bottom edge (half on the photo, half on the gold), never over the subject. Photo window bottom = ((var(--wy) + var(--wh) - var(--uy)) / var(--uh)) * 100%; the tab stays inside the art. */
+.ch-low { position: absolute; left: 6%; max-width: 88%; bottom: calc(100% - min(((var(--wy) + var(--wh) - var(--uy)) / var(--uh)) * 100% + 18px, ((100 - var(--uy)) / var(--uh)) * 100% - 6px)); display: flex; flex-direction: column-reverse; align-items: flex-start; }
+.ch-cap { display: grid; padding: .4em .85em .45em; border-radius: 12px; background: #f8ecd8; border: 1px solid #c99a43; box-shadow: 0 8px 18px -8px rgba(60,38,8,.45); }
 .ch-ci { grid-area: 1 / 1; margin: 0; display: grid; gap: 4px; opacity: 0; }
 .ch-ci.is-on { opacity: 1; }
-.ch-ct { font: italic 500 clamp(.95rem, 1.7vw, 1.55rem)/1.3 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #fffaf0; text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 0 14px rgba(0,0,0,.45); }
-.ch-cn { font: 600 .75rem/1.3 var(--fk-sans, Rupee, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #f3d28f; text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 10px rgba(0,0,0,.45); }
-.ch-pg { position: absolute; left: calc(6% - 12px); display: flex; pointer-events: auto; }
-.ch-pg--bottom, .ch-pg--top { bottom: 0; }
+.ch-ct { font: italic 500 clamp(.95rem, 1.7vw, 1.55rem)/1.3 var(--fk-serif, 'Playfair Display', Georgia, serif); color: #1b3a26; }
+.ch-cn { font: 600 .75rem/1.3 var(--fk-sans, Rupee, Poppins, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #74501a; }
+.ch-pg { display: flex; margin-left: -12px; pointer-events: auto; }
 .ch-pd { display: grid; place-items: center; width: 26px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; opacity: 0; -webkit-tap-highlight-color: transparent; }
 .ch.is-ssr .ch-pd { opacity: 1; transition: opacity 300ms ease; }
 .ch-pd span { display: block; width: 20px; height: 3px; border-radius: 3px; overflow: hidden; background: rgba(246,230,209,.45); box-shadow: 0 0 5px rgba(0,0,0,.4); }
@@ -376,7 +374,7 @@ const subParts = sub ? (subHl && sub.includes(subHl) ? [sub.slice(0, sub.indexOf
 @media (max-width: 820px) {
   .ch-sb { --wx: var(--pwx); --wy: var(--pwy); --ww: var(--pww); --wh: var(--pwh); --ux: var(--pux); --uy: var(--puy); --uw: var(--puw); --uh: var(--puh); --mask: var(--ch-mask-p); left: 0; right: auto; top: 0; translate: none; width: 100%; height: 100%; }
   .ch-ct { font-size: 1rem; } .ch-cn { font-size: .6875rem; letter-spacing: .08em; }
-  .ch-cap { left: 7%; } .ch-pg { left: calc(7% - 10px); }
+  .ch-low { left: 7%; } .ch-pg { margin-left: -10px; }
   .ch-pd { width: 22px; } .ch-pd span { width: 16px; }
   .ch-sb[data-n="8"] .ch-pd { width: 18px; } .ch-sb[data-n="8"] .ch-pd span { width: 13px; }
   /* HS3: no chips on phone (they covered the photo); the dots stay */

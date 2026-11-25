@@ -38,19 +38,20 @@ const faq = [
 ];
 const A = '/assets/heroes/slides/', C = '/assets/celebrations/', V = '/assets/venue/banquet/';
 const bqt = 'Elegance in every detail';
-const bqSlide = (cap: string, alt: string, full: string, fw: number, fh: number, n?: string) => ({ cap: [bqt, cap] as [string, string], alt, full, fw, fh, d: n ? `${A}bq-${n}-d.webp` : undefined, p: n ? `${A}bq-${n}-p.webp` : undefined });
+// g = graded full-aspect photo, pos = object-position [laptop, phone] (see party.astro)
+const bqSlide = (cap: string, alt: string, full: string, fw: number, fh: number, g?: string, pos?: [string, string]) => ({ cap: [bqt, cap] as [string, string], alt, full, fw, fh, d: g, p: g, pos });
 const bqSS = {
   label: 'Photos of the Fursat banquet hall and events',
   mask: { d: '/assets/heroes/bq-hero-window-mask.webp', p: '/assets/heroes/bq-hero-window-mask-phone.webp' },
   win: { d: [0, 14.5, 36.7, 79.4], p: [5.2, 29.8, 97.6, 95.9] }, ui: { d: [4, 20, 31, 68], p: [5.2, 29.8, 97.6, 95.9] },
   slides: [
     bqSlide('Main banquet floor', 'The Fursat banquet hall set with long red and gold tables', V + 'banquet-tables-05-720.webp', 720, 960),
-    bqSlide('Felicitation evening', 'A felicitation group photo on the stage at Fursat', C + 'felicitation-group-stage-640.webp', 640, 853, 'felicitation'),
-    bqSlide('Corporate meet', 'A corporate audience seated in the hall facing a lit stage', C + 'corporate-audience-stage-640.webp', 640, 853, 'corporate'),
-    bqSlide('Private party', 'A Private Party sign at the hall entrance', C + 'private-party-entrance-sign-640.webp', 640, 853, 'private-party'),
-    bqSlide('Red and gold hall', 'The banquet hall with a red feature wall', V + 'banquet-hall-02-720.webp', 720, 960, 'hall-red-wall'),
-    bqSlide('Grand dinner seating', 'Dinner seating laid out in the banquet hall', V + 'banquet-hall-06-720.webp', 720, 960, 'hall-dinner'),
-    bqSlide('Table layout', 'Round tables laid out in the banquet hall', V + 'banquet-tables-06.webp', 1200, 1600, 'table-layout'),
+    bqSlide('Felicitation evening', 'A felicitation group photo on the stage at Fursat', C + 'felicitation-group-stage-640.webp', 640, 853, `${A}g-felicitation.webp`, ['50% 31%', '50% 42%']),
+    bqSlide('Corporate meet', 'A corporate audience seated in the hall facing a lit stage', C + 'corporate-audience-stage-640.webp', 640, 853, `${A}g-corporate.webp`, ['50% 80%', '50% 58%']),
+    bqSlide('Private party', 'A Private Party sign at the hall entrance', C + 'private-party-entrance-sign-640.webp', 640, 853, `${A}g-private-party.webp`, ['50% 100%', '50% 100%']),
+    bqSlide('Red and gold hall', 'The banquet hall with a red feature wall', V + 'banquet-hall-02-720.webp', 720, 960, `${A}g-hall-red-wall.webp`, ['50% 50%', '50% 58%']),
+    bqSlide('Grand dinner seating', 'Dinner seating laid out in the banquet hall', V + 'banquet-hall-06-720.webp', 720, 960, `${A}g-hall-dinner.webp`, ['50% 69%', '50% 70%']),
+    bqSlide('Table layout', 'Round tables laid out in the banquet hall', V + 'banquet-tables-06.webp', 1200, 1600, `${A}g-table-layout.webp`, ['50% 90%', '50% 75%']),
   ],
 };
 import { existsSync as feHas } from 'node:fs';

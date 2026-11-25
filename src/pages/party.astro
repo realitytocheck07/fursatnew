@@ -15,7 +15,8 @@ import '../styles/fk-tokens.css';
 // All packages, prices, dishes and add-ons come from src/data/party.json (read by the two party components).
 // TODO(client): real banquet-hall and party photos for the closing panel.
 const A = '/assets/heroes/slides/', C = '/assets/celebrations/';
-const paSlide = (cap: string, alt: string, full: string, fw: number, fh: number, cat: string, n?: string) => ({ cap: ['Real celebrations at Fursat', cap] as [string, string], alt, full, fw, fh, cat, d: n ? `${A}pa-${n}-d.webp` : undefined, p: n ? `${A}pa-${n}-p.webp` : undefined });
+// g = graded full-aspect photo (same grade as the old window crops); pos = object-position [laptop, phone] so the faces/dishes stay in the frame; filt = one CSS warm grade for the cold cake
+const paSlide = (cap: string, alt: string, full: string, fw: number, fh: number, cat: string, g?: string, pos?: [string, string], filt?: string) => ({ cap: ['Real celebrations at Fursat', cap] as [string, string], alt, full, fw, fh, cat, d: g, p: g, pos, filt });
 const paSS = {
   label: 'Photos of celebrations at Fursat',
   mask: { d: '/assets/heroes/pa-hero-window-mask.webp', p: '/assets/heroes/pa-hero-window-mask-phone.webp' },
@@ -23,12 +24,12 @@ const paSS = {
   cats: [{ id: 'birthday', label: 'Birthdays' }, { id: 'kitty', label: 'Kitty parties' }, { id: 'corporate', label: 'Corporate' }, { id: 'cakes', label: 'Cakes' }],
   slides: [
     paSlide('Set for a party', 'High tables at Fursat ready for a party', '/assets/interior/tour-high-tables.webp', 1050, 1400, 'birthday'),
-    paSlide('Birthday cake', 'A birthday cake on the table', C + 'birthday-cake-dad-640.webp', 640, 853, 'birthday', 'birthday-cake'),
-    paSlide('Kitty games', 'Guests playing games at a high table', C + 'kitty-high-table-games-640.webp', 640, 853, 'kitty', 'kitty-games'),
-    paSlide('Corporate evening', 'A corporate audience seated in the hall facing a lit stage', C + 'corporate-audience-stage-640.webp', 640, 853, 'corporate', 'corporate'),
-    paSlide('Felicitation', 'A felicitation group photo on the stage at Fursat', C + 'felicitation-group-stage-640.webp', 640, 853, 'corporate', 'felicitation'),
-    paSlide('Celebration cake', 'A rose celebration cake', '/assets/bites/bw-03-720.webp', 720, 900, 'cakes', 'cake-rose'),
-    paSlide('Celebration cake', 'A celebration cake with decorations', '/assets/bites/bw-21-720.webp', 720, 900, 'cakes', 'cake-two'),
+    paSlide('Birthday cake', 'A birthday cake on the table', C + 'birthday-cake-dad-640.webp', 640, 853, 'birthday', `${A}g-birthday-cake.webp`, ['50% 35%', '50% 46%']),
+    paSlide('Kitty games', 'Guests playing games at a high table', C + 'kitty-high-table-games-640.webp', 640, 853, 'kitty', `${A}g-kitty-games.webp`, ['50% 25%', '50% 24%']),
+    paSlide('Corporate evening', 'A corporate audience seated in the hall facing a lit stage', C + 'corporate-audience-stage-640.webp', 640, 853, 'corporate', `${A}g-corporate.webp`, ['50% 59%', '50% 50%']),
+    paSlide('Felicitation', 'A felicitation group photo on the stage at Fursat', C + 'felicitation-group-stage-640.webp', 640, 853, 'corporate', `${A}g-felicitation.webp`, ['50% 41%', '50% 33%']),
+    paSlide('Celebration cake', 'A rose celebration cake', '/assets/bites/bw-03-720.webp', 720, 900, 'cakes', `${A}g-cake-rose.webp`, ['50% 90%', '50% 70%']),
+    paSlide('Celebration cake', 'A celebration cake with decorations', '/assets/bites/bw-21-720.webp', 720, 900, 'cakes', '/assets/bites/bw-21-720.webp', ['50% 100%', '50% 90%'], 'sepia(.2)'),
   ],
 };
 const closePhoto = { src: '/assets/interior/tour-high-tables.webp', alt: 'High tables at Fursat ready for a party', w: 1050, h: 1400, pos: '50% 55%' };
