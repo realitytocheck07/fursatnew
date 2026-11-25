@@ -618,3 +618,27 @@
 @media (hover:hover){.pl-t:hover .pl-top{fill:#fde7b0}}
 .pl-note{margin:10px 2px 0;font:500 .875rem/1.4 Rupee,Poppins,system-ui,sans-serif;min-height:2.5em}
 @media (prefers-reduced-motion:reduce){.pl-t{transition:none}}
+
+/* ───────── Reserve band (phone <768 container, same switch as the art above): hero band above the card; the card overlaps it by 28px; the mascot (a child of .rs-panel, placed by mx-mascot.js) is restyled to stand beside the card, not-done state only ───────── */
+.rs-band{display:none}
+@container (max-width:767.98px){
+  /* the phone segment already pads 84px under the header (!important rule above): the band pulls itself up into that gap */
+  .rs-band{display:block;position:relative;z-index:1;margin-top:-84px;height:clamp(232px,62vw,300px);padding:clamp(26px,7vw,40px) 22px 0;box-sizing:border-box;border-radius:0 0 28px 28px;overflow:hidden;
+    background:linear-gradient(90deg,rgba(46,26,8,.84) 0%,rgba(46,26,8,.7) 55%,rgba(46,26,8,.3) 100%),linear-gradient(0deg,rgba(46,26,8,.4),transparent 55%),url(/assets/tour/img/lounge.webp) 50% 62%/cover}
+  .rs-band-h{margin:0;width:max-content;font:500 clamp(1.9rem,8.8vw,2.5rem)/1.04 var(--fk-serif);color:#fbf3e6}
+  .rs-band-s{margin:12px 0 0;width:max-content;font:500 .92rem/1.2 var(--rs-sans);color:#f6e6c4}
+  .rs-band-s i{font-style:normal;color:#e6c27a;padding:0 .2em}
+  .rs-band-rule{display:block;width:96px;height:1.5px;margin-top:12px;background:linear-gradient(90deg,#e6c27a,rgba(230,194,122,0))}
+  .rs-band ~ .rs-panel-frame{margin-top:-28px}
+  .rs-panel:not(.is-done) .mx-m.mx-rs{width:clamp(128px,40vw,170px);left:auto!important;top:auto!important;right:10px;bottom:calc(100% - 10px)}
+  .rs-panel:not(.is-done) .mx-m.mx-rs .mx-p[data-pose="welcome"]{scale:-1 1}
+}
+/* tablet: the mascot stands at the right of the photo window, just above the card header (faces the headline) */
+@container (min-width:768px) and (max-width:1179.98px){
+  .rs-panel:not(.is-done) .mx-m.mx-rs{width:clamp(150px,26vw,200px);left:auto!important;top:auto!important;right:8px;bottom:calc(100% - 14px)}
+  .rs-panel:not(.is-done) .mx-m.mx-rs .mx-p[data-pose="welcome"]{scale:-1 1}
+}
+/* desktop: the mascot stands left of the card (bottom-left of the photo column, below the CTA and sub-line, feet on the divider under the card), facing the card */
+@container (min-width:1180px){
+  .rs-panel:not(.is-done) .mx-m.mx-rs{width:172px;left:auto!important;top:auto!important;right:calc(100% + 6px);bottom:-30px}
+}

@@ -9,6 +9,7 @@ import HyWindows from '../components/hybrid/HyWindows.astro';
 import rDesk from '../../scripts/bg-specs/reserve-deskw.out.json';
 import rPhone from '../../scripts/bg-specs/reserve-phone.out.json';
 import OrganicClip from '../components/fx/OrganicClip.astro';
+import ReserveBand from '../components/reserve/ReserveBand.astro';
 import ReserveHero from '../components/reserve/ReserveHero.astro';
 import ExperienceCards from '../components/reserve/ExperienceCards.astro';
 import BookingPanel from '../components/reserve/BookingPanel.astro';
@@ -34,6 +35,7 @@ const heroPhoto = { src: '/assets/tour/img/lounge.webp', alt: 'The lounge at Fur
         <HyWindows data={rDesk} slice={0} photos={[heroPhoto]} view="d" />
         <HyWindows data={rPhone} slice={0} photos={[heroPhoto]} view="m" />
         <div class="rs-stage">
+          <ReserveBand />
           <ReserveHero />
           <BookingPanel />
         </div>

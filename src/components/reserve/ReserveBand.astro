@@ -1,0 +1,10 @@
+---
+// ReserveBand.astro — phone-only hero band above the booking card (<=760px; hidden above that, where the art hero already is).
+// Decorative: the card keeps the page's single h1, so this text is aria-hidden. The mascot is NOT here: it stays inside .rs-panel (mx-mascot.js positions it from there) and is restyled in reserve.css.
+// The photo is a CSS background (existing lounge.webp, already preloaded) so wider screens download nothing extra.
+---
+<div class="rs-band" aria-hidden="true">
+  <p class="rs-band-h">Book Your<br />Experience</p>
+  <p class="rs-band-s">Dine <i>·</i> Drink <i>·</i> Unwind</p>
+  <i class="rs-band-rule"></i>
+</div>
