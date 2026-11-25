@@ -1,0 +1,177 @@
+---
+// Reusable draggable story rail (v2): native scroll-snap rail + a travelling path with a FIXED marker.
+// The path (solid trail, dashed path, number nodes) moves with the cards, the marker and pill stay put; a node reaching the marker merges with it.
+// items: { src, srcset, sizes, alt, pos, eyebrow?, title }. Extra classes keep the host page's card look (railClass, itemClass).
+export interface Item { src: string; srcset: string; sizes: string; alt: string; pos: string; eyebrow?: string; title: string }
+interface Props { items: Item[]; label: string; railClass?: string; itemClass?: string }
+const { items, label, railClass = '', itemClass = '' } = Astro.props;
+const pad = (v: number) => String(v).padStart(2, '0');
+const ey0 = items[0].eyebrow || 'From our kitchen';
+---
+<div class="sr" data-sr>
+  <div class="sr-head" aria-hidden="true">
+    <div class="sr-clip sr-clip-l"><div class="sr-mv"><svg class="sr-svg" focusable="false"><path class="sr-solid" /></svg></div></div>
+    <div class="sr-clip sr-clip-r"><div class="sr-mv"><svg class="sr-svg" focusable="false"><path class="sr-dash" /></svg></div></div>
+    <div class="sr-mv sr-nodes">{items.map((_, i) => <i class="sr-nd">{pad(i + 1)}</i>)}</div>
+    <div class="sr-mk"><span class="sr-halo"></span><span class="sr-gold"></span></div>
+    <span class="sr-pill"><span class="sr-pt">{ey0}</span></span>
+  </div>
+  <div class={`sr-rail ${railClass}`} role="region" aria-label={label} tabindex="0">
+    {items.map((it) => (
+      <div class="sr-card" data-ey={it.eyebrow || 'From our kitchen'}>
+        <figure class={`${itemClass}`}>
+          <img src={it.src} srcset={it.srcset} sizes={it.sizes} alt={it.alt} width="1067" height="1600" loading="lazy" decoding="async" style={`object-position:${it.pos}`} draggable="false" />
+        </figure>
+        <div class="sr-tx"><span class="sr-ey">{it.eyebrow}</span><p class="sr-ti" aria-hidden="true">{it.title}</p></div>
+      </div>
+    ))}
+  </div>
+  <div class="sr-dots" aria-hidden="true">{items.map((_, i) => <i class={i ? '' : 'on'}></i>)}</div>
+</div>
+
+<style is:global>
+  .sr { --sr-gx: var(--ct-gx, clamp(16px, 4vw, 40px)); --sr-gold: #c99a43; --sr-forest: #10261a; --sr-cream: #f8eee2 }
+  .sr-card { flex: 0 0 var(--ct-gw, 260px); min-width: 0; scroll-snap-align: start }
+  .sr-card .ct-gallery-item { width: 100% }
+  .sr-tx { padding: 12px 6px 0 }
+  .sr-ey { display: block; min-height: 1em; font: var(--fk-t-label); letter-spacing: var(--fk-ls-label); text-transform: uppercase; color: #74501a }
+  .sr-ti { margin: 4px 0 0; font: var(--fk-t-h3); color: #1f2a1a }
+  .sr-rail:focus-visible { outline: 3px solid #12803C; outline-offset: -3px }
+  .sr-head, .sr-dots { display: none }
+  .sr-on .sr-head { display: block; position: relative; height: 100px; margin: 0 0 4px; --y: 64px; --m: 0px; contain: paint }
+  .sr-clip { position: absolute; top: 0; bottom: 0; overflow: hidden }
+  .sr-clip-l { left: 0; width: var(--m) }
+  .sr-clip-r { left: var(--m); right: 0 }
+  .sr-mv { position: absolute; left: 0; top: 0; width: 0; height: 100% }
+  .sr-clip-r .sr-mv { left: calc(-1 * var(--m)) }
+  .sr-svg { position: absolute; left: 0; top: 0; display: block; overflow: visible }
+  .sr-svg path { fill: none; stroke-linecap: round; stroke-linejoin: round }
+  .sr-solid { stroke: var(--sr-gold); stroke-width: 2.5 }
+  .sr-dash { stroke: #cfc7b3; stroke-width: 2; stroke-dasharray: 1 7 }
+  .sr-nd { position: absolute; top: calc(var(--y) - 12px); width: 24px; height: 24px; margin-left: -12px; border-radius: 50%; background: #fffaf1; color: #7d6a45; box-shadow: 0 0 0 1px #e2d9c3; font: 600 .625rem/24px var(--fk-sans); font-style: normal; text-align: center; letter-spacing: .02em; transition: background-color 220ms var(--fk-ease-out, ease-out), color 220ms var(--fk-ease-out, ease-out), transform 260ms var(--fk-ease-out, ease-out) }
+  .sr-nd.dn { background: var(--sr-forest); color: #f4d38c; box-shadow: 0 0 0 1px var(--sr-forest) }
+  .sr-nd.mg { transform: scale(1.25) }
+  .sr-mk { position: absolute; left: var(--m); top: var(--y); width: 0; height: 0 }
+  .sr-halo { position: absolute; left: -17px; top: -17px; width: 34px; height: 34px; border-radius: 50%; background: rgba(201, 154, 67, .16) }
+  .sr-gold { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: var(--sr-gold); box-shadow: 0 0 0 3px var(--sr-cream) }
+  .sr-pill { position: absolute; left: calc(var(--m) + 13px); top: calc(var(--y) - 54px); transform: translateX(-50%); max-width: 190px; padding: 6px 12px; border-radius: 9999px; background: var(--sr-forest); color: var(--sr-cream); font: 600 .6875rem/14px var(--fk-sans); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap }
+  .sr-pt { display: block; transition: opacity 200ms var(--fk-ease-out, ease-out), transform 200ms var(--fk-ease-out, ease-out) }
+  .sr-pt.o { opacity: 0; transform: scale(.88); transition-duration: 140ms }
+  .sr-fit .sr-mk, .sr-fit .sr-pill, .sr-fit .sr-clip-l, .sr-on.sr-fit .sr-dots { display: none }
+  .sr-on.sr-fit .sr-head { height: 64px; --y: 32px }
+  .sr-on .sr-dots { display: flex; justify-content: center; align-items: center; gap: 6px; padding-top: 10px }
+  .sr-dots i { width: 6px; height: 6px; border-radius: 3px; background: #dcd5c3; transition: width 220ms var(--fk-ease-out, ease-out), background-color 220ms var(--fk-ease-out, ease-out) }
+  .sr-dots i.on { width: 22px; background: var(--sr-forest) }
+  .sr-can .sr-rail { cursor: grab }
+  .sr-drag .sr-rail { cursor: grabbing; scroll-snap-type: none; user-select: none }
+  .sr-live:not(.sr-fit) .sr-mv { will-change: transform }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-sr]').forEach((root) => {
+    const rail = root.querySelector<HTMLElement>('.sr-rail')!, head = root.querySelector<HTMLElement>('.sr-head')!;
+    const cards = [...rail.children] as HTMLElement[];
+    const n = cards.length, N = n - 1;
+    const mv = [...root.querySelectorAll<HTMLElement>('.sr-mv')];
+    const nds = [...root.querySelectorAll<HTMLElement>('.sr-nd')];
+    const svgs = [...root.querySelectorAll<SVGSVGElement>('.sr-svg')], paths = [...root.querySelectorAll<SVGPathElement>('.sr-svg path')];
+    const pt = root.querySelector<HTMLElement>('.sr-pt')!, halo = root.querySelector<HTMLElement>('.sr-halo')!;
+    const dots = [...root.querySelectorAll<HTMLElement>('.sr-dots i')];
+    const sec = root.closest('section') || root;
+    const A = 7, DX = 13, ZN = 0.12;
+    let max = 0, step = 0, pos = 0, fit = false, zn = -2, cur = 0, raf = 0, tm = 0, live = false, moved = 0, dr = 0, tgt = 0, draf = 0;
+    const merge = (z: number) => {
+      nds.forEach((e, i) => { e.classList.toggle('dn', i <= z); e.classList.toggle('mg', i === z); });
+      if (z !== cur) {
+        cur = z;
+        clearTimeout(tm);
+        pt.classList.add('o');
+        tm = window.setTimeout(() => { pt.textContent = cards[z].dataset.ey || ''; pt.classList.remove('o'); }, 140);
+        dots.forEach((d, k) => d.classList.toggle('on', k === z));
+      }
+      if (halo.animate) halo.animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(1.9)', opacity: 0 }], { duration: 520, easing: 'ease-out' });
+    };
+    const draw = () => {
+      raf = 0;
+      if (fit || !step) return;
+      const t = 'translate3d(' + -pos + 'px,' + -A * Math.sin(Math.PI * pos / step) + 'px,0)';
+      mv[0].style.transform = t; mv[1].style.transform = t; mv[2].style.transform = t;
+      const k = Math.round(pos / step), z = Math.abs(pos - k * step) < step * ZN ? Math.min(N, Math.max(0, k)) : -1;
+      if (z === zn) return;
+      const p = zn; zn = z;
+      if (z >= 0) merge(z);
+      else if (p >= 0) { nds[p].classList.remove('mg'); if (pos < p * step) nds[p].classList.remove('dn'); }
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(draw); };
+    const onScroll = () => { if (dr) return; pos = rail.scrollLeft; kick(); };
+    const measure = () => {
+      max = rail.scrollWidth - rail.clientWidth;
+      fit = max <= 1;
+      root.classList.toggle('sr-fit', fit);
+      root.classList.toggle('sr-can', !fit);
+      step = N ? cards[1].offsetLeft - cards[0].offsetLeft : 0;
+      const W = head.clientWidth, Y = fit ? 32 : 64, H = fit ? 64 : 100;
+      let xs: number[], x0: number, L: number, M = 0;
+      if (fit) {
+        const hl = head.getBoundingClientRect().left;
+        xs = cards.map((c) => { const r = c.firstElementChild!.getBoundingClientRect(); return r.left - hl + r.width / 2; });
+        x0 = xs[0]; L = W;
+      } else {
+        M = (parseFloat(getComputedStyle(rail).paddingLeft) || 0) + 0.3 * cards[0].offsetWidth;
+        x0 = M + DX; L = max + W;
+        xs = cards.map((_, i) => x0 + i * step);
+      }
+      head.style.setProperty('--m', M + 'px');
+      let d = '';
+      for (let x = 0; x <= L; x += 6) d += (x ? 'L' : 'M') + x + ' ' + (Y + (step ? A * Math.sin(Math.PI * (x - x0) / step) : 0)).toFixed(1);
+      svgs.forEach((s) => { s.setAttribute('viewBox', '0 0 ' + L + ' ' + H); s.setAttribute('width', String(L)); s.setAttribute('height', String(H)); });
+      paths.forEach((p) => p.setAttribute('d', d));
+      nds.forEach((e, i) => { e.style.left = xs[i] + 'px'; });
+      if (fit) mv.forEach((e) => { e.style.transform = ''; });
+      pos = fit ? 0 : rail.scrollLeft;
+      zn = -2;
+      draw();
+    };
+    root.classList.add('sr-on');
+    new ResizeObserver(measure).observe(rail);
+    measure();
+    const go = (on: boolean) => {
+      if (on === live) return;
+      live = on;
+      root.classList.toggle('sr-live', on);
+      if (on) { rail.addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
+      else { rail.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); raf = 0; }
+    };
+    new IntersectionObserver((e) => go(e[e.length - 1].isIntersecting)).observe(sec);
+    const snapTo = (i: number) => rail.scrollTo({ left: Math.max(0, Math.min(N, i)) * step, behavior: 'smooth' });
+    rail.addEventListener('keydown', (e) => {
+      if (e.target !== rail || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') || !step) return;
+      e.preventDefault();
+      snapTo(Math.round(rail.scrollLeft / step) + (e.key === 'ArrowRight' ? 1 : -1));
+    });
+    const dstep = () => { draf = 0; rail.scrollLeft = tgt; pos = tgt; draw(); };
+    rail.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button || max <= 1) return;
+      const x0 = e.clientX, s0 = rail.scrollLeft;
+      moved = 0;
+      const mvf = (m: PointerEvent) => {
+        const dx = m.clientX - x0;
+        if (!moved && Math.abs(dx) < 5) return;
+        if (!moved) { moved = 1; dr = 1; root.classList.add('sr-drag'); }
+        tgt = Math.min(max, Math.max(0, s0 - dx));
+        if (!draf) draf = requestAnimationFrame(dstep);
+      };
+      const up = () => {
+        removeEventListener('pointermove', mvf);
+        removeEventListener('pointerup', up);
+        removeEventListener('pointercancel', up);
+        if (moved) { cancelAnimationFrame(draf); draf = 0; dr = 0; root.classList.remove('sr-drag'); rail.scrollLeft = tgt; snapTo(Math.round(tgt / step)); }
+      };
+      addEventListener('pointermove', mvf);
+      addEventListener('pointerup', up);
+      addEventListener('pointercancel', up);
+    });
+    rail.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = 0; } }, true);
+    rail.addEventListener('dragstart', (e) => e.preventDefault());
+  });
+</script>

@@ -22,6 +22,14 @@ const cuisines = [
   { v: 'Pure Vegetarian Feast', t: 'Pure Vegetarian', sub: 'Feast', img: D + 'classic-paneer-tikka-480.webp', img2: D + 'classic-paneer-tikka-720.webp' },
   { v: 'Barbecue & Kebabs Special', t: 'Barbecue & Kebabs', sub: 'Special', img: D + 'chicken-tikka-angara-480.webp', img2: D + 'chicken-tikka-angara-720.webp' },
 ];
+import StoryRail from '../components/StoryRail.astro';
+const gs = '(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px';
+const gi = (f: string) => ({ src: D + f + '-720.webp', srcset: D + f + '-480.webp 480w, ' + D + f + '-720.webp 720w, ' + D + f + '.webp 1067w', sizes: gs });
+const railItems = [
+  { ...gi('nalli-gosht-biryani-half'), alt: 'Nalli gosht biryani', pos: '50% 95%', eyebrow: 'North Indian', title: 'Nalli gosht biryani' },
+  { ...gi('chicken-tikka-angara'), alt: 'Chicken tikka angara', pos: '50% 80%', eyebrow: 'Barbecue & Kebabs', title: 'Chicken tikka angara' },
+  { ...gi('nalla-karam-kodi-vepudu'), alt: 'Nalla karam kodi vepudu', pos: '50% 88%', title: 'Nalla karam kodi vepudu' },
+];
 import { existsSync as feHas } from 'node:fs';
 const FE_TIC = ['<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v2.5a6.5 6.5 0 0 1-6.5 6.5h-3A6.5 6.5 0 0 1 4 13.5V11ZM2 11h20M9 7.5c0-1.6 1.2-1.6 1.2-3.5M14 7.5c0-1.6 1.2-1.6 1.2-3.5"/></svg>', '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 9 0 0 1-18 0ZM13.5 3 10 11M19.5 4l-6 7"/></svg>', '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19C5 10.5 10 5.2 20 4.2 19 14 14 19 5 19ZM5 19l8.5-8.5"/></svg>', '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4 0-6.2-2.7-6.2-6 0-4 4.2-6 4.2-10 3 2 4 4.2 4 6.2 1-.8 1.5-2 1.5-3.2 2.2 1.6 2.7 4.2 2.7 7 0 3.3-2.2 6-6.2 6Z"/></svg>'];
 const FE_M = '/assets/brand/mascot/';
@@ -165,17 +173,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
 
     <!-- Gallery strip: dishes from our kitchen (real photos; no outdoor catering photos exist yet: TODO(client)) -->
     <section class="ct-gallery-strip" aria-label="From our kitchen at Capital Park">
-      <div class="ct-gallery-scroll">
-        <figure class="ct-gallery-item">
-          <img src="/assets/dishes/new/nalli-gosht-biryani-half-720.webp" srcset="/assets/dishes/new/nalli-gosht-biryani-half-480.webp 480w, /assets/dishes/new/nalli-gosht-biryani-half-720.webp 720w, /assets/dishes/new/nalli-gosht-biryani-half.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalli gosht biryani" width="1067" height="1600" loading="lazy" decoding="async" />
-        </figure>
-        <figure class="ct-gallery-item">
-          <img src="/assets/dishes/new/chicken-tikka-angara-720.webp" srcset="/assets/dishes/new/chicken-tikka-angara-480.webp 480w, /assets/dishes/new/chicken-tikka-angara-720.webp 720w, /assets/dishes/new/chicken-tikka-angara.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Chicken tikka angara" width="1067" height="1600" loading="lazy" decoding="async" />
-        </figure>
-        <figure class="ct-gallery-item">
-          <img src="/assets/dishes/new/nalla-karam-kodi-vepudu-720.webp" srcset="/assets/dishes/new/nalla-karam-kodi-vepudu-480.webp 480w, /assets/dishes/new/nalla-karam-kodi-vepudu-720.webp 720w, /assets/dishes/new/nalla-karam-kodi-vepudu.webp 1067w" sizes="(max-width: 1023px) 260px, (max-width: 1400px) 30vw, 420px" alt="Nalla karam kodi vepudu" width="1067" height="1600" loading="lazy" decoding="async" />
-        </figure>
-      </div>
+      <StoryRail label="Dishes from our kitchen, swipe or drag sideways" items={railItems} railClass="ct-gallery-scroll" itemClass="ct-gallery-item" />
       <p class="ct-gallery-cap">From our kitchen at Capital Park</p>
     </section>
 
@@ -555,10 +553,7 @@ const FE_T = feHas('public' + FE_M + 'thumbs-480.webp');
     transition: transform 0.5s ease}
   .ct-gallery-item:hover img {
     transform: scale(1.06)}
-  /* frame shows a 50%-tall window of a 2:3 photo: keep the plate inside it */
-  .ct-gallery-item:nth-child(1) img { object-position: 50% 95% }
-  .ct-gallery-item:nth-child(2) img { object-position: 50% 80% }
-  .ct-gallery-item:nth-child(3) img { object-position: 50% 88% }
+  /* object-position per photo now set inline by StoryRail (frame shows a 50%-tall window: plate stays inside) */
   /* below 1200px the strip scrolls: snap every slide to the gutter, the trailing spacer lets the last one reach it too */
   @media (max-width: 1199px) {
     .ct-gallery-scroll { scroll-snap-type: x mandatory }
