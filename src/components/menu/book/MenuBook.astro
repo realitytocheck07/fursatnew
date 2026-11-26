@@ -11,6 +11,7 @@ import '../../../styles/menu-book.css';
 
 interface Props { label?: string }
 const { label = 'Open the menu book' } = Astro.props;
+const lead = label.startsWith('Open the ') ? 'Open the ' : '', rest = label.slice(lead.length);
 
 // Photos of hands or a person are for menu rows only (dish-photos.json note): they get a small row thumb, never the big plate.
 const NO_PLATE = new Set(['Chicken Fry Piece Pulao', 'LIFE FURSAT BHAI', 'Classic Paneer Tikka', 'Tiramisu']);
@@ -96,9 +97,9 @@ const data = {
 const json = JSON.stringify(data).replace(/</g, '\\u003c');
 ---
 
-<button type="button" class="mb-open" data-mb-open aria-haspopup="dialog">
+<button type="button" class="mb-open" data-mb-open aria-haspopup="dialog" aria-label={label}>
   <svg class="mb-open-ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5C4.7 19 4 18.3 4 17.5v-12Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5v-12Z"/></svg>
-  <span>{label}</span>
+  <span>{lead && <span class="mb-open-w">{lead}</span>}<span class="mb-open-t">{rest}</span></span>
 </button>
 
 <dialog class="mb-root" id="mb-root" aria-label="FURSAT menu book" data-mb>

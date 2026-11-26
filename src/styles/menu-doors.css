@@ -177,6 +177,7 @@
   .md-btn{min-height:44px;padding:0 16px;font-size:.88rem}
   .mt{left:0;right:0;width:auto;translate:none;top:calc(var(--rest) + 56px);bottom:0}
   .mt-front-n{font-size:1.05rem}
+  .mt-front{top:auto;bottom:66px} /* caption grows upward from just above the arrows: price can never reach See dish */
   .mt-nav{bottom:10px}
   .mt-arrow{width:44px;height:44px}
   .mt-see{min-height:44px;font-size:.82rem}

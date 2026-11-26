@@ -15,10 +15,11 @@
 .mb-root button,.mb-root a{font:inherit;touch-action:manipulation}
 
 /* ── the button that opens it (sits next to "Full food menu") ── */
-.mb-open{display:inline-flex;align-items:center;gap:.6rem;min-height:48px;padding:.7rem 1.35rem;border-radius:999px;border:1.5px solid var(--fk-gold-500,#c99a43);
+.mb-open{display:inline-flex;flex:none;white-space:nowrap;align-items:center;gap:.6rem;min-height:48px;padding:.7rem 1.35rem;border-radius:999px;border:1.5px solid var(--fk-gold-500,#c99a43);
   background:linear-gradient(180deg,#17361f,#10261a);color:#f6e6d1;font:600 .95rem/1 var(--fk-sans,Rupee,Poppins,system-ui,sans-serif);cursor:pointer;
   box-shadow:0 14px 26px -16px rgba(16,38,26,.9),inset 0 1px 0 rgba(230,194,122,.35);transition:transform .16s var(--fk-ease,ease-out)}
 .mb-open-ic{color:#e6c27a;flex:none}
+@media (max-width:520px){.mb-open{min-height:44px;padding:.5rem .9rem;gap:.4rem;font-size:.85rem}.mb-open-ic{width:18px;height:18px}.mb-open-w{display:none}.mb-open-t{display:inline-block}.mb-open-t::first-letter{text-transform:uppercase}}
 .mb-open:active{transform:scale(.97)}
 @media (hover:hover){.mb-open:hover{transform:translateY(-1px)}}
 .mb-open:focus-visible,.mb-root :focus-visible{outline:3px solid var(--mb-gold-l);outline-offset:3px}

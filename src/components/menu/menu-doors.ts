@@ -226,12 +226,13 @@ function init(md: HTMLElement) {
     const W = mt.clientWidth, H = mt.clientHeight;
     const ph = narrow.matches;
     let D = Math.max(56, Math.min(W * (ph ? 0.27 : 0.19), H * (ph ? 0.34 : 0.24)));
-    const rx = W * (ph ? 0.38 : 0.41), ry = Math.min(H * (ph ? 0.13 : 0.14), rx * 0.3);
+    const rx = W * (ph ? 0.38 : 0.41); let ry = Math.min(H * (ph ? 0.13 : 0.14), rx * 0.3);
+    if (ph && 2 * ry + 0.9 * D > H - 135) { const k = (H - 135) / (2 * ry + 0.9 * D); D *= k; ry *= k; } // phone: table + caption + arrows must fit the door, so the ring shrinks only when it would not
     // desktop: the caption (headline + "Full food menu") sits above the table; the table never rides up under it
     const capBottom = ph ? 0 : Math.max(0, capF.getBoundingClientRect().bottom - mt.getBoundingClientRect().top) + 10;
     if (capBottom) D = Math.max(56, Math.min(D, (H - 138 - capBottom - 2 * ry) / 0.77));
     // keep the front dish, its name (~50px) and the arrows (~70px) inside the panel
-    let cy = Math.min(H * (ph ? 0.36 : 0.56), H - (ph ? 114 : 138) - ry - D * 0.32);
+    let cy = ph ? Math.min(Math.max(H * 0.36, 1 + ry + D * 0.45), H - 134 - ry - D * 0.45) : Math.min(H * 0.56, H - 138 - ry - D * 0.32);
     if (capBottom) cy = Math.max(cy, capBottom + ry + D * 0.45);
     geo = { W, H, cx: W / 2, cy, rx, ry, D };
     mt.style.setProperty('--d', D + 'px');
@@ -239,7 +240,7 @@ function init(md: HTMLElement) {
     mt.style.setProperty('--tw', ((rx * 2 + D * 1.1) / W) * 100 + '%');
     mt.style.setProperty('--th', ((ry * 2 + D * 0.9) / H) * 100 + '%');
     // the front dish's name sits just under it
-    mt.style.setProperty('--fy', Math.round(cy + ry - D * 0.18 + D / 2 + 10) + 'px');
+    mt.style.setProperty('--fy', Math.round(ph ? cy + ry + D * 0.45 + 14 : cy + ry - D * 0.18 + D / 2 + 10) + 'px');
   }
   function layout() {
     const { cx, cy, rx, ry, D } = geo;
