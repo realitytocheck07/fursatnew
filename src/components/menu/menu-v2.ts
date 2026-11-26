@@ -36,9 +36,11 @@ function init(root: HTMLElement) {
     const left = btn.getBoundingClientRect().left - box.getBoundingClientRect().left + box.scrollLeft - box.clientWidth / 2 + btn.offsetWidth / 2;
     box.scrollTo({ left, behavior: 'smooth' });
   }
+  let markedId: string | null | undefined;
   function mark(id: string | null) {
-    $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); if (on && b.offsetParent) centerIn(b); });
-    $$('.mv-idx-b').forEach((b) => { const on = b.dataset.go === id; b.classList.toggle('is-on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+    markedId = id;
+    $$('.mv-schip').forEach((b) => { const on = b.dataset.go === id; if (b.classList.contains('is-on') === on && b.getAttribute('aria-pressed') === String(on)) return; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); if (on && b.offsetParent) centerIn(b); });
+    $$('.mv-idx-b').forEach((b) => { const on = b.dataset.go === id; if (b.classList.contains('is-on') === on) return; b.classList.toggle('is-on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
   }
   // while we scroll the page ourselves (Full food / drinks menu, hotspots, chips) the scroll-spy must not flip the side:
   // passing through the other side's groups used to switch the list and the jump ended in the wrong menu.
@@ -118,9 +120,11 @@ function init(root: HTMLElement) {
       const top = (passed || inView[0])?.[0];
       if (!top) return;
       // a category-tiles block counts as part of its side; no chip is on until a category is chosen
-      if (top.classList.contains('mc-tiles')) { setSide(top.id === 'mc-drinks' ? 'drinks' : 'food'); mark(null); return; }
+      if (top.classList.contains('mc-tiles')) { const sd = top.id === 'mc-drinks' ? 'drinks' : 'food'; if (root.dataset.side === sd && markedId === null) return; setSide(sd); mark(null); return; }
       const id = top.getAttribute('data-group')!;
-      setSide(id.startsWith('d-') ? 'drinks' : 'food');
+      const sd = id.startsWith('d-') ? 'drinks' : 'food';
+      if (root.dataset.side === sd && markedId === id) return;   // nothing changed since the last frame
+      setSide(sd);
       mark(id);
     };
     const spy = new IntersectionObserver((entries) => {

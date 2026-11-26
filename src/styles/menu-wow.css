@@ -29,7 +29,7 @@
 .dk-card-n{color:#fbf3e6;font-size:1.1875rem}
 .dk-price{color:#f1c98d}
 .dk-cats-rail{position:relative}
-.dk-cat{background:rgb(255 255 255 / .05);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:1}
+.dk-cat{background:rgb(255 255 255 / .05);position:relative;z-index:1}
 .dk-blob{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:linear-gradient(180deg,#e8301f,#a91e12);box-shadow:0 0 24px -2px rgb(232 48 31 / .8);opacity:0;pointer-events:none;z-index:0}
 
 /* drinks list on the dark stage: glass cards, red glow edge */

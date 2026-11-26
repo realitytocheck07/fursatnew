@@ -291,7 +291,7 @@ html:has(.mv){background:var(--fk-plaster-base)}
 
 /* full list */
 .mv-list{background:none}
-.mv-sticky{background:rgb(240 216 184 / .94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom-color:rgb(168 115 28 / .28);box-shadow:0 10px 18px -16px rgb(60 40 10 / .5)}
+.mv-sticky{background:rgb(240 216 184 / .94);border-bottom-color:rgb(168 115 28 / .28);box-shadow:0 10px 18px -16px rgb(60 40 10 / .5)}
 .mv-side-h{border-bottom-color:var(--mv-hair)}
 .mv-side-h h2,.mv-grp-h{color:#1b3a26}
 .mv-grp-h .num{color:var(--mv-mute)}
@@ -386,7 +386,7 @@ html:has(.mv){background:var(--fk-plaster-base)}
 .mv-jump-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
 .mv-jump-grid[hidden]{display:none}
 .mv-tile{box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:2px;min-height:96px;height:100%;padding:12px 14px;border-radius:18px;
-  border:1px solid var(--ui2-hair);background:var(--ui2-glass);-webkit-backdrop-filter:var(--ui2-blur);backdrop-filter:var(--ui2-blur);color:var(--ui2-ink);text-decoration:none;
+  border:1px solid var(--ui2-hair);background:var(--ui2-glass);color:var(--ui2-ink);text-decoration:none;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform 150ms var(--ui2-ease),background-color 200ms ease,border-color 200ms ease}
 .mv-tile svg{width:28px;height:28px;margin-bottom:8px;color:#9a6b14}
 .mv-tile-n{font:600 .875rem/1.25 var(--fk-sans);text-wrap:balance;overflow-wrap:anywhere}
@@ -435,3 +435,5 @@ html:has(.mv){background:var(--fk-plaster-base)}
 .fk-chip--soldout{background:#ececec;color:#4a4a4a;border:1px solid #cfcfcf}
 
 /* Dish rows not filled in yet (menu-v2.ts fills them near the screen): hold roughly the room they will take, one card per row on a phone, 2 or 3 columns wider */
+/* perf: no live backdrop blur on the sticky bar's pills / switch (the bar behind them is already 94% opaque) */
+.mv-sticky .fk-pill,.mv-sticky .fk-seg{-webkit-backdrop-filter:none;backdrop-filter:none}

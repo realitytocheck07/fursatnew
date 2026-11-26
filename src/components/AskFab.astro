@@ -35,7 +35,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     const SP = 'cubic-bezier(.34,1.56,.64,1)', OUT = 'cubic-bezier(.19,1,.22,1)';
     const store = (k, v) => { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {} };
     const typing = () => { const e = document.activeElement; return !!e && (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || e.isContentEditable); };
-    let live = !home, dock = 0, cur = null, pt = 0, lastPlace = 0, lastHop = -1e9, lastAct = now(), sleep = null, bt = 0, st = 0, tilt = 0, moved = 0, natW = 0, natH = 0, lastSec = '';
+    let live = !home, dock = 0, cur = null, pt = 0, lastPlace = 0, lastHop = -1e9, lastAct = now(), sleep = null, bt = 0, st = 0, tilt = 0, moved = 0, lastScr = -1e9, th = 0, natW = 0, natH = 0, lastSec = '';
     const seen = new Set(), ly = new WeakMap(), pend = new Map();
 
     // ---- where is Ask free? Hit-test a few points of a box: the top thing there must not be a button, field, tile or bar ----
@@ -66,6 +66,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
 
     const place = () => {
       pt = 0; if (!live || a.classList.contains('is-intro')) return;
+      if (now() - lastScr < 250) { pt = setTimeout(() => { lastPlace = now(); place(); }, 260 - (now() - lastScr)); return; }   // no hit-tests while the page scrolls; one trailing run after it stops
       const off = hidden(); a.toggleAttribute('data-hide', off); if (off) return;
       const W = R.clientWidth, H = R.clientHeight, cs = getComputedStyle(a), P = ph(), vv = window.visualViewport;
       if (!dock) { natW = a.offsetWidth; natH = a.offsetHeight; }
@@ -88,7 +89,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
     };
     const req = (gap = 140) => { if (!pt) pt = setTimeout(() => { lastPlace = now(); place(); }, Math.max(0, gap - (now() - lastPlace))); };   // while the page scrolls the caller asks for a 320 ms gap
 
-    const tryHints = () => { for (const [el, t0] of pend) { const [t, q] = el.dataset.askHint.split('|'); if (seen.has(t)) pend.delete(el); else if (say(t, q, now() - t0 > 1400)) { pend.delete(el); break; } } };
+    const tryHints = () => { if (now() - lastScr < 250) { clearTimeout(th); th = setTimeout(tryHints, 260 - (now() - lastScr)); return; } for (const [el, t0] of pend) { const [t, q] = el.dataset.askHint.split('|'); if (seen.has(t)) pend.delete(el); else if (say(t, q, now() - t0 > 1400)) { pend.delete(el); break; } } };
     // ---- hint bubble: once per section per visit, 3 s, never while typing; the tap opens Ask with that question ----
     const unsay = () => { clearTimeout(bt); a.classList.remove('m-say'); a.setAttribute('href', base); };
     const say = (txt, q, force) => {
@@ -140,7 +141,7 @@ const tip = q ? `Ask Fursat: ${q}` : 'Ask Fursat what to eat or drink';
       req(320); clearTimeout(st);
       st = setTimeout(() => { img.style.setProperty('--tl', '0deg'); tilt = 0; if (live2() && moved > 160 && now() - lastHop > 1200 && !typing()) hop(); moved = 0; req(); }, 160);
     };
-    document.addEventListener('scroll', (e) => { sTgt = e.target.scrollingElement || e.target; if (!sRaf) sRaf = requestAnimationFrame(onFrame); }, { passive: true, capture: true });
+    document.addEventListener('scroll', (e) => { lastScr = now(); sTgt = e.target.scrollingElement || e.target; if (!sRaf) sRaf = requestAnimationFrame(onFrame); }, { passive: true, capture: true });
     addEventListener('resize', () => req(), { passive: true });
     addEventListener('focusin', () => { unsay(); req(); }); addEventListener('focusout', () => setTimeout(req, 60));
     if (window.visualViewport) visualViewport.addEventListener('resize', () => req());

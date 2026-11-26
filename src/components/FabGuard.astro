@@ -24,13 +24,16 @@
   function bandPx() { return innerWidth < 768 ? 270 : 150; }
   function update() {
     var wide = innerWidth >= 1024, hitAsk = false, hitWac = false;
-    inSet.forEach(function (el) {
-      if (el.closest('#fxsticky,#pb-dock,.mb-bar,.wac')) return;     // fixed bars never count as content
-      var r = el.getBoundingClientRect(), tall = r.height > innerHeight * 1.2;
+    for (var el of inSet) {
+      if (el.closest('#fxsticky,#pb-dock,.mb-bar,.wac')) continue;     // fixed bars never count as content
       if (!wide) hitAsk = true;
-      if (tall && innerWidth >= 768) return;                         // a zone taller than 1.2 screens is the page, not a corner panel
-      if (innerWidth < 768 || r.right > innerWidth - 110) hitWac = true;
-    });
+      if (innerWidth < 768) hitWac = true;                           // phones: always counts (no rect needed)
+      else {
+        var r = el.getBoundingClientRect(), tall = r.height > innerHeight * 1.2;
+        if (!tall && r.right > innerWidth - 110) hitWac = true;      // a zone taller than 1.2 screens is the page, not a corner panel
+      }
+      if ((wide || hitAsk) && hitWac) break;                         // both decided
+    }
     de.toggleAttribute('data-fab-clear', !wide && hitAsk);
     de.toggleAttribute('data-wac-hide', hitWac);
   }
