@@ -349,7 +349,7 @@ window.FursatConcierge={open:openIt,route:route};
   if(!rv||!fg||!m||!hero)return;
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
     save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false,cleanT=0;
-  window.__fzReel={on:true};
+  window.__fzReel={on:true,off:function(){return reelOff()}};
   var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
   function paused(){return !!(pv&&pv.dataset.s==="paused")}
@@ -365,30 +365,28 @@ window.FursatConcierge={open:openIt,route:route};
   /* a frame of video v is on screen (or cap ms passed) */
   function frame(v,cb,cap){var d=false,t=setTimeout(fin,cap);function fin(){if(d)return;d=true;clearTimeout(t);cb()}
     if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(fin);else v.addEventListener("playing",fin,{once:true})}
-  /* C10: the host answers media Range requests with a 200, so the reel is not seekable by URL. A blob: URL is seekable, so with the song playing the reel can join it. Fast desktop + sound only. */
-  var blobUrl=null,blobP=null,conn=navigator.connection||{};
+  /* HANDSHAKE: hero-reel-540-b.* is the reel cut (lossless, at a keyframe) from the song second reelOff() on, picture and audio. The song is never restarted: the mp3 stops where the reel
+     (muted, moved to the same song second inside its already buffered part) takes over. The old 540-a files stay for slow / Save-Data networks (reel muted, the mp3 plays on). */
+  var conn=navigator.connection||{};
   function songPos(){return window.__fzSongPos?window.__fzSongPos():0}
-  function soundOn(){var v=0;try{v=sessionStorage.getItem("fk-sound")==="1"}catch(e){}return v||songPos()>0}
   function goodNet(){return !save&&!/^(slow-2g|2g|3g)$/.test(conn.effectiveType||"")}
-  function reelUrl(){var ss=fg.querySelectorAll("source"),i,t;for(i=0;i<ss.length;i++){t=ss[i].getAttribute("type");if(!t||fg.canPlayType(t))return ss[i].getAttribute("src")}return ""}
-  function fetchBlob(){if(blobP||save||calm||phone||!window.fetch||!window.URL)return;var u=reelUrl();if(!u)return;
-    var ac=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ac)ac.abort()},9000);
-    blobP=fetch(u,ac?{signal:ac.signal}:undefined).then(function(r){return r.ok?r.blob():Promise.reject()}).then(function(b){clearTimeout(tm);if(st==="idle"||st==="wait")blobUrl=URL.createObjectURL(b)}).catch(function(){clearTimeout(tm)})}
-  addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on&&goodNet()&&window.__fzLens)fetchBlob()});
-  addEventListener("pagehide",function(){if(blobUrl){try{URL.revokeObjectURL(blobUrl)}catch(e){}blobUrl=null}});
-  function fromBlob(done){var n=0,fin=function(){if(!n++)done()};
-    [fg,bg].forEach(function(x){if(x){x.preload="auto";x.src=blobUrl;x.load()}});loaded=true;bgL=true;
-    if(fg.readyState>=1)fin();else{fg.addEventListener("loadedmetadata",fin,{once:true});setTimeout(fin,1500)}}
-  function lock(){var n=0,fix=function(){var T=songPos();if(T<.5||st!=="play")return;var d=Math.abs(fg.currentTime-T);
-      if(d>.22){try{fg.currentTime=Math.min(T+.3,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}}
-      if(++n<12)setTimeout(fix,600)};
-    fg.addEventListener("playing",function(){setTimeout(fix,150)},{once:true})}
+  function isB(){return /hero-reel-540-b\./.test(fg.currentSrc||"")}
+  function reelOff(){var s=fg.currentSrc||"";return /-b\.webm/.test(s)?12.8:/-b\.mp4/.test(s)?12.8638:0}   /* song second at the reel's 0:00 (measured, see CHANGES.md) */
+  if(!goodNet())rv.querySelectorAll('source[src*="-b."]').forEach(function(x){x.remove()});
+  function buf(x){var b=fg.buffered,i;for(i=0;i<b.length;i++)if(b.start(i)<=.2&&b.end(i)>=x)return true;return false}
+  function seekTo(t,cb){var d=false,f=function(){if(d)return;d=true;fg.removeEventListener("seeked",f);cb()};fg.addEventListener("seeked",f);try{fg.currentTime=t}catch(e){f()}setTimeout(f,500)}
+  function reelReady(){var T=songPos();if(T<.5){start("plain");return}                      /* no song playing: the reel plays on its own */
+    if(!isB()){window.__fzReel.keepSong=true;start("plain");return}                          /* old file: the song carries on, the reel stays silent */
+    var n=0;(function w(){var tg=songPos()-reelOff()+.15;
+      if(tg<=.2){start("join");return}                                                        /* the song is before the reel's first second: a cut forward, never a repeat */
+      if(buf(tg+.6)){seekTo(tg,function(){start("join")});return}                            /* a small seek inside what is already buffered */
+      if(++n>10){window.__fzReel.keepSong=true;start("plain");return}                        /* not buffered: the song carries on, no seek by URL, nothing restarts */
+      setTimeout(w,100)})()}
   function start(mode){st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
-    if(mode==="fresh")window.__fzReel.own=true;   /* AV1: the song is playing and the reel starts from 0 with its OWN audio (same music, same stream as its picture): 06.js fades the song out (120 ms) while the reel audio fades in (200 ms); the reel is not moved to the song */
     if(!paused())run()}
   /* plain path: start the moment the reel can play (usually already buffered during the lens); 15 s fallback = master loop + pill */
   function waitPlain(){load();var fin=false,t;
-    function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);start(songPos()>=.5?"fresh":"plain")}
+    function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);reelReady()}
     if(fg.readyState>=3){go();return}
     fg.addEventListener("canplay",go);
     t=setTimeout(function(){if(fin)return;fin=true;fg.removeEventListener("canplay",go);handoff()},15000)}
@@ -398,7 +396,6 @@ window.FursatConcierge={open:openIt,route:route};
     load();fg.addEventListener("canplay",go);t=setTimeout(go,cap||1500)};
   function begin(){if(st!=="idle")return;if(again){handoff();return}
     st="wait";
-    if(songPos()>=.5&&blobUrl){fromBlob(function(){var T2=songPos();try{fg.currentTime=Math.min(T2,(fg.duration||60)-.5);if(bg)bg.currentTime=fg.currentTime}catch(e){}start("blob");lock()});return}
     waitPlain()}
   function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);raf=0;
     if(!hero.classList.contains("reel-on")){hero.classList.add("reel-again");placeAgain(4200)}   /* no reel on screen (reload, error, fallback): the pill shows at once */
@@ -443,7 +440,7 @@ window.FursatConcierge={open:openIt,route:route};
   function ready(){return hero.classList.contains("go")&&!de.classList.contains("lock")}
   /* lens running: the reel loads paused on its first frame ~3.4 s in; it starts at the lens END (fz:lensend fires synchronously from the lens end(), same task as the overlay removal) */
   function check(){if(st!=="idle"||!ready())return st!=="idle";
-    if(window.__fzLens){if(!lt&&!again){lt=1;if(goodNet()&&soundOn())fetchBlob()}return false}
+    if(window.__fzLens)return false
     begin();return true}
   addEventListener("fz:lensrun",function(){if(st==="idle"&&!again&&!lr)lr=setTimeout(function(){if(st==="idle"&&!again)load()},500)});   /* V1b: fetch the front reel during the light first shot, never in dive 2 */
   addEventListener("fz:lensfade",function(){clearTimeout(lr);if(ready())begin()});

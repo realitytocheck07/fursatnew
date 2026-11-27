@@ -55,7 +55,7 @@ var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.
 var rsAt=0,refused=false;
 function reelSound(on,quick){if(!rf)return;if(!on){rf.muted=true;return}
  rsAt=performance.now();try{rf.volume=0;rf.muted=false}catch(e){}
- var t0=performance.now();(function f(n){var k=cl((n-t0)/(quick?200:500),0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0);
+ var t0=performance.now();(function f(n){var k=cl((n-t0)/(quick?150:500),0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0);
  setTimeout(function(){var up=$("fxpv");if(rf.paused&&!rf.ended&&!document.hidden&&!(up&&up.dataset.s==="paused")&&M.on&&viaReel){rf.muted=true;var q=rf.play();if(q&&q.catch)q.catch(function(){});toSong(rf.currentTime)}},500)}   /* AV1: sound refused: the song carries on from the reel's second (sound stays on) */
 function play(sync){var a=M.a;if(M.on)return;refused=false;M.on=true;flag(true);ui();
  emit("fk:sound",{on:true});emit("fk:music",{id:"main"});
@@ -100,14 +100,13 @@ addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(tr
 addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="main")stop(true,true)});
 /* the reel starts (after the intro): if sound is on, hand over from the mp3 to the reel's own audio. The reel ending / failing turns the sound off, like the song ending. */
 /* AV1: the reel's audio cannot play (paused by scroll / tab, or the browser refused sound): the mp3 carries on from the reel's second. */
-function toSong(tt,resume){var a=M.a;viaReel=false;if(resume)refused=true;rf.muted=true;if(resume){var rq=rf.play();if(rq&&rq.catch)rq.catch(function(){})}   /* resume: the browser paused the reel because it refused sound, so the picture keeps going muted */
+function toSong(tt,resume){tt+=window.__fzReel&&window.__fzReel.off?window.__fzReel.off():0;var a=M.a;viaReel=false;if(resume)refused=true;rf.muted=true;if(resume){var rq=rf.play();if(rq&&rq.catch)rq.catch(function(){})}   /* resume: the browser paused the reel because it refused sound, so the picture keeps going muted */
   hook(a);if(ac&&ac.resume)ac.resume();a.preload="auto";a.volume=0;
   var go=function(){try{a.currentTime=Math.min(tt,(a.duration||60)-.1)}catch(x){}var q=a.play();if(q&&q.then)q.then(function(){if(M.on)fade(M,IV,250)},function(){});else fade(M,IV,250)};
   if(a.readyState>=1)go();else a.addEventListener("loadedmetadata",go,{once:true});wake()}
 if(rf){rf.addEventListener("playing",function(){if(M.on&&!viaReel&&!refused&&reelUsable()){
   /* v5.58: coming back from the mp3 (the reel was paused by scroll / tab switch while the song kept playing): put the picture where the song is */
-  var own=window.__fzReel&&window.__fzReel.own;if(window.__fzReel)window.__fzReel.own=false;   /* AV1: first start of the reel: it plays from 0 on its own audio */
-  if(!own)try{var tt=M.a.currentTime;if(tt>.3&&Math.abs(rf.currentTime-tt)>.4)rf.currentTime=tt}catch(x){}
+  try{var ro=window.__fzReel&&window.__fzReel.off?window.__fzReel.off():0,tt=M.a.currentTime-ro;if(M.a.currentTime>.3&&tt>0&&Math.abs(rf.currentTime-tt)>.15)rf.currentTime=tt+.08}catch(x){}   /* HANDSHAKE: the reel is at (song second - its offset); the song never restarts */
   viaReel=true;fade(M,0,120,function(){M.a.pause()});reelSound(true,true)}});
  /* v5.58 FIX "music stops before the end": the reel is paused when the hero scrolls off screen or the tab hides (10.js). Its audio is the song, so the
     song died with it. Now, whenever the reel pauses by itself (not the guest's own pause button, not the end), the mp3 carries on from the same second. */
