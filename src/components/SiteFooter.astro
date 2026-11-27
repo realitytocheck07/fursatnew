@@ -169,6 +169,7 @@ const hasLegalDialog = Astro.url.pathname === '/';
   @media (max-width:899px) { .sf-band { padding-bottom:calc(var(--mb-clear,76px) + 72px + env(safe-area-inset-bottom,0px)); } .sf-giant { bottom:calc(var(--mb-clear,76px) + 10px + env(safe-area-inset-bottom,0px)); } .sf-link { min-height:44px; } .sf-order { display:flex; align-items:center; flex-wrap:nowrap; white-space:nowrap; min-height:44px; margin:0; } .sf-order a { padding:12px 4px; } .sf-mq-set { font-size:clamp(1.75rem,6vw,4.5rem); } }
   @media (min-width:640px) and (max-width:899px) { .sf-cols { grid-template-columns:1.25fr 1fr 1fr 1.25fr; gap:20px 16px; } .sf-visit, .sf-connect { grid-column:auto; } .sf-visit { order:0; background:none; padding:0; border-radius:0; } .sf-ig { flex-wrap:wrap; } .sf-conn-links { display:flex; flex-direction:column; align-items:flex-start; } .sf-top { flex-direction:row; align-items:center; justify-content:space-between; } .sf-actions { display:flex; } }
   @media (max-width:899px) { .sf-visit { order:-1; } }
+  @media (max-width:639px) { .sf-legal .sf-by { border-left:0; padding-left:0; } .sf-ig li { flex:1 1 0; min-width:0; } }
 
   /* desktop */
   @media (min-width:900px) {
