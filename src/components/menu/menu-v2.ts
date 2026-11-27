@@ -50,6 +50,13 @@ function init(root: HTMLElement) {
     autoUntil = performance.now() + 1600;
     const done = () => { autoUntil = 0; removeEventListener('scrollend', done); };
     addEventListener('scrollend', done, { once: true });
+    /* a downward jump: the site header slides away, so the bar sits at the top and the heading belongs just under its real height (the CSS margin
+       is read once at the start, when the header is still in view and --mv-stk is still its 64px default) */
+    const sb = $('#mv-sticky');
+    if (sb && el instanceof HTMLElement && el.matches('.mv-grp,.mv-sec') && el.getBoundingClientRect().top > 0) {
+      el.style.scrollMarginTop = Math.round(sb.offsetHeight) + 8 + 'px';
+      setTimeout(() => { el.style.scrollMarginTop = ''; }, 4000);
+    }
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   function need21(side: Side, run: () => void) {

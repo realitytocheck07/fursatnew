@@ -437,3 +437,14 @@ html:has(.mv){background:var(--fk-plaster-base)}
 /* Dish rows not filled in yet (menu-v2.ts fills them near the screen): hold roughly the room they will take, one card per row on a phone, 2 or 3 columns wider */
 /* perf: no live backdrop blur on the sticky bar's pills / switch (the bar behind them is already 94% opaque) */
 .mv-sticky .fk-pill,.mv-sticky .fk-seg{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* MENU-POLISH (phone): the generic .mv-card app-card rule above made the Chef's pick / Featured drink cards flex rows. Chef card back to 2 stacked rows, See dish on one line, Featured card height follows its text, a little more room for the search field */
+@media(max-width:720px){
+  .mv .mv-card.mv-chef{display:grid;gap:0;padding:0}
+  .mv .mv-chef-row .mv-btn{flex:none;white-space:nowrap}
+  .mv .mv-feat-ph{min-height:0}
+  .mv .mv-sticky .fk-seg>button{padding:0 12px}
+  .mv .mv-search{padding:0 10px;gap:4px}
+}
+@media(max-width:400px){.mv .mv-search input::placeholder{font-size:14px}}
+@media(max-width:370px){.mv .mv-search svg{display:none}.mv .mv-sticky .fk-seg>button{padding:0 10px}}

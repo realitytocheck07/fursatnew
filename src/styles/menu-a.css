@@ -106,7 +106,7 @@ html:has(.mv){scroll-padding-bottom:24px}
 @media(min-width:768px){.mv .fg--ph{overflow-x:visible}.mv .fg--ph .fg-tile{flex:1 1 0;min-width:0;max-width:240px}}
 
 /* ── phone: section chips are one scrolling row under the top bar (the active one is centred by mark()) ── */
-@media(max-width:720px){.mv .mv-sticky .mv-schips{order:5;flex:1 1 100%;scroll-snap-type:x proximity}.mv .mv-schip{scroll-snap-align:center}}
+@media(max-width:720px){.mv .mv-sticky .mv-schips{order:5;flex:1 1 0;min-width:0;scroll-snap-type:x proximity}.mv .mv-schip{scroll-snap-align:center}}
 
 /* ── laptop (>=1100px): slim index rail on the left, sticky, gold dot on the current section ── */
 .mv .mv-idx{display:none}
