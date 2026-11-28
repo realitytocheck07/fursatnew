@@ -349,7 +349,7 @@ window.FursatConcierge={open:openIt,route:route};
   if(!rv||!fg||!m||!hero)return;
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
     save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false,cleanT=0;
-  window.__fzReel={on:true,off:function(){return reelOff()}};
+  window.__fzReel={on:true,noClip:false};
   var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
   function paused(){return !!(pv&&pv.dataset.s==="paused")}
@@ -365,39 +365,33 @@ window.FursatConcierge={open:openIt,route:route};
   /* a frame of video v is on screen (or cap ms passed) */
   function frame(v,cb,cap){var d=false,t=setTimeout(fin,cap);function fin(){if(d)return;d=true;clearTimeout(t);cb()}
     if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(fin);else v.addEventListener("playing",fin,{once:true})}
-  /* HANDSHAKE: hero-reel-540-b.* is the reel cut (lossless, at a keyframe) from the song second reelOff() on, picture and audio. The song is never restarted: the mp3 stops where the reel
-     (muted, moved to the same song second inside its already buffered part) takes over. The old 540-a files stay for slow / Save-Data networks (reel muted, the mp3 plays on). */
-  var conn=navigator.connection||{};
-  function songPos(){return window.__fzSongPos?window.__fzSongPos():0}
+  /* REEL-HQ-3: hero-reel-hq-b.* is the original reel from T to its end (picture + audio, 720x1280); intro-clip.mp3 is the same recording before T. Sound on: the clip plays with the intro, the last intro frame is held
+     until the clip is about to end, then the reel plays unmuted from its 0:00. Sound off: the reel plays muted from its 0:00 at the animation end. Slow / Save-Data networks keep the old 540-a files (no clip, muted). */
+  var conn=navigator.connection||{},sk=false,natEnd=false,g0=window.__fzGo;
   function goodNet(){return !save&&!/^(slow-2g|2g|3g)$/.test(conn.effectiveType||"")}
-  function isB(){return /hero-reel-540-b\./.test(fg.currentSrc||"")}
-  function reelOff(){var s=fg.currentSrc||"";return /-b\.webm/.test(s)?12.8:/-b\.mp4/.test(s)?12.8638:0}   /* song second at the reel's 0:00 (measured, see CHANGES.md) */
-  if(!goodNet())rv.querySelectorAll('source[src*="-b."]').forEach(function(x){x.remove()});
-  function buf(x){var b=fg.buffered,i;for(i=0;i<b.length;i++)if(b.start(i)<=.2&&b.end(i)>=x)return true;return false}
-  function seekTo(t,cb){var d=false,f=function(){if(d)return;d=true;fg.removeEventListener("seeked",f);cb()};fg.addEventListener("seeked",f);try{fg.currentTime=t}catch(e){f()}setTimeout(f,500)}
-  function reelReady(){var T=songPos();if(T<.5){start("plain");return}                      /* no song playing: the reel plays on its own */
-    if(!isB()){window.__fzReel.keepSong=true;start("plain");return}                          /* old file: the song carries on, the reel stays silent */
-    var n=0;(function w(){var tg=songPos()-reelOff()+.15;
-      if(tg<=.2){start("join");return}                                                        /* the song is before the reel's first second: a cut forward, never a repeat */
-      if(buf(tg+.6)){seekTo(tg,function(){start("join")});return}                            /* a small seek inside what is already buffered */
-      if(++n>10){window.__fzReel.keepSong=true;start("plain");return}                        /* not buffered: the song carries on, no seek by URL, nothing restarts */
-      setTimeout(w,100)})()}
-  function start(mode){st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
+  if(!goodNet()){window.__fzReel.noClip=true;rv.querySelectorAll('source[src*="-hq-b."]').forEach(function(x){x.remove()})}
+  document.addEventListener("click",function(e){if(e.target&&e.target.closest&&e.target.closest("#fxskipall"))sk=true},true);
+  if(g0&&goodNet())window.__fzGo=function(){g0();if(st==="idle"&&!again)load();if(window.__fzClipWarm)window.__fzClipWarm()};   /* the reel starts loading when Enter is tapped / the auto-open starts, not at page load */
+  function left(){return natEnd&&window.__fzIntroLeft?window.__fzIntroLeft():0}   /* skipped intro: no hold, the clip stops at once */
+  function start(){window.__fzReelStart&&window.__fzReelStart();st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
     if(!paused())run()}
-  /* plain path: start the moment the reel can play (usually already buffered during the lens); 15 s fallback = master loop + pill */
-  function waitPlain(){load();var fin=false,t;
-    function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);reelReady()}
-    if(fg.readyState>=3){go();return}
-    fg.addEventListener("canplay",go);
-    t=setTimeout(function(){if(fin)return;fin=true;fg.removeEventListener("canplay",go);handoff()},15000)}
+  /* the reel starts when the animation is over AND (sound on) the intro clip is about to end; if the reel cannot play yet the last frame waits up to 1 s more, then it plays; 15 s fallback = master loop + pill */
+  function waitPlain(){load();var fin=false,th=0,tm=0,t15=setTimeout(function(){if(fin)return;fin=true;handoff()},15000);
+    function w(){tm=0;if(fin)return;if(left()>0){tm=setTimeout(w,16);return}
+      if(!th)th=performance.now();
+      if(fg.readyState>=3||performance.now()-th>1000){fin=true;clearTimeout(t15);start();return}
+      tm=setTimeout(w,30)}
+    addEventListener("fz:clipend",function(){clearTimeout(tm);w()},{once:true});   /* the clip has ended: the reel starts in the same task */
+    w()}
   /* V1b contract with Hero.astro: cb() runs once the front reel can show a decoded frame (or after cap ms); the lens fades on top of it, then starts the reel on fz:lensfade */
   window.__fzReelReady=function(cb,cap){var fin=false,t;function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);cb()}
     if(st!=="idle"||again||save||calm||fg.readyState>=3){go();return}
     load();fg.addEventListener("canplay",go);t=setTimeout(go,cap||1500)};
   function begin(){if(st!=="idle")return;if(again){handoff();return}
+    natEnd=!sk&&!!window.__fzT0&&performance.now()-window.__fzT0>11000;if(!natEnd&&window.__fzClipStop)window.__fzClipStop();   /* skipped intro: the clip stops at once */
     st="wait";
     waitPlain()}
-  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;cancelAnimationFrame(raf);raf=0;
+  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;if(!hero.classList.contains("reel-on")&&!(window.__fzIntroLeft&&window.__fzIntroLeft()>0))dispatchEvent(new CustomEvent("fk:sound",{detail:{on:false}}));cancelAnimationFrame(raf);raf=0;
     if(!hero.classList.contains("reel-on")){hero.classList.add("reel-again");placeAgain(4200)}   /* no reel on screen (reload, error, fallback): the pill shows at once */
     try{m.currentTime=2.45}catch(e){}
     if(!m.src&&stg)stg.click();
