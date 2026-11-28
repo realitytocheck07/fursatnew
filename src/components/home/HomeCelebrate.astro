@@ -1,5 +1,5 @@
 ---
-// "Celebrate at Fursat": one real banquet photo + the 3 party groups. Labels, blurbs and "From" prices come from party.json only.
+// "Celebrate at Fursat": three arch photos + the 3 party groups. Labels, blurbs and "From" prices come from party.json only.
 import party from '../../data/party.json';
 
 const rupee = (n: number) => `₹${n.toLocaleString('en-IN')}`;
@@ -18,18 +18,14 @@ const iconFallback = '<circle cx="12" cy="12" r="5"/>';
 import InstaFeed from '../InstaFeed.astro';
 ---
 <section class="hc" id="celebrate" aria-labelledby="hc-h">
-  <div class="hc-phw fk-dna-sh"><figure class="hc-ph fk-dna" style="--dna-pos:50% 50%" data-fk-reveal>
-    <img
-      src="/assets/celebrations/birthday-stage-screen-45-640.webp"
-      srcset="/assets/celebrations/birthday-stage-screen-45-360.webp 360w, /assets/celebrations/birthday-stage-screen-45-640.webp 640w"
-      sizes="(min-width: 900px) 48vw, 100vw"
-      alt="The Fursat stage set for a birthday, with a Happy Birthday message on the big LED screen"
-      width="640" height="800" loading="lazy" decoding="async" />
-  </figure></div>
-  <div class="hc-body" data-fk-reveal>
-    <svg class="hc-wave" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0H400V13C340 29 282 3 204 13S60 27 0 11Z"/></svg>
+  <div class="hc-body">
     <h2 class="fk-ty-h2" id="hc-h">Celebrate at <span class="hc-hl">Fursat</span></h2>
     <p class="hlead">Birthdays, corporate gatherings, kitty parties and bar parties.</p>
+    <ul class="hc-ar">
+      <li style="--d:90ms"><figure class="hc-arch"><img src="/assets/celebrations/birthday-cake-dad-640.webp" srcset="/assets/celebrations/birthday-cake-dad-360.webp 360w, /assets/celebrations/birthday-cake-dad-640.webp 640w" sizes="(min-width: 900px) 240px, 30vw" alt="A birthday cake with Dad written on it in chocolate" width="640" height="853" loading="lazy" decoding="async" /><figcaption>Birthdays</figcaption></figure></li>
+      <li style="--d:0ms"><figure class="hc-arch"><img src="/assets/heroes/slides/g-hall-dinner-640.webp" srcset="/assets/heroes/slides/g-hall-dinner-360.webp 360w, /assets/heroes/slides/g-hall-dinner-640.webp 640w" sizes="(min-width: 900px) 240px, 30vw" alt="The Fursat banquet hall set with rows of chairs in gold covers and maroon sashes" width="640" height="853" loading="lazy" decoding="async" /><figcaption>Banquet</figcaption></figure></li>
+      <li style="--d:160ms"><figure class="hc-arch"><img src="/assets/celebrations/kitty-high-table-games-640.webp" srcset="/assets/celebrations/kitty-high-table-games-360.webp 360w, /assets/celebrations/kitty-high-table-games-640.webp 640w" sizes="(min-width: 900px) 240px, 30vw" alt="Guests gathered around a high table at a kitty party" width="640" height="853" loading="lazy" decoding="async" /><figcaption>Kitty parties</figcaption></figure></li>
+    </ul>
     <ul class="hc-gl">
       {groups.map((g: any) => (
         <li>
@@ -49,54 +45,66 @@ import InstaFeed from '../InstaFeed.astro';
   </div>
 </section>
 
+<script is:inline>
+  (function () {
+    // arches rise once when they enter view; no JS = everything simply shows
+    var s = document.getElementById('celebrate'), a = s && s.querySelector('.hc-ar');
+    if (!a || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (es) {
+      if (!es.some(function (e) { return e.isIntersecting; })) return;
+      io.disconnect(); s.classList.add('lsx-on');
+      setTimeout(function () { s.classList.add('lsx-done'); }, 1000);
+    }, { threshold: 0.35 });
+    io.observe(a);
+  })();
+</script>
+
 <style is:global>
-.hc{--hc-gold:#e6c27a;--hc-gold5:#c99a43;--hc-ink:#10261a;background:var(--fk-plaster);background-blend-mode:multiply;color:#1A1608;padding:clamp(36px,5vw,64px) clamp(12px,2vw,28px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(20px,3.4vw,56px);align-items:center}
-.hc-phw{min-width:0;align-self:center}
-.hc-ph{margin:0;background:#d9cdb3;max-height:600px;width:100%}
-.hc-ph img{display:block;width:100%;height:100%;object-fit:cover}
-.hc-body{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;min-width:0;padding:calc(clamp(24px,3.4vw,40px) + 20px) clamp(16px,3vw,36px) clamp(24px,3.4vw,40px);border-radius:28px;color:#f6ecd6;background:radial-gradient(46% 26% at 96% 7%,rgba(230,194,122,.3),transparent 70%),radial-gradient(30% 18% at 80% 20%,rgba(230,194,122,.16),transparent 70%),radial-gradient(44% 34% at 0% 14%,rgba(92,138,52,.5),transparent 72%),radial-gradient(60% 30% at 50% 108%,rgba(201,154,67,.14),transparent 70%),linear-gradient(180deg,#14301c,var(--hc-ink) 70%)}
-.hc-wave{position:absolute;left:0;top:0;width:100%;height:26px;display:block;pointer-events:none}
-.hc-wave path{fill:var(--fk-cream-100)}
-.hc .fk-ty-h2{color:#fbf3e6}
+.hc{--hc-gold:#e6c27a;--hc-gold5:#c99a43;--lsx-ease:cubic-bezier(.16,1,.3,1);position:relative;color:#fbf3e6;padding:clamp(40px,5vw,64px) clamp(16px,3vw,28px) clamp(36px,5vw,56px);background-color:#16301a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' fill='none' stroke='%23c99a43' stroke-opacity='.2' stroke-width='1'%3E%3Cpath d='M28 0L56 28L28 56L0 28Z'/%3E%3Cpath d='M28 14L42 28L28 42L14 28Z'/%3E%3Cpath d='M0 0L14 14M56 0L42 14M0 56L14 42M56 56L42 42'/%3E%3C/svg%3E"),linear-gradient(170deg,#1f4326 0%,#16301a 52%,#0f2113 100%);background-size:160px 160px,56px 56px,auto}
+.hc-body{display:flex;flex-direction:column;gap:14px;min-width:0;max-width:1040px;margin-inline:auto}
+.hc .fk-ty-h2{color:#fbf3e6;line-height:1.08;text-wrap:balance}
 .hc-hl{color:var(--fk-gold-300);font-style:italic}
-.hc .fk-ty-h2::after{content:"";display:block;width:96px;height:3px;margin-top:12px;border-radius:50%;background:linear-gradient(90deg in oklab,transparent,var(--fk-gold-500) 30%,var(--fk-gold-300) 70%,transparent)}
-.hc .hlead{margin:0;color:#f1e5cc}
+.hc .hlead{margin:0;color:#f1e5cc;text-wrap:pretty}
+.hc-ar{list-style:none;padding:0;margin:34px auto 10px;width:100%;max-width:760px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2.6vw,28px);align-items:start}
+.hc-ar li{position:relative;min-width:0}
+.hc-ar li:nth-child(2){top:-22px}
+.hc-arch{position:relative;margin:0;aspect-ratio:3/4.3;overflow:hidden;border-radius:999px 999px 14px 14px;outline:1px solid rgba(201,154,67,.85);outline-offset:5px;box-shadow:0 18px 26px -14px rgba(0,0,0,.6);background:#0f2113}
+.hc-arch img{display:block;width:100%;height:100%;object-fit:cover}
+.hc-arch::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(0deg,rgba(15,33,19,.88),rgba(15,33,19,0));pointer-events:none}
+.hc-arch figcaption{position:absolute;z-index:1;left:6px;right:6px;bottom:10px;text-align:center;font:600 clamp(12px,3.3vw,15px)/1.2 'Playfair Display',serif;color:#fff}
 .hc-gl{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
-.hc-g{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:72px;padding:14px 16px 14px 14px;border-radius:24px;background:var(--fk-cream-50);border:1px solid rgba(201,154,67,.6);box-shadow:0 12px 24px -16px rgba(14,34,20,.7),inset 0 1px 0 #fff;color:var(--fk-forest-800);text-decoration:none;transition:transform .2s}
-.hc-gl li:first-child .hc-g{background:#fffaf0;border-color:var(--fk-gold-500);box-shadow:0 0 0 1px rgba(230,194,122,.7),0 0 18px 2px rgba(230,194,122,.5),0 12px 24px -16px rgba(14,34,20,.7),inset 0 1px 0 #fff}
+.hc-g{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:72px;height:100%;box-sizing:border-box;padding:14px 16px 14px 14px;border-radius:22px;background:#fbf3e6;border:1px solid rgba(201,154,67,.7);box-shadow:0 12px 24px -16px rgba(0,0,0,.7);color:var(--fk-forest-800);text-decoration:none;transition:transform .2s}
 .hc-gi{width:40px;height:40px;padding:9px;box-sizing:border-box;border-radius:50%;background:#e6ecd9;color:var(--fk-forest-800)}
 .hc-gt{display:flex;flex-direction:column;gap:2px;min-width:0}
-.hc-gt b{color:var(--fk-forest-800)}
+.hc-gt b{color:var(--fk-forest-800);line-height:1.15}
 .hc-gt small{color:#4a4330}
-.hc-gp{display:inline-flex;align-items:center;gap:8px;align-self:stretch;padding-left:12px;border-left:1px solid rgba(201,154,67,.7);font:600 15px/1 Rupee,Poppins,system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fk-forest-800)}
+.hc-gp{display:inline-flex;align-items:center;gap:8px;align-self:stretch;padding-left:12px;border-left:1px solid rgba(201,154,67,.7);font:600 15px/1 Rupee,Poppins,system-ui,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;color:#B8400F}
 .hc-gp svg{width:15px;height:15px;transition:transform .25s}
 .hc-g:focus-visible{outline:3px solid var(--hc-gold);outline-offset:3px}
 .hc-g:active{transform:scale(.98)}
 @media(hover:hover){.hc-g:hover{transform:translateY(-2px)}.hc-g:hover .hc-gp svg{transform:translateX(4px)}}
 .hc-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
 .hc .hc-btns .fk-btn{position:relative;min-height:56px}
-.hc .hc-btns .fk-btn--primary{padding-right:60px;border-color:var(--hc-gold5);box-shadow:0 0 0 1px rgba(201,154,67,.55),0 8px 18px -10px rgba(0,0,0,.6)}
+.hc .hc-btns .fk-btn--primary{padding-right:60px;background:#C94716;border-color:#C94716;color:#fff;box-shadow:0 8px 18px -10px rgba(0,0,0,.6)}
 .hc-pa{position:absolute;right:8px;top:50%;translate:0 -50%;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#fff;color:var(--fk-forest-800)}
 .hc-pa svg{width:18px;height:18px}
 .hc .hc-btns .fk-btn--secondary{background:transparent;border-color:rgba(251,243,230,.85);color:#fbf3e6}
 .hc .hc-btns .fk-btn:focus-visible{outline-color:var(--hc-gold)}
 .hc .igf-t{color:#f6ecd8}
 .hc .igf-t span{color:#d9c9a6}
-@media(max-width:899px){
-  .hc{grid-template-columns:minmax(0,1fr);gap:0}
-  .hc-ph{max-height:none}
-  html .hc .hc-ph.fk-dna{border-radius:28px;-webkit-mask:none;mask:none}
-  .hc-body{margin-top:-26px;z-index:1;text-align:center;align-items:stretch}
-  .hc .fk-ty-h2::after{margin-inline:auto}
-  .hc-gt{text-align:left}
-  .hc-hl{display:block;font-size:1.3em;line-height:1.1}
-}
-@media(max-width:767px){
-  .hc{padding-bottom:calc(var(--mb-clear,76px) + 64px)}
+@keyframes lsx-arch-rise{from{opacity:0;transform:translateY(22px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes lsx-fade{from{opacity:0}to{opacity:1}}
+.hc.lsx-on:not(.lsx-done) .hc-arch{animation:lsx-arch-rise 620ms var(--lsx-ease) var(--d,0ms) both;will-change:transform,opacity}
+.hc.lsx-on .hc-gl,.hc.lsx-on .hc-btns{animation:lsx-fade 400ms ease-out 300ms both}
+@media(min-width:900px){
+  .hc-ar{margin-top:40px}
+  .hc-gl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .hc-g{grid-template-columns:40px minmax(0,1fr);align-content:start}
+  .hc-gp{grid-column:1/-1;padding:12px 0 0;border-left:0;border-top:1px solid rgba(201,154,67,.5);justify-content:space-between;align-self:auto}
 }
 @media(max-width:479px){
   .hc-btns .fk-btn{flex:1 1 100%;padding-left:60px}
-  .hc-g{grid-template-columns:40px minmax(0,1fr) auto;gap:10px;padding:14px 12px 14px 12px}
+  .hc-g{gap:10px;padding:14px 12px}
   .hc-gp{gap:6px;padding-left:10px;width:88px;box-sizing:border-box;font-size:14px}
   .hc-gf{display:block;width:min-content;line-height:1.25;white-space:normal}
 }

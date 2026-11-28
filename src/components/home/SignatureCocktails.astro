@@ -26,7 +26,7 @@ const cards = [
   { key: 'lfb', name: title(lfb.name), line: lfb.description ?? '', href: `/menu/#dish=${encodeURIComponent(lfb.name)}`,
     label: `${title(lfb.name)}, a Fursat cocktail in a coupe glass`, reel: 'sig', clip: '/assets/cocktails/cocktail-lfb-v1' },
   { key: 'cos', name: title(cos.name), line: cos.description ?? '', href: `/menu/#dish=${encodeURIComponent(cos.name)}`,
-    label: `${title(cos.name)}, a Fursat cocktail in a martini glass`, reel: 'sig', clip: '/assets/cocktails/cocktail-cos-v1' },
+    label: `${title(cos.name)}, a Fursat cocktail in a martini glass`, reel: 'sig', start: 2.7, clip: '/assets/cocktails/cocktail-cos-v1' },
   { key: 'bar', name: 'Crafted at our bar', line: 'Every cocktail is built by hand at our bar.', href: '/menu/#go=d-cocktails',
     label: 'A bartender builds a layered cocktail at the Fursat bar', reel: 'bar', clip: '/assets/cocktails/cocktail-bar-v1' },
 ];
@@ -60,6 +60,7 @@ const reels = [
           </span>
         </a>
         <button class="sc-snd" type="button" data-reel-open={c.reel}
+          data-reel-start={c.start ? String(c.start) : undefined}
           data-reel-href={c.key === 'bar' ? undefined : c.href} data-reel-hlabel={c.key === 'bar' ? undefined : `See ${c.name} on the menu`}
           aria-label={`Watch the ${c.key === 'bar' ? 'bar' : c.name} reel with sound`} aria-haspopup="dialog">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

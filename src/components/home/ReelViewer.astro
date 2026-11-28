@@ -103,6 +103,7 @@ const { reels } = Astro.props as Props;
     var it = items[i]; paintNav();
     load(it).then(function (ok) {
       if (cur !== i || !dlg.open || !ok) return;
+      if (it.startAt) { try { it.v.currentTime = it.startAt; } catch (e) {} it.startAt = 0; }
       play(it);
       var n = items[i + 1] || items[i - 1]; if (n) load(n); // the neighbour is ready before the swipe
     });
@@ -112,7 +113,7 @@ const { reels } = Astro.props as Props;
     track.scrollTo({ top: i * track.clientHeight, behavior: reduce.matches ? 'auto' : 'smooth' });
   }
 
-  function open(key, drink, from) {
+  function open(key, drink, from, start) {
     var idx = 0; items.forEach(function (it, k) { if (it.key === key) idx = k; });
     opener = from || null;
     var was; try { was = sessionStorage.getItem('fk-sound'); sessionStorage.setItem('fk-sound', '1'); } catch (e) {}
@@ -130,6 +131,7 @@ const { reels } = Astro.props as Props;
       es.forEach(function (e) { if (e.isIntersecting && e.intersectionRatio >= 0.6) activate(items.indexOf(items.filter(function (x) { return x.el === e.target; })[0])); });
     }, { root: track, threshold: [0.6] });
     items.forEach(function (it) { io.observe(it.el); });
+    items.forEach(function (it) { it.startAt = 0; }); items[idx].startAt = start || 0;   // the Cosmopolitan card opens the shared reel at its own clip
     activate(idx);
     cancelAnimationFrame(raf); raf = requestAnimationFrame(tick);
     closeBtn.focus({ preventScroll: true });
@@ -148,7 +150,7 @@ const { reels } = Astro.props as Props;
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-reel-open]'); if (!b) return;
     e.preventDefault();
-    open(b.getAttribute('data-reel-open'), b.getAttribute('data-reel-href') ? { href: b.getAttribute('data-reel-href'), label: b.getAttribute('data-reel-hlabel') || 'See on the menu' } : null, b);
+    open(b.getAttribute('data-reel-open'), b.getAttribute('data-reel-href') ? { href: b.getAttribute('data-reel-href'), label: b.getAttribute('data-reel-hlabel') || 'See on the menu' } : null, b, parseFloat(b.getAttribute('data-reel-start')) || 0);
   });
   closeBtn.addEventListener('click', function () { dlg.close(); });
   muteBtn.addEventListener('click', function () { setMuted(!muted); });
