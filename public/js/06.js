@@ -6,35 +6,34 @@ var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,H=document.docume
 addEventListener("resize",function(){VW=innerWidth;VH=innerHeight},{passive:true});
 var seen=false;
 try{seen=sessionStorage.getItem("fz_seen")==="1"}catch(e){}
-var hero=$("top"),intro=$("intro"),ibox=$("ibox"),icard=$("icard"),lgo=$("lgo"),lcap=$("lcap"),D=7000,t0=null,done=false,go=false,ringed=false,Sz=0;
-var ring=document.createElement("div");ring.className="lring";intro.appendChild(lgo);intro.appendChild(ring);
+var hero=$("top"),intro=$("intro"),ibox=$("ibox"),icard=$("icard"),lgo=$("lgo"),lcap=$("lcap"),D=6000,t0=null,done=false,go=false,ringed=false,Sz=0;
+intro.appendChild(lgo);
+ibox.style.background="#0e0a07";icard.style.willChange="opacity";   /* the dark start of the picture is its opacity over a dark plate (no blur / brightness filter, no extra layer) */
+function bez(x1,y1,x2,y2){function X(t){return 3*(1-t)*(1-t)*t*x1+3*(1-t)*t*t*x2+t*t*t}function Y(t){return 3*(1-t)*(1-t)*t*y1+3*(1-t)*t*t*y2+t*t*t}return function(t){t=cl(t,0,1);var lo=0,hi=1,m,i;for(i=0;i<14;i++){m=(lo+hi)/2;X(m)<t?lo=m:hi=m}return Y((lo+hi)/2)}}
+var ez=bez(.7,0,.15,1),eo=bez(.6,0,.2,1);
+/* LOGO -> GLASSES: the logo flies in one arc onto the logo reflected in the lens (accelerate, then settle: cubic-bezier .7,0,.15,1), the lens holds one beat, then the picture pushes in on the lens (scale 1.3) and dissolves onto the hero (opacity, ease .6,0,.2,1). Only transform and opacity change per frame. */
 function frame(p){var vw=VW,vh=VH,s=Math.max(vw/700,vh/875),ox=(vw-700*s)/2,oy=(vh-875*s)/2,X=ox+497.6*s,Y=oy+321.6*s,r0=32*s,d=2*r0,
- S=Math.min(vw*.6,vh*.46,300),sx=vw/2,sy=vh*.42,a=e5((p-.12)/.40),b=e5((p-.56)/.44),z=1+1.5*b,R=r0+(Math.hypot(vw,vh)/z*1.06-r0)*b,
- cxp=sx-vw*.16,cyp=sy-vh*.2,u=1-a,
- cx=u*u*sx+2*u*a*cxp+a*a*X,cy=u*u*sy+2*u*a*cyp+a*a*Y,
- settle=Math.sin(cl((p-.47)/.12,0,1)*Math.PI)*.07,
- k=(d/S-1)*a+1+settle,float=Math.sin(p*55)*5*u,rot=-9*u+Math.sin(p*36)*2.4*u;
+ S=Math.min(vw*.6,vh*.46,300,512/Math.min(devicePixelRatio||1,3)),sx=vw/2,sy=vh*.42,a=ez((p-.08)/.36),b=eo((p-.5)/.5),z=1+.3*b,
+ cxp=sx-vw*.16,cyp=sy-vh*.2,u=1-a,cx=u*u*sx+2*u*a*cxp+a*a*X,cy=u*u*sy+2*u*a*cyp+a*a*Y,k=(d/S-1)*a+1;
  if(Sz!==S){Sz=S;lgo.style.width=lgo.style.height=S+"px"}
- icard.style.filter="blur("+(u*10).toFixed(1)+"px) brightness("+(.42+.58*a).toFixed(2)+") saturate("+(.82+.18*a).toFixed(2)+")";
- lgo.style.transform="translate3d("+(cx-S/2).toFixed(1)+"px,"+(cy-S/2+float).toFixed(1)+"px,0) rotate("+rot.toFixed(2)+"deg) scale("+(k*(1+.35*b)).toFixed(4)+")";
- lgo.style.opacity=(1-e5(b*1.7)).toFixed(2);
- if(a>.985&&!ringed){ringed=true;ring.style.cssText="width:"+d+"px;height:"+d+"px;--x:"+(X-d/2).toFixed(1)+"px;--y:"+(Y-d/2).toFixed(1)+"px";ring.classList.add("pop")}
- var f=2+26*b,m="radial-gradient(circle at "+X.toFixed(1)+"px "+Y.toFixed(1)+"px,transparent "+R.toFixed(1)+"px,#000 "+(R+f).toFixed(1)+"px)";
+ icard.style.opacity=(.42+.58*a).toFixed(3);
+ lgo.style.transform="translate3d("+(cx-S/2).toFixed(1)+"px,"+(cy-S/2).toFixed(1)+"px,0) scale("+(k*(1+.35*b)).toFixed(4)+")";
+ lgo.style.opacity=(1-eo(b*1.7)).toFixed(2);
  ibox.style.transformOrigin=X.toFixed(1)+"px "+Y.toFixed(1)+"px";ibox.style.transform="scale("+z.toFixed(3)+")";
- if(b>0){intro.style.background="transparent";ibox.style.webkitMaskImage=ibox.style.maskImage=m}
+ if(b>0){intro.style.background="transparent";ibox.style.opacity=(1-eo((b-.3)/.7)).toFixed(3)}
  lcap.style.opacity=cl(1-a*3,0,1);lcap.style.transform="translateY("+(a*26).toFixed(1)+"px)";
  if(b>.3&&!go){go=true;hero.classList.add("go")}}
 function finish(){if(done)return;done=true;go=true;hero.classList.add("go");intro.remove();lcap.remove();H.classList.remove("lock");scrollTo(0,0);dispatchEvent(new Event("fz:introend"))}
 function tick(now){if(done)return;if(t0===null)t0=now;var p=cl((now-t0-400)/D,0,1);frame(p);p<1?requestAnimationFrame(tick):finish()}
 if(calm||seen){finish()}else{H.classList.add("lock");frame(0);window.__fzGo=function(){if(window.__fzS)return;window.__fzS=1;requestAnimationFrame(tick)};/* 11.js shows "Enter Fursat" and starts the intro on tap or after 2 s */
  var skip=function(e){if(e&&e.target&&e.target.closest&&e.target.closest(".fk-isnd"))return;if(t0!==null&&performance.now()-t0>1200)finish()};["wheel","touchmove","keydown","pointerdown"].forEach(function(n){addEventListener(n,skip,{passive:true})})}
-/* SOUND (REEL-HQ-3) / SOUND-CONTRACT: the hero reel file carries the owner's reel (picture + music + the spoken line). The first seconds of the same recording are the INTRO CLIP (intro-clip.mp3, 0 to T), the reel file is the rest (T to the end), so the hand-over has nothing to align.
-   - Tap "Enter Fursat": the clip starts at once (the tap allows it). Sound turned on during the intro: the clip starts at the intro's elapsed time. The last intro frame is held (10.js) until the clip is about to end, then the reel plays UNMUTED from its 0:00.
-   - No tap (auto-enter): the intro is silent and the reel plays MUTED from its 0:00; "Sound on" unmutes the reel in place. Skip intro: the clip stops at once and the reel starts, muted or not as the sound state says.
-   - Slow / Save-Data network: no clip, the old 540 reel, muted. If the browser refuses sound the reel stays muted and the button shows "Sound on".
+/* SOUND (REEL-HQ-4) / SOUND-CONTRACT: intro-song.mp3 = the song "Yeh Chikittha" from its 3.0 s mark (sample 132,300), 14 s, plays with the intro. The hero reel is the owner's original reel, full length, with its own audio (music + the spoken line), from its 0:00.
+   - Tap "Enter Fursat": the song starts at once. At hand-over (animation end) it fades out (300 ms) while the reel starts from 0:00 UNMUTED (fade-in 300 ms). If the reel is not ready the song keeps playing, the reel waits up to 1 s (10.js) and then starts.
+   - No tap (auto-enter after 3 s): the intro is silent, the reel plays MUTED from its 0:00; "Sound on" unmutes the reel in place. Sound turned on during the intro: the song joins at the intro's clock (seek only in the buffered part; if it cannot seek it stays silent and the reel gets the sound at hand-over).
+   - Skip intro: the song fades out in 150 ms, the reel starts from 0:00 (muted or not as the sound state says). Slow / Save-Data network: no song, the old 540 reel, muted. If the browser refuses sound the reel stays muted and the button shows "Sound on".
    sessionStorage['fk-sound'] ('1' on) + window events fk:sound {on} and fk:music {id:"main"}; other players (drinks, tour) take over via fk:music. */
 var IV=.85,ac,an,fd,avg=0,last=0,B=0,sb=$("snd"),fkb=$("fksndb"),fkv=$("fksndv"),ended=false,rf=$("fxrvf"),viaReel=false;
-var M={a:new Audio("/assets/audio/intro-clip.mp3"),on:false,f:0};M.a.preload="none";M.a.volume=0;
+var M={a:new Audio("/assets/audio/intro-song.mp3"),on:false,f:0};M.a.preload="none";M.a.volume=0;
 function flag(v){try{sessionStorage.setItem("fk-sound",v?"1":"0")}catch(e){}}
 function emit(n,d){window.dispatchEvent(new CustomEvent(n,{detail:d}))}
 function fade(t,v,ms,cb){cancelAnimationFrame(t.f);var s=t.a.volume,t0=performance.now();(function f(n){var k=cl((n-t0)/ms,0,1);t.a.volume=s+(v-s)*k;if(k<1)t.f=requestAnimationFrame(f);else if(cb)cb()})(t0)}
@@ -43,22 +42,22 @@ function ui(){var v=M.on,t=v?"Sound off":"Sound on",l=v?"Turn sound off":"Turn s
  var rsb=$("rsnd");if(rsb){var ro=!!(rf&&hero.classList.contains("reel-on")&&!rf.ended&&!rf.error);rsb.hidden=!ro;rsb.setAttribute("aria-label",v?"Turn reel sound off":"Turn sound on");rsb.lastElementChild.textContent=v?"Reel sound off":"Sound on"}
  if(fkb){fkb.removeAttribute("aria-pressed");fkb.lastElementChild.textContent=t;fkb.setAttribute("aria-label",l)}}
 function hook(a){if(ac||!/^https?:/.test(location.protocol))return;try{ac=new(window.AudioContext||window.webkitAudioContext)();var s=ac.createMediaElementSource(a);an=ac.createAnalyser();an.fftSize=256;fd=new Uint8Array(an.frequencyBinCount);s.connect(an);an.connect(ac.destination)}catch(e){an=null}}
-/* seconds of the intro clip still to play (0 if it is not playing): 10.js holds the last intro frame until the clip is about to end */
-window.__fzIntroLeft=function(){return(M.on&&!viaReel&&!M.a.paused&&!M.a.ended&&M.a.duration)?Math.max(0,M.a.duration-M.a.currentTime):0};
+/* true while the intro song is audibly playing */
+window.__fzSongOn=function(){return !!(M.on&&!viaReel&&!M.a.paused&&!M.a.ended)};
 var el=function(){return window.__fzT0?(performance.now()-window.__fzT0)/1000:0};
 /* sync: during the intro the song jumps to the helicopter's elapsed time. play() is called straight from the tap (Safari / iPhone need that). */
 var inIntro=function(){return document.documentElement.classList.contains("lock")};
 var reelUsable=function(){return !!(rf&&rf.isConnected&&window.__fzReel&&window.__fzReel.on&&!calm&&!inIntro())};
 /* the reel's own audio. If the browser refuses sound (it pauses the video) the picture keeps playing muted and the button goes back to "Sound on". */
-var rsAt=0;
+var rsAt=0,pend=0;
 function reelSound(on,mode){if(!rf)return;if(!on){rf.muted=true;return}
- rsAt=performance.now();try{rf.volume=mode==="now"?IV:0;rf.muted=false}catch(e){}
- if(mode!=="now"){var t0=performance.now();(function f(n){var k=cl((n-t0)/500,0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0)}
+ rsAt=performance.now();try{rf.volume=0;rf.muted=false}catch(e){}
+ {var t0=performance.now();var ms=mode==="x150"?150:mode==="x300"?300:500;(function f(n){var k=cl((n-t0)/ms,0,1);try{rf.volume=IV*k}catch(e){}if(k<1&&!rf.muted)requestAnimationFrame(f)})(t0)}
  setTimeout(function(){var up=$("fxpv");if(rf.paused&&!rf.ended&&!document.hidden&&!(up&&up.dataset.s==="paused")&&M.on&&viaReel)refuse()},500)}
 function refuse(){viaReel=false;rf.muted=true;var q=rf.play();if(q&&q.catch)q.catch(function(){});M.on=false;flag(false);ui();emit("fk:sound",{on:false})}
 function play(sync){var a=M.a;if(M.on)return;
  if(reelUsable()){M.on=true;flag(true);ui();emit("fk:sound",{on:true});emit("fk:music",{id:"main"});viaReel=true;reelSound(true);wake();return}   /* the reel is on screen (muted): unmute it in place, no restart, no jump */
- if(window.__fzReel&&window.__fzReel.noClip)return;   /* slow / Save-Data network: no intro clip, the intro stays silent */
+ if(window.__fzReel&&window.__fzReel.noSong)return;   /* slow / Save-Data network: no intro song, the intro stays silent */
  M.on=true;flag(true);ui();emit("fk:sound",{on:true});emit("fk:music",{id:"main"});
  viaReel=false;hook(a);if(ac&&ac.resume)ac.resume();
  a.preload="auto";a.volume=0;
@@ -99,18 +98,18 @@ vui();
 if(fkb)fkb.onclick=function(){toggle(true)};
 if(fkv)fkv.oninput=function(){IV=cl(fkv.value/100,0,1);if(M.on&&!viaReel){cancelAnimationFrame(M.f);M.a.volume=IV}if(M.on&&viaReel)try{rf.volume=IV}catch(x){}};
 /* the song reached its end: back to "Sound on" */
-M.a.addEventListener("ended",function(){if(!M.on||viaReel)return;if(window.__fzReel&&window.__fzReel.on&&!hero.classList.contains("reel-on")){dispatchEvent(new Event("fz:clipend"));return}M.on=false;flag(false);ui();emit("fk:sound",{on:false})});
+M.a.addEventListener("ended",function(){if(!M.on||viaReel)return;if(window.__fzReel&&window.__fzReel.on&&!hero.classList.contains("reel-on")){return}M.on=false;flag(false);ui();emit("fk:sound",{on:false})});
 addEventListener("fk:sound",function(e){if(e.detail&&e.detail.on===false)stop(true)});
 addEventListener("fk:music",function(e){var i=e.detail&&e.detail.id;if(i&&i!=="main")stop(true,true)});
 /* the hero reel: when the browser pauses it (scroll / tab) its sound pauses and comes back with it; if it paused right after the unmute the browser refused sound */
 if(rf){rf.addEventListener("pause",function(){if(!M.on||!viaReel||rf.ended||document.documentElement.classList.contains("lock"))return;var up=$("fxpv");if(up&&up.dataset.s==="paused")return;if(performance.now()-rsAt<700&&!document.hidden)refuse()});
- rf.addEventListener("playing",ui);
+ rf.addEventListener("playing",function(){ui();if(pend){var ms=pend;pend=0;fade(M,0,ms,function(){try{M.a.pause()}catch(x){}});reelSound(true,ms===150?"x150":"x300")}});   /* hand-over: the song fades out while the reel fades in */
  var reelEnd=function(){if(M.on&&viaReel){if(window.__fzReel)window.__fzReel.heard=true;viaReel=false;M.on=false;flag(false);emit("fk:sound",{on:false})}ui()};
  rf.addEventListener("ended",reelEnd);rf.addEventListener("error",reelEnd)}
-/* 10.js calls this in the same task just before the hero reel plays: sound on -> the clip stops and the reel plays unmuted from its 0:00; sound off -> muted */
-window.__fzClipWarm=function(){if(window.__fzReel&&window.__fzReel.noClip)return;M.a.preload="auto";try{M.a.load()}catch(x){}};   /* the 218 KB clip is fetched when Enter is tapped / the auto-open starts, so a later sound-on can jump into it */
-window.__fzClipStop=function(){if(M.on&&!viaReel){cancelAnimationFrame(M.f);try{M.a.pause()}catch(x){}M.a.volume=0}};   /* skipped intro: the clip stops at once (the sound state stays on for the reel) */
-window.__fzReelStart=function(){if(!rf)return;if(M.on&&!viaReel){cancelAnimationFrame(M.f);try{M.a.pause()}catch(x){}M.a.volume=0;viaReel=true;reelSound(true,"now")}else if(!M.on)rf.muted=true;ui()};
+/* 10.js calls this in the same task just before the hero reel plays: sound on -> when the reel really plays, the song fades out (300 ms, 150 ms when the intro was skipped) while the reel fades in unmuted from its 0:00; sound off -> muted */
+window.__fzReelStart=function(sk){if(!rf)return;if(M.on&&!viaReel){viaReel=true;pend=sk?150:300;try{rf.volume=0;rf.muted=false}catch(x){}}else if(!M.on)rf.muted=true;ui()};   /* the song keeps playing until the reel really plays (see the "playing" listener) */
+window.__fzSongStop=function(){if(M.on&&!viaReel){fade(M,0,150,function(){try{M.a.pause()}catch(x){}});setTimeout(function(){if(!viaReel)try{M.a.pause()}catch(x){}},170)}};   /* skipped intro: the song stops at once (the sound state stays on for the reel) */
+window.__fzSongWarm=function(){if(window.__fzReel&&window.__fzReel.noSong)return;M.a.preload="auto";try{M.a.load()}catch(x){}};   /* the 225 KB song is fetched when Enter is tapped / the auto-enter starts */
 /* the Enter tap starts the song; the 2 s auto-enter does not */
 window.__fzIntroSound=function(tap){if(tap)play(true)};
 window.__fzReplayOn=function(){play(false)};   /* AV1: "Watch again" with the reel sound that was on when the reel ended */

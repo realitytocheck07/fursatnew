@@ -349,7 +349,7 @@ window.FursatConcierge={open:openIt,route:route};
   if(!rv||!fg||!m||!hero)return;
   var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,phone=matchMedia("(max-width:899px)").matches,
     save=!!(navigator.connection&&navigator.connection.saveData),st="idle",loaded=false,raf=0,warm=false,cleanT=0;
-  window.__fzReel={on:true,noClip:false};
+  window.__fzReel={on:true,noSong:false};
   var RK="fz_reel",again=false,ag=$("fxagain");try{again=sessionStorage.getItem(RK)==="1"}catch(e){}   /* U2: the reel plays once per visit; later page loads go straight to the master loop and show the "Watch again" pill */
   if(phone&&bg){bg.remove();bg=null}               /* ambient fill is desktop only */
   function paused(){return !!(pv&&pv.dataset.s==="paused")}
@@ -365,33 +365,27 @@ window.FursatConcierge={open:openIt,route:route};
   /* a frame of video v is on screen (or cap ms passed) */
   function frame(v,cb,cap){var d=false,t=setTimeout(fin,cap);function fin(){if(d)return;d=true;clearTimeout(t);cb()}
     if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(fin);else v.addEventListener("playing",fin,{once:true})}
-  /* REEL-HQ-3: hero-reel-hq-b.* is the original reel from T to its end (picture + audio, 720x1280); intro-clip.mp3 is the same recording before T. Sound on: the clip plays with the intro, the last intro frame is held
-     until the clip is about to end, then the reel plays unmuted from its 0:00. Sound off: the reel plays muted from its 0:00 at the animation end. Slow / Save-Data networks keep the old 540-a files (no clip, muted). */
+  /* REEL-HQ-4: hero-reel-full.* is the owner's original reel, full length, with its own audio. Sound on: intro-song.mp3 plays with the intro and fades out at the hand-over while the reel starts unmuted from its 0:00.
+     Sound off: the reel plays muted from its 0:00 at the animation end. Slow / Save-Data networks keep the old 540-a files (no song, muted). */
   var conn=navigator.connection||{},sk=false,natEnd=false,g0=window.__fzGo;
   function goodNet(){return !save&&!/^(slow-2g|2g|3g)$/.test(conn.effectiveType||"")}
-  if(!goodNet()){window.__fzReel.noClip=true;rv.querySelectorAll('source[src*="-hq-b."]').forEach(function(x){x.remove()})}
+  if(!goodNet()){window.__fzReel.noSong=true;rv.querySelectorAll('source[src*="hero-reel-full"]').forEach(function(x){x.remove()})}
   document.addEventListener("click",function(e){if(e.target&&e.target.closest&&e.target.closest("#fxskipall"))sk=true},true);
-  if(g0&&goodNet())window.__fzGo=function(){g0();if(st==="idle"&&!again)load();if(window.__fzClipWarm)window.__fzClipWarm()};   /* the reel starts loading when Enter is tapped / the auto-open starts, not at page load */
-  function left(){return natEnd&&window.__fzIntroLeft?window.__fzIntroLeft():0}   /* skipped intro: no hold, the clip stops at once */
-  function start(){window.__fzReelStart&&window.__fzReelStart();st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
+  if(g0&&goodNet())window.__fzGo=function(){g0();if(st==="idle"&&!again)load();if(window.__fzSongWarm)window.__fzSongWarm()};   /* the reel and the song start loading when Enter is tapped / the auto-enter starts, not at page load */
+  function start(){window.__fzReelStart&&window.__fzReelStart(!natEnd);st="play";try{sessionStorage.setItem(RK,"1")}catch(e){}hero.classList.add("reel-on");m.pause();
     if(!paused())run()}
-  /* the reel starts when the animation is over AND (sound on) the intro clip is about to end; if the reel cannot play yet the last frame waits up to 1 s more, then it plays; 15 s fallback = master loop + pill */
-  function waitPlain(){load();var fin=false,th=0,tm=0,t15=setTimeout(function(){if(fin)return;fin=true;handoff()},15000);
-    function w(){tm=0;if(fin)return;if(left()>0){tm=setTimeout(w,16);return}
-      if(!th)th=performance.now();
-      if(fg.readyState>=3||performance.now()-th>1000){fin=true;clearTimeout(t15);start();return}
-      tm=setTimeout(w,30)}
-    addEventListener("fz:clipend",function(){clearTimeout(tm);w()},{once:true});   /* the clip has ended: the reel starts in the same task */
-    w()}
+  /* the reel starts at the hand-over; if it cannot play yet it waits up to 1 s (the song keeps playing), then plays */
+  function waitPlain(){load();var th=performance.now();
+    (function w(){if(fg.readyState>=3||performance.now()-th>1000){start();return}setTimeout(w,30)})()}
   /* V1b contract with Hero.astro: cb() runs once the front reel can show a decoded frame (or after cap ms); the lens fades on top of it, then starts the reel on fz:lensfade */
   window.__fzReelReady=function(cb,cap){var fin=false,t;function go(){if(fin)return;fin=true;clearTimeout(t);fg.removeEventListener("canplay",go);cb()}
     if(st!=="idle"||again||save||calm||fg.readyState>=3){go();return}
     load();fg.addEventListener("canplay",go);t=setTimeout(go,cap||1500)};
   function begin(){if(st!=="idle")return;if(again){handoff();return}
-    natEnd=!sk&&!!window.__fzT0&&performance.now()-window.__fzT0>11000;if(!natEnd&&window.__fzClipStop)window.__fzClipStop();   /* skipped intro: the clip stops at once */
+    natEnd=!sk&&!!window.__fzT0&&performance.now()-window.__fzT0>9000;if(!natEnd&&window.__fzSongStop)window.__fzSongStop();   /* skipped intro: the song stops at once */
     st="wait";
     waitPlain()}
-  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;if(!hero.classList.contains("reel-on")&&!(window.__fzIntroLeft&&window.__fzIntroLeft()>0))dispatchEvent(new CustomEvent("fk:sound",{detail:{on:false}}));cancelAnimationFrame(raf);raf=0;
+  function handoff(){if(st==="done")return;st="done";window.__fzReel.on=false;if(!hero.classList.contains("reel-on")&&!(window.__fzSongOn&&window.__fzSongOn()))dispatchEvent(new CustomEvent("fk:sound",{detail:{on:false}}));cancelAnimationFrame(raf);raf=0;
     if(!hero.classList.contains("reel-on")){hero.classList.add("reel-again");placeAgain(4200)}   /* no reel on screen (reload, error, fallback): the pill shows at once */
     try{m.currentTime=2.45}catch(e){}
     if(!m.src&&stg)stg.click();
